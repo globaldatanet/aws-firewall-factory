@@ -1,0 +1,49 @@
+version: '3'
+output: prefixed
+env:
+  PROCESS_PARAMETERS: values/david-test.json
+
+tasks:
+  deploy:
+    desc: Deploy Stack
+    cmds:
+      - task: clean
+      - task: setvariable
+      - task: cdkdeploy
+  synth:
+    desc: synth Stack
+    cmds:
+      - task: clean
+      - task: setvariable
+      - cdk synth
+    vars:
+      ACCOUNT:
+        sh: aws sts get-caller-identity |jq -r .Account
+      TAGS:
+        sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
+  clean:
+    desc: Clean CDK Out
+    cmds:
+      - rm -rf ./cdk.out
+      - rm -rf ./node-modules
+    silent: true
+  setvariable:
+    desc: Unset / Set Parameters Variable
+    cmds:
+      - echo 🙅‍♀️ Update PROCESS_PARAMETERS env variable
+      - unset PROCESS_PARAMETERS
+      - PROCESS_PARAMETERS="{{.PROCESS_PARAMETERS}}"
+      - export PROCESS_PARAMETERS
+      - CDK_DEFAULT_REGION="$(aws configure get profile.$AWSUME_PROFILE.region)"
+      - CDK_DEFAULT_ACCOUNT="$(aws sts get-caller-identity |jq -r .Account)"
+    silent: true
+  cdkdeploy:
+    desc: CDK Deploy
+    cmds:
+      - cdk deploy --require-approval never {{.TAGS}}
+    vars:
+      ACCOUNT:
+        sh: aws sts get-caller-identity |jq -r .Account
+      TAGS:
+        sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
+    silent: true
