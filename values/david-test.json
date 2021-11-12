@@ -10,8 +10,9 @@
     "Name": "DAVID",
     "Scope": "REGIONAL",
     "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-    "RuleStatements": [
+    "Rules": [
       {
+        "Statement": {
         "AndStatement": {
           "Statements": [
             {
@@ -65,7 +66,15 @@
             }
           ]
         }
+      },
+      "Action": {
+        "Allow": {}
+      },
+      "VisibilityConfig": {
+        "SampledRequestsEnabled": false,
+        "CloudWatchMetricsEnabled": false
       }
+    },
     ],
     "ManagedRuleGroups": [
       {
@@ -81,24 +90,5 @@
         "Capacity": 25
       }
     ]
-  },
-  "RuleCapacities": [
-    30,
-    20,
-    20,
-    20,
-    30,
-    30
-  ],
-  "Capacity": 150,
-  "DeployedRuleIdentifier": [
-    "R0"
-  ],
-  "DeployedRuleCapacities": [
-    30
-  ],
-  "DeployedRuleNames": [
-    "GDN-DAVID-INT-0",
-    "GDN-DAVID-INT-1"
-  ]
+  }
 }

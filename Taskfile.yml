@@ -1,7 +1,7 @@
 version: '3'
 output: prefixed
 env:
-  PROCESS_PARAMETERS: values/david-test.json
+  PROCESS_PARAMETERS: values/atlassian-prod.json
 
 tasks:
   deploy:
@@ -10,6 +10,7 @@ tasks:
       - task: clean
       - task: setvariable
       - task: cdkdeploy
+      - task: creatediagram
   synth:
     desc: synth Stack
     cmds:
@@ -46,4 +47,9 @@ tasks:
         sh: aws sts get-caller-identity |jq -r .Account
       TAGS:
         sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
+    silent: true
+  creatediagram:
+    desc: Create Diagram
+    cmds:
+      - echo 🤳🏻 $(cfn-dia draw.io --cdk-output cdk.out --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< {{.PROCESS_PARAMETERS}}) --ci-mode --skip-synth)
     silent: true

@@ -7,6 +7,8 @@ import * as logs from "@aws-cdk/aws-logs";
 import * as kms from "@aws-cdk/aws-kms";
 import { open, close } from "fs";
 import { config, env } from "process";
+import { RuleAction } from "@aws-sdk/client-wafv2";
+import { print } from "util";
 
 
 
@@ -15,19 +17,26 @@ export interface Config {
     readonly Prefix: string,
     readonly Stage: string,
     readonly DeployTo: string[],
+    DeployHash: string,
   },
   readonly WebAcl:{
     readonly Name: string,
     readonly Scope: string,
     readonly Type: string,
-    readonly RuleStatements: any,
+    readonly Rules: Array<RulesArray>,
     readonly ManagedRuleGroups: any[],
   },
   Capacity: number,
   RuleCapacities: number[],
-  DeployedRuleCapacities: number[],
-  DeployedRuleNames: string[],
-  DeployedRuleIdentifier: string[],
+  DeployedRuleGroupCapacities: number[],
+  DeployedRuleGroupNames: string[],
+  DeployedRuleGroupIdentifier: string[],
+}
+
+interface RulesArray{
+  Statement: any,
+  Action: any,
+  VisibilityConfig: any
 }
 
 function toCamel(o: any) {
@@ -65,11 +74,11 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     super(scope, id, props);
     const account_id = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
-    if(typeof props.config.DeployedRuleCapacities[0] == "undefined"){
+    if(typeof props.config.DeployedRuleGroupCapacities == "undefined"){
       console.log("⚙️ Initialize lists for Update mechanism.")
-      props.config.DeployedRuleCapacities = []
-      props.config.DeployedRuleNames = []
-      props.config.DeployedRuleIdentifier = []}
+      props.config.DeployedRuleGroupCapacities = []
+      props.config.DeployedRuleGroupNames = []
+      props.config.DeployedRuleGroupIdentifier = []}
 
     const kmskeyArn = kms.Key.fromLookup(this,"S3DefaultKMSKey",{
       aliasName:"alias/"+props.config.General.Prefix.toUpperCase()+"/KMS/S3/DEFAULT/ENCRYPTION"})
@@ -129,7 +138,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     })
 
     const CfnDeliveryStream = new firehouse.CfnDeliveryStream(this, "S3DeliveryStream",{
-      deliveryStreamName: "aws-waf-logs-"+props.config.General.Prefix+"-kinesis-wafv2log-"+props.config.WebAcl.Name+props.config.General.Stage,
+      deliveryStreamName: "aws-waf-logs-"+props.config.General.Prefix+"-kinesis-wafv2log-"+props.config.WebAcl.Name+props.config.General.Stage+props.config.General.DeployHash,
       extendedS3DestinationConfiguration: {
         bucketArn:"arn:aws:s3:::"+props.config.General.Prefix+"-"+account_id+"-kinesis-wafv2log",
         encryptionConfiguration:{kmsEncryptionConfig:{awskmsKeyArn:kmskeyArn.keyArn}},
@@ -140,7 +149,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
 
     })
 
-    if(props.config.WebAcl.RuleStatements == "DEFAULT")
+    if(props.config.WebAcl.Rules == null)
     {
       console.log("Creating DEFAULT Policy.")
       const novalue = null
@@ -183,47 +192,45 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         excludeResourceTags: false,
         remediationEnabled: false,
         resourceType: "AWS::ElasticLoadBalancingV2::LoadBalancer",
-        policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage,
+        policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage+ "-" +props.config.General.DeployHash,
         includeMap: {account: props.config.General.DeployTo },
         securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
       });
 
     }
     else{
-      let securityservicepolicydata = {}
       if (props.config.Capacity < 100){
         const rules = [];
         let count = 1
-        for(const statement of props.config.WebAcl.RuleStatements){
+
+        for(const statement of props.config.WebAcl.Rules){
           const CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty = {
-            name: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString(),
+            name: props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash,
             priority: count,
-            action: {
-              allow: {}
-            },
-            statement: toCamel(statement),
+            action: toCamel(statement.Action),
+            statement: toCamel(statement.Statement),
             visibilityConfig: {
-              sampledRequestsEnabled: false,
-              cloudWatchMetricsEnabled: false,
-              metricName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString(),
+              sampledRequestsEnabled: statement.VisibilityConfig.SampledRequestsEnabled,
+              cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
+              metricName: props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash,
             },
           };
           rules.push(CfnRuleProperty)
           count +=1
         }
 
-        let name = props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage
+        let name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash
         let rulegroupidentifier = "RuleGroup"
-        if(typeof props.config.DeployedRuleCapacities[0] !== "undefined"){
-          if(props.config.DeployedRuleCapacities[0] != props.config.Capacity){
+        if(typeof props.config.DeployedRuleGroupCapacities[0] !== "undefined"){
+          if(props.config.DeployedRuleGroupCapacities[0] != props.config.Capacity){
             console.log("⭕️ Deploy new RuleGroup because the Capacity has changed!")
-            console.log("\n 🟥 Old Capacity: ["+ props.config.DeployedRuleCapacities[0] + "]\n 🟩 New Capacity: [" + props.config.Capacity+"]")
-            if(props.config.DeployedRuleIdentifier[0] == "RuleGroup"){
+            console.log("\n 🟥 Old Capacity: ["+ props.config.DeployedRuleGroupCapacities[0] + "]\n 🟩 New Capacity: [" + props.config.Capacity+"]")
+            if(props.config.DeployedRuleGroupIdentifier[0] == "RuleGroup"){
               rulegroupidentifier ="RG"
             }
 
-            if(props.config.DeployedRuleNames[0] == props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage){
-              name = props.config.General.Prefix.toUpperCase() + "-G" + props.config.WebAcl.Name + "-" + props.config.General.Stage
+            if(props.config.DeployedRuleGroupNames[0] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash){
+              name = props.config.General.Prefix.toUpperCase() + "-G" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash
             }
             console.log(" 💬 New Name: "+ name)
             console.log(" 📇 New Identifier: "+ rulegroupidentifier)
@@ -237,10 +244,13 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           visibilityConfig: {
             sampledRequestsEnabled: false,
             cloudWatchMetricsEnabled: false,
-            metricName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage,
+            metricName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash,
           }
         });
         const preProcessRuleGroups = []
+
+        preProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
+        console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + props.config.Capacity +"]")
         const novalue = null
         let mangedrule;
         for(mangedrule of props.config.WebAcl.ManagedRuleGroups){
@@ -254,10 +264,36 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "ruleGroupArn": novalue,"excludeRules": [],"ruleGroupType": "ManagedRuleGroup"});}
         }
 
-        props.config.DeployedRuleIdentifier[0] = rulegroupidentifier
-        props.config.DeployedRuleNames[0] = name
-        props.config.DeployedRuleCapacities[0] = props.config.Capacity
-        securityservicepolicydata = {
+        props.config.DeployedRuleGroupCapacities.splice(0)
+        props.config.DeployedRuleGroupIdentifier.splice(0)
+        props.config.DeployedRuleGroupNames.splice(0)
+
+        props.config.DeployedRuleGroupIdentifier[0] = rulegroupidentifier
+        props.config.DeployedRuleGroupNames[0] = name
+        props.config.DeployedRuleGroupCapacities[0] = props.config.Capacity
+
+
+        new cdk.CfnOutput(this, "DeployedRuleGroupNames", {
+          value: props.config.DeployedRuleGroupNames.toString(),
+          description: "DeployedRuleGroupNames",
+          exportName: "DeployedRuleGroupNames"+props.config.General.DeployHash,
+        });
+
+        new cdk.CfnOutput(this, "DeployedRuleGroupCapacities", {
+          value: props.config.DeployedRuleGroupCapacities.toString(),
+          description: "DeployedRuleGroupCapacities",
+          exportName: "DeployedRuleGroupCapacities"+props.config.General.DeployHash,
+        });
+
+        new cdk.CfnOutput(this, "DeployedRuleGroupIdentifier", {
+          value: props.config.DeployedRuleGroupIdentifier.toString(),
+          description: "DeployedRuleGroupIdentifier",
+          exportName: "DeployedRuleGroupIdentifier"+props.config.General.DeployHash,
+        });
+
+
+
+        const securityservicepolicydata = {
           "type":"WAFV2",
           "defaultAction":{ "type":"ALLOW" },
           "preProcessRuleGroups": preProcessRuleGroups,
@@ -267,6 +303,14 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "logDestinationConfigs":["${S3DeliveryStream.Arn}"]
           }
         }
+        const fmsPolicy = new fms.CfnPolicy(this, "CfnPolicy", {
+          excludeResourceTags: false,
+          remediationEnabled: false,
+          resourceType: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+          policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage+ "-" +props.config.General.DeployHash,
+          includeMap: {account: props.config.General.DeployTo },
+          securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
+        });
       }
       else{
         const threshold = 100
@@ -295,26 +339,25 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         let rulegroupidentifier = ""
         let name =""
         while (count < rulesets.length){
-          if(typeof props.config.DeployedRuleCapacities[count] !== "undefined"){
-
-            if(rulegroupcapacities[count] == props.config.DeployedRuleCapacities[count]){
+          if(typeof props.config.DeployedRuleGroupCapacities[count] !== "undefined"){
+            if(rulegroupcapacities[count] == props.config.DeployedRuleGroupCapacities[count]){
               rulegroupidentifier = "R"+count.toString()
-              name = props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString()
+              name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
             }
             else{
-              console.log("\n⭕️ Deploy new RuleGroup because the Capacity has changed for " +props.config.DeployedRuleIdentifier[count] + " !")
-              console.log("\n 🟥 Old Capacity: ["+ props.config.DeployedRuleCapacities[count] + "]\n 🟩 New Capacity: [" + rulegroupcapacities[count] +"]")
-              if(typeof props.config.DeployedRuleNames[count] !== "undefined"){
-                if(props.config.DeployedRuleNames[count] == props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString()){
-                  name = props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-R" + count.toString()
+              console.log("\n⭕️ Deploy new RuleGroup because the Capacity has changed for " +props.config.DeployedRuleGroupIdentifier[count] + " !")
+              console.log("\n 🟥 Old Capacity: ["+ props.config.DeployedRuleGroupCapacities[count] + "]\n 🟩 New Capacity: [" + rulegroupcapacities[count] +"]")
+              if(typeof props.config.DeployedRuleGroupNames[count] !== "undefined"){
+                if(props.config.DeployedRuleGroupNames[count] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString()+ "-" +props.config.General.DeployHash){
+                  name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-R" + count.toString() + "-" +props.config.General.DeployHash
                 }
                 else{
-                  name = props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString()
+                  name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
                 }
                 console.log(" 💬 New Name: "+ name)
               }
-              if(typeof props.config.DeployedRuleIdentifier[count] !== "undefined"){
-                if(props.config.DeployedRuleIdentifier[count] == "R"+count.toString()){
+              if(typeof props.config.DeployedRuleGroupIdentifier[count] !== undefined){
+                if(props.config.DeployedRuleGroupIdentifier[count] == "R"+count.toString()){
                   rulegroupidentifier = "G"+count.toString()
                 }
                 else{
@@ -323,12 +366,10 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 console.log(" 📇 New Identifier: "+ rulegroupidentifier + "\n")
               }
             }
-          }
-          else{
+          }else{
             rulegroupidentifier = "R"+count.toString()
-            name = props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString()
+            name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
           }
-
           const CfnRuleProperties = []
           let rulegroupcounter = 0
           while( rulegroupcounter < rulesets[count].length){
@@ -336,14 +377,12 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             const CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty = {
               name: name + rulegroupcounter.toString(),
               priority: rulegroupcounter,
-              action: {
-                allow: {}
-              },
-              statement: toCamel(props.config.WebAcl.RuleStatements[statementindex]),
+              action: toCamel(props.config.WebAcl.Rules[statementindex].Action),
+              statement: toCamel(props.config.WebAcl.Rules[statementindex].Statement),
               visibilityConfig: {
-                sampledRequestsEnabled: false,
-                cloudWatchMetricsEnabled: false,
-                metricName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString(),
+                sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
+                cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
+                metricName: props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash,
               },
             }
             CfnRuleProperties.push(CfnRuleProperty)
@@ -357,22 +396,40 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             visibilityConfig: {
               sampledRequestsEnabled: false,
               cloudWatchMetricsEnabled: false,
-              metricName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString(),
+              metricName: props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash,
             }
           });
 
           preProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
           console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + rulegroupcapacities[count].toString() +"]")
-          props.config.DeployedRuleCapacities[count] = rulegroupcapacities[count]
-          props.config.DeployedRuleIdentifier[count] = rulegroupidentifier
-          props.config.DeployedRuleNames[count] = name
+          props.config.DeployedRuleGroupCapacities[count] = rulegroupcapacities[count]
+          props.config.DeployedRuleGroupIdentifier[count] = rulegroupidentifier
+          props.config.DeployedRuleGroupNames[count] = name
           count++
         }
         const lenght = rulesets.length
-        props.config.DeployedRuleCapacities.splice(lenght)
-        props.config.DeployedRuleIdentifier.splice(lenght)
-        props.config.DeployedRuleNames.splice(lenght)
+        props.config.DeployedRuleGroupCapacities.splice(lenght)
+        props.config.DeployedRuleGroupIdentifier.splice(lenght)
+        props.config.DeployedRuleGroupNames.splice(lenght)
         const novalue = null
+
+        new cdk.CfnOutput(this, "DeployedRuleGroupNames", {
+          value: props.config.DeployedRuleGroupNames.toString(),
+          description: "DeployedRuleGroupNames",
+          exportName: "DeployedRuleGroupNames"+props.config.General.DeployHash,
+        });
+
+        new cdk.CfnOutput(this, "DeployedRuleGroupCapacities", {
+          value: props.config.DeployedRuleGroupCapacities.toString(),
+          description: "DeployedRuleGroupCapacities",
+          exportName: "DeployedRuleGroupCapacities"+props.config.General.DeployHash,
+        });
+
+        new cdk.CfnOutput(this, "DeployedRuleGroupIdentifier", {
+          value: props.config.DeployedRuleGroupIdentifier.toString(),
+          description: "DeployedRuleGroupIdentifier",
+          exportName: "DeployedRuleGroupIdentifier"+props.config.General.DeployHash,
+        });
 
         let mangedrule;
         for(mangedrule of props.config.WebAcl.ManagedRuleGroups){
@@ -386,7 +443,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "ruleGroupArn": novalue,"excludeRules": [],"ruleGroupType": "ManagedRuleGroup"});}
         }
 
-        securityservicepolicydata = {
+        const securityservicepolicydata = {
           "type":"WAFV2",
           "defaultAction":{ "type":"ALLOW" },
           "preProcessRuleGroups": preProcessRuleGroups,
@@ -396,21 +453,23 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "logDestinationConfigs":["${S3DeliveryStream.Arn}"]
           }
         }
+        const fmsPolicy = new fms.CfnPolicy(this, "CfnPolicy", {
+          excludeResourceTags: false,
+          remediationEnabled: false,
+          resourceType: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+          policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage+ "-" +props.config.General.DeployHash,
+          includeMap: {account: props.config.General.DeployTo },
+          securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
+        });
       }
-      const fmsPolicy = new fms.CfnPolicy(this, "CfnPolicy", {
-        excludeResourceTags: false,
-        remediationEnabled: false,
-        resourceType: props.config.WebAcl.Type,
-        policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage,
-        includeMap: {account: props.config.General.DeployTo},
-        securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
-      });
     }
+
+    const {Capacity,RuleCapacities,DeployedRuleGroupCapacities,DeployedRuleGroupIdentifier,DeployedRuleGroupNames, ...tempconfig} = props.config 
     const options = { flag : "w", force: true };
     const { promises: fsp } = require("fs");
     (async () => {
       try {
-        await fsp.writeFile(process.env.PROCESS_PARAMETERS,JSON.stringify(props.config,null,2),options);
+        await fsp.writeFile(process.env.PROCESS_PARAMETERS,JSON.stringify(tempconfig,null,2),options);
       } catch (error) {
         console.log("Error " + error)
       }
