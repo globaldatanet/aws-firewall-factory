@@ -1,10 +1,12 @@
 {
   "General": {
     "Prefix": "gdn",
-    "Stage": "INT",
+    "Stage": "int",
     "DeployTo": [
-      "1234567890"
-    ]
+      ""
+    ],
+    "FireHoseKeyArn": "",
+    "DeployHash": ""
   },
   "WebAcl": {
     "Name": "DAVID",
@@ -13,68 +15,53 @@
     "Rules": [
       {
         "Statement": {
-        "AndStatement": {
-          "Statements": [
-            {
-              "ByteMatchStatement": {
-                "SearchString": "test.de",
-                "FieldToMatch": {
-                  "SingleHeader": {
-                    "Name": "host"
-                  }
-                },
-                "TextTransformations": [
-                  {
-                    "Priority": 0,
-                    "Type": "NONE"
-                  }
-                ],
-                "PositionalConstraint": "CONTAINS"
+          "AndStatement": {
+            "Statements": [
+              {
+                "ByteMatchStatement": {
+                  "SearchString": "test.de",
+                  "FieldToMatch": {
+                    "SingleHeader": {
+                      "Name": "host"
+                    }
+                  },
+                  "TextTransformations": [
+                    {
+                      "Priority": 0,
+                      "Type": "NONE"
+                    }
+                  ],
+                  "PositionalConstraint": "CONTAINS"
+                }
+              },
+              {
+                "ByteMatchStatement": {
+                  "SearchString": "test.de",
+                  "FieldToMatch": {
+                    "SingleHeader": {
+                      "Name": "host"
+                    }
+                  },
+                  "TextTransformations": [
+                    {
+                      "Priority": 0,
+                      "Type": "NONE"
+                    }
+                  ],
+                  "PositionalConstraint": "CONTAINS"
+                }
               }
-            },
-            {
-              "ByteMatchStatement": {
-                "SearchString": "test.de",
-                "FieldToMatch": {
-                  "SingleHeader": {
-                    "Name": "host"
-                  }
-                },
-                "TextTransformations": [
-                  {
-                    "Priority": 0,
-                    "Type": "NONE"
-                  }
-                ],
-                "PositionalConstraint": "CONTAINS"
-              }
-            },
-            {
-              "ByteMatchStatement": {
-                "SearchString": "GET",
-                "FieldToMatch": {
-                  "Method": {}
-                },
-                "TextTransformations": [
-                  {
-                    "Priority": 0,
-                    "Type": "NONE"
-                  }
-                ],
-                "PositionalConstraint": "CONTAINS"
-              }
-            }
-          ]
+            ]
+          }
+        },
+        "Action": {
+          "Allow": {}
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true
         }
-      },
-      "Action": {
-        "Allow": {}
-      },
-      "VisibilityConfig": {
-        "SampledRequestsEnabled": false,
-        "CloudWatchMetricsEnabled": false
       }
-    },
     ],
     "ManagedRuleGroups": [
       {
