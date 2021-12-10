@@ -4,12 +4,7 @@ import * as fms from "@aws-cdk/aws-fms";
 import * as firehouse from "@aws-cdk/aws-kinesisfirehose";
 import * as iam from 	"@aws-cdk/aws-iam";
 import * as logs from "@aws-cdk/aws-logs";
-import * as kms from "@aws-cdk/aws-kms";
-import { open, close } from "fs";
-import { config, env } from "process";
-import { RuleAction } from "@aws-sdk/client-wafv2";
 import { print } from "util";
-
 
 
 export interface Config {
@@ -17,6 +12,7 @@ export interface Config {
     readonly Prefix: string,
     readonly Stage: string,
     readonly DeployTo: string[],
+    readonly FireHoseKeyArn: string,
     DeployHash: string,
   },
   readonly WebAcl:{
@@ -46,6 +42,9 @@ function toCamel(o: any) {
       if (typeof value === "object") {
         value = toCamel(value)
       }
+      if(value == "aRN"){
+        value = "arn"
+      }
       return value
     })
   } else {
@@ -53,9 +52,15 @@ function toCamel(o: any) {
     for (origKey in o) {
       if (o.hasOwnProperty(origKey)) {
         newKey = (origKey.charAt(0).toLowerCase() + origKey.slice(1) || origKey).toString()
+        if(newKey == "aRN"){
+          newKey = "arn"
+        }
         value = o[origKey]
         if (value instanceof Array || (value !== null && value.constructor === Object)) {
           value = toCamel(value)
+          if(value == "aRN"){
+            value = "arn"
+          }
         }
         newO[newKey] = value
       }
@@ -74,14 +79,11 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     super(scope, id, props);
     const account_id = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
-    if(typeof props.config.DeployedRuleGroupCapacities == "undefined"){
+    if(props.config.DeployedRuleGroupCapacities === undefined){
       console.log("⚙️ Initialize lists for Update mechanism.")
       props.config.DeployedRuleGroupCapacities = []
       props.config.DeployedRuleGroupNames = []
       props.config.DeployedRuleGroupIdentifier = []}
-
-    const kmskeyArn = kms.Key.fromLookup(this,"S3DefaultKMSKey",{
-      aliasName:"alias/"+props.config.General.Prefix.toUpperCase()+"/KMS/S3/DEFAULT/ENCRYPTION"})
 
     const CfnRole = new iam.CfnRole(this, "KinesisS3DeliveryRole",{
       assumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"","Effect":"Allow","Principal":{"Service":"firehose.amazonaws.com"},"Action":"sts:AssumeRole"}]}
@@ -125,7 +127,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "kms:GenerateDataKey"
           ],
           Resource: [
-            kmskeyArn.keyArn
+            props.config.General.FireHoseKeyArn
           ]
         }
       ]
@@ -141,7 +143,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       deliveryStreamName: "aws-waf-logs-"+props.config.General.Prefix+"-kinesis-wafv2log-"+props.config.WebAcl.Name+props.config.General.Stage+props.config.General.DeployHash,
       extendedS3DestinationConfiguration: {
         bucketArn:"arn:aws:s3:::"+props.config.General.Prefix+"-"+account_id+"-kinesis-wafv2log",
-        encryptionConfiguration:{kmsEncryptionConfig:{awskmsKeyArn:kmskeyArn.keyArn}},
+        encryptionConfiguration:{kmsEncryptionConfig:{awskmsKeyArn:props.config.General.FireHoseKeyArn}},
         roleArn: CfnRole.attrArn,
         bufferingHints: {sizeInMBs:50, intervalInSeconds:60},
         compressionFormat: "UNCOMPRESSED"
@@ -149,7 +151,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
 
     })
 
-    if(props.config.WebAcl.Rules == null)
+    if(props.config.WebAcl.Rules == undefined)
     {
       console.log("Creating DEFAULT Policy.")
       const novalue = null
@@ -191,7 +193,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       const fmsPolicy = new fms.CfnPolicy(this, "CfnPolicy", {
         excludeResourceTags: false,
         remediationEnabled: false,
-        resourceType: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+        resourceType: props.config.WebAcl.Type,
         policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage+ "-" +props.config.General.DeployHash,
         includeMap: {account: props.config.General.DeployTo },
         securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
@@ -306,7 +308,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         const fmsPolicy = new fms.CfnPolicy(this, "CfnPolicy", {
           excludeResourceTags: false,
           remediationEnabled: false,
-          resourceType: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+          resourceType: props.config.WebAcl.Type,
           policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage+ "-" +props.config.General.DeployHash,
           includeMap: {account: props.config.General.DeployTo },
           securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
@@ -456,7 +458,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         const fmsPolicy = new fms.CfnPolicy(this, "CfnPolicy", {
           excludeResourceTags: false,
           remediationEnabled: false,
-          resourceType: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+          resourceType: props.config.WebAcl.Type,
           policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage+ "-" +props.config.General.DeployHash,
           includeMap: {account: props.config.General.DeployTo },
           securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
