@@ -10,6 +10,7 @@ import { exit, off, prependOnceListener } from "process";
 import * as template from "../values/calculatecapacity.json";
 import { print } from "util";
 import { AnyPrincipal } from "@aws-cdk/aws-iam";
+import * as lodash from "lodash";
 
 function str2ab(str: string): Uint8Array {
   var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
@@ -68,14 +69,48 @@ async function CheckCapacity(Scope: string, calculated_capacity_json: object): P
   return response.Capacity || 0
 }
 async function CheckQuota(Quoata: string): Promise<number>{
+  let current_quota = 0
   const quoata_client = new quota.ServiceQuotasClient({ region: deploymentregion });
   const input: quota.GetAWSDefaultServiceQuotaCommandInput = {
     QuotaCode: Quoata,
     ServiceCode: "fms"
-  };  
+  };
   const command = new quota.GetAWSDefaultServiceQuotaCommand(input);
   const responsequoata = await quoata_client.send(command);
-  return responsequoata.Quota?.Value || 0
+  if(responsequoata.Quota?.Adjustable == true){
+    const input: quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommandInput = {
+      QuotaCode: Quoata,
+      ServiceCode: "fms"
+    };
+    const command = new quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommand(input);
+    const newquota = await quoata_client.send(command);
+    if(newquota.RequestedQuotas != []){
+      if(newquota.RequestedQuotas?.length || 0 == 0){
+        const sortquota = lodash.sortBy(newquota.RequestedQuotas,["Created"]);
+        if(sortquota?.length == 1){
+          if(sortquota?.[0].Status != "APPROVED"){
+            console.log("ℹ️  There is an open Quota request for " + Quoata + "but still not approved using DEFAULT Quota.")
+            current_quota = responsequoata.Quota?.Value || 0
+            return current_quota
+          }
+          if(sortquota?.[0].Status == "APPROVED"){
+            current_quota = sortquota?.[0].DesiredValue  || 0
+            return current_quota
+          }
+        }
+      }
+      else{
+        current_quota = responsequoata.Quota?.Value || 0
+        return current_quota
+      }
+    }
+    else{
+      current_quota = responsequoata.Quota?.Value || 0
+      return current_quota
+    }
+  }
+  current_quota = responsequoata.Quota?.Value || 0
+  return current_quota
 }
 
 async function GetManagedRuleCapacity(Vendor: string, Name: string, Scope: string, Version: string): Promise<number>{
@@ -157,11 +192,10 @@ if (configFile && fs.existsSync(configFile)) {
     let exitCode = 0;
     const StackName = config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase()
     if(Temp_Hash === config.General.DeployHash){
-      let policies = await ListPolicies();
-      policies = policies +1
+      const policies = await ListPolicies();
       const quota_policies = await CheckQuota("L-0B28E140");
       if(quota_policies <= policies){
-        console.log("\n🚨 You are about to exceed the soft limit for Policies per region.\n  ﹗ Stopping deployment ﹗")
+        console.log("\n🚨 You are about to exceed the soft limit for Policies per region.\n Region Quota: " +quota_policies + "\n Deployed Policies: " + policies + "\n ﹗ Stopping deployment ﹗")
         exitCode = 1;
       }
       console.log("ℹ First Deployment of this WAF.")
@@ -231,3 +265,7 @@ if (configFile && fs.existsSync(configFile)) {
 else {
   console.log("File", configFile, "not found. - NO CDK ERROR");
 }
+function elseif() {
+  throw new Error("Function not implemented.");
+}
+
