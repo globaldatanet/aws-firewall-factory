@@ -237,7 +237,7 @@ if (configFile && fs.existsSync(configFile)) {
       managedrulecapacity = managedrulecapacity + capacity
     }
     config.Capacity = calculate_capacity_sum
-    const total_wcu = config.Capacity + 725
+    const total_wcu = config.Capacity + managedrulecapacity
     const quote_wcu = await CheckQuota("L-D86ED2F3");
     if (total_wcu <= Number(quote_wcu)) {
       console.log("\n🔎 Capacity Check result: 🟢 \n")
