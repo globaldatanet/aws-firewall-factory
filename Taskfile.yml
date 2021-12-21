@@ -4,6 +4,7 @@ env:
   PROCESS_PARAMETERS: values/david-test.json
   CDK_DEFAULT_ACCOUNT: $(aws sts get-caller-identity |jq -r .Account)
   REGION: $(aws configure get profile.$AWSUME_PROFILE.region)
+  SKIP_QUOTA_CHECK: true
 
 tasks:
   deploy:
