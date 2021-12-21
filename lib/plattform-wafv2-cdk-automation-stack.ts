@@ -266,7 +266,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         let OverrideAction;
         for(mangedrule of props.config.WebAcl.ManagedRuleGroups){
           if(mangedrule.ExcludeRules){
-            ExcludeRules = mangedrule.ExcludeRules
+            ExcludeRules = toCamel(mangedrule.ExcludeRules)
             OverrideAction = mangedrule.OverrideAction
           }
           else{
@@ -455,7 +455,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         let OverrideAction;
         for(mangedrule of props.config.WebAcl.ManagedRuleGroups){
           if(mangedrule.ExcludeRules){
-            ExcludeRules = mangedrule.ExcludeRules
+            ExcludeRules = toCamel(mangedrule.ExcludeRules)
             OverrideAction = mangedrule.OverrideAction
           }
           else{
