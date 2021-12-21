@@ -13,11 +13,11 @@ This simple solution helps you deploy, update, and stage your WAFs while managin
 6. Easy configuration of WAF Rules trough json file.
 7. Deployment Hash to deploy same WAF more than one time for testing and/or blue/green deployments.
 8. Stopping deployment if soft limit will be exceeded:  **Firewall Manager policies per organization per Region (L-0B28E140)** - **Maximum number of web ACL capacity units in a web ACL in WAF for regional (L-D9F31E8A)**
-9. NEW **RegexMatchStatement** is working now 🚀 
+9. NEW **RegexMatchStatement** and **IPSetReferenceStatement** is working now 🚀
+
 ## Coming soon:
 
-1.[IPSetReferenceStatement](https://github.com/aws/aws-cdk/issues/17864)
-2. Deployment via Teamcity 
+1. Deployment via Teamcity 
 
 
 # Deployment via Taskfile

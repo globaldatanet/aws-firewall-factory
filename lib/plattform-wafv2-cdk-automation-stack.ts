@@ -46,6 +46,9 @@ function toCamel(o: any) {
       if(value == "aRN"){
         value = "arn"
       }
+      if(value == "iPSetReferenceStatement"){
+        value = "ipSetReferenceStatement"
+      }
       return value
     })
   } else {
@@ -55,6 +58,9 @@ function toCamel(o: any) {
         newKey = (origKey.charAt(0).toLowerCase() + origKey.slice(1) || origKey).toString()
         if(newKey == "aRN"){
           newKey = "arn"
+        }
+        if(newKey == "iPSetReferenceStatement"){
+          newKey = "ipSetReferenceStatement"
         }
         value = o[origKey]
         if (value instanceof Array || (value !== null && value.constructor === Object)) {
