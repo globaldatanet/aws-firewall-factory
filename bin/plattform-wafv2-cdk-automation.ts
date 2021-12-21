@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { PlattformWafv2CdkAutomationStack, Config } from "../lib/plattform-wafv2-cdk-automation-stack";
-import * as cdk from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
 import * as fs from "fs";
 import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, Statement,CreateRegexPatternSetCommandInput, CreateRegexPatternSetCommand, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput, CreateRegexPatternSetRequest, RegexPatternSet } from "@aws-sdk/client-wafv2";
 import * as quota from "@aws-sdk/client-service-quotas";
@@ -9,7 +9,6 @@ import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-s
 import { exit, off, prependOnceListener } from "process";
 import * as template from "../values/calculatecapacity.json";
 import { print } from "util";
-import { AnyPrincipal } from "@aws-cdk/aws-iam";
 import * as lodash from "lodash";
 
 function str2ab(str: string): Uint8Array {
@@ -89,7 +88,7 @@ async function CheckQuota(Quoata: string): Promise<number>{
         const sortquota = lodash.sortBy(newquota.RequestedQuotas,["Created"]);
         if(sortquota?.length == 1){
           if(sortquota?.[0].Status != "APPROVED"){
-            console.log("ℹ️  There is an open Quota request for " + Quoata + "but still not approved using DEFAULT Quota.")
+            console.log("ℹ️  There is an open Quota request for " + Quoata + " but it is still not approved using DEFAULT Quota.")
             current_quota = responsequoata.Quota?.Value || 0
             return current_quota
           }
@@ -193,10 +192,15 @@ if (configFile && fs.existsSync(configFile)) {
     const StackName = config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase()
     if(Temp_Hash === config.General.DeployHash){
       const policies = await ListPolicies();
-      const quota_policies = await CheckQuota("L-0B28E140");
-      if(quota_policies <= policies){
-        console.log("\n🚨 You are about to exceed the soft limit for Policies per region.\n Region Quota: " +quota_policies + "\n Deployed Policies: " + policies + "\n ﹗ Stopping deployment ﹗")
-        exitCode = 1;
+      if(process.env.SKIP_QUOTA_CHECK == "true"){
+        console.log("❗️ SKIPPING Quota Check for Quota: L-0B28E140")
+      }
+      else{
+        const quota_policies = await CheckQuota("L-0B28E140");
+        if(quota_policies <= policies){
+          console.log("\n🚨 You are about to exceed the limit for Policies per region.\n Region Quota: " +quota_policies + "\n Deployed Policies: " + policies + "\n ﹗ Stopping deployment ﹗")
+          exitCode = 1;
+        }
       }
       console.log("ℹ First Deployment of this WAF.")
     }else{

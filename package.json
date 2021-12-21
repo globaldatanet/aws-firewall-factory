@@ -11,12 +11,11 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.124.0",
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
     "@typescript-eslint/parser": "^4.32.0",
-    "aws-cdk": "1.124.0",
+    "aws-cdk": "^2.2.0",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.24.2",
@@ -28,20 +27,14 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-cdk/aws-fms": "^1.124.0",
-    "@aws-cdk/aws-iam": "^1.124.0",
-    "@aws-cdk/aws-kinesisfirehose": "^1.124.0",
-    "@aws-cdk/aws-kms": "^1.124.0",
-    "@aws-cdk/aws-wafv2": "^1.124.0",
-    "@aws-cdk/core": "1.124.0",
-    "@aws-cdk/custom-resources": "^1.125.0",
+    "aws-cdk-lib": "^2.2.0",
+    "constructs": "^10.0.0",
     "@aws-sdk/client-cloudformation": "^3.40.0",
     "@aws-sdk/client-fms": "^3.43.0",
     "@aws-sdk/client-service-quotas": "^3.38.0",
     "@aws-sdk/client-wafv2": "^3.35.0",
     "@mhlabs/cfn-diagram": "^1.1.32",
     "@types/lodash": "^4.14.178",
-    "cdk-dia": "^0.3.0",
     "lodash": "^4.17.21",
     "process": "^0.11.10",
     "shapes": "^0.4.0"

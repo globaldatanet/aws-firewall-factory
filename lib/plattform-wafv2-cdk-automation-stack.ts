@@ -1,9 +1,10 @@
-import * as cdk from "@aws-cdk/core";
-import * as wafv2 from "@aws-cdk/aws-wafv2";
-import * as fms from "@aws-cdk/aws-fms";
-import * as firehouse from "@aws-cdk/aws-kinesisfirehose";
-import * as iam from 	"@aws-cdk/aws-iam";
-import * as logs from "@aws-cdk/aws-logs";
+import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+import {aws_wafv2 as wafv2} from "aws-cdk-lib";
+import {aws_fms as fms} from "aws-cdk-lib";
+import {aws_kinesisfirehose as firehouse} from "aws-cdk-lib";
+import {aws_iam as iam} from "aws-cdk-lib";
+import {aws_logs as logs} from "aws-cdk-lib";
 import { print } from "util";
 
 
@@ -75,7 +76,7 @@ export interface ConfigStackProps extends cdk.StackProps {
 
 
 export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props: ConfigStackProps) {
+  constructor(scope: Construct, id: string, props: ConfigStackProps) {
     super(scope, id, props);
     const account_id = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
@@ -255,15 +256,25 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + props.config.Capacity +"]")
         const novalue = null
         let mangedrule;
+        let ExcludeRules;
+        let OverrideAction;
         for(mangedrule of props.config.WebAcl.ManagedRuleGroups){
+          if(mangedrule.ExcludeRules){
+            ExcludeRules = mangedrule.ExcludeRules
+            OverrideAction = mangedrule.OverrideAction
+          }
+          else{
+            ExcludeRules = []
+            OverrideAction = { "type": "NONE" }
+          }
           if(mangedrule.Version == ""){
             preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
-              "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": { "type": "NONE" },
-            "ruleGroupArn": novalue,"excludeRules": [],"ruleGroupType": "ManagedRuleGroup"});}
+              "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": OverrideAction,
+            "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
           else{
             preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
-              "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": { "type": "NONE" },
-            "ruleGroupArn": novalue,"excludeRules": [],"ruleGroupType": "ManagedRuleGroup"});}
+              "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": OverrideAction,
+            "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
         }
 
         props.config.DeployedRuleGroupCapacities.splice(0)
@@ -434,15 +445,25 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         });
 
         let mangedrule;
+        let ExcludeRules;
+        let OverrideAction;
         for(mangedrule of props.config.WebAcl.ManagedRuleGroups){
+          if(mangedrule.ExcludeRules){
+            ExcludeRules = mangedrule.ExcludeRules
+            OverrideAction = mangedrule.OverrideAction
+          }
+          else{
+            ExcludeRules = []
+            OverrideAction = { "type": "NONE" }
+          }
           if(mangedrule.Version == ""){
             preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
-              "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": { "type": "NONE" },
-            "ruleGroupArn": novalue,"excludeRules": [],"ruleGroupType": "ManagedRuleGroup"});}
+              "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": OverrideAction,
+            "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
           else{
             preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
-              "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": { "type": "NONE" },
-            "ruleGroupArn": novalue,"excludeRules": [],"ruleGroupType": "ManagedRuleGroup"});}
+              "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": OverrideAction,
+            "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
         }
 
         const securityservicepolicydata = {
