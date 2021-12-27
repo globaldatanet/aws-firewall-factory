@@ -1,0 +1,18 @@
+
+name: Linting
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install Flake8
+        run: pip install flake8
+      - name: Run flake8
+        run: flake8 orgtool.py
