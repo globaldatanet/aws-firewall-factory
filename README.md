@@ -1,5 +1,7 @@
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
+
+![](./static/icon/firewallfactory.svg)
 # Web Application Firewalls at Scale 
 
 This simple solution helps you deploy, update, and stage your WAFs while managing them centrally via FMS.
