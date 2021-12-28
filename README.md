@@ -1,4 +1,4 @@
-[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+[![License: Apache2](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/)
 
 
 # Web Application Firewalls at Scale 
@@ -10,6 +10,10 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 |Releases |Author  | 
 --- | --- |
 | [Changelog](CHANGELOG.md) - [Features](#Features)| David Krohn </br> [Linkedin](https://www.linkedin.com/in/daknhh/) - [Blog](https://globaldatanet.com/our-team/david-krohn)|
+
+
+## Architecture
+
 
 ## Features
 
