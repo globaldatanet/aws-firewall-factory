@@ -61,13 +61,70 @@
           "SampledRequestsEnabled": true,
           "CloudWatchMetricsEnabled": true
         }
-      }
+      },
+      {
+        "Statement": {
+          "OrStatement": {
+            "Statements": [
+              {
+                "RegexMatchStatement": {
+                  "RegexString": "^.*\\/clients-registrations\\/openid-connect",
+                  "FieldToMatch": {
+                    "UriPath": {}
+                  },
+                  "TextTransformations": [
+                    {
+                      "Priority": 0,
+                      "Type": "LOWERCASE"
+                    }
+                  ]
+                }
+              },
+              {
+                "RegexMatchStatement": {
+                  "RegexString": "^.*\\/console",
+                  "FieldToMatch": {
+                    "UriPath": {}
+                  },
+                  "TextTransformations": [
+                    {
+                      "Priority": 0,
+                      "Type": "LOWERCASE"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "Action": {
+          "Block": {}
+        },
+        "VisibilityConfig": {
+          "SampledRequestsEnabled": true,
+          "CloudWatchMetricsEnabled": true
+        }
+      },
     ],
     "ManagedRuleGroups": [
       {
         "Vendor": "AWS",
         "Name": "AWSManagedRulesCommonRuleSet",
+        "ExcludeRules": [
+          {
+            "Name": "CrossSiteScripting_BODY"
+          },
+          {
+            "Name": "GenericRFI_QUERYARGUMENTS"
+          },
+          {
+            "Name": "NoUserAgent_HEADER"
+          }
+        ],
         "Version": "",
+        "OverrideAction": {
+          "type": "COUNT"
+        },
         "Capacity": 700
       },
       {
