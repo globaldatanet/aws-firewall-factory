@@ -1,9 +1,8 @@
 [![License: Apache2](https://img.shields.io/badge/license-Apache%202-lightgrey.svg)](http://www.apache.org/licenses/) [![cdk](https://img.shields.io/badge/aws_cdk-v2-orange.svg)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 [![latest](https://img.shields.io/badge/latest-release-yellow.svg)](https://github.com/globaldatanet/aws-firewall-factory/releases)
 
-*by*
 
-[![gdn](https://img.shields.io/badge/by-globaldatanet-green.svg)](https://globaldatanet.com) [![dakn](https://img.shields.io/badge/by-dakn-blue.svg)](https://github.com/daknhh)
+[![gdn](https://img.shields.io/badge/by-globaldatanet-%2300ecbd)](https://globaldatanet.com) [![dakn](https://img.shields.io/badge/by-dakn-%23ae0009.svg)](https://github.com/daknhh)
 
 
 
