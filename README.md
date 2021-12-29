@@ -1,5 +1,4 @@
-[![License: Apache2](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/)
-
+[![License: Apache2](https://img.shields.io/badge/license-Apache%202-green.svg)](http://www.apache.org/licenses/) ![cdk](https://img.shields.io/badge/aws_cdk-v2-orange.svg)
 
 # Web Application Firewalls at Scale 
 
@@ -13,6 +12,10 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 
 
 ## Architecture
+
+![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
+
+
 
 
 ## Features
