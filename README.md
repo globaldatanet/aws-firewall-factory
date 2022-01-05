@@ -22,8 +22,8 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
 
-
-
+### Prerequisites:
+1. An central S3 Bucket with **write** permission for security account needs to be in place.
 
 ## Features
 
