@@ -31,6 +31,7 @@ export interface Config {
 }
 
 interface RulesArray{
+  Name?: string,
   Statement: any,
   Action: any,
   VisibilityConfig: any
@@ -213,15 +214,23 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         let count = 1
 
         for(const statement of props.config.WebAcl.Rules){
+          let rulename = ""
+          if(statement.Name !== undefined){
+            const Temp_Hash = Date.now().toString(36)
+            rulename = statement.Name  + "-" + Temp_Hash
+          }
+          else{
+            rulename = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
+          }
           const CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty = {
-            name: props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash,
+            name: rulename,
             priority: count,
             action: toCamel(statement.Action),
             statement: toCamel(statement.Statement),
             visibilityConfig: {
               sampledRequestsEnabled: statement.VisibilityConfig.SampledRequestsEnabled,
               cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
-              metricName: props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash,
+              metricName: rulename + "-metric",
             },
           };
           rules.push(CfnRuleProperty)
@@ -393,15 +402,23 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           let rulegroupcounter = 0
           while( rulegroupcounter < rulesets[count].length){
             const statementindex = rulesets[count][rulegroupcounter]
+            let rulename = ""
+            if(props.config.WebAcl.Rules[statementindex].Name !== undefined){
+              const Temp_Hash = Date.now().toString(36)
+              rulename = props.config.WebAcl.Rules[statementindex].Name  + "-" + Temp_Hash
+            }
+            else{
+              rulename = rulegroupcounter.toString()
+            }
             const CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty = {
-              name: name + rulegroupcounter.toString(),
+              name: rulename,
               priority: rulegroupcounter,
               action: toCamel(props.config.WebAcl.Rules[statementindex].Action),
               statement: toCamel(props.config.WebAcl.Rules[statementindex].Statement),
               visibilityConfig: {
                 sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
                 cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
-                metricName: props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash,
+                metricName: rulename + "-metric",
               },
             }
             CfnRuleProperties.push(CfnRuleProperty)
