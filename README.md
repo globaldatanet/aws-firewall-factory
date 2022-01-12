@@ -37,6 +37,7 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 7. Deployment Hash to deploy same WAF more than one time for testing and/or blue/green deployments.
 8. Stopping deployment if soft limit will be exceeded:  **Firewall Manager policies per organization per Region (L-0B28E140)** - **Maximum number of web ACL capacity units in a web ACL in WAF for regional (L-D9F31E8A)**
 9. NEW **RegexMatchStatement** and **IPSetReferenceStatement** is working now 🚀
+10. NEW You can now name your Rules. If you define a Name in your RulesArray the Name + a Base36 Timestamp will be used for creation of your Rule - otherwise a name will be generated. This will help you to query your logs in Athena. The same Rulename also apply to the metric just with adding "-metric" to the name.
 
 ## Coming soon:
 
