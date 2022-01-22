@@ -163,35 +163,33 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     {
       console.log("Creating DEFAULT Policy.")
       const novalue = null
+      let mangedrule;
+      let ExcludeRules;
+      let OverrideAction;
+      const preProcessRuleGroups = []
+      for(mangedrule of props.config.WebAcl.ManagedRuleGroups){
+        if(mangedrule.ExcludeRules){
+          ExcludeRules = toCamel(mangedrule.ExcludeRules)
+          OverrideAction = mangedrule.OverrideAction
+        }
+        else{
+          ExcludeRules = []
+          OverrideAction = { "type": "NONE" }
+        }
+        if(mangedrule.Version == ""){
+          preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
+            "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": OverrideAction,
+          "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
+        else{
+          preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
+            "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": OverrideAction,
+          "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
+      }
       const securityservicepolicydata = {
         "type":"WAFV2",
         "defaultAction":{ "type":"ALLOW" },
-        "preProcessRuleGroups": [
-          {
-            "managedRuleGroupIdentifier": {
-              "vendorName": "AWS",
-              "managedRuleGroupName": "AWSManagedRulesCommonRuleSet",
-              "version": novalue
-            },
-            "overrideAction": { "type": "NONE" },
-            "ruleGroupArn": novalue,
-            "excludeRules": [],
-            "ruleGroupType": "ManagedRuleGroup"
-          }
-        ],
-        "postProcessRuleGroups": [
-          {
-            "managedRuleGroupIdentifier": {
-              "vendorName": "AWS",
-              "managedRuleGroupName": "AWSManagedRulesAmazonIpReputationList",
-              "version": novalue
-            },
-            "overrideAction": { "type": "NONE" },
-            "ruleGroupArn": novalue,
-            "excludeRules": [],
-            "ruleGroupType": "ManagedRuleGroup"
-          }
-        ],
+        "preProcessRuleGroups": preProcessRuleGroups,
+        "postProcessRuleGroups": [],
         "overrideCustomerWebACLAssociation":true,
         "loggingConfiguration": {
           "logDestinationConfigs":["${S3DeliveryStream.Arn}"]
@@ -419,7 +417,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
                 cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
                 metricName: rulename + "-metric",
-              },
+              }
             }
             CfnRuleProperties.push(CfnRuleProperty)
             rulegroupcounter++
