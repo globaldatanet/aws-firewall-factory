@@ -2,7 +2,7 @@
 import { PlattformWafv2CdkAutomationStack, Config } from "../lib/plattform-wafv2-cdk-automation-stack";
 import * as cdk from "aws-cdk-lib";
 import * as fs from "fs";
-import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, Statement,CreateRegexPatternSetCommandInput, CreateRegexPatternSetCommand, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput, CreateRegexPatternSetRequest, RegexPatternSet } from "@aws-sdk/client-wafv2";
+import { WAFV2Client, CheckCapacityCommandOutput, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput } from "@aws-sdk/client-wafv2";
 import * as quota from "@aws-sdk/client-service-quotas";
 import * as cloudformation from "@aws-sdk/client-cloudformation"
 import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
@@ -64,8 +64,8 @@ async function CheckCapacity(Scope: string, calculated_capacity_json: object): P
     Rules: newRules
   };
   const command = new CheckCapacityCommand(input);
-  const response = await client.send(command);
-  return response.Capacity || 0
+  const response: any = await client.send(command);
+  return response.Capacity | 0
 }
 async function CheckQuota(Quoata: string): Promise<number>{
   let current_quota = 0
@@ -121,8 +121,8 @@ async function GetManagedRuleCapacity(Vendor: string, Name: string, Scope: strin
       Scope: Scope
     }
     const command = new DescribeManagedRuleGroupCommand(input);
-    const response = await client.send(command)
-    return response.Capacity || 0
+    const response: any = await client.send(command);
+    return response.Capacity | 0
   }
   else{
     const input: DescribeManagedRuleGroupCommandInput = {
@@ -132,8 +132,8 @@ async function GetManagedRuleCapacity(Vendor: string, Name: string, Scope: strin
       VersionName: Version
     }
     const command = new DescribeManagedRuleGroupCommand(input);
-    const response = await client.send(command)
-    return response.Capacity || 0
+    const response: any = await client.send(command);
+    return response.Capacity | 0
   }
 }
 
@@ -178,6 +178,17 @@ if (configFile && fs.existsSync(configFile)) {
   else{
     deploymentregion = process.env.REGION || "eu-central-1"
   }
+  console.log(`
+   █████╗ ██╗    ██╗███████╗    ███████╗██╗██████╗ ███████╗██╗    ██╗ █████╗ ██╗     ██╗         ███████╗ █████╗  ██████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
+  ██╔══██╗██║    ██║██╔════╝    ██╔════╝██║██╔══██╗██╔════╝██║    ██║██╔══██╗██║     ██║         ██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
+  ███████║██║ █╗ ██║███████╗    █████╗  ██║██████╔╝█████╗  ██║ █╗ ██║███████║██║     ██║         █████╗  ███████║██║        ██║   ██║   ██║██████╔╝ ╚████╔╝ 
+  ██╔══██║██║███╗██║╚════██║    ██╔══╝  ██║██╔══██╗██╔══╝  ██║███╗██║██╔══██║██║     ██║         ██╔══╝  ██╔══██║██║        ██║   ██║   ██║██╔══██╗  ╚██╔╝  
+  ██║  ██║╚███╔███╔╝███████║    ██║     ██║██║  ██║███████╗╚███╔███╔╝██║  ██║███████╗███████╗    ██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║  ██║   ██║   
+  ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
+  `);
+  console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
+  console.log("\n👤 AWS Profile used: ","\x1b[33m","\n                      " + process.env.AWSUME_PROFILE,"\x1b[0m");
+  console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentregion,"\x1b[0m \n")
   if(config.General.DeployHash == ""){
     Temp_Hash = Date.now().toString(36)
     config.General.DeployHash = Temp_Hash
@@ -213,14 +224,26 @@ if (configFile && fs.existsSync(configFile)) {
     }
     else{
       while (count < config.WebAcl.Rules.length) {
-        const rule_calculated_capacity_json = [];
-        const temp_template = template;
-        temp_template.Statement = config.WebAcl.Rules[count].Statement;
-        temp_template.Action = config.WebAcl.Rules[count].Action;
-        rule_calculated_capacity_json.push(temp_template);
-        const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
-
-        config.RuleCapacities.push(capacity);
+        if("Captcha" in config.WebAcl.Rules[count].Action){
+          const rule_calculated_capacity_json = [];
+          const temp_template = template;
+          temp_template.Statement = config.WebAcl.Rules[count].Statement;
+          temp_template.Action = config.WebAcl.Rules[count].Action;
+          temp_template.CaptchaConfig = config.WebAcl.Rules[count].CaptchaConfig;
+          rule_calculated_capacity_json.push(temp_template);
+          const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
+          config.RuleCapacities.push(capacity);
+        }
+        else{
+          const rule_calculated_capacity_json = [];
+          const temp_template = template;
+          temp_template.Statement = config.WebAcl.Rules[count].Statement;
+          temp_template.Action = config.WebAcl.Rules[count].Action;
+          delete temp_template.CaptchaConfig
+          rule_calculated_capacity_json.push(temp_template);
+          const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
+          config.RuleCapacities.push(capacity);
+        }
         count++
       }
       calculate_capacity_sum = config.RuleCapacities.reduce(function (a, b) {

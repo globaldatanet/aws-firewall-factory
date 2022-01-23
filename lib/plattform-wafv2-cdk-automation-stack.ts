@@ -34,7 +34,8 @@ interface RulesArray{
   Name?: string,
   Statement: any,
   Action: any,
-  VisibilityConfig: any
+  VisibilityConfig: any,
+  CaptchaConfig?: any,
 }
 
 function toCamel(o: any) {
@@ -163,35 +164,33 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     {
       console.log("Creating DEFAULT Policy.")
       const novalue = null
+      let mangedrule;
+      let ExcludeRules;
+      let OverrideAction;
+      const preProcessRuleGroups = []
+      for(mangedrule of props.config.WebAcl.ManagedRuleGroups){
+        if(mangedrule.ExcludeRules){
+          ExcludeRules = toCamel(mangedrule.ExcludeRules)
+          OverrideAction = mangedrule.OverrideAction
+        }
+        else{
+          ExcludeRules = []
+          OverrideAction = { "type": "NONE" }
+        }
+        if(mangedrule.Version == ""){
+          preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
+            "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": OverrideAction,
+          "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
+        else{
+          preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
+            "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": OverrideAction,
+          "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
+      }
       const securityservicepolicydata = {
         "type":"WAFV2",
         "defaultAction":{ "type":"ALLOW" },
-        "preProcessRuleGroups": [
-          {
-            "managedRuleGroupIdentifier": {
-              "vendorName": "AWS",
-              "managedRuleGroupName": "AWSManagedRulesCommonRuleSet",
-              "version": novalue
-            },
-            "overrideAction": { "type": "NONE" },
-            "ruleGroupArn": novalue,
-            "excludeRules": [],
-            "ruleGroupType": "ManagedRuleGroup"
-          }
-        ],
-        "postProcessRuleGroups": [
-          {
-            "managedRuleGroupIdentifier": {
-              "vendorName": "AWS",
-              "managedRuleGroupName": "AWSManagedRulesAmazonIpReputationList",
-              "version": novalue
-            },
-            "overrideAction": { "type": "NONE" },
-            "ruleGroupArn": novalue,
-            "excludeRules": [],
-            "ruleGroupType": "ManagedRuleGroup"
-          }
-        ],
+        "preProcessRuleGroups": preProcessRuleGroups,
+        "postProcessRuleGroups": [],
         "overrideCustomerWebACLAssociation":true,
         "loggingConfiguration": {
           "logDestinationConfigs":["${S3DeliveryStream.Arn}"]
@@ -222,7 +221,23 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           else{
             rulename = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
           }
-          const CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty = {
+          let CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty
+          if("Captcha" in statement.Action){
+            CfnRuleProperty = {
+              name: rulename,
+              priority: count,
+              action: toCamel(statement.Action),
+              statement: toCamel(statement.Statement),
+              visibilityConfig: {
+                sampledRequestsEnabled: statement.VisibilityConfig.SampledRequestsEnabled,
+                cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
+                metricName: rulename + "-metric",
+              },
+              captchaConfig: toCamel(statement.CaptchaConfig),
+            }
+          }
+          else{ 
+            CfnRuleProperty = {
             name: rulename,
             priority: count,
             action: toCamel(statement.Action),
@@ -232,7 +247,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
               metricName: rulename + "-metric",
             },
-          };
+          };}
           rules.push(CfnRuleProperty)
           count +=1
         }
@@ -410,17 +425,35 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             else{
               rulename = rulegroupcounter.toString()
             }
-            const CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty = {
-              name: rulename,
-              priority: rulegroupcounter,
-              action: toCamel(props.config.WebAcl.Rules[statementindex].Action),
-              statement: toCamel(props.config.WebAcl.Rules[statementindex].Statement),
-              visibilityConfig: {
-                sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
-                cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
-                metricName: rulename + "-metric",
-              },
+            let CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty
+            if("Captcha" in props.config.WebAcl.Rules[statementindex].Action){
+              CfnRuleProperty = {
+                name: rulename,
+                priority: rulegroupcounter,
+                action: toCamel(props.config.WebAcl.Rules[statementindex].Action),
+                statement: toCamel(props.config.WebAcl.Rules[statementindex].Statement),
+                visibilityConfig: {
+                  sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
+                  cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
+                  metricName: rulename + "-metric",
+                },
+                captchaConfig: toCamel(props.config.WebAcl.Rules[statementindex].CaptchaConfig),
+              }
             }
+            else{
+              CfnRuleProperty = {
+                name: rulename,
+                priority: rulegroupcounter,
+                action: toCamel(props.config.WebAcl.Rules[statementindex].Action),
+                statement: toCamel(props.config.WebAcl.Rules[statementindex].Statement),
+                visibilityConfig: {
+                  sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
+                  cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
+                  metricName: rulename + "-metric",
+                }
+              }
+            }
+
             CfnRuleProperties.push(CfnRuleProperty)
             rulegroupcounter++
           }

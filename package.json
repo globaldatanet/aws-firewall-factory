@@ -27,14 +27,14 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "aws-cdk-lib": "^2.2.0",
-    "constructs": "^10.0.0",
     "@aws-sdk/client-cloudformation": "^3.40.0",
     "@aws-sdk/client-fms": "^3.43.0",
     "@aws-sdk/client-service-quotas": "^3.38.0",
-    "@aws-sdk/client-wafv2": "^3.35.0",
+    "@aws-sdk/client-wafv2": "^3.48.0",
     "@mhlabs/cfn-diagram": "^1.1.32",
     "@types/lodash": "^4.14.178",
+    "aws-cdk-lib": "^2.8.0",
+    "constructs": "^10.0.0",
     "lodash": "^4.17.21",
     "process": "^0.11.10",
     "shapes": "^0.4.0"
