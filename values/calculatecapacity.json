@@ -1,10 +1,11 @@
 {
 "Name": "TEST",
 "Priority": 0,
-"Action": {
-    "Allow": {}
-},
 "Statement": {
+},
+"Action":{
+},
+"CaptchaConfig":{
 },
 "VisibilityConfig": {
     "SampledRequestsEnabled": false,

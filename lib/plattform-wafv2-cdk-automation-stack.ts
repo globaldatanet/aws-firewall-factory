@@ -34,7 +34,8 @@ interface RulesArray{
   Name?: string,
   Statement: any,
   Action: any,
-  VisibilityConfig: any
+  VisibilityConfig: any,
+  CaptchaConfig?: any,
 }
 
 function toCamel(o: any) {
@@ -220,7 +221,23 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           else{
             rulename = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
           }
-          const CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty = {
+          let CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty
+          if("Captcha" in statement.Action){
+            CfnRuleProperty = {
+              name: rulename,
+              priority: count,
+              action: toCamel(statement.Action),
+              statement: toCamel(statement.Statement),
+              visibilityConfig: {
+                sampledRequestsEnabled: statement.VisibilityConfig.SampledRequestsEnabled,
+                cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
+                metricName: rulename + "-metric",
+              },
+              captchaConfig: toCamel(statement.CaptchaConfig),
+            }
+          }
+          else{ 
+            CfnRuleProperty = {
             name: rulename,
             priority: count,
             action: toCamel(statement.Action),
@@ -230,7 +247,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
               metricName: rulename + "-metric",
             },
-          };
+          };}
           rules.push(CfnRuleProperty)
           count +=1
         }
@@ -408,17 +425,35 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             else{
               rulename = rulegroupcounter.toString()
             }
-            const CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty = {
-              name: rulename,
-              priority: rulegroupcounter,
-              action: toCamel(props.config.WebAcl.Rules[statementindex].Action),
-              statement: toCamel(props.config.WebAcl.Rules[statementindex].Statement),
-              visibilityConfig: {
-                sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
-                cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
-                metricName: rulename + "-metric",
+            let CfnRuleProperty: wafv2.CfnRuleGroup.RuleProperty
+            if("Captcha" in props.config.WebAcl.Rules[statementindex].Action){
+              CfnRuleProperty = {
+                name: rulename,
+                priority: rulegroupcounter,
+                action: toCamel(props.config.WebAcl.Rules[statementindex].Action),
+                statement: toCamel(props.config.WebAcl.Rules[statementindex].Statement),
+                visibilityConfig: {
+                  sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
+                  cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
+                  metricName: rulename + "-metric",
+                },
+                captchaConfig: toCamel(props.config.WebAcl.Rules[statementindex].CaptchaConfig),
               }
             }
+            else{
+              CfnRuleProperty = {
+                name: rulename,
+                priority: rulegroupcounter,
+                action: toCamel(props.config.WebAcl.Rules[statementindex].Action),
+                statement: toCamel(props.config.WebAcl.Rules[statementindex].Statement),
+                visibilityConfig: {
+                  sampledRequestsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.SampledRequestsEnabled,
+                  cloudWatchMetricsEnabled: props.config.WebAcl.Rules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
+                  metricName: rulename + "-metric",
+                }
+              }
+            }
+
             CfnRuleProperties.push(CfnRuleProperty)
             rulegroupcounter++
           }

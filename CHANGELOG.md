@@ -2,6 +2,19 @@
 
 ## Released
 
+## 1.0.3
+
+### Added 
+
+New Support for Captcha - You can now add Captcha as Action to your WAFs. AWS WAF Captcha is available in the US East (N. Virginia), US West (Oregon), Europe (Frankfurt), South America (Sao Paulo), and Asia Pacific (Singapore) AWS Regions and supports Application Load Balancer, Amazon API Gateway, and AWS AppSync resources.
+## 1.0.2
+
+### Added 
+#### Rule Name 
+You can now name your Rules. If you define a Name in your RulesArray the Name + a Base36 Timestamp will be used for creation of your Rule - otherwise a name will be generated. This will help you to query your logs in Athena. The same Rulename also apply to the metric just with adding "-metric" to the name.
+## 1.0.1
+
+Updated Readme - Community Release
 ## 1.0.0
 
 ### Added
