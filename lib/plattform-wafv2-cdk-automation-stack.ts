@@ -157,7 +157,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         roleArn: CfnRole.attrArn,
         bufferingHints: {sizeInMBs:50, intervalInSeconds:60},
         compressionFormat: "UNCOMPRESSED",
-        prefix: "AWSLogs/"+ account_id +"/FirewallManager/"+region+"/"
+        prefix: "AWSLogs/"+ account_id +"/FirewallManager/"+region+"/",
+        errorOutputPrefix: "AWSLogs/"+ account_id +"/FirewallManager/"+region+"/Errors"
       },
 
     })
