@@ -39,6 +39,7 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 9. NEW **RegexMatchStatement** and **IPSetReferenceStatement** is working now 🚀
 10. NEW You can now name your Rules. If you define a Name in your RulesArray the Name + a Base36 Timestamp will be used for creation of your Rule - otherwise a name will be generated. This will help you to query your logs in Athena. The same Rulename also apply to the metric just with adding "-metric" to the name.
 11. New Support for Captcha - You can now add Captcha as Action to your WAFs. This help you to block unwanted bot traffic by requiring users to successfully complete challenges before their web request are allowed to reach AWS WAF protected resources. AWS WAF Captcha is available in the US East (N. Virginia), US West (Oregon), Europe (Frankfurt), South America (Sao Paulo), and Asia Pacific (Singapore) AWS Regions and supports Application Load Balancer, Amazon API Gateway, and AWS AppSync resources.
+12. Added S3LoggingBucketName to json. You need to specify the S3 Bucket where the Logs should be placed in now. We also added a Prefix for the logs to be aws conform (Prefix: AWSLogs/AWS_ACCOUNTID/FirewallManager/AWS_REGION/).
 ## Coming soon:
 
 1. Deployment via Teamcity 
@@ -53,3 +54,11 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 3. Enter `task deploy`
 
 ![Example Deployment](./static/example_deployment.jpg "Example Deployment")
+
+### 👏 Supporters
+
+[![Stargazers repo roster for @globaldatanet/aws-firewall-factory](https://reporoster.com/stars/dark/globaldatanet/aws-firewall-factory)](https://github.com/globaldatanet/aws-firewall-factory/stargazers)
+
+</br>
+
+<p align="center"><a href="https://github.com/nastyox/Rando.js#nastyox"><img src="http://randojs.com/images/barsSmallTransparentBackground.gif" alt="Animated footer bars" width="100%"/></a></p>

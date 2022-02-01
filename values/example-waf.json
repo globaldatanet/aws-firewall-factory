@@ -5,6 +5,7 @@
     "DeployTo": [
       ""
     ],
+    "S3LoggingBucketName": "",
     "FireHoseKeyArn": "",
     "DeployHash": ""
   },

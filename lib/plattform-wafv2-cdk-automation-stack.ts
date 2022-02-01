@@ -14,6 +14,7 @@ export interface Config {
     readonly Stage: string,
     readonly DeployTo: string[],
     readonly FireHoseKeyArn: string,
+    readonly S3LoggingBucketName: string,
     DeployHash: string,
   },
   readonly WebAcl:{
@@ -116,8 +117,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "s3:PutObjectAcl"
           ],
           Resource: [
-            "arn:aws:s3:::"+props.config.General.Prefix+"-"+account_id+"-kinesis-wafv2log",
-            "arn:aws:s3:::"+props.config.General.Prefix+"-"+account_id+"-kinesis-wafv2log/*"
+            "arn:aws:s3:::"+props.config.General.S3LoggingBucketName,
+            "arn:aws:s3:::"+props.config.General.S3LoggingBucketName +"/*"
           ]
         },
         {
@@ -151,11 +152,12 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     const CfnDeliveryStream = new firehouse.CfnDeliveryStream(this, "S3DeliveryStream",{
       deliveryStreamName: "aws-waf-logs-"+props.config.General.Prefix+"-kinesis-wafv2log-"+props.config.WebAcl.Name+props.config.General.Stage+props.config.General.DeployHash,
       extendedS3DestinationConfiguration: {
-        bucketArn:"arn:aws:s3:::"+props.config.General.Prefix+"-"+account_id+"-kinesis-wafv2log",
+        bucketArn:"arn:aws:s3:::"+props.config.General.S3LoggingBucketName,
         encryptionConfiguration:{kmsEncryptionConfig:{awskmsKeyArn:props.config.General.FireHoseKeyArn}},
         roleArn: CfnRole.attrArn,
         bufferingHints: {sizeInMBs:50, intervalInSeconds:60},
-        compressionFormat: "UNCOMPRESSED"
+        compressionFormat: "UNCOMPRESSED",
+        prefix: "AWSLogs/"+ account_id +"/FirewallManager/"+region+"/"
       },
 
     })
