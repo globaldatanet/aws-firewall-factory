@@ -40,6 +40,13 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 10. NEW You can now name your Rules. If you define a Name in your RulesArray the Name + a Base36 Timestamp will be used for creation of your Rule - otherwise a name will be generated. This will help you to query your logs in Athena. The same Rulename also apply to the metric just with adding "-metric" to the name.
 11. New Support for Captcha - You can now add Captcha as Action to your WAFs. This help you to block unwanted bot traffic by requiring users to successfully complete challenges before their web request are allowed to reach AWS WAF protected resources. AWS WAF Captcha is available in the US East (N. Virginia), US West (Oregon), Europe (Frankfurt), South America (Sao Paulo), and Asia Pacific (Singapore) AWS Regions and supports Application Load Balancer, Amazon API Gateway, and AWS AppSync resources.
 12. Added S3LoggingBucketName to json. You need to specify the S3 Bucket where the Logs should be placed in now. We also added a Prefix for the logs to be aws conform (Prefix: AWSLogs/AWS_ACCOUNTID/FirewallManager/AWS_REGION/).
+13. Added Testing your WAF with [GoTestWAF](https://github.com/wallarm/gotestwaf). To be able to check your waf we introduced the **SecuredDomain** Parameter in the json which should be your Domain which will be checked using the WAF tool.
+14. Introduced two new Parameters in the taskfile (**WAF_TEST** and **CREATE_DIAGRAM**).
+
+| Parameter   |      Value      |
+|----------|:-------------:|
+| WAF_TEST |  true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)  |
+| CREATE_DIAGRAM |  true (generating a diagram using draw.io) </br> false (Skipping diagram generation)  |
 ## Coming soon:
 
 1. Deployment via Teamcity 

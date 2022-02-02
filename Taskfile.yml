@@ -1,10 +1,11 @@
 version: '3'
-output: prefixed
 env:
-  PROCESS_PARAMETERS: values/david-test.json
+  PROCESS_PARAMETERS: values/example-waf.json
   CDK_DEFAULT_ACCOUNT: $(aws sts get-caller-identity |jq -r .Account)
   REGION: $(aws configure get profile.$AWSUME_PROFILE.region)
   SKIP_QUOTA_CHECK: true
+  WAF_TEST: true
+  CREATE_DIAGRAM: false
 
 tasks:
   deploy:
@@ -13,6 +14,7 @@ tasks:
       - task: clean
       - task: cdkdeploy
       - task: creatediagram
+      - task: testwaf
   synth:
     desc: synth Stack
     cmds:
@@ -34,6 +36,7 @@ tasks:
     desc: CDK Deploy
     cmds:
       - cdk deploy --require-approval never {{.TAGS}} --debug
+      - rm -f $(find ./cdk.out/*assets.json -type f)
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
@@ -43,5 +46,15 @@ tasks:
   creatediagram:
     desc: Create Diagram
     cmds:
-      - echo 🤳🏻 $(cfn-dia draw.io --cdk-output cdk.out --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< {{.PROCESS_PARAMETERS}}) --ci-mode --skip-synth)
+      - if [[ {{.CREATE_DIAGRAM}} = true ]] ; then echo 🤳🏻 $(cfn-dia draw.io --cdk-output cdk.out --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< {{.PROCESS_PARAMETERS}}) --ci-mode --skip-synth); else echo ⏭  Skipping Diagram generation 🤳🏻; fi
     silent: true
+  testwaf:
+    desc: Test of your waf using GoTestWAF
+    cmds:
+      - echo 🧪  Testing of your new 🔥 WAF using GoTestWAF
+      - ./gotestwaf/gotestwaf --url=$(cat {{.PROCESS_PARAMETERS}} | jq -r '.[].SecuredDomain') --wafName="$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.Prefix')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.WebAcl.Name')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.Stage')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases ##--verbose
+    silent: true
+    optional: true
+    preconditions:
+      - sh: if [[ {{.WAF_TEST}} = true ]] ; then exit 0; else exit 1; fi
+        msg: ⏭  Skipping WAF Testing 🧪
