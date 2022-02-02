@@ -6,12 +6,14 @@ env:
   SKIP_QUOTA_CHECK: true
   WAF_TEST: true
   CREATE_DIAGRAM: false
+  CDK_DIFF: false
 
 tasks:
   deploy:
     desc: Deploy Stack
     cmds:
       - task: clean
+      - task: cdkdiff
       - task: cdkdeploy
       - task: creatediagram
       - task: testwaf
@@ -31,11 +33,16 @@ tasks:
       - rm -rf ./cdk.out
       - rm -rf ./node-modules
     silent: true
-
+  cdkdiff:
+    desc: CDK Diff
+    cmds:
+      - if [[ {{.CDK_DIFF}} = true ]];then cdk diff; echo -n "Continue  (y/n)?"; read CONT; if [ "$CONT" = "n" ]; then echo "NO" | exit 1; else echo "YES"; fi; else exit 0;fi;
+    silent: true
+    interactive: true
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - cdk deploy --require-approval never {{.TAGS}} --debug
+      - cdk deploy --require-approval never {{.TAGS}} --strict
       - rm -f $(find ./cdk.out/*assets.json -type f)
     vars:
       ACCOUNT:

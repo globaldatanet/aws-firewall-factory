@@ -9,12 +9,13 @@
 
 2. Added Testing your WAF with [GoTestWAF](https://github.com/wallarm/gotestwaf). To be able to check your waf we introduced the **SecuredDomain** Parameter in the json which should be your Domain which will be checked using the WAF tool.
 
-3. Introduced two new Parameters in the taskfile (**WAF_TEST** and **CREATE_DIAGRAM**).
+3. Introduced three new Parameters in the taskfile (**WAF_TEST**,**CREATE_DIAGRAM** and **CDK_DIFF**).
 
 | Parameter   |      Value      |
 |----------|:-------------:|
 | WAF_TEST |  true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)  |
 | CREATE_DIAGRAM |  true (generating a diagram using draw.io) </br> false (Skipping diagram generation)  |
+| CDK_DIFF |  true (generating a cdk before invoking cdk deploy) </br> false (Skipping cdk diff)  |
 ## 1.0.3
 
 ### Added
