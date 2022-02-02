@@ -52,9 +52,8 @@ tasks:
     desc: Test of your waf using GoTestWAF
     cmds:
       - echo 🧪  Testing of your new 🔥 WAF using GoTestWAF
-      - ./gotestwaf/gotestwaf --url=$(cat {{.PROCESS_PARAMETERS}} | jq -r '.[].SecuredDomain') --wafName="$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.Prefix')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.WebAcl.Name')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.Stage')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases ##--verbose
+      - ./gotestwaf/gotestwaf --url=$(cat {{.PROCESS_PARAMETERS}} | jq -r '.[].SecuredDomain') --wafName="$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.Prefix')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.WebAcl.Name')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.Stage')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck
     silent: true
-    optional: true
     preconditions:
       - sh: if [[ {{.WAF_TEST}} = true ]] ; then exit 0; else exit 1; fi
         msg: ⏭  Skipping WAF Testing 🧪
