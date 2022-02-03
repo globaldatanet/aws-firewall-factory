@@ -16,6 +16,8 @@
 | WAF_TEST |  true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)  |
 | CREATE_DIAGRAM |  true (generating a diagram using draw.io) </br> false (Skipping diagram generation)  |
 | CDK_DIFF |  true (generating a cdk before invoking cdk deploy) </br> false (Skipping cdk diff)  |
+
+4. Add schema validation
 ## 1.0.3
 
 ### Added

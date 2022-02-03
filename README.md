@@ -48,6 +48,9 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 | WAF_TEST |  true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)  |
 | CREATE_DIAGRAM |  true (generating a diagram using draw.io) </br> false (Skipping diagram generation)  |
 | CDK_DIFF |  true (generating a cdk before invoking cdk deploy) </br> false (Skipping cdk diff)  |
+
+15. Validation of your ConfigFile using Schema validation - if you miss an required parameter in your config file the deployment will stop automatically and show you the missing path.
+
 ## Coming soon:
 
 1. Deployment via Teamcity 
