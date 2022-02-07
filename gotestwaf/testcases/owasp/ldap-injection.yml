@@ -1,0 +1,14 @@
+---
+payload:
+  - '*)(uid=*))(|(uid=*'
+  - '(&(uid=*)(uid=*))(|(uid=*)(userPassword={MD5}X03MO1qnZdYdgyfeuILPmQ==))'
+encoder:
+  - Base64Flat
+  - URL
+placeholder:
+  - URLParam
+  - HTMLForm
+  - HTMLMultipartForm
+  - JSONRequest
+type: "LDAP Injection"
+...

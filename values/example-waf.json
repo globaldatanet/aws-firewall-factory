@@ -5,8 +5,10 @@
     "DeployTo": [
       ""
     ],
+    "S3LoggingBucketName": "",
     "FireHoseKeyArn": "",
-    "DeployHash": ""
+    "DeployHash": "",
+    "SecuredDomain":""
   },
   "WebAcl": {
     "Name": "DAVID",

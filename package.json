@@ -27,6 +27,7 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
+    "typescript-json-schema": "^0.53.0",
     "@aws-sdk/client-cloudformation": "^3.40.0",
     "@aws-sdk/client-fms": "^3.43.0",
     "@aws-sdk/client-service-quotas": "^3.38.0",

@@ -6,37 +6,9 @@ import {aws_kinesisfirehose as firehouse} from "aws-cdk-lib";
 import {aws_iam as iam} from "aws-cdk-lib";
 import {aws_logs as logs} from "aws-cdk-lib";
 import { print } from "util";
+import { Config } from "./types/config";
+import { Runtimeprops } from "./types/runtimeprops";
 
-
-export interface Config {
-  readonly General: {
-    readonly Prefix: string,
-    readonly Stage: string,
-    readonly DeployTo: string[],
-    readonly FireHoseKeyArn: string,
-    DeployHash: string,
-  },
-  readonly WebAcl:{
-    readonly Name: string,
-    readonly Scope: string,
-    readonly Type: string,
-    readonly Rules: Array<RulesArray>,
-    readonly ManagedRuleGroups: any[],
-  },
-  Capacity: number,
-  RuleCapacities: number[],
-  DeployedRuleGroupCapacities: number[],
-  DeployedRuleGroupNames: string[],
-  DeployedRuleGroupIdentifier: string[],
-}
-
-interface RulesArray{
-  Name?: string,
-  Statement: any,
-  Action: any,
-  VisibilityConfig: any,
-  CaptchaConfig?: any,
-}
 
 function toCamel(o: any) {
   var newO: any, origKey: any, newKey: any, value: any
@@ -80,6 +52,7 @@ function toCamel(o: any) {
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
+  runtimeprops: Runtimeprops;
 }
 
 
@@ -88,11 +61,11 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     super(scope, id, props);
     const account_id = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
-    if(props.config.DeployedRuleGroupCapacities === undefined){
+    if(props.runtimeprops.DeployedRuleGroupCapacities === undefined){
       console.log("⚙️ Initialize lists for Update mechanism.")
-      props.config.DeployedRuleGroupCapacities = []
-      props.config.DeployedRuleGroupNames = []
-      props.config.DeployedRuleGroupIdentifier = []}
+      props.runtimeprops.DeployedRuleGroupCapacities = []
+      props.runtimeprops.DeployedRuleGroupNames = []
+      props.runtimeprops.DeployedRuleGroupIdentifier = []}
 
     const CfnRole = new iam.CfnRole(this, "KinesisS3DeliveryRole",{
       assumeRolePolicyDocument: {"Version":"2012-10-17","Statement":[{"Sid":"","Effect":"Allow","Principal":{"Service":"firehose.amazonaws.com"},"Action":"sts:AssumeRole"}]}
@@ -116,8 +89,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "s3:PutObjectAcl"
           ],
           Resource: [
-            "arn:aws:s3:::"+props.config.General.Prefix+"-"+account_id+"-kinesis-wafv2log",
-            "arn:aws:s3:::"+props.config.General.Prefix+"-"+account_id+"-kinesis-wafv2log/*"
+            "arn:aws:s3:::"+props.config.General.S3LoggingBucketName,
+            "arn:aws:s3:::"+props.config.General.S3LoggingBucketName +"/*"
           ]
         },
         {
@@ -151,11 +124,13 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     const CfnDeliveryStream = new firehouse.CfnDeliveryStream(this, "S3DeliveryStream",{
       deliveryStreamName: "aws-waf-logs-"+props.config.General.Prefix+"-kinesis-wafv2log-"+props.config.WebAcl.Name+props.config.General.Stage+props.config.General.DeployHash,
       extendedS3DestinationConfiguration: {
-        bucketArn:"arn:aws:s3:::"+props.config.General.Prefix+"-"+account_id+"-kinesis-wafv2log",
+        bucketArn:"arn:aws:s3:::"+props.config.General.S3LoggingBucketName,
         encryptionConfiguration:{kmsEncryptionConfig:{awskmsKeyArn:props.config.General.FireHoseKeyArn}},
         roleArn: CfnRole.attrArn,
         bufferingHints: {sizeInMBs:50, intervalInSeconds:60},
-        compressionFormat: "UNCOMPRESSED"
+        compressionFormat: "UNCOMPRESSED",
+        prefix: "AWSLogs/"+ account_id +"/FirewallManager/"+region+"/",
+        errorOutputPrefix: "AWSLogs/"+ account_id +"/FirewallManager/"+region+"/Errors"
       },
 
     })
@@ -208,7 +183,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
 
     }
     else{
-      if (props.config.Capacity < 100){
+      if (props.runtimeprops.Capacity < 100){
         const rules = [];
         let count = 1
 
@@ -254,15 +229,15 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
 
         let name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash
         let rulegroupidentifier = "RuleGroup"
-        if(typeof props.config.DeployedRuleGroupCapacities[0] !== "undefined"){
-          if(props.config.DeployedRuleGroupCapacities[0] != props.config.Capacity){
+        if(typeof props.runtimeprops.DeployedRuleGroupCapacities[0] !== "undefined"){
+          if(props.runtimeprops.DeployedRuleGroupCapacities[0] != props.runtimeprops.Capacity){
             console.log("⭕️ Deploy new RuleGroup because the Capacity has changed!")
-            console.log("\n 🟥 Old Capacity: ["+ props.config.DeployedRuleGroupCapacities[0] + "]\n 🟩 New Capacity: [" + props.config.Capacity+"]")
-            if(props.config.DeployedRuleGroupIdentifier[0] == "RuleGroup"){
+            console.log("\n 🟥 Old Capacity: ["+ props.runtimeprops.DeployedRuleGroupCapacities[0] + "]\n 🟩 New Capacity: [" + props.runtimeprops.Capacity+"]")
+            if(props.runtimeprops.DeployedRuleGroupIdentifier[0] == "RuleGroup"){
               rulegroupidentifier ="RG"
             }
 
-            if(props.config.DeployedRuleGroupNames[0] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash){
+            if(props.runtimeprops.DeployedRuleGroupNames[0] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash){
               name = props.config.General.Prefix.toUpperCase() + "-G" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash
             }
             console.log(" 💬 New Name: "+ name)
@@ -270,7 +245,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           }
         }
         const rulegroup = new wafv2.CfnRuleGroup(this,rulegroupidentifier, {
-          capacity: props.config.Capacity,
+          capacity: props.runtimeprops.Capacity,
           scope: props.config.WebAcl.Scope,
           rules: rules,
           name: name,
@@ -283,7 +258,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         const preProcessRuleGroups = []
 
         preProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
-        console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + props.config.Capacity +"]")
+        console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + props.runtimeprops.Capacity +"]")
         const novalue = null
         let mangedrule;
         let ExcludeRules;
@@ -307,29 +282,29 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
         }
 
-        props.config.DeployedRuleGroupCapacities.splice(0)
-        props.config.DeployedRuleGroupIdentifier.splice(0)
-        props.config.DeployedRuleGroupNames.splice(0)
+        props.runtimeprops.DeployedRuleGroupCapacities.splice(0)
+        props.runtimeprops.DeployedRuleGroupIdentifier.splice(0)
+        props.runtimeprops.DeployedRuleGroupNames.splice(0)
 
-        props.config.DeployedRuleGroupIdentifier[0] = rulegroupidentifier
-        props.config.DeployedRuleGroupNames[0] = name
-        props.config.DeployedRuleGroupCapacities[0] = props.config.Capacity
+        props.runtimeprops.DeployedRuleGroupIdentifier[0] = rulegroupidentifier
+        props.runtimeprops.DeployedRuleGroupNames[0] = name
+        props.runtimeprops.DeployedRuleGroupCapacities[0] = props.runtimeprops.Capacity
 
 
         new cdk.CfnOutput(this, "DeployedRuleGroupNames", {
-          value: props.config.DeployedRuleGroupNames.toString(),
+          value: props.runtimeprops.DeployedRuleGroupNames.toString(),
           description: "DeployedRuleGroupNames",
           exportName: "DeployedRuleGroupNames"+props.config.General.DeployHash,
         });
 
         new cdk.CfnOutput(this, "DeployedRuleGroupCapacities", {
-          value: props.config.DeployedRuleGroupCapacities.toString(),
+          value: props.runtimeprops.DeployedRuleGroupCapacities.toString(),
           description: "DeployedRuleGroupCapacities",
           exportName: "DeployedRuleGroupCapacities"+props.config.General.DeployHash,
         });
 
         new cdk.CfnOutput(this, "DeployedRuleGroupIdentifier", {
-          value: props.config.DeployedRuleGroupIdentifier.toString(),
+          value: props.runtimeprops.DeployedRuleGroupIdentifier.toString(),
           description: "DeployedRuleGroupIdentifier",
           exportName: "DeployedRuleGroupIdentifier"+props.config.General.DeployHash,
         });
@@ -360,10 +335,10 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         const rulesets: any[]  = []
         const indexes: number[] = []
         const rulegroupcapacities = []
-        while(indexes.length<props.config.RuleCapacities.length){
+        while(indexes.length<props.runtimeprops.RuleCapacities.length){
           let tracker = 0
           const ruleset: any[] = []
-          props.config.RuleCapacities.map((v,i) => {
+          props.runtimeprops.RuleCapacities.map((v,i) => {
             if(!(indexes.find((e)=> e === i+1))){ 
               if(v+tracker <= threshold){
                 tracker += v
@@ -382,16 +357,16 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         let rulegroupidentifier = ""
         let name =""
         while (count < rulesets.length){
-          if(typeof props.config.DeployedRuleGroupCapacities[count] !== "undefined"){
-            if(rulegroupcapacities[count] == props.config.DeployedRuleGroupCapacities[count]){
+          if(typeof props.runtimeprops.DeployedRuleGroupCapacities[count] !== "undefined"){
+            if(rulegroupcapacities[count] == props.runtimeprops.DeployedRuleGroupCapacities[count]){
               rulegroupidentifier = "R"+count.toString()
               name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
             }
             else{
-              console.log("\n⭕️ Deploy new RuleGroup because the Capacity has changed for " +props.config.DeployedRuleGroupIdentifier[count] + " !")
-              console.log("\n 🟥 Old Capacity: ["+ props.config.DeployedRuleGroupCapacities[count] + "]\n 🟩 New Capacity: [" + rulegroupcapacities[count] +"]")
-              if(typeof props.config.DeployedRuleGroupNames[count] !== "undefined"){
-                if(props.config.DeployedRuleGroupNames[count] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString()+ "-" +props.config.General.DeployHash){
+              console.log("\n⭕️ Deploy new RuleGroup because the Capacity has changed for " +props.runtimeprops.DeployedRuleGroupIdentifier[count] + " !")
+              console.log("\n 🟥 Old Capacity: ["+ props.runtimeprops.DeployedRuleGroupCapacities[count] + "]\n 🟩 New Capacity: [" + rulegroupcapacities[count] +"]")
+              if(typeof props.runtimeprops.DeployedRuleGroupNames[count] !== "undefined"){
+                if(props.runtimeprops.DeployedRuleGroupNames[count] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString()+ "-" +props.config.General.DeployHash){
                   name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-R" + count.toString() + "-" +props.config.General.DeployHash
                 }
                 else{
@@ -399,8 +374,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 }
                 console.log(" 💬 New Name: "+ name)
               }
-              if(typeof props.config.DeployedRuleGroupIdentifier[count] !== undefined){
-                if(props.config.DeployedRuleGroupIdentifier[count] == "R"+count.toString()){
+              if(typeof props.runtimeprops.DeployedRuleGroupIdentifier[count] !== undefined){
+                if(props.runtimeprops.DeployedRuleGroupIdentifier[count] == "R"+count.toString()){
                   rulegroupidentifier = "G"+count.toString()
                 }
                 else{
@@ -471,31 +446,31 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
 
           preProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
           console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + rulegroupcapacities[count].toString() +"]")
-          props.config.DeployedRuleGroupCapacities[count] = rulegroupcapacities[count]
-          props.config.DeployedRuleGroupIdentifier[count] = rulegroupidentifier
-          props.config.DeployedRuleGroupNames[count] = name
+          props.runtimeprops.DeployedRuleGroupCapacities[count] = rulegroupcapacities[count]
+          props.runtimeprops.DeployedRuleGroupIdentifier[count] = rulegroupidentifier
+          props.runtimeprops.DeployedRuleGroupNames[count] = name
           count++
         }
         const lenght = rulesets.length
-        props.config.DeployedRuleGroupCapacities.splice(lenght)
-        props.config.DeployedRuleGroupIdentifier.splice(lenght)
-        props.config.DeployedRuleGroupNames.splice(lenght)
+        props.runtimeprops.DeployedRuleGroupCapacities.splice(lenght)
+        props.runtimeprops.DeployedRuleGroupIdentifier.splice(lenght)
+        props.runtimeprops.DeployedRuleGroupNames.splice(lenght)
         const novalue = null
 
         new cdk.CfnOutput(this, "DeployedRuleGroupNames", {
-          value: props.config.DeployedRuleGroupNames.toString(),
+          value: props.runtimeprops.DeployedRuleGroupNames.toString(),
           description: "DeployedRuleGroupNames",
           exportName: "DeployedRuleGroupNames"+props.config.General.DeployHash,
         });
 
         new cdk.CfnOutput(this, "DeployedRuleGroupCapacities", {
-          value: props.config.DeployedRuleGroupCapacities.toString(),
+          value: props.runtimeprops.DeployedRuleGroupCapacities.toString(),
           description: "DeployedRuleGroupCapacities",
           exportName: "DeployedRuleGroupCapacities"+props.config.General.DeployHash,
         });
 
         new cdk.CfnOutput(this, "DeployedRuleGroupIdentifier", {
-          value: props.config.DeployedRuleGroupIdentifier.toString(),
+          value: props.runtimeprops.DeployedRuleGroupIdentifier.toString(),
           description: "DeployedRuleGroupIdentifier",
           exportName: "DeployedRuleGroupIdentifier"+props.config.General.DeployHash,
         });
@@ -543,7 +518,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       }
     }
 
-    const {Capacity,RuleCapacities,DeployedRuleGroupCapacities,DeployedRuleGroupIdentifier,DeployedRuleGroupNames, ...tempconfig} = props.config 
+    const {Capacity,RuleCapacities,DeployedRuleGroupCapacities,DeployedRuleGroupIdentifier,DeployedRuleGroupNames, ...tempconfig} = props.runtimeprops 
     const options = { flag : "w", force: true };
     const { promises: fsp } = require("fs");
     (async () => {

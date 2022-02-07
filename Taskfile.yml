@@ -1,18 +1,22 @@
 version: '3'
-output: prefixed
 env:
-  PROCESS_PARAMETERS: values/david-test.json
+  PROCESS_PARAMETERS: values/example-waf.json
   CDK_DEFAULT_ACCOUNT: $(aws sts get-caller-identity |jq -r .Account)
   REGION: $(aws configure get profile.$AWSUME_PROFILE.region)
   SKIP_QUOTA_CHECK: true
+  WAF_TEST: true
+  CREATE_DIAGRAM: false
+  CDK_DIFF: false
 
 tasks:
   deploy:
     desc: Deploy Stack
     cmds:
       - task: clean
+      - task: cdkdiff
       - task: cdkdeploy
       - task: creatediagram
+      - task: testwaf
   synth:
     desc: synth Stack
     cmds:
@@ -29,11 +33,17 @@ tasks:
       - rm -rf ./cdk.out
       - rm -rf ./node-modules
     silent: true
-
+  cdkdiff:
+    desc: CDK Diff
+    cmds:
+      - if [[ {{.CDK_DIFF}} = true ]];then cdk diff; echo -n "Continue  (y/n)?"; read CONT; if [ "$CONT" = "n" ]; then echo "NO" | exit 1; else echo "YES"; fi; else exit 0;fi;
+    silent: true
+    interactive: true
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - cdk deploy --require-approval never {{.TAGS}} --debug
+      - cdk deploy --require-approval never {{.TAGS}} --strict
+      - rm -f $(find ./cdk.out/*assets.json -type f)
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
@@ -43,5 +53,14 @@ tasks:
   creatediagram:
     desc: Create Diagram
     cmds:
-      - echo 🤳🏻 $(cfn-dia draw.io --cdk-output cdk.out --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< {{.PROCESS_PARAMETERS}}) --ci-mode --skip-synth)
+      - if [[ {{.CREATE_DIAGRAM}} = true ]] ; then echo 🤳🏻 $(cfn-dia draw.io --cdk-output cdk.out --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< {{.PROCESS_PARAMETERS}}) --ci-mode --skip-synth); else echo ⏭  Skipping Diagram generation 🤳🏻; fi
     silent: true
+  testwaf:
+    desc: Test of your waf using GoTestWAF
+    cmds:
+      - echo 🧪  Testing of your new 🔥 WAF using GoTestWAF
+      - ./gotestwaf/gotestwaf --url=$(cat {{.PROCESS_PARAMETERS}} | jq -r '.[].SecuredDomain') --wafName="$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.Prefix')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.WebAcl.Name')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.Stage')-$(cat {{.PROCESS_PARAMETERS}} | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck
+    silent: true
+    preconditions:
+      - sh: if [[ {{.WAF_TEST}} = true ]] ; then exit 0; else exit 1; fi
+        msg: ⏭  Skipping WAF Testing 🧪
