@@ -73,4 +73,4 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 
 </br>
 
-<p align="center"><a href="https://github.com/nastyox/Rando.js#nastyox"><img src="http://randojs.com/images/barsSmallTransparentBackground.gif" alt="Animated footer bars" width="100%"/></a></p>
+<p align="center"><a href="https://github.com/globaldatanet/aws-firewall-factory"><img src="./static/barsSmallTransparentBackground.gif" width="100%"/></a></p>
