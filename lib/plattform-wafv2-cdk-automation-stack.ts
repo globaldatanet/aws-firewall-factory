@@ -518,12 +518,11 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       }
     }
 
-    const {Capacity,RuleCapacities,DeployedRuleGroupCapacities,DeployedRuleGroupIdentifier,DeployedRuleGroupNames, ...tempconfig} = props.runtimeprops 
     const options = { flag : "w", force: true };
     const { promises: fsp } = require("fs");
     (async () => {
       try {
-        await fsp.writeFile(process.env.PROCESS_PARAMETERS,JSON.stringify(tempconfig,null,2),options);
+        await fsp.writeFile(process.env.PROCESS_PARAMETERS,JSON.stringify(props.config,null,2),options);
       } catch (error) {
         console.log("Error " + error)
       }
