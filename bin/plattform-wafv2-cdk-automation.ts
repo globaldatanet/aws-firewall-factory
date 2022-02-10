@@ -14,7 +14,10 @@ import { validate } from "../lib/tools/config-validator";
 import {Config} from "../lib/types/config";
 import { Runtimeprops } from "../lib/types/runtimeprops";
 
-const runtimeprops: Runtimeprops = {Capacity: 0, DeployedRuleGroupCapacities: [], RuleCapacities: [],  DeployedRuleGroupNames: [], DeployedRuleGroupIdentifier: []}
+const runtimeprops: Runtimeprops = {PreProcessCapacity: 0, PostProcessCapacity: 0, 
+  PreProcessDeployedRuleGroupCapacities: [], PreProcessRuleCapacities: [],  PreProcessDeployedRuleGroupNames: [], PreProcessDeployedRuleGroupIdentifier: [],
+  PostProcessDeployedRuleGroupCapacities: [], PostProcessRuleCapacities: [],  PostProcessDeployedRuleGroupNames: [], PostProcessDeployedRuleGroupIdentifier: []
+}
 
 function str2ab(str: string): Uint8Array {
   var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
@@ -153,17 +156,42 @@ async function GetOutputsFromStack(StackName:string,config: Config): Promise<voi
     for(const output of responsestack.Stacks?.[0].Outputs){
       if(output.OutputKey == "DeployedRuleGroupNames")
       {
-        runtimeprops.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || []
+        runtimeprops.PreProcessDeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || []
       }
       else if(output.OutputKey == "DeployedRuleGroupIdentifier")
       {
-        runtimeprops.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || []
+        runtimeprops.PreProcessDeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || []
       }
       else if(output.OutputKey == "DeployedRuleGroupCapacities")
       {
         const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-        runtimeprops.DeployedRuleGroupCapacities = arrayOfNumbers
-
+        runtimeprops.PreProcessDeployedRuleGroupCapacities = arrayOfNumbers
+      }
+      if(output.OutputKey == "PreProcessDeployedRuleGroupNames")
+      {
+        runtimeprops.PreProcessDeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || []
+      }
+      else if(output.OutputKey == "PreProcessDeployedRuleGroupIdentifier")
+      {
+        runtimeprops.PreProcessDeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || []
+      }
+      else if(output.OutputKey == "PreProcessDeployedRuleGroupCapacities")
+      {
+        const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
+        runtimeprops.PreProcessDeployedRuleGroupCapacities = arrayOfNumbers
+      }
+      if(output.OutputKey == "PostProcessDeployedRuleGroupNames")
+      {
+        runtimeprops.PostProcessDeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || []
+      }
+      else if(output.OutputKey == "PostProcessDeployedRuleGroupIdentifier")
+      {
+        runtimeprops.PostProcessDeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || []
+      }
+      else if(output.OutputKey == "PostProcessDeployedRuleGroupCapacities")
+      {
+        const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
+        runtimeprops.PostProcessDeployedRuleGroupCapacities = arrayOfNumbers
       }
     }
   }
@@ -176,7 +204,8 @@ if (configFile && fs.existsSync(configFile)) {
   const config: Config = require(fs.realpathSync(configFile));
   if (validate(config)){
     const app = new cdk.App();
-    runtimeprops.RuleCapacities = []
+    runtimeprops.PostProcessRuleCapacities = []
+    runtimeprops.PreProcessRuleCapacities = []
     let Temp_Hash
     if(config.WebAcl.Scope == "CLOUDFRONT"){
       deploymentregion = "us-east-1"
@@ -224,59 +253,109 @@ if (configFile && fs.existsSync(configFile)) {
         await GetOutputsFromStack(StackName, config);
       }
       let count = 0
-      let calculate_capacity_sum = 0
-      if(config.WebAcl.Rules === undefined){
-        console.log("ℹ️  Skip Rule Capacity Calculation.")
-      }
+      let pre_calculate_capacity_sum = 0
+      if(config.WebAcl.PreProcess.CustomRules === undefined){
+        console.log("\n ℹ️  Skip Rule Capacity Calculation for PreProcess Custom Rules.")}
       else{
-        while (count < config.WebAcl.Rules.length) {
-          if("Captcha" in config.WebAcl.Rules[count].Action){
+        while (count < config.WebAcl.PreProcess.CustomRules.length) {
+          if("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action){
             const rule_calculated_capacity_json = [];
             const temp_template = template;
-            temp_template.Statement = config.WebAcl.Rules[count].Statement;
-            temp_template.Action = config.WebAcl.Rules[count].Action;
-            temp_template.CaptchaConfig = config.WebAcl.Rules[count].CaptchaConfig;
+            temp_template.Statement = config.WebAcl.PreProcess.CustomRules[count].Statement;
+            temp_template.Action = config.WebAcl.PreProcess.CustomRules[count].Action;
+            temp_template.CaptchaConfig = config.WebAcl.PreProcess.CustomRules[count].CaptchaConfig;
             rule_calculated_capacity_json.push(temp_template);
             const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
-            runtimeprops.RuleCapacities.push(capacity);
+            runtimeprops.PreProcessRuleCapacities.push(capacity);
           }
           else{
             const rule_calculated_capacity_json = [];
             const temp_template = template;
-            temp_template.Statement = config.WebAcl.Rules[count].Statement;
-            temp_template.Action = config.WebAcl.Rules[count].Action;
+            temp_template.Statement = config.WebAcl.PreProcess.CustomRules[count].Statement;
+            temp_template.Action = config.WebAcl.PreProcess.CustomRules[count].Action;
             delete temp_template.CaptchaConfig
             rule_calculated_capacity_json.push(temp_template);
             const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
-            runtimeprops.RuleCapacities.push(capacity);
+            runtimeprops.PreProcessRuleCapacities.push(capacity);
           }
           count++
         }
-        calculate_capacity_sum = runtimeprops.RuleCapacities.reduce(function (a, b) {
+        pre_calculate_capacity_sum = runtimeprops.PreProcessRuleCapacities.reduce(function (a, b) {
+          return a + b;
+        }, 0);
+      }
+      count = 0
+      let post_calculate_capacity_sum = 0
+      if(config.WebAcl.PostProcess.CustomRules === undefined){
+        console.log("\n ℹ️  Skip Rule Capacity Calculation for PostProcess Custom Rules.")
+      }
+      else{
+        while (count < config.WebAcl.PostProcess.CustomRules.length) {
+          if("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action){
+            const rule_calculated_capacity_json = [];
+            const temp_template = template;
+            temp_template.Statement = config.WebAcl.PostProcess.CustomRules[count].Statement;
+            temp_template.Action = config.WebAcl.PostProcess.CustomRules[count].Action;
+            temp_template.CaptchaConfig = config.WebAcl.PostProcess.CustomRules[count].CaptchaConfig;
+            rule_calculated_capacity_json.push(temp_template);
+            const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
+            runtimeprops.PostProcessRuleCapacities.push(capacity);
+          }
+          else{
+            const rule_calculated_capacity_json = [];
+            const temp_template = template;
+            temp_template.Statement = config.WebAcl.PostProcess.CustomRules[count].Statement;
+            temp_template.Action = config.WebAcl.PostProcess.CustomRules[count].Action;
+            delete temp_template.CaptchaConfig
+            rule_calculated_capacity_json.push(temp_template);
+            const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
+            runtimeprops.PostProcessRuleCapacities.push(capacity);
+          }
+          count++
+        }
+        post_calculate_capacity_sum = runtimeprops.PostProcessRuleCapacities.reduce(function (a, b) {
           return a + b;
         }, 0);
       }
       let managedrule;
       let managedrulecapacity = 0;
       console.log("\n👓 Get ManagedRule Capacity:\n")
-      for(managedrule of config.WebAcl.ManagedRuleGroups){
-        const capacity = await GetManagedRuleCapacity(managedrule.Vendor,managedrule.Name,config.WebAcl.Scope,managedrule.Version)
-        managedrule.Capacity = capacity
-        console.log(" ➕ Capacity for " + managedrule.Name + " is [" + managedrule.Capacity + "]")
-        managedrulecapacity = managedrulecapacity + capacity
+      if(config.WebAcl.PreProcess.ManagedRuleGroups === undefined){
+        console.log("\n ℹ️  No ManagedRuleGroups defined in PreProcess.")
       }
-      runtimeprops.Capacity = calculate_capacity_sum
-      const total_wcu = runtimeprops.Capacity + managedrulecapacity
+      else{
+        for(managedrule of config.WebAcl.PreProcess.ManagedRuleGroups){
+          const capacity = await GetManagedRuleCapacity(managedrule.Vendor,managedrule.Name,config.WebAcl.Scope,managedrule.Version)
+          managedrule.Capacity = capacity
+          console.log(" ➕ Capacity for " + managedrule.Name + " is [" + managedrule.Capacity + "]")
+          managedrulecapacity = managedrulecapacity + capacity
+        }
+      }
+      if(config.WebAcl.PostProcess.ManagedRuleGroups === undefined){
+        console.log("\n ℹ️  No ManagedRuleGroups defined in PostProcess.")
+      }
+      else{
+        for(managedrule of config.WebAcl.PostProcess.ManagedRuleGroups){
+          const capacity = await GetManagedRuleCapacity(managedrule.Vendor,managedrule.Name,config.WebAcl.Scope,managedrule.Version)
+          managedrule.Capacity = capacity
+          console.log(" ➕ Capacity for " + managedrule.Name + " is [" + managedrule.Capacity + "]")
+          managedrulecapacity = managedrulecapacity + capacity
+        }
+      }
+      runtimeprops.PreProcessCapacity = pre_calculate_capacity_sum
+      runtimeprops.PostProcessCapacity = post_calculate_capacity_sum
+      const custom_capacity = runtimeprops.PreProcessCapacity + runtimeprops.PostProcessCapacity
+      const total_wcu = runtimeprops.PreProcessCapacity + runtimeprops.PostProcessCapacity + managedrulecapacity
       const quote_wcu = await CheckQuota("L-D86ED2F3");
       if (total_wcu <= Number(quote_wcu)) {
         console.log("\n🔎 Capacity Check result: 🟢 \n")
         console.log(" 💡 Account WAF-WCU Quota: " +Number(quote_wcu).toString())
-        console.log(" 🧮 Calculated Custom Rule Capacity is: [" + runtimeprops.Capacity + "] \n ➕ ManagedRulesCapacity: ["+ managedrulecapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n")
+        console.log(" 🧮 Calculated Custom Rule Capacity is: [" + custom_capacity + "] \n ➕ ManagedRulesCapacity: ["+ managedrulecapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n")
       }
       else {
         console.log("\n🔎 Capacity Check result: 🔴 \n  ﹗ Stopping deployment ﹗\n")
         console.log(" 💡 Account WAF-WCU Quota: " +Number(quote_wcu).toString())
-        console.log(" 🧮 Calculated Custom Rule Capacity is: [" + runtimeprops.Capacity + "] \n ➕ ManagedRulesCapacity: ["+ managedrulecapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n")
+        console.log(" 🧮 Calculated Custom Rule Capacity is: [" + custom_capacity + "] \n ➕ ManagedRulesCapacity: ["+ managedrulecapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n")
         exitCode = 1;
       }
       if(exitCode == 1){
