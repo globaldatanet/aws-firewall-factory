@@ -1,140 +1,131 @@
 {
-  "General": {
-    "Prefix": "gdn",
-    "Stage": "int",
-    "DeployTo": [
-      ""
-    ],
-    "S3LoggingBucketName": "",
-    "FireHoseKeyArn": "",
-    "DeployHash": "",
-    "SecuredDomain":""
-  },
-  "WebAcl": {
-    "Name": "DAVID",
-    "Scope": "REGIONAL",
-    "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-    "Rules": [
-      {
-        "Statement": {
-          "AndStatement": {
-            "Statements": [
-              {
-                "ByteMatchStatement": {
-                  "SearchString": "test.de",
-                  "FieldToMatch": {
-                    "SingleHeader": {
-                      "Name": "host"
-                    }
-                  },
-                  "TextTransformations": [
-                    {
-                      "Priority": 0,
-                      "Type": "NONE"
-                    }
-                  ],
-                  "PositionalConstraint": "CONTAINS"
-                }
-              },
-              {
-                "ByteMatchStatement": {
-                  "SearchString": "test.de",
-                  "FieldToMatch": {
-                    "SingleHeader": {
-                      "Name": "host"
-                    }
-                  },
-                  "TextTransformations": [
-                    {
-                      "Priority": 0,
-                      "Type": "NONE"
-                    }
-                  ],
-                  "PositionalConstraint": "CONTAINS"
-                }
-              }
-            ]
-          }
-        },
-        "Action": {
-          "Allow": {}
-        },
-        "VisibilityConfig": {
-          "SampledRequestsEnabled": true,
-          "CloudWatchMetricsEnabled": true
-        }
-      },
-      {
-        "Statement": {
-          "OrStatement": {
-            "Statements": [
-              {
-                "RegexMatchStatement": {
-                  "RegexString": "^.*\\/clients-registrations\\/openid-connect",
-                  "FieldToMatch": {
-                    "UriPath": {}
-                  },
-                  "TextTransformations": [
-                    {
-                      "Priority": 0,
-                      "Type": "LOWERCASE"
-                    }
-                  ]
-                }
-              },
-              {
-                "RegexMatchStatement": {
-                  "RegexString": "^.*\\/console",
-                  "FieldToMatch": {
-                    "UriPath": {}
-                  },
-                  "TextTransformations": [
-                    {
-                      "Priority": 0,
-                      "Type": "LOWERCASE"
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        },
-        "Action": {
-          "Block": {}
-        },
-        "VisibilityConfig": {
-          "SampledRequestsEnabled": true,
-          "CloudWatchMetricsEnabled": true
-        }
-      },
-    ],
-    "ManagedRuleGroups": [
-      {
-        "Vendor": "AWS",
-        "Name": "AWSManagedRulesCommonRuleSet",
-        "ExcludeRules": [
-          {
-            "Name": "CrossSiteScripting_BODY"
-          },
-          {
-            "Name": "GenericRFI_QUERYARGUMENTS"
-          },
-          {
-            "Name": "NoUserAgent_HEADER"
-          }
-        ],
-        "Version": "",
-        "OverrideAction": {
-          "type": "COUNT"
-        },
-        "Capacity": 700
-      },
-      {
-        "Vendor": "AWS",
-        "Name": "AWSManagedRulesAmazonIpReputationList",
-        "Version": "",
-        "Capacity": 25
-      }
-    ]
-  }
+	"General": {
+		"Prefix": "gdn",
+		"Stage": "int",
+		"DeployTo": [
+			""
+		],
+		"S3LoggingBucketName": "",
+		"FireHoseKeyArn": "",
+		"DeployHash": "",
+		"SecuredDomain": ""
+	},
+	"WebAcl": {
+		"Name": "DAVID",
+		"Scope": "REGIONAL",
+		"Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+		"PostProcess": {
+			"CustomRules": [{
+					"Statement": {
+						"AndStatement": {
+							"Statements": [{
+									"ByteMatchStatement": {
+										"SearchString": "test.de",
+										"FieldToMatch": {
+											"SingleHeader": {
+												"Name": "host"
+											}
+										},
+										"TextTransformations": [{
+											"Priority": 0,
+											"Type": "NONE"
+										}],
+										"PositionalConstraint": "CONTAINS"
+									}
+								},
+								{
+									"ByteMatchStatement": {
+										"SearchString": "test.de",
+										"FieldToMatch": {
+											"SingleHeader": {
+												"Name": "host"
+											}
+										},
+										"TextTransformations": [{
+											"Priority": 0,
+											"Type": "NONE"
+										}],
+										"PositionalConstraint": "CONTAINS"
+									}
+								}
+							]
+						}
+					},
+					"Action": {
+						"Allow": {}
+					},
+					"VisibilityConfig": {
+						"SampledRequestsEnabled": true,
+						"CloudWatchMetricsEnabled": true
+					}
+				},
+				{
+					"Statement": {
+						"OrStatement": {
+							"Statements": [{
+									"RegexMatchStatement": {
+										"RegexString": "^.*\\/clients-registrations\\/openid-connect",
+										"FieldToMatch": {
+											"UriPath": {}
+										},
+										"TextTransformations": [{
+											"Priority": 0,
+											"Type": "LOWERCASE"
+										}]
+									}
+								},
+								{
+									"RegexMatchStatement": {
+										"RegexString": "^.*\\/console",
+										"FieldToMatch": {
+											"UriPath": {}
+										},
+										"TextTransformations": [{
+											"Priority": 0,
+											"Type": "LOWERCASE"
+										}]
+									}
+								}
+							]
+						}
+					},
+					"Action": {
+						"Block": {}
+					},
+					"VisibilityConfig": {
+						"SampledRequestsEnabled": true,
+						"CloudWatchMetricsEnabled": true
+					}
+				}
+			]
+		},
+		"PreProcess": {
+			"ManagedRuleGroups": [{
+					"Vendor": "AWS",
+					"Name": "AWSManagedRulesCommonRuleSet",
+					"ExcludeRules": [{
+							"Name": "CrossSiteScripting_BODY"
+						},
+						{
+							"Name": "GenericRFI_QUERYARGUMENTS"
+						},
+						{
+							"Name": "NoUserAgent_HEADER"
+						}
+					],
+					"Version": "",
+					"OverrideAction": {
+						"type": "COUNT"
+					},
+					"Capacity": 700
+				},
+				{
+					"Vendor": "AWS",
+					"Name": "AWSManagedRulesAmazonIpReputationList",
+					"Version": "",
+					"Capacity": 25
+				}
+			]
+		}
+	}
 }

@@ -291,26 +291,25 @@ if (configFile && fs.existsSync(configFile)) {
       }
       else{
         while (count < config.WebAcl.PostProcess.CustomRules.length) {
+          const rule_calculated_capacity_json = [];
+          const temp_template = template;
           if("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action){
-            const rule_calculated_capacity_json = [];
-            const temp_template = template;
-            temp_template.Statement = config.WebAcl.PostProcess.CustomRules[count].Statement;
-            temp_template.Action = config.WebAcl.PostProcess.CustomRules[count].Action;
             temp_template.CaptchaConfig = config.WebAcl.PostProcess.CustomRules[count].CaptchaConfig;
-            rule_calculated_capacity_json.push(temp_template);
-            const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
-            runtimeprops.PostProcessRuleCapacities.push(capacity);
           }
           else{
-            const rule_calculated_capacity_json = [];
-            const temp_template = template;
-            temp_template.Statement = config.WebAcl.PostProcess.CustomRules[count].Statement;
-            temp_template.Action = config.WebAcl.PostProcess.CustomRules[count].Action;
             delete temp_template.CaptchaConfig
-            rule_calculated_capacity_json.push(temp_template);
-            const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
-            runtimeprops.PostProcessRuleCapacities.push(capacity);
           }
+          if(config.WebAcl.PostProcess.CustomRules[count].RuleLabels){
+            temp_template.RuleLabels = config.WebAcl.PostProcess.CustomRules[count].RuleLabels;
+          }
+          else{
+            delete temp_template.RuleLabels
+          }
+          temp_template.Statement = config.WebAcl.PostProcess.CustomRules[count].Statement;
+          temp_template.Action = config.WebAcl.PostProcess.CustomRules[count].Action;
+          rule_calculated_capacity_json.push(temp_template);
+          const capacity = await CheckCapacity(config.WebAcl.Scope, rule_calculated_capacity_json);
+          runtimeprops.PostProcessRuleCapacities.push(capacity);
           count++
         }
         post_calculate_capacity_sum = runtimeprops.PostProcessRuleCapacities.reduce(function (a, b) {

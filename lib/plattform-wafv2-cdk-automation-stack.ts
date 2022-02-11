@@ -248,6 +248,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                     metricName: rulename + "-metric",
                   },
                   captchaConfig: toCamel(statement.CaptchaConfig),
+                  ruleLabels: toCamel(statement.RuleLabels),
                 }
               }
               else{ 
@@ -261,6 +262,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                   cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
                   metricName: rulename + "-metric",
                 },
+                ruleLabels: toCamel(statement.RuleLabels)
               };}
               rules.push(CfnRuleProperty)
               count +=1
@@ -407,6 +409,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                     metricName: rulename + "-metric",
                   },
                   captchaConfig: toCamel(props.config.WebAcl.PreProcess.CustomRules[statementindex].CaptchaConfig),
+                  ruleLabels: toCamel(props.config.WebAcl.PreProcess.CustomRules[statementindex].RuleLabels)
                 }
               }
               else{
@@ -419,7 +422,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                     sampledRequestsEnabled: props.config.WebAcl.PreProcess.CustomRules[statementindex].VisibilityConfig.SampledRequestsEnabled,
                     cloudWatchMetricsEnabled: props.config.WebAcl.PreProcess.CustomRules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
                     metricName: rulename + "-metric",
-                  }
+                  },
+                  ruleLabels: toCamel(props.config.WebAcl.PreProcess.CustomRules[statementindex].RuleLabels)
                 }
               }
 
@@ -500,6 +504,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                   metricName: rulename + "-metric",
                 },
                 captchaConfig: toCamel(statement.CaptchaConfig),
+                ruleLabels: toCamel(statement.RuleLabels)
               }
             }
             else{ 
@@ -513,6 +518,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
                 metricName: rulename + "-metric",
               },
+              ruleLabels: toCamel(statement.RuleLabels)
             };}
             rules.push(CfnRuleProperty)
             count +=1
@@ -659,6 +665,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                     metricName: rulename + "-metric",
                   },
                   captchaConfig: toCamel(props.config.WebAcl.PostProcess.CustomRules[statementindex].CaptchaConfig),
+                  ruleLabels: toCamel(props.config.WebAcl.PostProcess.CustomRules[statementindex].RuleLabels),
                 }
               }
               else{
@@ -671,7 +678,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                     sampledRequestsEnabled: props.config.WebAcl.PostProcess.CustomRules[statementindex].VisibilityConfig.SampledRequestsEnabled,
                     cloudWatchMetricsEnabled: props.config.WebAcl.PostProcess.CustomRules[statementindex].VisibilityConfig.CloudWatchMetricsEnabled,
                     metricName: rulename + "-metric",
-                  }
+                  },
+                  ruleLabels: toCamel(props.config.WebAcl.PostProcess.CustomRules[statementindex].RuleLabels),
                 }
               }
         

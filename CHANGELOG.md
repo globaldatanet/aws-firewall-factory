@@ -1,6 +1,29 @@
 # Change Log
 
 ## Released
+
+## 1.1.0
+
+### Added
+1. preProcessRuleGroups and postProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
+
+2. RuleLabels - A label is a string made up of a prefix, optional namespaces, and a name. The components of a label are delimited with a colon. Labels have the following requirements and characteristics:
+
+    - Labels are case-sensitive.
+
+    - Each label namespace or label name can have up to 128 characters.
+
+    - You can specify up to five namespaces in a label.
+
+    - Components of a label are separated by colon (:).
+### Changed
+
+1. Values Structure:
+
+ - Removed (Rules and ManagedRuleGroups)
+ - Added PreProcess and PostProcess
+
+ℹ️ See [example json](./values/example-waf.json).
 ## 1.0.4
 
 ### Added
