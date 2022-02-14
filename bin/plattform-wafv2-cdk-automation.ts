@@ -13,7 +13,8 @@ import * as lodash from "lodash";
 import { validate } from "../lib/tools/config-validator";
 import {Config} from "../lib/types/config";
 import { Runtimeprops } from "../lib/types/runtimeprops";
-
+import * as awsfirewallfactoryinfo from "../package.json";
+const afwfver = awsfirewallfactoryinfo.version
 const runtimeprops: Runtimeprops = {PreProcessCapacity: 0, PostProcessCapacity: 0, 
   PreProcessDeployedRuleGroupCapacities: [], PreProcessRuleCapacities: [],  PreProcessDeployedRuleGroupNames: [], PreProcessDeployedRuleGroupIdentifier: [],
   PostProcessDeployedRuleGroupCapacities: [], PostProcessRuleCapacities: [],  PostProcessDeployedRuleGroupNames: [], PostProcessDeployedRuleGroupIdentifier: []
@@ -222,7 +223,8 @@ if (configFile && fs.existsSync(configFile)) {
   ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
   `);
     console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
-    console.log("\n👤 AWS Profile used: ","\x1b[33m","\n                      " + process.env.AWSUME_PROFILE,"\x1b[0m");
+    console.log("\n🏷  Version: ","\x1b[4m",afwfver,"\x1b[0m")
+    console.log("👤 AWS Profile used: ","\x1b[33m","\n                      " + process.env.AWSUME_PROFILE,"\x1b[0m");
     console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentregion,"\x1b[0m \n")
     if(config.General.DeployHash == ""){
       Temp_Hash = Date.now().toString(36)
@@ -381,6 +383,7 @@ if (configFile && fs.existsSync(configFile)) {
    ██║  ██║╚███╔███╔╝███████║    ██║     ██║██║  ██║███████╗╚███╔███╔╝██║  ██║███████╗███████╗    ██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║  ██║   ██║   
    ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   
    `);
+    console.log("\n🏷  Version: ","\x1b[4m",afwfver,"\x1b[0m")
     console.log("\n 🧪 Validation of your ConfigFile: \n   📂 " + configFile + "\n\n")
     console.error("\u001B[31m","🚨 Invalid Configuration File 🚨 \n\n","\x1b[0m" + JSON.stringify(validate.errors, null, 2)+ "\n\n");
     process.exitCode = 1;
