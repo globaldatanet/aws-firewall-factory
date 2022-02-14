@@ -470,22 +470,22 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           props.runtimeprops.PreProcessDeployedRuleGroupNames.splice(lenght)
           const novalue = null
 
-          new cdk.CfnOutput(this, "DeployedRuleGroupNames", {
-            value: props.runtimeprops.PreProcessDeployedRuleGroupCapacities.toString(),
-            description: "DeployedRuleGroupNames",
-            exportName: "DeployedRuleGroupNames"+props.config.General.DeployHash,
+          new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupNames", {
+            value: props.runtimeprops.PreProcessDeployedRuleGroupNames.toString(),
+            description: "PreProcessDeployedRuleGroupNames",
+            exportName: "PreProcessDeployedRuleGroupNames"+props.config.General.DeployHash,
           });
 
-          new cdk.CfnOutput(this, "DeployedRuleGroupCapacities", {
+          new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupCapacities", {
             value: props.runtimeprops.PreProcessDeployedRuleGroupCapacities.toString(),
-            description: "DeployedRuleGroupCapacities",
-            exportName: "DeployedRuleGroupCapacities"+props.config.General.DeployHash,
+            description: "PreProcessDeployedRuleGroupCapacities",
+            exportName: "PreProcessDeployedRuleGroupCapacities"+props.config.General.DeployHash,
           });
 
-          new cdk.CfnOutput(this, "DeployedRuleGroupIdentifier", {
+          new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupIdentifier", {
             value: props.runtimeprops.PreProcessDeployedRuleGroupIdentifier.toString(),
-            description: "DeployedRuleGroupIdentifier",
-            exportName: "DeployedRuleGroupIdentifier"+props.config.General.DeployHash,
+            description: "PreProcessDeployedRuleGroupIdentifier",
+            exportName: "PreProcessDeployedRuleGroupIdentifier"+props.config.General.DeployHash,
           });
         }
       }
@@ -742,22 +742,22 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           props.runtimeprops.PostProcessDeployedRuleGroupNames.splice(lenght)
           const novalue = null
         
-          new cdk.CfnOutput(this, "DeployedRuleGroupNames", {
-            value: props.runtimeprops.PostProcessDeployedRuleGroupCapacities.toString(),
-            description: "DeployedRuleGroupNames",
-            exportName: "DeployedRuleGroupNames"+props.config.General.DeployHash,
+          new cdk.CfnOutput(this, "PostProcessDeployedRuleGroupNames", {
+            value: props.runtimeprops.PostProcessDeployedRuleGroupNames.toString(),
+            description: "PostProcessDeployedRuleGroupNames",
+            exportName: "PostProcessDeployedRuleGroupNames"+props.config.General.DeployHash,
           });
         
-          new cdk.CfnOutput(this, "DeployedRuleGroupCapacities", {
-            value: props.runtimeprops.PostProcessDeployedRuleGroupCapacities.toString(),
-            description: "DeployedRuleGroupCapacities",
-            exportName: "DeployedRuleGroupCapacities"+props.config.General.DeployHash,
-          });
-        
-          new cdk.CfnOutput(this, "DeployedRuleGroupIdentifier", {
+          new cdk.CfnOutput(this, "PostProcessDeployedRuleGroupIdentifier", {
             value: props.runtimeprops.PostProcessDeployedRuleGroupIdentifier.toString(),
-            description: "DeployedRuleGroupIdentifier",
-            exportName: "DeployedRuleGroupIdentifier"+props.config.General.DeployHash,
+            description: "PostProcessDeployedRuleGroupIdentifier",
+            exportName: "PostProcessDeployedRuleGroupIdentifier"+props.config.General.DeployHash,
+          });
+        
+          new cdk.CfnOutput(this, "PostProcessDeployedRuleGroupCapacities", {
+            value: props.runtimeprops.PostProcessDeployedRuleGroupCapacities.toString(),
+            description: "PostProcessDeployedRuleGroupCapacities",
+            exportName: "PostProcessDeployedRuleGroupCapacities"+props.config.General.DeployHash,
           });
         }
       }
