@@ -8,8 +8,7 @@
 <img align="left" src="./static/icon/firewallfactory.svg" width="150">
 
 AWS Web Application Firewalls (WAFs) protect web applications and APIs from typical attacks from the Internet that can compromise security and availability, and put undue strain on servers and resources. The AWS WAF provides prebuilt security rules that help control bot traffic and block attack patterns. However, with its help, you can also create your own rules based on your specific requirements. In simple scenarios and for smaller applications, this is very easy to implement on an individual basis. However, in larger environments with tens or even hundreds of applications, it is advisable to aim for central governance and automation. This simple solution helps you deploy, update, and stage your Web Application Firewalls while managing them centrally via AWS Firewall Manager
-<div>
-<div style="float:left;width:50%">
+
 </br>
 
 - [AWS FIREWALL FACTORY](#aws-firewall-factory)
@@ -21,17 +20,11 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
   * [Deployment via Taskfile](#deployment-via-taskfile)
     + [👏 Supporters](#---supporters)
 
-</div>
 
-<div>
 
 |Releases |Author  | 
 --- | --- |
 | [Changelog](CHANGELOG.md) - [Features](#Features)| David Krohn </br> [Linkedin](https://www.linkedin.com/in/daknhh/) - [Blog](https://globaldatanet.com/our-team/david-krohn)|
-</div>
-</br></br></br></br></br></br>
-</div>
-
 
 ### Media
 If you want to learn something more about the AWS Firewall Factory feel free to look at the following media resources.
