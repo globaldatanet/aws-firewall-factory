@@ -2,7 +2,7 @@
 
 ## Released
 
-## 1.1.0
+## 2.0.0
 
 ### Added
 1. preProcessRuleGroups and postProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
