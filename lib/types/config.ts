@@ -38,4 +38,5 @@ interface RulesArray{
   Action: any,
   VisibilityConfig: any,
   CaptchaConfig?: any,
+  RuleLabels?: any
 }
