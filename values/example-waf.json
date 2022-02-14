@@ -14,6 +14,28 @@
 		"Name": "DAVID",
 		"Scope": "REGIONAL",
 		"Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+		"PreProcess": {
+			"ManagedRuleGroups": [{
+					"Vendor": "AWS",
+					"Name": "AWSManagedRulesCommonRuleSet",
+					"ExcludeRules": [{
+							"Name": "CrossSiteScripting_BODY"
+						},
+						{
+							"Name": "GenericRFI_QUERYARGUMENTS"
+						},
+						{
+							"Name": "NoUserAgent_HEADER"
+						}
+					],
+					"Version": "",
+					"OverrideAction": {
+						"type": "COUNT"
+					},
+					"Capacity": 700
+				}
+			]
+		},
 		"PostProcess": {
 			"CustomRules": [{
 					"Statement": {
@@ -97,35 +119,13 @@
 						"CloudWatchMetricsEnabled": true
 					}
 				}
-			]
-		},
-		"PreProcess": {
-			"ManagedRuleGroups": [{
-					"Vendor": "AWS",
-					"Name": "AWSManagedRulesCommonRuleSet",
-					"ExcludeRules": [{
-							"Name": "CrossSiteScripting_BODY"
-						},
-						{
-							"Name": "GenericRFI_QUERYARGUMENTS"
-						},
-						{
-							"Name": "NoUserAgent_HEADER"
-						}
-					],
-					"Version": "",
-					"OverrideAction": {
-						"type": "COUNT"
-					},
-					"Capacity": 700
-				},
-				{
-					"Vendor": "AWS",
-					"Name": "AWSManagedRulesAmazonIpReputationList",
-					"Version": "",
-					"Capacity": 25
-				}
-			]
+			],
+			"ManagedRuleGroups":[{
+				"Vendor": "AWS",
+				"Name": "AWSManagedRulesAmazonIpReputationList",
+				"Version": "",
+				"Capacity": 25
+			}]
 		}
 	}
 }
