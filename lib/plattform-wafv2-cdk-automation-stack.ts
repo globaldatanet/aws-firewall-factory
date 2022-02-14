@@ -263,7 +263,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 ruleLabels: toCamel(statement.RuleLabels)
               };}
               let CfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty
-              if(CfnRuleProperty.ruleLabels = []){
+              if(CfnRuleProperty.ruleLabels == []){
                 const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
                 CfnRuleProperties = CfnRulePropertii
               }
@@ -433,7 +433,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               }
               let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
 
-              if(CfnRuleProperty.ruleLabels = []){
+              if(CfnRuleProperty.ruleLabels == []){
                 const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
                 CfnRuleProperti = CfnRulePropertii
               }
@@ -534,7 +534,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               ruleLabels: toCamel(statement.RuleLabels)
             };}
             let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
-            if(CfnRuleProperty.ruleLabels = []){
+            if(CfnRuleProperty.ruleLabels == []){
               const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
               CfnRuleProperti = CfnRulePropertii
             }
@@ -542,6 +542,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               CfnRuleProperti = CfnRuleProperty
             }
             rules.push(CfnRuleProperti)
+            console.log(rules)
             count +=1
           }
       
@@ -703,7 +704,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 }
               }
               let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
-              if(CfnRuleProperty.ruleLabels = []){
+              if(CfnRuleProperty.ruleLabels == []){
                 const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
                 CfnRuleProperti = CfnRulePropertii
               }
