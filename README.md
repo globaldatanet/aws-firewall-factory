@@ -1,23 +1,23 @@
+# AWS FIREWALL FACTORY
+
 [![License: Apache2](https://img.shields.io/badge/license-Apache%202-lightgrey.svg)](http://www.apache.org/licenses/) [![cdk](https://img.shields.io/badge/aws_cdk-v2-orange.svg)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 [![latest](https://img.shields.io/badge/latest-release-yellow.svg)](https://github.com/globaldatanet/aws-firewall-factory/releases)
+[![gdn](https://img.shields.io/badge/opensource-@globaldatanet-%2300ecbd)](https://globaldatanet.com/opensource) [![dakn](https://img.shields.io/badge/by-dakn-%23ae0009.svg)](https://github.com/daknhh)
 
-
-[![gdn](https://img.shields.io/badge/by-globaldatanet-%2300ecbd)](https://globaldatanet.com) [![dakn](https://img.shields.io/badge/by-dakn-%23ae0009.svg)](https://github.com/daknhh)
-
-
-
-
-# Web Application Firewalls at Scale 
 
 <img align="left" src="./static/icon/firewallfactory.svg" width="150">
 
-AWS Web Application Firewalls (WAFs) protect web applications and APIs from typical attacks from the Internet that can compromise security and availability, and put undue strain on servers and resources. The AWS WAF provides prebuilt security rules that help control bot traffic and block attack patterns. However, with its help, you can also create your own rules based on your specific requirements. In simple scenarios and for smaller applications, this is very easy to implement on an individual basis. However, in larger environments with tens or even hundreds of applications, it is advisable to aim for central governance and automation. This simple solution helps you deploy, update, and stage your Web Application Firewalls while managing them centrally via AWS Firewall Manager.
+AWS Web Application Firewalls (WAFs) protect web applications and APIs from typical attacks from the Internet that can compromise security and availability, and put undue strain on servers and resources. The AWS WAF provides prebuilt security rules that help control bot traffic and block attack patterns. However, with its help, you can also create your own rules based on your specific requirements. In simple scenarios and for smaller applications, this is very easy to implement on an individual basis. However, in larger environments with tens or even hundreds of applications, it is advisable to aim for central governance and automation. This simple solution helps you deploy, update, and stage your Web Application Firewalls while managing them centrally via AWS Firewall Manager
 
 |Releases |Author  | 
 --- | --- |
 | [Changelog](CHANGELOG.md) - [Features](#Features)| David Krohn </br> [Linkedin](https://www.linkedin.com/in/daknhh/) - [Blog](https://globaldatanet.com/our-team/david-krohn)|
 
+### Media
+If you want to learn something more about the AWS Firewall Factory feel free to look at the following media resources.
 
+- [📺 Webinar: Web Application Firewalls at Scale](https://globaldatanet.com/webinars/aws-security-with-security-in-the-cloud)
+- [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 ## Architecture
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
@@ -52,13 +52,13 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 16. Validation of your ConfigFile using Schema validation - if you miss an required parameter in your config file the deployment will stop automatically and show you the missing path.
 
 
-## Coming soon:
+### Coming soon:
 
 1. Deployment via Teamcity 
 
 
 
-# Deployment via Taskfile
+## Deployment via Taskfile
 
 0. Create new json file for you WAF and configure Rules in the JSON (see [example.json](values/example-waf.json) to see structure)
 1. Set `PROCESS_PARAMETERS` in `Taskfile.yml` for new json file

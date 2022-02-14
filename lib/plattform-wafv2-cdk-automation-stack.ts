@@ -542,7 +542,6 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               CfnRuleProperti = CfnRuleProperty
             }
             rules.push(CfnRuleProperti)
-            console.log(rules)
             count +=1
           }
       

@@ -257,7 +257,7 @@ if (configFile && fs.existsSync(configFile)) {
       let count = 0
       let pre_calculate_capacity_sum = 0
       if(config.WebAcl.PreProcess.CustomRules === undefined){
-        console.log("\n ℹ️  Skip Rule Capacity Calculation for PreProcess Custom Rules.")}
+        console.log("\n ⏭  Skip Rule Capacity Calculation for PreProcess Custom Rules.")}
       else{
         while (count < config.WebAcl.PreProcess.CustomRules.length) {
           if("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action){
@@ -289,7 +289,7 @@ if (configFile && fs.existsSync(configFile)) {
       count = 0
       let post_calculate_capacity_sum = 0
       if(config.WebAcl.PostProcess.CustomRules === undefined){
-        console.log("\n ℹ️  Skip Rule Capacity Calculation for PostProcess Custom Rules.")
+        console.log("\n ⏭  Skip Rule Capacity Calculation for PostProcess Custom Rules.")
       }
       else{
         while (count < config.WebAcl.PostProcess.CustomRules.length) {
