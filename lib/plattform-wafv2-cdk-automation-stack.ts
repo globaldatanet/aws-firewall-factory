@@ -9,7 +9,6 @@ import { print } from "util";
 import { Config } from "./types/config";
 import { Runtimeprops } from "./types/runtimeprops";
 
-
 function toCamel(o: any) {
   var newO: any, origKey: any, newKey: any, value: any
   if (o instanceof Array) {
@@ -147,6 +146,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       let ExcludeRules;
       let OverrideAction;
       const preProcessRuleGroups = []
+      const postProcessRuleGroups = []
       if(props.config.WebAcl.PreProcess.ManagedRuleGroups === undefined){
         console.log("\nℹ️  No ManagedRuleGroups defined in PreProcess.")
       }
@@ -170,7 +170,6 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
         }
       }
-      const postProcessRuleGroups = []
       if(props.config.WebAcl.PostProcess.ManagedRuleGroups === undefined){
         console.log("ℹ️  No ManagedRuleGroups defined in PostProcess.")
       }
@@ -356,7 +355,6 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
 
           console.log(`🖖 Split Rules into ${rulesets.length.toString()} RuleGroups \n  ℹ️  AWS Limitation 100 Capacity per RuleGroup\n`);
           let count = 0
-          const preProcessRuleGroups = []
           let rulegroupidentifier = ""
           let name =""
           while (count < rulesets.length){
@@ -401,7 +399,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 rulename = props.config.WebAcl.PreProcess.CustomRules[statementindex].Name  + "-" + Temp_Hash
               }
               else{
-                rulename = rulegroupcounter.toString()
+                rulename = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-pre-" + rulegroupcounter.toString() + "-" +props.config.General.DeployHash
               }
               let CfnRuleProperty
               if("Captcha" in props.config.WebAcl.PreProcess.CustomRules[statementindex].Action){
@@ -628,7 +626,6 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         
           console.log(`🖖 Split Rules into ${rulesets.length.toString()} RuleGroups \n  ℹ️  AWS Limitation 100 Capacity per RuleGroup\n`);
           let count = 0
-          const postProcessRuleGroups = []
           let rulegroupidentifier = ""
           let name =""
           while (count < rulesets.length){
@@ -641,7 +638,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 console.log("\n⭕️ Deploy new RuleGroup because the Capacity has changed for " +props.runtimeprops.PostProcessDeployedRuleGroupIdentifier[count] + " !")
                 console.log("\n 🟥 Old Capacity: ["+ props.runtimeprops.PostProcessDeployedRuleGroupCapacities[count] + "]\n 🟩 New Capacity: [" + rulegroupcapacities[count] +"]")
                 if(typeof props.runtimeprops.PostProcessDeployedRuleGroupCapacities[count] !== "undefined"){
-                  if(props.runtimeprops.PostProcessDeployedRuleGroupNames[count] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString()+ "-" +props.config.General.DeployHash){
+                  if(props.runtimeprops.PostProcessDeployedRuleGroupNames[count] == props.config.WebAcl.Name + "-post-" + props.config.General.Stage + "-" + count.toString()+ "-" +props.config.General.DeployHash){
                     name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-postR-" + count.toString() + "-" +props.config.General.DeployHash
                   }
                   else{
@@ -661,7 +658,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               }
             }else{
               rulegroupidentifier = "postR"+count.toString()
-              name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
+              name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-post-" + count.toString() + "-" +props.config.General.DeployHash
             }
             const CfnRuleProperties = []
             let rulegroupcounter = 0
@@ -670,10 +667,10 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               let rulename = ""
               if(props.config.WebAcl.PostProcess.CustomRules[statementindex].Name !== undefined){
                 const Temp_Hash = Date.now().toString(36)
-                rulename = props.config.WebAcl.PostProcess.CustomRules[statementindex].Name  + "-" + Temp_Hash
+                rulename = props.config.WebAcl.PostProcess.CustomRules[statementindex].Name  + "-post-" + Temp_Hash
               }
               else{
-                rulename = rulegroupcounter.toString()
+                rulename = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-post-" + rulegroupcounter.toString() + "-" +props.config.General.DeployHash
               }
               let CfnRuleProperty
               if("Captcha" in props.config.WebAcl.PostProcess.CustomRules[statementindex].Action){
