@@ -318,15 +318,16 @@ if (configFile && fs.existsSync(configFile)) {
       }
       let managedrule;
       let managedrulecapacity = 0;
-      console.log("\n👓 Get ManagedRule Capacity:\n")
+      console.log("\n👀 Get ManagedRule Capacity:\n")
       if(config.WebAcl.PreProcess.ManagedRuleGroups === undefined){
         console.log("\n ℹ️  No ManagedRuleGroups defined in PreProcess.")
       }
       else{
+        console.log(" 🥇 PreProcess: ")
         for(managedrule of config.WebAcl.PreProcess.ManagedRuleGroups){
           const capacity = await GetManagedRuleCapacity(managedrule.Vendor,managedrule.Name,config.WebAcl.Scope,managedrule.Version)
           managedrule.Capacity = capacity
-          console.log(" ➕ Capacity for " + managedrule.Name + " is [" + managedrule.Capacity + "]")
+          console.log("   ➕ Capacity for " + managedrule.Name + " is [" + managedrule.Capacity + "]")
           managedrulecapacity = managedrulecapacity + capacity
         }
       }
@@ -334,10 +335,11 @@ if (configFile && fs.existsSync(configFile)) {
         console.log("\n ℹ️  No ManagedRuleGroups defined in PostProcess.")
       }
       else{
+        console.log("\n 🥈 PostProcess: ")
         for(managedrule of config.WebAcl.PostProcess.ManagedRuleGroups){
           const capacity = await GetManagedRuleCapacity(managedrule.Vendor,managedrule.Name,config.WebAcl.Scope,managedrule.Version)
           managedrule.Capacity = capacity
-          console.log(" ➕ Capacity for " + managedrule.Name + " is [" + managedrule.Capacity + "]")
+          console.log("   ➕ Capacity for " + managedrule.Name + " is [" + managedrule.Capacity + "]")
           managedrulecapacity = managedrulecapacity + capacity
         }
       }
@@ -349,7 +351,7 @@ if (configFile && fs.existsSync(configFile)) {
       if (total_wcu <= Number(quote_wcu)) {
         console.log("\n🔎 Capacity Check result: 🟢 \n")
         console.log(" 💡 Account WAF-WCU Quota: " +Number(quote_wcu).toString())
-        console.log(" 🧮 Calculated Custom Rule Capacity is: [" + custom_capacity + "] \n ➕ ManagedRulesCapacity: ["+ managedrulecapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n")
+        console.log(" 🧮 Calculated Custom Rule Capacity is: [" + custom_capacity + "] (🥇[" + runtimeprops.PreProcessCapacity + "] + 🥈[" + runtimeprops.PostProcessCapacity + "]) \n ➕ ManagedRulesCapacity: ["+ managedrulecapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n")
       }
       else {
         console.log("\n🔎 Capacity Check result: 🔴 \n  ﹗ Stopping deployment ﹗\n")
@@ -367,8 +369,6 @@ if (configFile && fs.existsSync(configFile)) {
           account: process.env.CDK_DEFAULT_ACCOUNT,
         },
       });
-
-      console.log("\n🌎 Set CDK Default Region to: " + deploymentregion + " \n📦 Set CDK Default Account to: " + process.env.CDK_DEFAULT_ACCOUNT + "\n")
     //app.synth()
     })();
   // }

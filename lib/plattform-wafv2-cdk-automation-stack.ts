@@ -218,10 +218,10 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       const preProcessRuleGroups = []
       const postProcessRuleGroups = []
       if(props.config.WebAcl.PreProcess.CustomRules == undefined){
-        console.log("\n\nℹ️  No Custom Rules defined in PreProcess.")
+        console.log("\nℹ️  No Custom Rules defined in PreProcess.")
       }
       else{
-        console.log("\n\nℹ️  Custom Rules PreProcess: \n")
+        console.log("\u001b[1m","\n🥇  Custom Rules PreProcess: ","\x1b[0m\n")
         if (props.runtimeprops.PreProcessCapacity < 100){
             const rules = [];
             let count = 1
@@ -353,7 +353,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             rulegroupcapacities.push(tracker)
           }
 
-          console.log(`🖖 Split Rules into ${rulesets.length.toString()} RuleGroups \n  ℹ️  AWS Limitation 100 Capacity per RuleGroup\n`);
+          console.log(`  🖖 Split Rules into ${rulesets.length.toString()} RuleGroups: \n`);
           let count = 0
           let rulegroupidentifier = ""
           let name =""
@@ -451,12 +451,12 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               visibilityConfig: {
                 sampledRequestsEnabled: false,
                 cloudWatchMetricsEnabled: false,
-                metricName: props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash,
+                metricName: name + "-metric",
               }
             });
 
             preProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
-            console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + rulegroupcapacities[count].toString() +"]")
+            console.log("   ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + rulegroupcapacities[count].toString() +"]")
             props.runtimeprops.PreProcessDeployedRuleGroupCapacities[count] = rulegroupcapacities[count]
             props.runtimeprops.PreProcessDeployedRuleGroupIdentifier[count] = rulegroupidentifier
             props.runtimeprops.PreProcessDeployedRuleGroupNames[count] = name
@@ -488,10 +488,10 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         }
       }
       if(props.config.WebAcl.PostProcess.CustomRules === undefined){
-        console.log("\n\nℹ️  No Custom Rules defined in PostProcess.")
+        console.log("\nℹ️  No Custom Rules defined in PostProcess.")
       }
       else{
-        console.log("\n\nℹ️  Custom Rules PostProcess: \n")
+        console.log("\u001b[1m","\n🥈  Custom Rules PostProcess:","\x1b[0m\n")
         if (props.runtimeprops.PostProcessCapacity < 100){
           const rules = [];
           let count = 1
@@ -502,7 +502,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               rulename = statement.Name  + "-post-" + props.config.General.DeployHash
             }
             else{
-              rulename = props.config.WebAcl.Name + "-post-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
+              rulename = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-post-" + count.toString() + "-" +props.config.General.DeployHash
             }
             let CfnRuleProperty
             if("Captcha" in statement.Action){
@@ -555,8 +555,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 rulegroupidentifier ="postRG"
               }
       
-              if(props.runtimeprops.PostProcessDeployedRuleGroupNames[0] == props.config.WebAcl.Name + "-post-" + props.config.General.Stage + "-" +props.config.General.DeployHash){
-                name = props.config.General.Prefix.toUpperCase() + "-postG" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash
+              if(props.runtimeprops.PostProcessDeployedRuleGroupNames[0] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-post-" +props.config.General.DeployHash){
+                name = props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-postG-" +props.config.General.DeployHash
               }
               console.log(" 💬 New Name: "+ name)
               console.log(" 📇 New Identifier: "+ rulegroupidentifier)
@@ -570,11 +570,11 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             visibilityConfig: {
               sampledRequestsEnabled: false,
               cloudWatchMetricsEnabled: false,
-              metricName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash,
+              metricName: name + "-metric",
             }
           });
           postProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
-          console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + props.runtimeprops.PostProcessCapacity +"]")
+          console.log("     ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + props.runtimeprops.PostProcessCapacity +"]")
           props.runtimeprops.PostProcessDeployedRuleGroupCapacities.splice(0)
           props.runtimeprops.PostProcessDeployedRuleGroupIdentifier.splice(0)
           props.runtimeprops.PostProcessDeployedRuleGroupNames.splice(0)
@@ -624,7 +624,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             rulegroupcapacities.push(tracker)
           }
         
-          console.log(`🖖 Split Rules into ${rulesets.length.toString()} RuleGroups \n  ℹ️  AWS Limitation 100 Capacity per RuleGroup\n`);
+          console.log(`  🖖 Split Rules into ${rulesets.length.toString()} RuleGroups:\n`);
           let count = 0
           let rulegroupidentifier = ""
           let name =""
@@ -727,7 +727,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             });
         
             postProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
-            console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + rulegroupcapacities[count].toString() +"]")
+            console.log("   ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + rulegroupcapacities[count].toString() +"]")
             props.runtimeprops.PostProcessDeployedRuleGroupCapacities[count] = rulegroupcapacities[count]
             props.runtimeprops.PostProcessDeployedRuleGroupIdentifier[count] = rulegroupidentifier
             props.runtimeprops.PostProcessDeployedRuleGroupNames[count] = name
