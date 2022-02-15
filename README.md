@@ -18,7 +18,7 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
   * [Features](#features)
     + [Coming soon](#coming-soon-)
   * [Deployment via Taskfile](#deployment-via-taskfile)
-    + [👏 Supporters](#---supporters)
+  * [👏 Supporters](#---supporters)
 
 
 
@@ -42,7 +42,7 @@ If you want to learn something more about the AWS Firewall Factory feel free to 
 
 1. Automated Capactiy Calculation via [API - CheckCapacity](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html)
 2. Algorithm to split Rules into RuleGroups
-3. Automated Update of RuleGroup if Capacity Changed 
+3. Automated Update of RuleGroup if Capacity Changed
 4. Add [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/aws-managed-rule-groups-list.html) via configuration file
 5. Automated Generation of draw.io [diagram](https://app.diagrams.net/) for each WAF
 6. Checking of the softlimit quota for WCU set in the AWS Account (Stop deployment if Caluclated WCU is above the quota)
