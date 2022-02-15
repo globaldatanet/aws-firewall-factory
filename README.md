@@ -63,7 +63,9 @@ If you want to learn something more about the AWS Firewall Factory feel free to 
 | CDK_DIFF |  true (generating a cdk before invoking cdk deploy) </br> false (Skipping cdk diff)  |
 
 16. Validation of your ConfigFile using Schema validation - if you miss an required parameter in your config file the deployment will stop automatically and show you the missing path.
-17. preProcessRuleGroups and postProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
+17. PreProcess-and PostProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
+
+- New Structure see [example json](./values/example-waf.json).
 
 18. RuleLabels - A label is a string made up of a prefix, optional namespaces, and a name. The components of a label are delimited with a colon. Labels have the following requirements and characteristics:
 
