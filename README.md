@@ -54,13 +54,16 @@ If you want to learn something more about the AWS Firewall Factory feel free to 
 12. Support for Captcha - You can add Captcha as Action to your WAFs. This help you to block unwanted bot traffic by requiring users to successfully complete challenges before their web request are allowed to reach AWS WAF protected resources. AWS WAF Captcha is available in the US East (N. Virginia), US West (Oregon), Europe (Frankfurt), South America (Sao Paulo), and Asia Pacific (Singapore) AWS Regions and supports Application Load Balancer, Amazon API Gateway, and AWS AppSync resources.
 13. Added S3LoggingBucketName to json. You need to specify the S3 Bucket where the Logs should be placed in now. We also added a Prefix for the logs to be aws conform (Prefix: AWSLogs/*AWS_ACCOUNTID*/FirewallManager/*AWS_REGION*/).
 14. Added Testing your WAF with [GoTestWAF](https://github.com/wallarm/gotestwaf). To be able to check your waf we introduced the **SecuredDomain** Parameter in the json which should be your Domain which will be checked using the WAF tool.
-15. Introduced three new Parameters in the taskfile (**WAF_TEST**,**CREATE_DIAGRAM** and **CDK_DIFF**).
+15. TaskFileParameters:
 
 | Parameter   |      Value      |
 |----------|:-------------:|
+| PROCESS_PARAMETERS | path to values file eg. values/example-waf.json |
+| SKIP_QUOTA_CHECK |true (Stop deployment if calculated WCU is above the quota) </br> false (Skipping WCU Check)  |
 | WAF_TEST |  true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)  |
 | CREATE_DIAGRAM |  true (generating a diagram using draw.io) </br> false (Skipping diagram generation)  |
 | CDK_DIFF |  true (generating a cdk before invoking cdk deploy) </br> false (Skipping cdk diff)  |
+
 
 16. Validation of your ConfigFile using Schema validation - if you miss an required parameter in your config file the deployment will stop automatically and show you the missing path.
 17. PreProcess-and PostProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
