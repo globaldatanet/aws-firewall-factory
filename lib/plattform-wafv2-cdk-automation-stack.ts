@@ -222,7 +222,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       }
       else{
         console.log("\u001b[1m","\n🥇  Custom Rules PreProcess: ","\x1b[0m\n")
-        if (props.runtimeprops.PreProcessCapacity < 100){
+        if (props.runtimeprops.PreProcessCapacity < 1000){
             const rules = [];
             let count = 1
             for(const statement of props.config.WebAcl.PreProcess.CustomRules){
@@ -263,7 +263,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 ruleLabels: toCamel(statement.RuleLabels)
               };}
               let CfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty
-              if(CfnRuleProperty.ruleLabels == []){
+              if(!!CfnRuleProperty.ruleLabels){
                 const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
                 CfnRuleProperties = CfnRulePropertii
               }
@@ -333,7 +333,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     
         }
         else{
-          const threshold = 100
+          const threshold = 1000
           const rulesets: any[]  = []
           const indexes: number[] = []
           const rulegroupcapacities = []
@@ -432,8 +432,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 }
               }
               let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
-
-              if(CfnRuleProperty.ruleLabels == []){
+              if(!!CfnRuleProperty.ruleLabels){
                 const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
                 CfnRuleProperti = CfnRulePropertii
               }
@@ -492,7 +491,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       }
       else{
         console.log("\u001b[1m","\n🥈  Custom Rules PostProcess:","\x1b[0m\n")
-        if (props.runtimeprops.PostProcessCapacity < 100){
+        if (props.runtimeprops.PostProcessCapacity < 1000){
           const rules = [];
           let count = 1
       
@@ -534,7 +533,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               ruleLabels: toCamel(statement.RuleLabels)
             };}
             let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
-            if(CfnRuleProperty.ruleLabels == []){
+            if(!!CfnRuleProperty.ruleLabels){
               const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
               CfnRuleProperti = CfnRulePropertii
             }
@@ -551,12 +550,11 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             if(props.runtimeprops.PostProcessDeployedRuleGroupCapacities[0] != props.runtimeprops.PostProcessCapacity){
               console.log("⭕️ Deploy new RuleGroup because the Capacity has changed!")
               console.log("\n 🟥 Old Capacity: ["+ props.runtimeprops.PostProcessDeployedRuleGroupCapacities[0] + "]\n 🟩 New Capacity: [" + props.runtimeprops.PostProcessCapacity+"]")
-              if(props.runtimeprops.PostProcessDeployedRuleGroupIdentifier[0] == "RuleGroup"){
+              if(props.runtimeprops.PostProcessDeployedRuleGroupIdentifier[0] === "PostRuleGroup"){
                 rulegroupidentifier ="postRG"
               }
-      
-              if(props.runtimeprops.PostProcessDeployedRuleGroupNames[0] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-post-" +props.config.General.DeployHash){
-                name = props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-postG-" +props.config.General.DeployHash
+              if(props.runtimeprops.PostProcessDeployedRuleGroupNames[0] === props.config.WebAcl.Name + "-post-" + props.config.General.Stage + "-" +props.config.General.DeployHash){
+                name = props.config.WebAcl.Name + "-" + props.config.General.Stage + "-postG-" +props.config.General.DeployHash
               }
               console.log(" 💬 New Name: "+ name)
               console.log(" 📇 New Identifier: "+ rulegroupidentifier)
@@ -604,7 +602,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       
         }
         else{
-          const threshold = 100
+          const threshold = 1000
           const rulesets: any[]  = []
           const indexes: number[] = []
           const rulegroupcapacities = []
@@ -703,7 +701,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 }
               }
               let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
-              if(CfnRuleProperty.ruleLabels == []){
+              if(!!CfnRuleProperty.ruleLabels){
                 const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
                 CfnRuleProperti = CfnRulePropertii
               }
