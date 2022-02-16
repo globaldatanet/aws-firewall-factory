@@ -24,6 +24,9 @@
  - Added PreProcess and PostProcess
 
 ℹ️ See [example json](./values/example-waf.json).
+
+2. Optimized RuleGroup Splitting - RuleGroups will now be splitted into Groups with up to 1000 WCU.
+
 ## 1.0.4
 
 ### Added
