@@ -223,34 +223,34 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       else{
         console.log("\u001b[1m","\n🥇  Custom Rules PreProcess: ","\x1b[0m\n")
         if (props.runtimeprops.PreProcessCapacity < 1000){
-            const rules = [];
-            let count = 1
-            for(const statement of props.config.WebAcl.PreProcess.CustomRules){
-              let rulename = ""
-              if(statement.Name !== undefined){
-                rulename = statement.Name  + "-pre-" + props.config.General.DeployHash
+          const rules = [];
+          let count = 1
+          for(const statement of props.config.WebAcl.PreProcess.CustomRules){
+            let rulename = ""
+            if(statement.Name !== undefined){
+              rulename = statement.Name  + "-pre-" + props.config.General.DeployHash
+            }
+            else{
+              rulename = props.config.WebAcl.Name + "-pre-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
+            }
+            let CfnRuleProperty
+            if("Captcha" in statement.Action){
+              CfnRuleProperty = {
+                name: rulename,
+                priority: count,
+                action: toCamel(statement.Action),
+                statement: toCamel(statement.Statement),
+                visibilityConfig: {
+                  sampledRequestsEnabled: statement.VisibilityConfig.SampledRequestsEnabled,
+                  cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
+                  metricName: rulename + "-metric",
+                },
+                captchaConfig: toCamel(statement.CaptchaConfig),
+                ruleLabels: toCamel(statement.RuleLabels)
               }
-              else{
-                rulename = props.config.WebAcl.Name + "-pre-" + props.config.General.Stage + "-" + count.toString() + "-" +props.config.General.DeployHash
-              }
-              let CfnRuleProperty
-              if("Captcha" in statement.Action){
-                CfnRuleProperty = {
-                  name: rulename,
-                  priority: count,
-                  action: toCamel(statement.Action),
-                  statement: toCamel(statement.Statement),
-                  visibilityConfig: {
-                    sampledRequestsEnabled: statement.VisibilityConfig.SampledRequestsEnabled,
-                    cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
-                    metricName: rulename + "-metric",
-                  },
-                  captchaConfig: toCamel(statement.CaptchaConfig),
-                  ruleLabels: toCamel(statement.RuleLabels)
-                }
-              }
-              else{ 
-                CfnRuleProperty = {
+            }
+            else{ 
+              CfnRuleProperty = {
                 name: rulename,
                 priority: count,
                 action: toCamel(statement.Action),
@@ -261,75 +261,76 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                   metricName: rulename + "-metric",
                 },
                 ruleLabels: toCamel(statement.RuleLabels)
-              };}
-              let CfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty
-              if(!!CfnRuleProperty.ruleLabels){
-                const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
-                CfnRuleProperties = CfnRulePropertii
-              }
-              else{
-                CfnRuleProperties = CfnRuleProperty
-              }
-              rules.push(CfnRuleProperties)
-              count +=1
+              };
             }
-    
-            let name = props.config.WebAcl.Name + "-pre-" + props.config.General.Stage + "-" +props.config.General.DeployHash
-            let rulegroupidentifier = "PreRuleGroup"
-            if(typeof props.runtimeprops.PreProcessDeployedRuleGroupCapacities[0] !== "undefined"){
-              if(props.runtimeprops.PreProcessDeployedRuleGroupCapacities[0] != props.runtimeprops.PreProcessCapacity){
-                console.log("⭕️ Deploy new RuleGroup because the Capacity has changed!")
-                console.log("\n 🟥 Old Capacity: ["+ props.runtimeprops.PreProcessDeployedRuleGroupCapacities[0] + "]\n 🟩 New Capacity: [" + props.runtimeprops.PreProcessCapacity+"]")
-                if(props.runtimeprops.PreProcessDeployedRuleGroupIdentifier[0] == "RuleGroup"){
-                  rulegroupidentifier ="preRG"
-                }
-    
-                if(props.runtimeprops.PreProcessDeployedRuleGroupNames[0] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash){
-                  name = props.config.General.Prefix.toUpperCase() + "-G" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash
-                }
-                console.log(" 💬 New Name: "+ name)
-                console.log(" 📇 New Identifier: "+ rulegroupidentifier)
-              }
+            let CfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty
+            if(statement.RuleLabels){
+              CfnRuleProperties = CfnRuleProperty
             }
-            const rulegroup = new wafv2.CfnRuleGroup(this,rulegroupidentifier, {
-              capacity: props.runtimeprops.PreProcessCapacity,
-              scope: props.config.WebAcl.Scope,
-              rules: rules,
-              name: name,
-              visibilityConfig: {
-                sampledRequestsEnabled: false,
-                cloudWatchMetricsEnabled: false,
-                metricName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash,
+            else{
+              const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
+              CfnRuleProperties = CfnRulePropertii
+            }
+            rules.push(CfnRuleProperties)
+            count +=1
+          }
+    
+          let name = props.config.WebAcl.Name + "-pre-" + props.config.General.Stage + "-" +props.config.General.DeployHash
+          let rulegroupidentifier = "PreRuleGroup"
+          if(typeof props.runtimeprops.PreProcessDeployedRuleGroupCapacities[0] !== "undefined"){
+            if(props.runtimeprops.PreProcessDeployedRuleGroupCapacities[0] != props.runtimeprops.PreProcessCapacity){
+              console.log("⭕️ Deploy new RuleGroup because the Capacity has changed!")
+              console.log("\n 🟥 Old Capacity: ["+ props.runtimeprops.PreProcessDeployedRuleGroupCapacities[0] + "]\n 🟩 New Capacity: [" + props.runtimeprops.PreProcessCapacity+"]")
+              if(props.runtimeprops.PreProcessDeployedRuleGroupIdentifier[0] == "RuleGroup"){
+                rulegroupidentifier ="preRG"
               }
-            });
-            preProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
-            console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + props.runtimeprops.PreProcessCapacity +"]")
-            props.runtimeprops.PreProcessDeployedRuleGroupCapacities.splice(0)
-            props.runtimeprops.PreProcessDeployedRuleGroupIdentifier.splice(0)
-            props.runtimeprops.PreProcessDeployedRuleGroupNames.splice(0)
     
-            props.runtimeprops.PreProcessDeployedRuleGroupIdentifier[0] = rulegroupidentifier
-            props.runtimeprops.PreProcessDeployedRuleGroupNames[0] = name
-            props.runtimeprops.PreProcessDeployedRuleGroupCapacities[0] = props.runtimeprops.PreProcessCapacity
+              if(props.runtimeprops.PreProcessDeployedRuleGroupNames[0] == props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash){
+                name = props.config.General.Prefix.toUpperCase() + "-G" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash
+              }
+              console.log(" 💬 New Name: "+ name)
+              console.log(" 📇 New Identifier: "+ rulegroupidentifier)
+            }
+          }
+          const rulegroup = new wafv2.CfnRuleGroup(this,rulegroupidentifier, {
+            capacity: props.runtimeprops.PreProcessCapacity,
+            scope: props.config.WebAcl.Scope,
+            rules: rules,
+            name: name,
+            visibilityConfig: {
+              sampledRequestsEnabled: false,
+              cloudWatchMetricsEnabled: false,
+              metricName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage + "-" +props.config.General.DeployHash,
+            }
+          });
+          preProcessRuleGroups.push({"ruleGroupType":"RuleGroup","ruleGroupArn":"${"+ rulegroupidentifier +".Arn}","overrideAction":{"type":"NONE"}});
+          console.log("  ➡️  Creating " + rulegroupidentifier + " with calculated capacity: [" + props.runtimeprops.PreProcessCapacity +"]")
+          props.runtimeprops.PreProcessDeployedRuleGroupCapacities.splice(0)
+          props.runtimeprops.PreProcessDeployedRuleGroupIdentifier.splice(0)
+          props.runtimeprops.PreProcessDeployedRuleGroupNames.splice(0)
+    
+          props.runtimeprops.PreProcessDeployedRuleGroupIdentifier[0] = rulegroupidentifier
+          props.runtimeprops.PreProcessDeployedRuleGroupNames[0] = name
+          props.runtimeprops.PreProcessDeployedRuleGroupCapacities[0] = props.runtimeprops.PreProcessCapacity
     
     
-            new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupNames", {
-              value: props.runtimeprops.PreProcessDeployedRuleGroupNames.toString(),
-              description: "PreProcessDeployedRuleGroupNames",
-              exportName: "PreProcessDeployedRuleGroupNames"+props.config.General.DeployHash,
-            });
+          new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupNames", {
+            value: props.runtimeprops.PreProcessDeployedRuleGroupNames.toString(),
+            description: "PreProcessDeployedRuleGroupNames",
+            exportName: "PreProcessDeployedRuleGroupNames"+props.config.General.DeployHash,
+          });
     
-            new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupCapacities", {
-              value: props.runtimeprops.PreProcessDeployedRuleGroupCapacities.toString(),
-              description: "PreProcessDeployedRuleGroupCapacities",
-              exportName: "PreProcessDeployedRuleGroupCapacities"+props.config.General.DeployHash,
-            });
+          new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupCapacities", {
+            value: props.runtimeprops.PreProcessDeployedRuleGroupCapacities.toString(),
+            description: "PreProcessDeployedRuleGroupCapacities",
+            exportName: "PreProcessDeployedRuleGroupCapacities"+props.config.General.DeployHash,
+          });
     
-            new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupIdentifier", {
-              value: props.runtimeprops.PreProcessDeployedRuleGroupIdentifier.toString(),
-              description: "PreProcessDeployedRuleGroupIdentifier",
-              exportName: "PreProcessDeployedRuleGroupIdentifier"+props.config.General.DeployHash,
-            });
+          new cdk.CfnOutput(this, "PreProcessDeployedRuleGroupIdentifier", {
+            value: props.runtimeprops.PreProcessDeployedRuleGroupIdentifier.toString(),
+            description: "PreProcessDeployedRuleGroupIdentifier",
+            exportName: "PreProcessDeployedRuleGroupIdentifier"+props.config.General.DeployHash,
+          });
     
         }
         else{
@@ -432,12 +433,12 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 }
               }
               let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
-              if(!!CfnRuleProperty.ruleLabels){
-                const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
-                CfnRuleProperti = CfnRulePropertii
+              if(props.config.WebAcl.PreProcess.CustomRules[statementindex].RuleLabels){
+                CfnRuleProperti = CfnRuleProperty
               }
               else{
-                CfnRuleProperti = CfnRuleProperty
+                const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
+                CfnRuleProperti = CfnRulePropertii
               }
               CfnRuleProperties.push(CfnRuleProperti)
               rulegroupcounter++
@@ -521,24 +522,24 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             }
             else{ 
               CfnRuleProperty = {
-              name: rulename,
-              priority: count,
-              action: toCamel(statement.Action),
-              statement: toCamel(statement.Statement),
-              visibilityConfig: {
-                sampledRequestsEnabled: statement.VisibilityConfig.SampledRequestsEnabled,
-                cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
-                metricName: rulename + "-metric",
-              },
-              ruleLabels: toCamel(statement.RuleLabels)
-            };}
+                name: rulename,
+                priority: count,
+                action: toCamel(statement.Action),
+                statement: toCamel(statement.Statement),
+                visibilityConfig: {
+                  sampledRequestsEnabled: statement.VisibilityConfig.SampledRequestsEnabled,
+                  cloudWatchMetricsEnabled: statement.VisibilityConfig.CloudWatchMetricsEnabled,
+                  metricName: rulename + "-metric",
+                },
+                ruleLabels: toCamel(statement.RuleLabels)
+              };}
             let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
-            if(!!CfnRuleProperty.ruleLabels){
-              const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
-              CfnRuleProperti = CfnRulePropertii
+            if(statement.RuleLabels){
+              CfnRuleProperti = CfnRuleProperty
             }
             else{
-              CfnRuleProperti = CfnRuleProperty
+              const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
+              CfnRuleProperti = CfnRulePropertii
             }
             rules.push(CfnRuleProperti)
             count +=1
@@ -701,12 +702,12 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 }
               }
               let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty
-              if(!!CfnRuleProperty.ruleLabels){
-                const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
+              if(props.config.WebAcl.PostProcess.CustomRules[statementindex].RuleLabels){
+                const CfnRulePropertii = CfnRuleProperty
                 CfnRuleProperti = CfnRulePropertii
               }
               else{
-                const CfnRulePropertii = CfnRuleProperty
+                const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty
                 CfnRuleProperti = CfnRulePropertii
               }
               CfnRuleProperties.push(CfnRuleProperti)
@@ -762,53 +763,53 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       }
       else{
         let mangedrule;
-      for(mangedrule of props.config.WebAcl.PostProcess.ManagedRuleGroups){
-        let ExcludeRules;
-        let OverrideAction;
-        if(mangedrule.ExcludeRules){
-          ExcludeRules = toCamel(mangedrule.ExcludeRules)
-          OverrideAction = mangedrule.OverrideAction
+        for(mangedrule of props.config.WebAcl.PostProcess.ManagedRuleGroups){
+          let ExcludeRules;
+          let OverrideAction;
+          if(mangedrule.ExcludeRules){
+            ExcludeRules = toCamel(mangedrule.ExcludeRules)
+            OverrideAction = mangedrule.OverrideAction
+          }
+          else{
+            ExcludeRules = []
+            OverrideAction = { "type": "NONE" }
+          }
+          if(mangedrule.Version == ""){
+            postProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
+              "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": OverrideAction,
+            "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
+          else{
+            postProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
+              "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": OverrideAction,
+            "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
         }
-        else{
-          ExcludeRules = []
-          OverrideAction = { "type": "NONE" }
-        }
-        if(mangedrule.Version == ""){
-          postProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
-            "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": OverrideAction,
-          "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
-        else{
-          postProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
-            "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": OverrideAction,
-          "ruleGroupArn": novalue,"excludeRules": ExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
       }
-    }
-    if(props.config.WebAcl.PreProcess.ManagedRuleGroups === undefined){
-      console.log("ℹ️  No ManagedRuleGroups defined in PreProcess.")
-    }
-    else{
-      let mangedrule;
-    for(mangedrule of props.config.WebAcl.PreProcess.ManagedRuleGroups){
-      let PreProcessExcludeRules = [];
-      let OverrideAction;
-      if(mangedrule.ExcludeRules){
-        PreProcessExcludeRules = toCamel(mangedrule.ExcludeRules)
-        OverrideAction = mangedrule.OverrideAction
+      if(props.config.WebAcl.PreProcess.ManagedRuleGroups === undefined){
+        console.log("ℹ️  No ManagedRuleGroups defined in PreProcess.")
       }
       else{
-        PreProcessExcludeRules = []
-        OverrideAction = { "type": "NONE" }
+        let mangedrule;
+        for(mangedrule of props.config.WebAcl.PreProcess.ManagedRuleGroups){
+          let PreProcessExcludeRules = [];
+          let OverrideAction;
+          if(mangedrule.ExcludeRules){
+            PreProcessExcludeRules = toCamel(mangedrule.ExcludeRules)
+            OverrideAction = mangedrule.OverrideAction
+          }
+          else{
+            PreProcessExcludeRules = []
+            OverrideAction = { "type": "NONE" }
+          }
+          if(mangedrule.Version == ""){
+            preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
+              "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": OverrideAction,
+            "ruleGroupArn": novalue,"excludeRules": PreProcessExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
+          else{
+            preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
+              "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": OverrideAction,
+            "ruleGroupArn": novalue,"excludeRules": PreProcessExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
+        }
       }
-      if(mangedrule.Version == ""){
-        preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
-          "managedRuleGroupName":mangedrule.Name,"version": novalue},"overrideAction": OverrideAction,
-        "ruleGroupArn": novalue,"excludeRules": PreProcessExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
-      else{
-        preProcessRuleGroups.push({"managedRuleGroupIdentifier": {"vendorName": mangedrule.Vendor,
-          "managedRuleGroupName":mangedrule.Name,"version": mangedrule.Version},"overrideAction": OverrideAction,
-        "ruleGroupArn": novalue,"excludeRules": PreProcessExcludeRules,"ruleGroupType": "ManagedRuleGroup"});}
-    }
-  }
       if(postProcessRuleGroups == []){
         const securityservicepolicydata = {
           "type":"WAFV2",
@@ -830,24 +831,24 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         });
       }
       if(preProcessRuleGroups == []){
-      const securityservicepolicydata = {
-        "type":"WAFV2",
-        "defaultAction":{ "type":"ALLOW" },
-        "preProcessRuleGroups": [],
-        "postProcessRuleGroups": postProcessRuleGroups,
-        "overrideCustomerWebACLAssociation":true,
-        "loggingConfiguration": {
-          "logDestinationConfigs":["${S3DeliveryStream.Arn}"]
+        const securityservicepolicydata = {
+          "type":"WAFV2",
+          "defaultAction":{ "type":"ALLOW" },
+          "preProcessRuleGroups": [],
+          "postProcessRuleGroups": postProcessRuleGroups,
+          "overrideCustomerWebACLAssociation":true,
+          "loggingConfiguration": {
+            "logDestinationConfigs":["${S3DeliveryStream.Arn}"]
+          }
         }
-      }
-      const fmsPolicy = new fms.CfnPolicy(this, "CfnPolicy", {
-        excludeResourceTags: false,
-        remediationEnabled: false,
-        resourceType: props.config.WebAcl.Type,
-        policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage+ "-" +props.config.General.DeployHash,
-        includeMap: {account: props.config.General.DeployTo },
-        securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
-      });
+        const fmsPolicy = new fms.CfnPolicy(this, "CfnPolicy", {
+          excludeResourceTags: false,
+          remediationEnabled: false,
+          resourceType: props.config.WebAcl.Type,
+          policyName: props.config.General.Prefix.toUpperCase() + "-" + props.config.WebAcl.Name + "-" + props.config.General.Stage+ "-" +props.config.General.DeployHash,
+          includeMap: {account: props.config.General.DeployTo },
+          securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
+        });
       }
       if(preProcessRuleGroups != [] && postProcessRuleGroups != []){
         const securityservicepolicydata = {
@@ -868,7 +869,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           includeMap: {account: props.config.General.DeployTo },
           securityServicePolicyData: {"Type": "WAFV2","ManagedServiceData": cdk.Fn.sub(JSON.stringify(securityservicepolicydata))}
         });
-        }
+      }
     }
 
     const options = { flag : "w", force: true };
