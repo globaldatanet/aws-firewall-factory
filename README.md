@@ -1,4 +1,4 @@
-# AWS FIREWALL FACTORY
+# AWS FIREWALL FACTORY v2
 
 [![License: Apache2](https://img.shields.io/badge/license-Apache%202-lightgrey.svg)](http://www.apache.org/licenses/) [![cdk](https://img.shields.io/badge/aws_cdk-v2-orange.svg)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 [![latest](https://img.shields.io/badge/latest-release-yellow.svg)](https://github.com/globaldatanet/aws-firewall-factory/releases)
@@ -93,7 +93,7 @@ If you want to learn something more about the AWS Firewall Factory feel free to 
 2. Assume AWS Profile `awsume PROFILENAME`
 3. Enter `task deploy`
 
-![Example Deployment](./static/example_deployment.jpg "Example Deployment")
+![Example Deployment](./static/example_deployment.png "Example Deployment")
 
 ### 👏 Supporters
 
