@@ -1,3 +1,11 @@
+interface RulesArray{
+  Name?: string,
+  Statement: any,
+  Action: any,
+  VisibilityConfig: any,
+  CaptchaConfig?: any,
+}
+
 export interface Config {
   readonly General: {
     readonly Prefix: string,
@@ -12,10 +20,17 @@ export interface Config {
     readonly Name: string,
     readonly Scope: string,
     readonly Type: string,
-    readonly Rules: Array<RulesArray>,
-    readonly ManagedRuleGroups: any[],
+    readonly PreProcess: {
+      CustomRules?: Array<RulesArray> | undefined,
+      ManagedRuleGroups?: any[] | undefined;
+    }
+    readonly PostProcess:{
+      CustomRules?: Array<RulesArray> | undefined,
+      ManagedRuleGroups?: any[] | undefined;
+    }
   },
 }
+
 
 interface RulesArray{
   Name?: string,
@@ -23,4 +38,5 @@ interface RulesArray{
   Action: any,
   VisibilityConfig: any,
   CaptchaConfig?: any,
+  RuleLabels?: any
 }

@@ -1,7 +1,12 @@
 export interface Runtimeprops {
-    Capacity: number,
-    RuleCapacities: number[],
-    DeployedRuleGroupCapacities: number[],
-    DeployedRuleGroupNames: string[],
-    DeployedRuleGroupIdentifier: string[]
+    PreProcessCapacity: number,
+    PostProcessCapacity: number,
+    PreProcessRuleCapacities: number[],
+    PostProcessRuleCapacities: number[],
+    PreProcessDeployedRuleGroupCapacities: number[],
+    PreProcessDeployedRuleGroupNames: string[],
+    PreProcessDeployedRuleGroupIdentifier: string[],
+    PostProcessDeployedRuleGroupCapacities: number[],
+    PostProcessDeployedRuleGroupNames: string[],
+    PostProcessDeployedRuleGroupIdentifier: string[],
 }

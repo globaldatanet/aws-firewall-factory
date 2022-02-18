@@ -1,12 +1,16 @@
 version: '3'
 env:
   PROCESS_PARAMETERS: values/example-waf.json
-  CDK_DEFAULT_ACCOUNT: $(aws sts get-caller-identity |jq -r .Account)
-  REGION: $(aws configure get profile.$AWSUME_PROFILE.region)
   SKIP_QUOTA_CHECK: true
-  WAF_TEST: true
+  WAF_TEST: false
   CREATE_DIAGRAM: false
   CDK_DIFF: false
+
+vars:
+  REGION:
+    sh: aws configure get profile.$AWSUME_PROFILE.region
+  CDK_DEFAULT_ACCOUNT:
+    sh: aws sts get-caller-identity |jq -r .Account
 
 tasks:
   deploy:

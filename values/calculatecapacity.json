@@ -11,5 +11,6 @@
     "SampledRequestsEnabled": false,
     "CloudWatchMetricsEnabled": false,
     "MetricName": "TEST"
-    }
+},
+"RuleLabels": []
 }
