@@ -7,7 +7,7 @@ Deploy, update, and stage your WAFs while managing them centrally via FMS
 [![gdn](https://img.shields.io/badge/opensource-@globaldatanet-%2300ecbd)](https://globaldatanet.com/opensource) [![dakn](https://img.shields.io/badge/by-dakn-%23ae0009.svg)](https://github.com/daknhh)
 
 
-![Example Deployment](./static/example_deployment.png "Example Deployment")
+![Example Deployment](./static/example-deployment.gif "Example Deployment")
 
 <img align="left" src="./static/icon/firewallfactory.svg" width="150">
 
