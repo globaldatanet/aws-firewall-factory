@@ -121,13 +121,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 ## Contribute
 
-Want to contribute to **AWS FIREWALL FACTORY**? Here's how:
-
-1. `git clone` this repository
-2. Create a branch (`feature/<yourFeature>` to add new features. `fix/<WhatFix>` for fixing existing issues)
-3. Commit and push your changes to your branch
-4. Create a Pull Request to `master`
-
+Want to contribute to **AWS FIREWALL FACTORY**? Check out the [Contribution docs](./CONTRIBUTING.md)
 </br>
 
 ### 👏 Supporters
