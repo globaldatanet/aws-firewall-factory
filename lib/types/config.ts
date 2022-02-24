@@ -1,11 +1,3 @@
-interface RulesArray{
-  Name?: string,
-  Statement: any,
-  Action: any,
-  VisibilityConfig: any,
-  CaptchaConfig?: any,
-}
-
 export interface Config {
   readonly General: {
     readonly Prefix: string,
@@ -18,25 +10,58 @@ export interface Config {
   },
   readonly WebAcl:{
     readonly Name: string,
-    readonly Scope: string,
+    readonly Scope: "CLOUDFRONT" | "REGIONAL",
     readonly Type: string,
-    readonly PreProcess: {
-      CustomRules?: Array<RulesArray> | undefined,
-      ManagedRuleGroups?: any[] | undefined;
-    }
-    readonly PostProcess:{
-      CustomRules?: Array<RulesArray> | undefined,
-      ManagedRuleGroups?: any[] | undefined;
-    }
+    readonly PreProcess: RouleGroupSet,
+    readonly PostProcess: RouleGroupSet
   },
 }
 
+interface RouleGroupSet {
+  CustomRules?: Rule[],
+  ManagedRuleGroups?: ManagedRuleGroup[];
+}
 
-interface RulesArray{
+interface ManagedRuleGroup {
+  Vendor: string,
+  Name: string,
+  Version: string,
+  Capacity: number,
+  ExcludeRules?: NameObject[],
+  OverrideAction?: {
+    type: "COUNT" | "NONE"
+  }
+}
+export interface Rule {
   Name?: string,
   Statement: any,
-  Action: any,
-  VisibilityConfig: any,
-  CaptchaConfig?: any,
-  RuleLabels?: any
+  Action: Action,
+  VisibilityConfig: {
+    SampledRequestsEnabled: boolean,
+    CloudWatchMetricsEnabled: boolean,
+    MetricName?: string
+  },
+  CaptchaConfig?: {
+    ImmunityTimeProperty?: {
+      ImmunityTime: number
+    }
+  },
+  RuleLabels?: NameObject[]
+}
+
+type NameObject = {
+  Name: string
+}
+
+type Action = | {
+  Block: Record<string, never>
+}
+| {
+  Allow: Record<string, never>
+}
+| {
+  Count: Record<string, never>
+}
+| {
+  Captcha: Record<string, never>
 }

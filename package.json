@@ -27,10 +27,10 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudformation": "^3.40.0",
-    "@aws-sdk/client-fms": "^3.43.0",
-    "@aws-sdk/client-service-quotas": "^3.38.0",
-    "@aws-sdk/client-wafv2": "^3.48.0",
+    "@aws-sdk/client-cloudformation": "^3.52.0",
+    "@aws-sdk/client-fms": "^3.52.0",
+    "@aws-sdk/client-service-quotas": "^3.52.0",
+    "@aws-sdk/client-wafv2": "^3.52.0",
     "@mhlabs/cfn-diagram": "^1.1.32",
     "@types/lodash": "^4.14.178",
     "aws-cdk-lib": "^2.8.0",

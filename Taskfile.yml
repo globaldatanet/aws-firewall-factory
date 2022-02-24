@@ -68,3 +68,8 @@ tasks:
     preconditions:
       - sh: if [[ {{.WAF_TEST}} = true ]] ; then exit 0; else exit 1; fi
         msg: ⏭  Skipping WAF Testing 🧪
+  validateconfig:
+    desc: Validation of the current config
+    cmds:
+      - ts-node test/config-loader.ts
+    silent: true
