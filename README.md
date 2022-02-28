@@ -16,7 +16,8 @@ Deploy, update, and stage your WAFs while managing them centrally via FMS
 - [Deployment](#deployment)
   - [Prerequisites](#prerequisites)
   - [Deployment via Taskfile](#deployment-via-taskfile)
-- [Contribute](#contribute)
+- [Contributors](#contributors)
+    - [Contribute](#contribute)
 - [👏 Supporters](#-👏-supporters)
 
 </br>
@@ -119,7 +120,18 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 2. Assume AWS Profile `awsume PROFILENAME`
 3. Enter `task deploy`
 
-## Contribute
+## Contributors
+
+<a href="https://github.com/globaldatanet/aws-firewall-factory/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=globaldatanet/aws-firewall-factory" />
+</a>
+
+</br>
+Any form of contribution is welcome. The above contributors have been officially released by globaldatanet.
+</br>
+</br>
+
+### Contribute 
 
 Want to contribute to **AWS FIREWALL FACTORY**? Check out the [Contribution docs](./CONTRIBUTING.md)
 </br>
