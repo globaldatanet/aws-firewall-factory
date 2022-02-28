@@ -2,7 +2,7 @@ import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeM
 import * as quota from "@aws-sdk/client-service-quotas";
 import * as cloudformation from "@aws-sdk/client-cloudformation";
 import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
-import { Rule } from "../types/config";
+import { Rule } from "../types/fms";
 import * as lodash from "lodash";
 import { RuntimeProperties } from "../types/runtimeprops";
 import { Config } from "../types/config";
@@ -160,42 +160,42 @@ export async function setOutputsFromStack(deploymentRegion: string, runtimeprops
     for(const output of responsestack.Stacks?.[0].Outputs){
       if(output.OutputKey === "DeployedRuleGroupNames")
       {
-        runtimeprops.PreProcessDeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
       }
       else if(output.OutputKey === "DeployedRuleGroupIdentifier")
       {
-        runtimeprops.PreProcessDeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
       }
       else if(output.OutputKey === "DeployedRuleGroupCapacities")
       {
         const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-        runtimeprops.PreProcessDeployedRuleGroupCapacities = arrayOfNumbers;
+        runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
       }
       if(output.OutputKey === "PreProcessDeployedRuleGroupNames")
       {
-        runtimeprops.PreProcessDeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
       }
       else if(output.OutputKey === "PreProcessDeployedRuleGroupIdentifier")
       {
-        runtimeprops.PreProcessDeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
       }
       else if(output.OutputKey === "PreProcessDeployedRuleGroupCapacities")
       {
         const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-        runtimeprops.PreProcessDeployedRuleGroupCapacities = arrayOfNumbers;
+        runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
       }
       if(output.OutputKey === "PostProcessDeployedRuleGroupNames")
       {
-        runtimeprops.PostProcessDeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        runtimeprops.PostProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
       }
       else if(output.OutputKey === "PostProcessDeployedRuleGroupIdentifier")
       {
-        runtimeprops.PostProcessDeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        runtimeprops.PostProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
       }
       else if(output.OutputKey === "PostProcessDeployedRuleGroupCapacities")
       {
         const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-        runtimeprops.PostProcessDeployedRuleGroupCapacities = arrayOfNumbers;
+        runtimeprops.PostProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
       }
     }
   }
@@ -242,7 +242,7 @@ async function calculateCapacities(
           config.WebAcl.Scope,
           rules
         );
-        runtimeProperties.PreProcessRuleCapacities.push(capacity);
+        runtimeProperties.PreProcess.RuleCapacities.push(capacity);
       } else {
         const rule_calculated_capacity_json = [];
         const { CloudWatchMetricsEnabled, SampledRequestsEnabled } =
@@ -263,11 +263,11 @@ async function calculateCapacities(
           config.WebAcl.Scope,
           rule_calculated_capacity_json
         );
-        runtimeProperties.PreProcessRuleCapacities.push(capacity);
+        runtimeProperties.PreProcess.RuleCapacities.push(capacity);
       }
       count++;
     }
-    runtimeProperties.PreProcessCapacity = runtimeProperties.PreProcessRuleCapacities.reduce(
+    runtimeProperties.PreProcess.Capacity = runtimeProperties.PreProcess.RuleCapacities.reduce(
       function (a, b) {
         return a + b;
       },
@@ -309,10 +309,10 @@ async function calculateCapacities(
         config.WebAcl.Scope,
         rule_calculated_capacity_json
       );
-      runtimeProperties.PostProcessRuleCapacities.push(capacity);
+      runtimeProperties.PostProcess.RuleCapacities.push(capacity);
       count++;
     }
-    PostProcessCapacity = runtimeProperties.PostProcessRuleCapacities.reduce(
+    PostProcessCapacity = runtimeProperties.PostProcess.RuleCapacities.reduce(
       function (a, b) {
         return a + b;
       },
@@ -366,7 +366,7 @@ async function calculateCapacities(
       runtimeProperties.ManagedRuleCapacity += capacity;
     }
   }
-  runtimeProperties.PostProcessCapacity = PostProcessCapacity;
+  runtimeProperties.PostProcess.Capacity = PostProcessCapacity;
 }
 
 /**
@@ -399,8 +399,8 @@ export async function isPolicyQuotaReached(deploymentRegion: string): Promise<bo
  */
 export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: RuntimeProperties, config: Config): Promise<boolean> {
   await calculateCapacities(config, deploymentRegion, runtimeProps);
-  const custom_capacity = runtimeProps.PreProcessCapacity + runtimeProps.PostProcessCapacity;
-  const total_wcu = runtimeProps.PreProcessCapacity + runtimeProps.PostProcessCapacity + runtimeProps.ManagedRuleCapacity;
+  const custom_capacity = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity;
+  const total_wcu = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity + runtimeProps.ManagedRuleCapacity;
   const quote_wcu = await getFmsQuota(deploymentRegion, WCU_QUOTA_CODE);
   const wcuLimitReached = (total_wcu > Number(quote_wcu));
   if (wcuLimitReached) {
@@ -411,7 +411,7 @@ export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: 
   else {
     console.log("\n🔎 Capacity Check result: 🟢 \n");
     console.log(" 💡 Account WAF-WCU Quota: " +Number(quote_wcu).toString());
-    console.log(" 🧮 Calculated Custom Rule Capacity is: [" + custom_capacity + "] (🥇[" + runtimeProps.PreProcessCapacity + "] + 🥈[" + runtimeProps.PostProcessCapacity + "]) \n ➕ ManagedRulesCapacity: ["+ runtimeProps.ManagedRuleCapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n");
+    console.log(" 🧮 Calculated Custom Rule Capacity is: [" + custom_capacity + "] (🥇[" + runtimeProps.PreProcess.Capacity + "] + 🥈[" + runtimeProps.PostProcess.Capacity + "]) \n ➕ ManagedRulesCapacity: ["+ runtimeProps.ManagedRuleCapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n");
   }
   return wcuLimitReached;
 }
@@ -423,16 +423,20 @@ export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: 
 export function initRuntimeProperties() : RuntimeProperties {
   return {
     ManagedRuleCapacity: 0,
-    PreProcessCapacity: 0,
-    PostProcessCapacity: 0,
-    PreProcessDeployedRuleGroupCapacities: [],
-    PreProcessRuleCapacities: [],
-    PreProcessDeployedRuleGroupNames: [],
-    PreProcessDeployedRuleGroupIdentifier: [],
-    PostProcessDeployedRuleGroupCapacities: [],
-    PostProcessRuleCapacities: [],
-    PostProcessDeployedRuleGroupNames: [],
-    PostProcessDeployedRuleGroupIdentifier: [],
+    PostProcess: {
+      Capacity: 0,
+      DeployedRuleGroupCapacities: [],
+      DeployedRuleGroupIdentifier: [],
+      DeployedRuleGroupNames: [],
+      RuleCapacities: []
+    },
+    PreProcess: {
+      Capacity: 0,
+      DeployedRuleGroupCapacities: [],
+      DeployedRuleGroupIdentifier: [],
+      DeployedRuleGroupNames: [],
+      RuleCapacities: []
+    },
   };
 }
 

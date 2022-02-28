@@ -1,3 +1,4 @@
+import { Rule, ManagedRuleGroup } from "./fms";
 export interface Config {
   readonly General: {
     readonly Prefix: string,
@@ -12,56 +13,12 @@ export interface Config {
     readonly Name: string,
     readonly Scope: "CLOUDFRONT" | "REGIONAL",
     readonly Type: string,
-    readonly PreProcess: RouleGroupSet,
-    readonly PostProcess: RouleGroupSet
+    readonly PreProcess: RuleGroupSet,
+    readonly PostProcess: RuleGroupSet
   },
 }
 
-interface RouleGroupSet {
+export interface RuleGroupSet {
   CustomRules?: Rule[],
   ManagedRuleGroups?: ManagedRuleGroup[];
-}
-
-interface ManagedRuleGroup {
-  Vendor: string,
-  Name: string,
-  Version: string,
-  Capacity: number,
-  ExcludeRules?: NameObject[],
-  OverrideAction?: {
-    type: "COUNT" | "NONE"
-  }
-}
-export interface Rule {
-  Name?: string,
-  Statement: any,
-  Action: Action,
-  VisibilityConfig: {
-    SampledRequestsEnabled: boolean,
-    CloudWatchMetricsEnabled: boolean,
-    MetricName?: string
-  },
-  CaptchaConfig?: {
-    ImmunityTimeProperty?: {
-      ImmunityTime: number
-    }
-  },
-  RuleLabels?: NameObject[]
-}
-
-type NameObject = {
-  Name: string
-}
-
-type Action = | {
-  Block: Record<string, never>
-}
-| {
-  Allow: Record<string, never>
-}
-| {
-  Count: Record<string, never>
-}
-| {
-  Captcha: Record<string, never>
 }
