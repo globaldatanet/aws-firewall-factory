@@ -2,6 +2,22 @@
 
 ## Released
 
+## 2.1.0
+
+### Added
+
+- Added Linting with typescript-eslint
+- Added .gitignore and .npmignore file
+- Added 2 functions for building service data (managed & custom rules) to remove redundant code
+
+### Changed
+
+- Refactoring bin file: outsource capacity checks & other functions to helpers.ts
+- Transform capacity.json to Typescript Type Rule
+- Start refactoring lib file: get rid of redundant code and use JS shortcuts
+- Extend types of the Config interface
+- Restructuring runtime properties:  introduce separate layer for PreProcess and PostProcess
+- New types for Firewall Manager API and CDK mapping
 ## 2.0.0
 
 ### Added

@@ -1,11 +1,4 @@
-interface RulesArray{
-  Name?: string,
-  Statement: any,
-  Action: any,
-  VisibilityConfig: any,
-  CaptchaConfig?: any,
-}
-
+import { Rule, ManagedRuleGroup } from "./fms";
 export interface Config {
   readonly General: {
     readonly Prefix: string,
@@ -18,25 +11,14 @@ export interface Config {
   },
   readonly WebAcl:{
     readonly Name: string,
-    readonly Scope: string,
+    readonly Scope: "CLOUDFRONT" | "REGIONAL",
     readonly Type: string,
-    readonly PreProcess: {
-      CustomRules?: Array<RulesArray> | undefined,
-      ManagedRuleGroups?: any[] | undefined;
-    }
-    readonly PostProcess:{
-      CustomRules?: Array<RulesArray> | undefined,
-      ManagedRuleGroups?: any[] | undefined;
-    }
+    readonly PreProcess: RuleGroupSet,
+    readonly PostProcess: RuleGroupSet
   },
 }
 
-
-interface RulesArray{
-  Name?: string,
-  Statement: any,
-  Action: any,
-  VisibilityConfig: any,
-  CaptchaConfig?: any,
-  RuleLabels?: any
+export interface RuleGroupSet {
+  CustomRules?: Rule[],
+  ManagedRuleGroups?: ManagedRuleGroup[];
 }

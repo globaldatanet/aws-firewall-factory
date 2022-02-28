@@ -1,4 +1,4 @@
-import Ajv, {JSONSchemaType} from "ajv"
+import Ajv, {JSONSchemaType} from "ajv";
 import {Config} from "../types/config";
 import { resolve } from "path";
 import * as TJS from "typescript-json-schema";

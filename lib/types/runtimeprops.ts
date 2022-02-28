@@ -1,12 +1,13 @@
-export interface Runtimeprops {
-    PreProcessCapacity: number,
-    PostProcessCapacity: number,
-    PreProcessRuleCapacities: number[],
-    PostProcessRuleCapacities: number[],
-    PreProcessDeployedRuleGroupCapacities: number[],
-    PreProcessDeployedRuleGroupNames: string[],
-    PreProcessDeployedRuleGroupIdentifier: string[],
-    PostProcessDeployedRuleGroupCapacities: number[],
-    PostProcessDeployedRuleGroupNames: string[],
-    PostProcessDeployedRuleGroupIdentifier: string[],
+export interface RuntimeProperties {
+    PreProcess: ProcessProperties,
+    PostProcess: ProcessProperties,
+    ManagedRuleCapacity: number
+}
+
+export interface ProcessProperties {
+    Capacity: number,
+    RuleCapacities: number[],
+    DeployedRuleGroupCapacities: number[],
+    DeployedRuleGroupNames: string[],
+    DeployedRuleGroupIdentifier: string[]
 }
