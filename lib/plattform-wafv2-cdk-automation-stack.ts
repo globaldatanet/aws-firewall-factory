@@ -296,7 +296,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         );
         if (
           processRuntimeProps.DeployedRuleGroupIdentifier[0] ===
-          "RuleGroup"
+          type+"RuleGroup"
         ) {
           rulegroupidentifier = type + "RG";
         }
@@ -304,6 +304,8 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         if (
           processRuntimeProps.DeployedRuleGroupNames[0] ===
           webaclName +
+            "-" +
+            type.toLowerCase() +
             "-" +
             stage +
             "-" +
