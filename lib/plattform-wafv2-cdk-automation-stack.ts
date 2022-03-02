@@ -279,6 +279,8 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
       "-" +
       deployHash;
     let rulegroupidentifier = type + "RuleGroup";
+    console.log(processRuntimeProps.DeployedRuleGroupCapacities[0])
+    console.log(capacity)
     if (processRuntimeProps.DeployedRuleGroupCapacities[0]) {
       if (
         processRuntimeProps.DeployedRuleGroupCapacities[0] !==
@@ -651,30 +653,30 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
     );
     processRuntimeProps.DeployedRuleGroupNames.splice(lenght);
 
-    new cdk.CfnOutput(scope, "PreProcessDeployedRuleGroupNames", {
+    new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupNames", {
       value:
         processRuntimeProps.DeployedRuleGroupNames.toString(),
-      description: "PreProcessDeployedRuleGroupNames",
+      description: type+"ProcessDeployedRuleGroupNames",
       exportName:
-        "PreProcessDeployedRuleGroupNames" +
+        type+"ProcessDeployedRuleGroupNames" +
         deployHash,
     });
 
-    new cdk.CfnOutput(scope, "PreProcessDeployedRuleGroupCapacities", {
+    new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupCapacities", {
       value:
         processRuntimeProps.DeployedRuleGroupCapacities.toString(),
-      description: "PreProcessDeployedRuleGroupCapacities",
+      description: type+"ProcessDeployedRuleGroupCapacities",
       exportName:
-        "PreProcessDeployedRuleGroupCapacities" +
+        type+"ProcessDeployedRuleGroupCapacities" +
         deployHash,
     });
 
-    new cdk.CfnOutput(scope, "PreProcessDeployedRuleGroupIdentifier", {
+    new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupIdentifier", {
       value:
         processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
-      description: "PreProcessDeployedRuleGroupIdentifier",
+      description: type+"ProcessDeployedRuleGroupIdentifier",
       exportName:
-        "PreProcessDeployedRuleGroupIdentifier" +
+        type+"ProcessDeployedRuleGroupIdentifier" +
         deployHash,
     });
   }

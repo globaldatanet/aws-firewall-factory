@@ -2,6 +2,12 @@
 
 ## Released
 
+## 2.1.1
+
+### Fixed
+
+- Outputs were not dynamic
+
 ## 2.1.0
 
 ### Added
