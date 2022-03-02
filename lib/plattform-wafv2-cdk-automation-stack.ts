@@ -279,8 +279,6 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
       "-" +
       deployHash;
     let rulegroupidentifier = type + "RuleGroup";
-    console.log(processRuntimeProps.DeployedRuleGroupCapacities[0])
-    console.log(capacity)
     if (processRuntimeProps.DeployedRuleGroupCapacities[0]) {
       if (
         processRuntimeProps.DeployedRuleGroupCapacities[0] !==
