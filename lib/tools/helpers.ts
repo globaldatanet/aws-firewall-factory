@@ -220,7 +220,9 @@ async function calculateCapacities(
     );
   } else {
     while (count < config.WebAcl.PreProcess.CustomRules.length) {
+      runtimeProperties.PreProcess.CustomRuleCount += 1;
       if ("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) {
+        runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
         const rules : Rule[] = [];
         const { CloudWatchMetricsEnabled, SampledRequestsEnabled } =
           config.WebAcl.PreProcess.CustomRules[count].VisibilityConfig;
@@ -282,6 +284,7 @@ async function calculateCapacities(
     );
   } else {
     while (count < config.WebAcl.PostProcess.CustomRules.length) {
+      runtimeProperties.PostProcess.CustomRuleCount += 1;
       const rule_calculated_capacity_json = [];
       const { CloudWatchMetricsEnabled, SampledRequestsEnabled } =
         config.WebAcl.PostProcess.CustomRules[count].VisibilityConfig;
@@ -296,6 +299,7 @@ async function calculateCapacities(
         },
       };
       if ("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action) {
+        runtimeProperties.PostProcess.CustomCaptchaRuleCount += 1;
         rule.CaptchaConfig =
           config.WebAcl.PostProcess.CustomRules[count].CaptchaConfig;
       }
@@ -341,6 +345,9 @@ async function calculateCapacities(
           "]"
       );
       runtimeProperties.ManagedRuleCapacity += capacity;
+      runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
+      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : ""
+      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : ""
     }
   }
   if (!config.WebAcl.PostProcess.ManagedRuleGroups) {
@@ -364,6 +371,9 @@ async function calculateCapacities(
           "]"
       );
       runtimeProperties.ManagedRuleCapacity += capacity;
+      runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
+      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : ""
+      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : ""
     }
   }
   runtimeProperties.PostProcess.Capacity = PostProcessCapacity;
@@ -428,15 +438,38 @@ export function initRuntimeProperties() : RuntimeProperties {
       DeployedRuleGroupCapacities: [],
       DeployedRuleGroupIdentifier: [],
       DeployedRuleGroupNames: [],
-      RuleCapacities: []
+      RuleCapacities: [],
+      ManagedRuleGroupCount: 0,
+      ManagedRuleBotControlCount: 0,
+      ManagedRuleATPCount: 0,
+      CustomRuleCount: 0,
+      CustomRuleGroupCount: 0,
+      CustomCaptchaRuleCount: 0
     },
     PreProcess: {
       Capacity: 0,
       DeployedRuleGroupCapacities: [],
       DeployedRuleGroupIdentifier: [],
       DeployedRuleGroupNames: [],
-      RuleCapacities: []
+      RuleCapacities: [],
+      ManagedRuleGroupCount: 0,
+      ManagedRuleBotControlCount: 0,
+      ManagedRuleATPCount: 0,
+      CustomRuleCount: 0,
+      CustomRuleGroupCount: 0,
+      CustomCaptchaRuleCount: 0
     },
+    Pricing: {
+      Policy: 0,
+      Rule: 0,
+      WebACL: 0,
+      Request: 0,
+      BotControl: 0,
+      BotControlRequest: 0,
+      Captcha: 0,
+      AccountTakeoverPrevention: 0,
+      AccountTakeoverPreventionRequest: 0,
+    }
   };
 }
 
