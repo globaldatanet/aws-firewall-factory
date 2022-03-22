@@ -130,13 +130,13 @@ export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promis
   const totalcost = fixedcost + (requestscost * 5) + (captchacost * 5);
   console.log("\n💰 Cost: \n");
   console.log("   WAF Rules cost: " + fixedcost + " $ per month");
-  console.log("   WAF Requests: "+ requestscost + " $ pro 1 mio requests");
+  console.log("   WAF Requests: "+ requestscost + " $ per 1 mio requests");
   (captchacost > 0) ? console.log("   WAF Analysis fee:\n    Captcha: " +captchacost +"$ per thousand challenge attempts analyzed") : " ";
   console.log("\n   Total WAF cost (monthly): "+ totalcost + " $ *");
   console.log("\n    * This costs are based on expectation that the WAF gets 5 mio requests per month. ");
   (atpfixedcost !== 0) ? console.log("\n    *This costs are based on expectation that 10.000 login attempts where analyzed. ") : "";
   console.log("\n   ℹ The costs are calculated based on the provided information at https://aws.amazon.com/waf/pricing/. ");
-  (botcontrolfixedcost !== 0) ? console.log("     The deployed WAF includes BotControl rules this costs an extra fee of "+runtimeProps.Pricing.BotControl +" $ and " +runtimeProps.Pricing.BotControlRequest +"$ pro 1 mio requests (10 mio request Free Tier). \n     These costs are already included in the price calculation.") : "";
+  (botcontrolfixedcost !== 0) ? console.log("     The deployed WAF includes BotControl rules this costs an extra fee of "+runtimeProps.Pricing.BotControl +" $ and " +runtimeProps.Pricing.BotControlRequest +"$ per 1 mio requests (10 mio request Free Tier). \n     These costs are already included in the price calculation.") : "";
   (atpfixedcost !== 0) ? console.log("     The deployed WAF includes Account Takeover Prevention rules this costs an extra fee of "+runtimeProps.Pricing.AccountTakeoverPrevention+" $ and " + runtimeProps.Pricing.AccountTakeoverPreventionRequest +" $ per thousand login attempts analyzed (10,000 attempts analyzed Free Tier). \n     These costs are already included in the price calculation.") : "";
   const pricecalculated = "True";
   return pricecalculated;
