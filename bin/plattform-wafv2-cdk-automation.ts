@@ -3,8 +3,9 @@ import { PlattformWafv2CdkAutomationStack } from "../lib/plattform-wafv2-cdk-aut
 import * as cdk from "aws-cdk-lib";
 import { realpathSync, existsSync } from "fs";
 import { validate } from "../lib/tools/config-validator";
-import { Config } from "../lib/types/config";
+import { Config, PriceRegions, RegionString } from "../lib/types/config";
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
+import {isPriceCalculated, GetCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
 
 /**
@@ -80,6 +81,8 @@ if (configFile && existsSync(configFile)) {
           account: process.env.CDK_DEFAULT_ACCOUNT,
         },
       });
+      const Prices = await GetCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties)
+      const PriceCalculated = await isPriceCalculated(runtimeProperties)
     })();
   } else {
     console.log(`

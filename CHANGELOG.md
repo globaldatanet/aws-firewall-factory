@@ -1,7 +1,11 @@
 # Change Log
 
 ## Released
+## 2.1.2
 
+### Added
+
+- Price calculation for your WAF
 ## 2.1.1
 
 ### Fixed

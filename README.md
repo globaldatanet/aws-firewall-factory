@@ -103,6 +103,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
     - Components of a label are separated by a colon (:).
 
+19. While Deployment the Price for your WAF will be calculated using the Pricing API
 ### Coming soon
 
 - Deployment via Teamcity
