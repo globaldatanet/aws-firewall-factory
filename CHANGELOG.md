@@ -5,7 +5,7 @@
 
 ### Added
 
-- Price calculation for you WAF
+- Price calculation for your WAF
 ## 2.1.1
 
 ### Fixed
