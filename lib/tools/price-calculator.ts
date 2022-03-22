@@ -27,7 +27,7 @@ function findValuesHelper(obj:any, key:string, list: any) {
   }
   if (obj[key]) list.push(obj[key]);
 
-  if ((typeof obj == "object") && (obj !== null) ){
+  if ((typeof obj === "object") && (obj !== null) ){
     const children = Object.keys(obj);
     if (children.length > 0){
       for (let i = 0; i < children.length; i++ ){
@@ -52,15 +52,15 @@ export async function GetCurrentPrices(deploymentRegion: PriceRegions, runtimePr
     runtimeProps.Pricing.Request =  (await getProductPrice(deploymentRegion,"awswaf",undefined,"Request") * 1000000);
     runtimeProps.Pricing.BotControl = Number(await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR Bot Control Entity"));
     const BotControlRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,undefined,"AMR Bot Control Request Processed");
-    runtimeProps.Pricing.BotControlRequest = (BotControlRequest[0] * 1000000)
-    runtimeProps.Pricing.Captcha = 0.4
+    runtimeProps.Pricing.BotControlRequest = (BotControlRequest[0] * 1000000);
+    runtimeProps.Pricing.Captcha = 0.4;
     runtimeProps.Pricing.AccountTakeoverPrevention = Number(await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Entity"));
-    const AccountTakeoverPreventionRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Login Attempt")
+    const AccountTakeoverPreventionRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Login Attempt");
     runtimeProps.Pricing.AccountTakeoverPreventionRequest = (AccountTakeoverPreventionRequest[0] * 1000);
-    return true
+    return true;
   }
   catch{
-    return false
+    return false;
   }
 }
 
@@ -73,31 +73,31 @@ export async function GetCurrentPrices(deploymentRegion: PriceRegions, runtimePr
  */
 async function getProductPrice(deploymentRegion: PriceRegions, servicecode: string, operation?: string,group?: string, groupDescription?: string): Promise<number> {
   const client = new PricingClient({region: PRICING_API_ENDPOINT_REGION});
-  const Filters: {Type: string, Field: string, Value: string}[] = []
+  const Filters: {Type: string, Field: string, Value: string}[] = [];
   if(groupDescription){
     Filters.push({
       Type: "TERM_MATCH",
       Field: "groupDescription",
-      Value: groupDescription})
+      Value: groupDescription});
   }
   if(group){
     Filters.push({
       Type: "TERM_MATCH",
       Field: "group",
-      Value: group})
+      Value: group});
   }
   if(operation){
     Filters.push({
       Type: "TERM_MATCH",
       Field: "operation",
       Value: operation
-    })
+    });
   }
   Filters.push({
     Type: "TERM_MATCH",
     Field: "location",
     Value: deploymentRegion
-  })
+  });
 
   const input: GetProductsCommandInput = {
     Filters,
@@ -120,14 +120,14 @@ async function getProductPrice(deploymentRegion: PriceRegions, servicecode: stri
  * @returns whether price is successfully calculated or not
  */
 export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promise<string> {
-  const preprocessfixedcost = (runtimeProps.PreProcess.CustomRuleCount * runtimeProps.Pricing.Rule) + runtimeProps.PreProcess.CustomRuleGroupCount + runtimeProps.PreProcess.ManagedRuleGroupCount
-  const postprocessfixedcost = (runtimeProps.PostProcess.CustomRuleCount * runtimeProps.Pricing.Rule) + runtimeProps.PostProcess.CustomRuleGroupCount + runtimeProps.PostProcess.ManagedRuleGroupCount
-  const captchacost = (runtimeProps.PostProcess.CustomCaptchaRuleCount + runtimeProps.PreProcess.CustomCaptchaRuleCount) * runtimeProps.Pricing.Captcha
-  const botcontrolfixedcost = (runtimeProps.PostProcess.ManagedRuleBotControlCount + runtimeProps.PreProcess.ManagedRuleBotControlCount) * runtimeProps.Pricing.BotControl
-  const atpfixedcost =  (runtimeProps.PostProcess.ManagedRuleATPCount + runtimeProps.PreProcess.ManagedRuleATPCount) * runtimeProps.Pricing.AccountTakeoverPrevention
-  const fixedcost = runtimeProps.Pricing.Policy + runtimeProps.Pricing.WebACL + postprocessfixedcost + preprocessfixedcost + botcontrolfixedcost  + atpfixedcost
+  const preprocessfixedcost = (runtimeProps.PreProcess.CustomRuleCount * runtimeProps.Pricing.Rule) + runtimeProps.PreProcess.CustomRuleGroupCount + runtimeProps.PreProcess.ManagedRuleGroupCount;
+  const postprocessfixedcost = (runtimeProps.PostProcess.CustomRuleCount * runtimeProps.Pricing.Rule) + runtimeProps.PostProcess.CustomRuleGroupCount + runtimeProps.PostProcess.ManagedRuleGroupCount;
+  const captchacost = (runtimeProps.PostProcess.CustomCaptchaRuleCount + runtimeProps.PreProcess.CustomCaptchaRuleCount) * runtimeProps.Pricing.Captcha;
+  const botcontrolfixedcost = (runtimeProps.PostProcess.ManagedRuleBotControlCount + runtimeProps.PreProcess.ManagedRuleBotControlCount) * runtimeProps.Pricing.BotControl;
+  const atpfixedcost =  (runtimeProps.PostProcess.ManagedRuleATPCount + runtimeProps.PreProcess.ManagedRuleATPCount) * runtimeProps.Pricing.AccountTakeoverPrevention;
+  const fixedcost = runtimeProps.Pricing.Policy + runtimeProps.Pricing.WebACL + postprocessfixedcost + preprocessfixedcost + botcontrolfixedcost  + atpfixedcost;
   const requestscost = runtimeProps.Pricing.Request;
-  const totalcost = fixedcost + (requestscost * 5) + (captchacost * 5)
+  const totalcost = fixedcost + (requestscost * 5) + (captchacost * 5);
   console.log("\n💰 Cost: \n");
   console.log("   WAF Rules cost: " + fixedcost + " $ per month");
   console.log("   WAF Requests: "+ requestscost + " $ pro 1 mio requests");
