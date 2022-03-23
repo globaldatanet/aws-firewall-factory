@@ -364,30 +364,30 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
     processRuntimeProps.DeployedRuleGroupCapacities[0] =
       processRuntimeProps.Capacity;
 
-    new cdk.CfnOutput(scope, "PreProcessDeployedRuleGroupNames", {
+    new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupNames", {
       value:
         processRuntimeProps.DeployedRuleGroupNames.toString(),
-      description: "PreProcessDeployedRuleGroupNames",
+      description: type+"ProcessDeployedRuleGroupNames",
       exportName:
-        "PreProcessDeployedRuleGroupNames" +
+        type+"ProcessDeployedRuleGroupNames" +
         deployHash,
     });
 
-    new cdk.CfnOutput(scope, "PreProcessDeployedRuleGroupCapacities", {
+    new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupCapacities", {
       value:
         processRuntimeProps.DeployedRuleGroupCapacities.toString(),
-      description: "PreProcessDeployedRuleGroupCapacities",
+      description: type+"ProcessDeployedRuleGroupCapacities",
       exportName:
-        "PreProcessDeployedRuleGroupCapacities" +
+        type+"ProcessDeployedRuleGroupCapacities" +
         deployHash,
     });
 
-    new cdk.CfnOutput(scope, "PreProcessDeployedRuleGroupIdentifier", {
+    new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupIdentifier", {
       value:
         processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
-      description: "PreProcessDeployedRuleGroupIdentifier",
+      description: type+"ProcessDeployedRuleGroupIdentifier",
       exportName:
-        "PreProcessDeployedRuleGroupIdentifier" +
+        type+"ProcessDeployedRuleGroupIdentifier" +
         deployHash,
     });
   } else {
