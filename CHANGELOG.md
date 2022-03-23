@@ -1,6 +1,13 @@
 # Change Log
 
 ## Released
+
+## 2.1.3
+
+### Fixed
+
+- Outputs for PostProcess and PreProcess Custom Rule not dynamic
+
 ## 2.1.2
 
 ### Added
