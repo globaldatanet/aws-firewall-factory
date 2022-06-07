@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
+import { aws_wafv2 as wafv2, Tag } from "aws-cdk-lib";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
@@ -138,10 +138,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         logDestinationConfigs: ["${S3DeliveryStream.Arn}"],
       },
     };
-
-    new fms.CfnPolicy(this, "CfnPolicy", {
-      excludeResourceTags: false,
-      remediationEnabled: false,
+    const CfnPolicyProps = {
+      remediationEnabled: props.config.WebAcl.RemediationEnabled ? props.config.WebAcl.RemediationEnabled : false,
       resourceType: props.config.WebAcl.Type,
       policyName:
         props.config.General.Prefix.toUpperCase() +
@@ -151,14 +149,19 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
         props.config.General.Stage +
         "-" +
         props.config.General.DeployHash,
-      includeMap: { account: props.config.General.DeployTo },
+      includeMap: props.config.WebAcl.IncludeMap,
+      excludeMap: props.config.WebAcl.ExcludeMap,
       securityServicePolicyData: {
         Type: "WAFV2",
         ManagedServiceData: cdk.Fn.sub(
           JSON.stringify(managedServiceData)
         ),
       },
-    });
+      resourcesCleanUp: props.config.WebAcl.ResourcesCleanUp ? props.config.WebAcl.ResourcesCleanUp : false,
+      resourceTags: props.config.WebAcl.ResourceTags,
+      excludeResourceTags: props.config.WebAcl.ExcludeResourceTags ? props.config.WebAcl.ExcludeResourceTags : false,
+    };
+    new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
 
     const options = { flag: "w", force: true };
     (async () => {

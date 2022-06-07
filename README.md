@@ -1,6 +1,8 @@
+[![Mentioned in Awesome CDK](https://awesome.re/mentioned-badge.svg)](https://github.com/kolomied/awesome-cdk)
 [![License: Apache2](https://img.shields.io/badge/license-Apache%202-lightgrey.svg)](http://www.apache.org/licenses/) [![cdk](https://img.shields.io/badge/aws_cdk-v2-orange.svg)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 [![latest](https://img.shields.io/badge/latest-release-yellow.svg)](https://github.com/globaldatanet/aws-firewall-factory/releases)
 [![gdn](https://img.shields.io/badge/opensource-@globaldatanet-%2300ecbd)](https://globaldatanet.com/opensource) [![dakn](https://img.shields.io/badge/by-dakn-%23ae0009.svg)](https://github.com/daknhh)
+[![language](https://img.shields.io/badge/typescript-3.9.7-purple.svg)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 
 # AWS FIREWALL FACTORY v2   [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=AWS%20FIREWALL%20FACTORY%20-%20Deploy%2C%20update%2C%20and%20stage%20your%20WAFs%20while%20managing%20them%20centrally%20via%20FMS&url=https://github.com/globaldatanet/aws-firewall-factory&hashtags=aws,security,waf)
 
@@ -40,7 +42,9 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 
 If you want to learn more about the AWS Firewall Factory feel free to look at the following media resources.
 
-- [📺 Webinar: Web Application Firewalls at Scale](https://globaldatanet.com/webinars/aws-security-with-security-in-the-cloud)
+- [📺 Webinar: Web Application Firewalls at Scale - Language: 🇩🇪](https://globaldatanet.com/webinars/aws-security-with-security-in-the-cloud)
+- [📺 Webinar: Managing AWS Web Application Firewalls at Scale - Language: 🇺🇸](https://globaldatanet.com/webinars/managing-aws-web-application-firewalls-at-scale)
+
 - [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 
 ## Architecture
@@ -81,7 +85,6 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
     |     Parameter      |                                           Value                                              |
     |--------------------|----------------------------------------------------------------------------------------------|
-    | PROCESS_PARAMETERS | path to values file eg. values/example-waf.json                                              |
     | SKIP_QUOTA_CHECK   | true (Stop deployment if calculated WCU is above the quota) </br> false (Skipping WCU Check) |
     | WAF_TEST           | true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)                    |
     | CREATE_DIAGRAM     | true (generating a diagram using draw.io) </br> false (Skipping diagram generation)          |
@@ -117,9 +120,9 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 ### Deployment via Taskfile
 
 0. Create new json file for you WAF and configure Rules in the JSON (see [example.json](values/example-waf.json) to see structure)
-1. Set `PROCESS_PARAMETERS` in `Taskfile.yml` for new json file
-2. Assume AWS Profile `awsume PROFILENAME`
-3. Enter `task deploy`
+1. Assume AWS Profile `awsume PROFILENAME`
+2. (Optional) Enter `task generateconfig`
+3. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 
 ## Contributors
 

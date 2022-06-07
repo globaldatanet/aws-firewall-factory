@@ -1,9 +1,9 @@
 import { Rule, ManagedRuleGroup } from "./fms";
+import { aws_fms as fms } from "aws-cdk-lib";
 export interface Config {
   readonly General: {
     readonly Prefix: string,
     readonly Stage: string,
-    readonly DeployTo: string[],
     readonly FireHoseKeyArn: string,
     readonly S3LoggingBucketName: string,
     DeployHash: string,
@@ -11,12 +11,20 @@ export interface Config {
   },
   readonly WebAcl:{
     readonly Name: string,
+    readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
+    readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
     readonly Scope: "CLOUDFRONT" | "REGIONAL",
-    readonly Type: string,
+    readonly Type: "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage",
+    readonly ResourceTags?: Array<fms.CfnPolicy.ResourceTagProperty>,
+    readonly ExcludeResourceTags?: boolean,
+    readonly RemediationEnabled?: boolean,
+    readonly ResourcesCleanUp?: boolean,
     readonly PreProcess: RuleGroupSet,
     readonly PostProcess: RuleGroupSet
   },
 }
+
+
 export type RegionString = "us-west-2" | "us-west-1" | "us-east-2" | "us-east-1" | "ap-south-1"| "ap-northeast-2" | "ap-northeast-1" | "ap-southeast-1" | "ap-southeast-2" | "ca-central-1" | "cn-north-1" | "eu-central-1" | "eu-west-1" | "eu-west-2" | "eu-west-3" | "sa-east-1" | "us-gov-west-1" | "ap-east-1" | "ap-southeast-3" | "ap-northeast-3" | "eu-south-1" | "eu-north-1" | "me-south-1";
 
 export enum PriceRegions{
