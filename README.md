@@ -42,7 +42,9 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 
 If you want to learn more about the AWS Firewall Factory feel free to look at the following media resources.
 
-- [📺 Webinar: Web Application Firewalls at Scale](https://globaldatanet.com/webinars/aws-security-with-security-in-the-cloud)
+- [📺 Webinar: Web Application Firewalls at Scale - Language: 🇩🇪](https://globaldatanet.com/webinars/aws-security-with-security-in-the-cloud)
+- [📺 Webinar: Managing AWS Web Application Firewalls at Scale - Language: 🇺🇸](https://globaldatanet.com/webinars/managing-aws-web-application-firewalls-at-scale)
+
 - [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 
 ## Architecture
