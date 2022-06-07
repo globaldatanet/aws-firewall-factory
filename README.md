@@ -121,7 +121,8 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 0. Create new json file for you WAF and configure Rules in the JSON (see [example.json](values/example-waf.json) to see structure)
 1. Assume AWS Profile `awsume PROFILENAME`
-2. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+2. (Optional) Enter `task generateconfig`
+3. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 
 ## Contributors
 
