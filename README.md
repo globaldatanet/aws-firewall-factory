@@ -81,7 +81,6 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
     |     Parameter      |                                           Value                                              |
     |--------------------|----------------------------------------------------------------------------------------------|
-    | PROCESS_PARAMETERS | path to values file eg. values/example-waf.json                                              |
     | SKIP_QUOTA_CHECK   | true (Stop deployment if calculated WCU is above the quota) </br> false (Skipping WCU Check) |
     | WAF_TEST           | true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)                    |
     | CREATE_DIAGRAM     | true (generating a diagram using draw.io) </br> false (Skipping diagram generation)          |
