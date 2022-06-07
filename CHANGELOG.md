@@ -2,6 +2,26 @@
 
 ## Released
 
+## 2.5.0
+
+### Added
+
+- Added:
+    - RemediationEnabled?: Indicates if the policy should be automatically applied to new resources.
+    - IncludeMap: Specifies the AWS account IDs and AWS Organizations organizational units (OUs) to include in the policy.
+    - ExcludeMap?: Specifies the AWS account IDs and AWS Organizations organizational units (OUs) to exclude from the policy.
+    - ResourceTags?: An array of ResourceTag objects, used to explicitly include resources in the policy scope or explicitly exclude them.
+    - ResourcesCleanUp?: Indicates whether AWS Firewall Manager should automatically remove protections from resources that leave the policy scope and clean up resources that Firewall Manager is managing for accounts when those accounts leave policy scope.
+    - TaskFile:
+        validateconfig: Validates the current config
+        generateconfig: Generate skeleton for a waf configuration file
+### Removed
+
+- DeployTo will now be managed trough the includeMap
+- Example JSON WAF
+### Changed:
+- A Firewall can now deployed using:  task deploy config=NAMEOFYOURCONFIGFILE without JSON 
+
 ## 2.1.3
 
 ### Fixed

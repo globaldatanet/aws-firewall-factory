@@ -1,6 +1,6 @@
 {
   "name": "plattform-wafv2-cdk-automation",
-  "version": "2.1.2",
+  "version": "2.5.0",
   "bin": {
     "plattform-wafv2-cdk-automation": "bin/plattform-wafv2-cdk-automation.js"
   },
@@ -23,7 +23,7 @@
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
-    "ts-node": "^9.0.0",
+    "ts-node": "^9.1.1",
     "typescript": "~3.9.7"
   },
   "dependencies": {
