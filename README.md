@@ -117,9 +117,8 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 ### Deployment via Taskfile
 
 0. Create new json file for you WAF and configure Rules in the JSON (see [example.json](values/example-waf.json) to see structure)
-1. Set `PROCESS_PARAMETERS` in `Taskfile.yml` for new json file
-2. Assume AWS Profile `awsume PROFILENAME`
-3. Enter `task deploy`
+1. Assume AWS Profile `awsume PROFILENAME`
+2. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 
 ## Contributors
 
