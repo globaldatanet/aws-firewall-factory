@@ -3,16 +3,14 @@ version: '3'
 env:
   SKIP_QUOTA_CHECK: true
   WAF_TEST: false
-  CREATE_DIAGRAM: false
+  CREATE_DIAGRAM: true
   CDK_DIFF: false
-
 vars:
   config: # without .json
   REGION:
     sh: echo $AWS_REGION
   CDK_DEFAULT_ACCOUNT:
     sh: aws sts get-caller-identity |jq -r .Account
-
 tasks:
   deploy:
     desc: Deploy Stack
@@ -32,6 +30,8 @@ tasks:
         sh: aws sts get-caller-identity |jq -r .Account
       TAGS:
         sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
+    env:
+      PROCESS_PARAMETERS: values/{{.config}}.json  
   clean:
     desc: Clean CDK Out
     cmds:
@@ -73,13 +73,15 @@ tasks:
   creatediagram:
     desc: Create Diagram
     cmds:
-      - if [[ {{.CREATE_DIAGRAM}} = true ]] ; then echo 🤳🏻 $(cfn-dia draw.io --cdk-output cdk.out --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< values/{{.config}}.json) --ci-mode --skip-synth); else echo ⏭   Skipping Diagram generation 🤳🏻 ; fi
+      - if [[ {{.CREATE_DIAGRAM}} = true ]] ; then echo 🤳🏻 $(cfn-dia draw.io -t cdk.out/"$(cat values/{{.config}}.json | jq -r '.General.Prefix')-WAF-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')".template.json --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< values/{{.config}}.json) --ci-mode --skip-synth); else echo ⏭   Skipping Diagram generation 🤳🏻 ; fi
     silent: true
+    env:
+      PROCESS_PARAMETERS: values/{{.config}}.json
   testwaf:
     desc: Test of your waf using GoTestWAF
     cmds:
       - echo 🧪  Testing of your new 🔥 WAF using GoTestWAF
-      - ./gotestwaf/gotestwaf --url=$(cat values/{{.config}}.json | jq -r '.[].SecuredDomain') --wafName="$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck
+      - ./gotestwaf/gotestwaf --url=$(cat values/{{.config}}.json | jq -r '.[].SecuredDomain') --workers 50 --blockConnReset  --tlsVerify --wafName="$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --verbose --skipWAFBlockCheck --reportName /waf-evaluation-report-"$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')"
     silent: true
     preconditions:
       - sh: if [[ {{.WAF_TEST}} = true ]] ; then exit 0; else exit 1; fi
@@ -101,3 +103,6 @@ tasks:
     cmds:
       - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-skeleton.ts ; fi
     silent: true
+
+
+      

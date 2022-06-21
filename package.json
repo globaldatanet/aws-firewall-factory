@@ -1,6 +1,6 @@
 {
   "name": "plattform-wafv2-cdk-automation",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "bin": {
     "plattform-wafv2-cdk-automation": "bin/plattform-wafv2-cdk-automation.js"
   },
