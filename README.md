@@ -6,7 +6,8 @@
 
 # AWS FIREWALL FACTORY v2   [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=AWS%20FIREWALL%20FACTORY%20-%20Deploy%2C%20update%2C%20and%20stage%20your%20WAFs%20while%20managing%20them%20centrally%20via%20FMS&url=https://github.com/globaldatanet/aws-firewall-factory&hashtags=aws,security,waf)
 
-Deploy, update, and stage your WAFs while managing them centrally via FMS
+<img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?description=1&font=Raleway&issues=1&logo=https://raw.githubusercontent.com/globaldatanet/aws-firewall-factory/master/static/icon/firewallfactory.svg&
+pattern=Solid&stargazers=1&theme=Dark" alt="AWSFirewallFactory" width="640" height="320" />
 
 ## Table of contents
 
@@ -44,6 +45,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 - [📺 Webinar: Web Application Firewalls at Scale - Language: 🇩🇪](https://globaldatanet.com/webinars/aws-security-with-security-in-the-cloud)
 - [📺 Webinar: Managing AWS Web Application Firewalls at Scale - Language: 🇺🇸](https://globaldatanet.com/webinars/managing-aws-web-application-firewalls-at-scale)
+- [📊 Slides: Managing AWS Web Application Firewalls at Scale - Language: 🇺🇸](https://docs.google.com/presentation/d/1jE_DmNk0cCc1XM8eBYPM2za0pzGyg9Lv/edit?usp=sharing&ouid=115444461121738087344&rtpof=true&sd=true)
 
 - [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 
