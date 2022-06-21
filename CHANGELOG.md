@@ -1,7 +1,10 @@
 # Change Log
 
 ## Released
+## 2.5.1
 
+### Fixed
+- Diagram Creation using template parameter
 ## 2.5.0
 
 ### Added
