@@ -6,8 +6,7 @@
 
 # AWS FIREWALL FACTORY v2   [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=AWS%20FIREWALL%20FACTORY%20-%20Deploy%2C%20update%2C%20and%20stage%20your%20WAFs%20while%20managing%20them%20centrally%20via%20FMS&url=https://github.com/globaldatanet/aws-firewall-factory&hashtags=aws,security,waf)
 
-<img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?description=1&font=Raleway&issues=1&logo=https://raw.githubusercontent.com/globaldatanet/aws-firewall-factory/master/static/icon/firewallfactory.svg&
-pattern=Solid&stargazers=1&theme=Dark" alt="AWSFirewallFactory" width="640" height="320" />
+<img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?description=1&font=Raleway&issues=1&logo=https://raw.githubusercontent.com/globaldatanet/aws-firewall-factory/master/static/icon/firewallfactory.svg&pattern=Solid&stargazers=1&theme=Dark" alt="AWSFirewallFactory" width="640" height="320" />
 
 ## Table of contents
 
