@@ -142,7 +142,7 @@ Want to contribute to **AWS FIREWALL FACTORY**? Check out the [Contribution docs
 
 ### 👏 Supporters
 
-[![Stargazers repo roster for @globaldatanet/aws-firewall-factory](https://reporoster.com/stars/dark/globaldatanet/aws-firewall-factory)](https://github.com/globaldatanet/aws-firewall-factory/stargazers)
+[![Stargazers repo roster for @globaldatanet/aws-firewall-factory](https://reporoster.com/stars/globaldatanet/aws-firewall-factory)](https://github.com/globaldatanet/aws-firewall-factory/stargazers)
 
 </br>
 
