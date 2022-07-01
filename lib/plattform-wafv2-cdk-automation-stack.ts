@@ -197,8 +197,9 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
 
       if(props.config.WebAcl.IncludeMap.account){
         const infowidget = new cloudwatch.TextWidget({
-          markdown: "# "+webaclName+"\n + Deployed to "+props.config.WebAcl.IncludeMap.account.toString(),
-          width: 24
+          markdown: "# 🔥 "+webaclName+"\n + 🏗  Deployed to: \n\n 📦 Accounts: "+props.config.WebAcl.IncludeMap.account.toString() + "\n\n 🌎 Region: " + region + "\n\n 💡 Type: " + props.config.WebAcl.Type,
+          width: 24,
+          height: 4
         });
         const firstrow = new cloudwatch.Row(infowidget);
         cwdashboard.addWidgets(firstrow);
@@ -207,7 +208,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           const countexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\CountedRequests\"', '\Sum', 300)";
 
           const CountedRequests = new cloudwatch.GraphWidget({
-            title: "CountedRequests in " + account,
+            title: "💯 CountedRequests in " + account,
             width: 8,
             height: 8
           });
@@ -218,14 +219,14 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               label: "CountedRequests",
               searchAccount: account,
               searchRegion: region,
-              color: "#0000FF"
+              color: "#00FF00"
             }));
 
 
           const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
           
           const BlockedRequests = new cloudwatch.GraphWidget({
-            title: "BlockedRequests in " + account,
+            title: "❌ BlockedRequests in " + account,
             width: 8,
             height: 8
           });
@@ -236,12 +237,12 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               label: "BlockedRequests",
               searchAccount: account,
               searchRegion: region,
-              color: "#ff0000"
+              color: "#4169e1"
             }));
 
           const allowedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\AllowedRequests\"', '\Sum', 300)";
           const AllowedRequests = new cloudwatch.GraphWidget({
-            title: "AllowedRequests in " + account,
+            title: "✅ AllowedRequests in " + account,
             width: 8,
             height: 8
           });
@@ -252,7 +253,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               label: "AllowedRequests",
               searchAccount: account,
               searchRegion: region,
-              color: "#ff0000"
+              color: "#00FF00"
             }));
 
           const sinlevaluecountedrequestsexpression = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"CountedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
@@ -264,7 +265,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           const expression6 = "SUM([e1,e2,-e3,-e4])";
           
           const botrequestsvsnonbotrequests = new cloudwatch.GraphWidget({
-            title: "Bot requests vs Non-bot requests in " + account,
+            title: "🤖 Bot requests vs 😁 Non-bot requests in " + account,
             width: 24,
             height: 8
           });
@@ -279,7 +280,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               label: "Bot requests",
               searchAccount: account,
               searchRegion: region,
-              color: "#FF7F0E"
+              color: "#4169e1"
             }));
           botrequestsvsnonbotrequests.addLeftMetric(new cloudwatch.MathExpression({
             expression: expression6,
@@ -292,13 +293,13 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
             label: "Non-bot requests",
             searchAccount: account,
             searchRegion: region,
-            color: "#1F77B4"
+            color: "#00FF00"
           }));
 
 
           
           const sinlevaluecountedrequests = new cloudwatch.SingleValueWidget({
-            title: "Counted Request in" + account,
+            title: "💯 Counted Request in " + account,
             metrics: [
               new cloudwatch.MathExpression({
                 expression: "SUM(" +sinlevaluecountedrequestsexpression +")",
@@ -306,14 +307,14 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 label: "CountedRequests",
                 searchAccount: account,
                 searchRegion: region,
-                color: "#ff0000"
+                color: "#4169e1"
               })
             ],
             width: 8,
             height: 3
           });
           const singlevalueallowedrequest = new cloudwatch.SingleValueWidget({
-            title: "Allowed Request in" + account,
+            title: "✅ Allowed Request in " + account,
             metrics: [
               new cloudwatch.MathExpression({
                 expression: "SUM(" +expression1 +")",
@@ -321,14 +322,14 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 label: "AllowedRequests",
                 searchAccount: account,
                 searchRegion: region,
-                color: "#ff0000"
+                color: "#00FF00"
               })
             ],
             width: 8,
             height: 3
           });
           const singlevaluebockedrequest = new cloudwatch.SingleValueWidget({
-            title: "Blocked Request in" + account,
+            title: "❌ Blocked Request in " + account,
             metrics: [
               new cloudwatch.MathExpression({
                 expression: "SUM(" +expression2 +")",
