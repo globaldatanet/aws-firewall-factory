@@ -54,7 +54,7 @@ tasks:
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - cdk deploy --require-approval never {{.TAGS}} --strict
+      - cdk deploy --require-approval never {{.TAGS}} --strict false --trace false
       - rm -f $(find ./cdk.out/*assets.json -type f)
     vars:
       ACCOUNT:

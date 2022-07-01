@@ -8,6 +8,7 @@ export interface Config {
     readonly S3LoggingBucketName: string,
     DeployHash: string,
     readonly SecuredDomain: string,
+    readonly CreateDashboard?: boolean,
   },
   readonly WebAcl:{
     readonly Name: string,
