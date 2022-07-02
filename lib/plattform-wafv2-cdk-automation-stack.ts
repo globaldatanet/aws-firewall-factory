@@ -11,7 +11,12 @@ import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import { promises as fsp } from "fs";
 import { toAwsCamel } from "./tools/helpers";
 import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
+import * as packageJsonObject from "../package.json";
 
+/**
+ * Version of the AWS Firewall Factory - extracted from package.json
+ */
+const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
@@ -198,17 +203,27 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       if(props.config.WebAcl.IncludeMap.account){
         const infowidget = new cloudwatch.TextWidget({
           markdown: "# 🔥 "+webaclName+"\n + 🏗  Deployed to: \n\n 📦 Accounts: "+props.config.WebAcl.IncludeMap.account.toString() + "\n\n 🌎 Region: " + region + "\n\n 💡 Type: " + props.config.WebAcl.Type,
-          width: 24,
+          width: 18,
           height: 4
         });
-        const firstrow = new cloudwatch.Row(infowidget);
+        const app = new cloudwatch.TextWidget({
+          markdown: "ℹ️ Link to your secured  \n\n [button:Application]("+props.config.General.SecuredDomain+")",
+          width: 3,
+          height: 4
+        });
+        const fwfactory = new cloudwatch.TextWidget({
+          markdown: "**AWS FIREWALL FACTORY** \n\n ![Image](https://github.com/globaldatanet/aws-firewall-factory/raw/master/static/icon/firewallfactory.png) \n\n 🏷 Version: " + FIREWALL_FACTORY_VERSION,
+          width: 3,
+          height: 4
+        });
+        const firstrow = new cloudwatch.Row(infowidget,app,fwfactory);
         cwdashboard.addWidgets(firstrow);
         for(const account of props.config.WebAcl.IncludeMap.account){
 
           const countexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\CountedRequests\"', '\Sum', 300)";
 
           const CountedRequests = new cloudwatch.GraphWidget({
-            title: "💯 CountedRequests in " + account,
+            title: "🔢 Counted Requests in " + account,
             width: 8,
             height: 8
           });
@@ -219,14 +234,14 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               label: "CountedRequests",
               searchAccount: account,
               searchRegion: region,
-              color: "#00FF00"
+              color: "#9dbcd4"
             }));
 
 
           const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
           
           const BlockedRequests = new cloudwatch.GraphWidget({
-            title: "❌ BlockedRequests in " + account,
+            title: "❌ Blocked Requests in " + account,
             width: 8,
             height: 8
           });
@@ -237,12 +252,12 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               label: "BlockedRequests",
               searchAccount: account,
               searchRegion: region,
-              color: "#4169e1"
+              color: "#ff0000"
             }));
 
           const allowedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\AllowedRequests\"', '\Sum', 300)";
           const AllowedRequests = new cloudwatch.GraphWidget({
-            title: "✅ AllowedRequests in " + account,
+            title: "✅ Allowed Requests in " + account,
             width: 8,
             height: 8
           });
@@ -280,7 +295,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               label: "Bot requests",
               searchAccount: account,
               searchRegion: region,
-              color: "#4169e1"
+              color: "#ff0000"
             }));
           botrequestsvsnonbotrequests.addLeftMetric(new cloudwatch.MathExpression({
             expression: expression6,
@@ -297,9 +312,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           }));
 
 
-          
           const sinlevaluecountedrequests = new cloudwatch.SingleValueWidget({
-            title: "💯 Counted Request in " + account,
+            title: "🔢 Counted Request in " + account,
             metrics: [
               new cloudwatch.MathExpression({
                 expression: "SUM(" +sinlevaluecountedrequestsexpression +")",
@@ -307,7 +321,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
                 label: "CountedRequests",
                 searchAccount: account,
                 searchRegion: region,
-                color: "#4169e1"
+                color: "#9dbcd4"
               })
             ],
             width: 8,
