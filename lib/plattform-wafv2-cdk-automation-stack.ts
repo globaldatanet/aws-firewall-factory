@@ -404,7 +404,7 @@ function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : Ser
     if(managedRuleGroup.Version !== ""){
       version = "**"+ managedRuleGroup.Version+"**";
     }
-    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"]" + version);
+    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] " + version);
   }
   return cfnManagedRuleGroup;
 }
