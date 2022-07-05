@@ -203,16 +203,23 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       if(props.config.WebAcl.IncludeMap.account){
         const infowidget = new cloudwatch.TextWidget({
           markdown: "# 🔥 "+webaclName+"\n + 🏗  Deployed to: \n\n 📦 Accounts: "+props.config.WebAcl.IncludeMap.account.toString() + "\n\n 🌎 Region: " + region + "\n\n 💡 Type: " + props.config.WebAcl.Type,
-          width: 18,
+          width: 14,
           height: 4
         });
         const app = new cloudwatch.TextWidget({
-          markdown: "ℹ️ Link to your secured  \n\n [button:Application]("+props.config.General.SecuredDomain+")",
-          width: 3,
+          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + ManagedRuleGroupsInfo.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+props.config.General.SecuredDomain+")",
+          width: 7,
           height: 4
         });
+        let fwmessage = "";
+        if(process.env.LASTEST_FIREWALLFACTORY_VERSION !== FIREWALL_FACTORY_VERSION){
+          fwmessage = "🚨 old or beta version";
+        }
+        else{
+          fwmessage = "💚 latest version";
+        }
         const fwfactory = new cloudwatch.TextWidget({
-          markdown: "**AWS FIREWALL FACTORY** \n\n ![Image](https://github.com/globaldatanet/aws-firewall-factory/raw/master/static/icon/firewallfactory.png) \n\n 🏷 Version: " + FIREWALL_FACTORY_VERSION,
+          markdown: "**AWS FIREWALL FACTORY** \n\n ![Image](https://github.com/globaldatanet/aws-firewall-factory/raw/master/static/icon/firewallfactory.png) \n\n 🏷 Version: [" + FIREWALL_FACTORY_VERSION + "](https://github.com/globaldatanet/aws-firewall-factory/releases/tag/" + FIREWALL_FACTORY_VERSION + ")  \n" + fwmessage,
           width: 3,
           height: 4
         });
@@ -380,7 +387,7 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     })();
   }
 }
-
+const ManagedRuleGroupsInfo: string[]= [""];
 function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : ServiceDataManagedRuleGroup[] {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
@@ -395,6 +402,7 @@ function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : Ser
       excludeRules: managedRuleGroup.ExcludeRules ?  toAwsCamel(managedRuleGroup.ExcludeRules) : [],
       ruleGroupType: "ManagedRuleGroup"
     });
+    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] "+ managedRuleGroup.Version);
   }
   return cfnManagedRuleGroup;
 }

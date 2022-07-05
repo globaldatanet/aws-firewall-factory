@@ -1,4 +1,4 @@
-import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput } from "@aws-sdk/client-wafv2";
+import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput } from "@aws-sdk/client-wafv2";
 import * as quota from "@aws-sdk/client-service-quotas";
 import * as cloudformation from "@aws-sdk/client-cloudformation";
 import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
@@ -6,7 +6,6 @@ import { Rule } from "../types/fms";
 import * as lodash from "lodash";
 import { RuntimeProperties } from "../types/runtimeprops";
 import { Config } from "../types/config";
-
 /**
  * Service Quota Code for Firewall Manager Total WAF WCU in account & region
  */
@@ -134,6 +133,32 @@ async function getManagedRuleCapacity(deploymentRegion: string, vendor: string, 
   }
 }
 
+
+/**
+ *
+ * @param deploymentRegion AWS region, e.g. eu-central-1
+ * @param vendor vendor of the Managed Rule Group
+ * @param rgName vame of the Managed Rule Group
+ * @param scope whether scope is REGIONAL or CLOUDFRONT
+ * @returns returns the CurrentDefaultVersion of the Managed Rule Group
+ */
+export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string, vendor: string, rgName: string, scope: string): Promise<string>{
+  const client = new WAFV2Client({ region: deploymentRegion});
+  const input: ListAvailableManagedRuleGroupVersionsCommandInput = {
+    VendorName: vendor,
+    Name: rgName,
+    Scope: scope,
+    Limit: 5,
+  };
+  const command = new ListAvailableManagedRuleGroupVersionsCommand(input);
+  const response: any = await client.send(command);
+  if(response.Versions.length > 0){
+    return response.Versions[0].Name;
+  }
+  else{
+    return "";
+  }
+}
 /**
  * Writes outputs from an existing stack into the specified runtime props
  * @param deploymentRegion AWS region, e.g. eu-central-1
@@ -329,6 +354,7 @@ async function calculateCapacities(
   } else {
     console.log(" 🥇 PreProcess: ");
     for (const managedrule of config.WebAcl.PreProcess.ManagedRuleGroups) {
+      managedrule.Version ? managedrule.Version : managedrule.Version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.Vendor, managedrule.Name, config.WebAcl.Scope);
       const capacity = await getManagedRuleCapacity(
         deploymentRegion,
         managedrule.Vendor,
@@ -346,8 +372,8 @@ async function calculateCapacities(
       );
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
-      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : ""
-      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : ""
+      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
+      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
     }
   }
   if (!config.WebAcl.PostProcess.ManagedRuleGroups) {
@@ -355,6 +381,7 @@ async function calculateCapacities(
   } else {
     console.log("\n 🥈 PostProcess: ");
     for (const managedrule of config.WebAcl.PostProcess.ManagedRuleGroups) {
+      managedrule.Version ? managedrule.Version : managedrule.Version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.Vendor, managedrule.Name, config.WebAcl.Scope);
       const capacity = await getManagedRuleCapacity(
         deploymentRegion,
         managedrule.Vendor,
@@ -372,8 +399,8 @@ async function calculateCapacities(
       );
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
-      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : ""
-      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : ""
+      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
+      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
     }
   }
   runtimeProperties.PostProcess.Capacity = PostProcessCapacity;
