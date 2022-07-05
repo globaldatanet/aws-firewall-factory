@@ -243,10 +243,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               searchRegion: region,
               color: "#9dbcd4"
             }));
-
-
           const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
-          
+
           const BlockedRequests = new cloudwatch.GraphWidget({
             title: "❌ Blocked Requests in " + account,
             width: 8,
@@ -402,7 +400,7 @@ function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : Ser
       excludeRules: managedRuleGroup.ExcludeRules ?  toAwsCamel(managedRuleGroup.ExcludeRules) : [],
       ruleGroupType: "ManagedRuleGroup"
     });
-    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] "+ managedRuleGroup.Version);
+    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] **"+ managedRuleGroup.Version+"**");
   }
   return cfnManagedRuleGroup;
 }
