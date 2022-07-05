@@ -400,7 +400,11 @@ function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : Ser
       excludeRules: managedRuleGroup.ExcludeRules ?  toAwsCamel(managedRuleGroup.ExcludeRules) : [],
       ruleGroupType: "ManagedRuleGroup"
     });
-    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] **"+ managedRuleGroup.Version+"**");
+    let version ="";
+    if(managedRuleGroup.Version !== ""){
+      version = "**"+ managedRuleGroup.Version+"**";
+    }
+    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"]" + version);
   }
   return cfnManagedRuleGroup;
 }
