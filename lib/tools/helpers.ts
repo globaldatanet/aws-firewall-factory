@@ -370,6 +370,7 @@ async function calculateCapacities(
           managedrule.Capacity +
           "]"
       );
+      managedrule.Version ? console.log("      🏷  Latest " + managedrule.Version) : console.log("");
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
       managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
@@ -397,6 +398,7 @@ async function calculateCapacities(
           managedrule.Capacity +
           "]"
       );
+      managedrule.Version ? console.log("      🏷  Latest " + managedrule.Version) : console.log("");
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
       managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
