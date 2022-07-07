@@ -5,6 +5,7 @@ env:
   WAF_TEST: false
   CREATE_DIAGRAM: true
   CDK_DIFF: false
+
 vars:
   config: # without .json
   REGION:
@@ -56,7 +57,7 @@ tasks:
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - cdk deploy --require-approval never {{.TAGS}} --strict false --trace false
+      - cdk deploy --require-approval never {{.TAGS}}
       - rm -f $(find ./cdk.out/*assets.json -type f)
     vars:
       ACCOUNT:
@@ -105,6 +106,3 @@ tasks:
     cmds:
       - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-skeleton.ts ; fi
     silent: true
-
-
-      
