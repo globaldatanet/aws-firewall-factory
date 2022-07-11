@@ -49,7 +49,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 #### Useful Links
 
-- [🐦🤖 Twitter Bot to get Notified for Managed Rules Updates](https://twitter.com/ManagedRulesBot)
+- [🐦🤖 Twitter Bot to get Notified for Managed Rules Updates](https://twitter.com/AWSMgMtRulesBot)
 - [🔔 Slack automation to get Notified for Managed Rules Updates](https://github.com/globaldatanet/WAF-Managed-Rules-Update-Slack-Notification-Service)
 - [🏫 AWS WAF Workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/c2f03000-cf61-42a6-8e62-9eaf04907417/en-US/02-custom-rules)
 ## Architecture
