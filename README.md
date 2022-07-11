@@ -47,6 +47,10 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 - [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 
+#### Useful Links
+
+- [🐦🤖 Twitter Bot to get Notified for Managed Rules Updates](https://twitter.com/ManagedRulesBot)
+- [🏫 AWS WAF Workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/c2f03000-cf61-42a6-8e62-9eaf04907417/en-US/02-custom-rules)
 ## Architecture
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
