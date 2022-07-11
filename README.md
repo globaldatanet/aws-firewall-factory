@@ -121,7 +121,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
     - Bot vs Non-bot Requests
 
 See example:
-![FirewallDashboard]()
+![FirewallDashboard](./static/FirewallDashboard.jpg)
 
 ## Deployment
 
