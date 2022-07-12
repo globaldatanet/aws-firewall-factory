@@ -111,7 +111,6 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
 
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
-    console.log("Creating DEFAULT Policy.");
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
       preProcessRuleGroups.push(...buildServiceDataManagedRGs(props.config.WebAcl.PreProcess.ManagedRuleGroups));
     } else {
@@ -171,6 +170,14 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
     const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
+      console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", props.config.General.Prefix.toUpperCase() +
+      "-" +
+      props.config.WebAcl.Name +
+      "-" +
+      props.config.General.Stage +
+      "-" +
+      props.config.General.DeployHash,"\u001b[0m");
+      console.log("   ℹ️  Warnings for Math expressions can be ignored.");
       const cwdashboard = new cloudwatch.Dashboard(this, "cloudwatch-dashboard", {
         dashboardName: props.config.General.Prefix.toUpperCase() +
         "-" +
@@ -244,7 +251,6 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
               color: "#9dbcd4"
             }));
           const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
-
           const BlockedRequests = new cloudwatch.GraphWidget({
             title: "❌ Blocked Requests in " + account,
             width: 8,

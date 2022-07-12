@@ -114,7 +114,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 19. While Deployment the Price for your WAF will be calculated using the Pricing API
 
 20. Dashboard - The Firewall Factory is able to provision a CloudWatch Dashboard per Firewall.
-  Dashboard includes:
+  The Dashboard shows:
     - Where the WAF is deployed to [AWS Region and Account(s)]
     - Which resource type you are securing
     - Which Managed Rule Groups in which version are in use
@@ -133,6 +133,9 @@ See example:
 ### Prerequisites
 
 1. An central S3 Bucket with **write** permission for the security account needs to be in place.
+
+2. (Optional) If you want to use the CreateDashboard Feature to get a Dashboard deployed for your Firewall in the central Security Account, the cross-account functionality in CloudWatch must be enabled.
+To enable enable your account to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) how to.
 
 ### Deployment via Taskfile
 

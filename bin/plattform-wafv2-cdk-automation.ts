@@ -8,6 +8,7 @@ import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRunti
 import {isPriceCalculated, GetCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
 
+
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
  */
@@ -67,7 +68,7 @@ if (configFile && existsSync(configFile)) {
         await setOutputsFromStack(deploymentRegion, runtimeProperties, config);
         console.log("#️⃣  Deployment Hash for this WAF: "+  config.General.DeployHash);
       }
-      console.log("🔥 Deploy FMS Policy: " + config.General.Prefix.toUpperCase() + "-" + config.WebAcl.Name.toUpperCase()+ "-" + config.General.Stage + "-" + config.General.DeployHash + "\n ⦂ Type: " +config.WebAcl.Type + "\n📚 Stackname: " + config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase());
+      console.log("🔥 Deploy FMS Policy: " + config.General.Prefix.toUpperCase() + "-" + config.WebAcl.Name.toUpperCase()+ "-" + config.General.Stage + "-" + config.General.DeployHash + "\n ⦂ Type: " +config.WebAcl.Type + "\n📚 Stackname: ","\u001b[32m",config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase(),"\u001b[0m");
       const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
       if(wcuQuotaReached) {
         console.error("\u001B[31m","🚨 Exit process due Quota Check for WCU 🚨 \n\n","\x1b[0m" + "\n\n");
