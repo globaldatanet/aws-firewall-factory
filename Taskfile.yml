@@ -5,15 +5,14 @@ env:
   WAF_TEST: false
   CREATE_DIAGRAM: true
   CDK_DIFF: false
-
+  LASTEST_FIREWALLFACTORY_VERSION:
+    sh: curl --silent "https://api.github.com/repos/globaldatanet/aws-firewall-factory/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 vars:
   config: # without .json
   REGION:
     sh: echo $AWS_REGION
   CDK_DEFAULT_ACCOUNT:
     sh: aws sts get-caller-identity |jq -r .
-  LASTEST_FIREWALLFACTORY_VERSION:
-    sh: curl --silent "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 tasks:
   deploy:
     desc: Deploy Stack
