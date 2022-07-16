@@ -1,6 +1,14 @@
 # Change Log
 
 ## Released
+## 3.0.0
+
+- Added CloudWatch Dashboarding - Set "CreateDashboard": true to get a Dashboard deployed for your Firewall in the central Security Account. To use this Feature the cross-account functionality in CloudWatch must be enabled.
+To enable your account to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) how to.
+
+### Changed:
+- If you leave the version for a ManagedRuleGroup empty the Firewall Factory will retrieve the latest version of the ManageRuleGroup and add it to your configuration.
+
 ## 2.5.1
 
 ### Fixed

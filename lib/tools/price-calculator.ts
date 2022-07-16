@@ -52,15 +52,15 @@ export async function GetCurrentPrices(deploymentRegion: PriceRegions, runtimePr
     runtimeProps.Pricing.Request =  (await getProductPrice(deploymentRegion,"awswaf",undefined,"Request") * 1000000);
     runtimeProps.Pricing.BotControl = Number(await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR Bot Control Entity"));
     const BotControlRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,undefined,"AMR Bot Control Request Processed");
-    runtimeProps.Pricing.BotControlRequest = (BotControlRequest[0] * 1000000)
-    runtimeProps.Pricing.Captcha = 0.4
+    runtimeProps.Pricing.BotControlRequest = (BotControlRequest[0] * 1000000);
+    runtimeProps.Pricing.Captcha = 0.4;
     runtimeProps.Pricing.AccountTakeoverPrevention = Number(await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Entity"));
-    const AccountTakeoverPreventionRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Login Attempt")
+    const AccountTakeoverPreventionRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Login Attempt");
     runtimeProps.Pricing.AccountTakeoverPreventionRequest = (AccountTakeoverPreventionRequest[0] * 1000);
-    return true
+    return true;
   }
   catch{
-    return false
+    return false;
   }
 }
 
@@ -78,7 +78,7 @@ async function getProductPrice(deploymentRegion: PriceRegions, servicecode: stri
     Filters.push({
       Type: "TERM_MATCH",
       Field: "groupDescription",
-      Value: groupDescription})
+      Value: groupDescription});
   }
   if(group){
     Filters.push({

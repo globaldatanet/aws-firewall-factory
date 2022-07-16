@@ -5,12 +5,15 @@ env:
   WAF_TEST: false
   CREATE_DIAGRAM: true
   CDK_DIFF: false
+
 vars:
   config: # without .json
   REGION:
     sh: echo $AWS_REGION
   CDK_DEFAULT_ACCOUNT:
-    sh: aws sts get-caller-identity |jq -r .Account
+    sh: aws sts get-caller-identity |jq -r .
+  LASTEST_FIREWALLFACTORY_VERSION:
+    sh: curl --silent "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 tasks:
   deploy:
     desc: Deploy Stack
@@ -54,7 +57,7 @@ tasks:
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - cdk deploy --require-approval never {{.TAGS}} --strict
+      - cdk deploy --require-approval never {{.TAGS}}
       - rm -f $(find ./cdk.out/*assets.json -type f)
     vars:
       ACCOUNT:
@@ -103,6 +106,3 @@ tasks:
     cmds:
       - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-skeleton.ts ; fi
     silent: true
-
-
-      

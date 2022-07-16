@@ -47,6 +47,11 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 - [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 
+#### Useful Links
+
+- [🐦🤖 Twitter Bot to get Notified for Managed Rules Updates](https://twitter.com/AWSMgMtRulesBot)
+- [🔔 Slack automation to get Notified for Managed Rules Updates](https://github.com/globaldatanet/WAF-Managed-Rules-Update-Slack-Notification-Service)
+- [🏫 AWS WAF Workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/c2f03000-cf61-42a6-8e62-9eaf04907417/en-US/02-custom-rules)
 ## Architecture
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
@@ -104,18 +109,33 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
     - You can specify up to five namespaces in a label.
 
-    - Components of a label are separated by a colon (:).
+    - Components of a label are separated by a colon ( : ).
 
 19. While Deployment the Price for your WAF will be calculated using the Pricing API
-### Coming soon
 
-- Deployment via Teamcity
+20. Dashboard - The Firewall Factory is able to provision a CloudWatch Dashboard per Firewall.
+  The Dashboard shows:
+    - Where the WAF is deployed to [AWS Region and Account(s)]
+    - Which resource type you are securing
+    - Which Managed Rule Groups in which version are in use
+    - Link to Managed Rule Groups documentation
+    - Direct Link to your secured Application / Endpoint
+    - AWS Firewall Factory version
+    - Check if the AWS Firewall Factory version is the latest or not during rollout
+    - Allowed / Blocked and Counted Requests
+    - Bot vs Non-bot Requests
+
+See example:
+![FirewallDashboard](./static/FirewallDashboard.jpg)
 
 ## Deployment
 
 ### Prerequisites
 
 1. An central S3 Bucket with **write** permission for the security account needs to be in place.
+
+2. (Optional) If you want to use the CreateDashboard Feature to get a Dashboard deployed for your Firewall in the central Security Account, the cross-account functionality in CloudWatch must be enabled.
+To enable enable your account to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) how to.
 
 ### Deployment via Taskfile
 

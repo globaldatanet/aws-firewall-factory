@@ -1,6 +1,6 @@
 {
   "name": "plattform-wafv2-cdk-automation",
-  "version": "2.5.1",
+  "version": "3.0.0",
   "bin": {
     "plattform-wafv2-cdk-automation": "bin/plattform-wafv2-cdk-automation.js"
   },
@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.52.0",
+    "@aws-sdk/client-cloudwatch": "^3.131.0",
     "@aws-sdk/client-fms": "^3.52.0",
     "@aws-sdk/client-pricing": "^3.54.1",
     "@aws-sdk/client-service-quotas": "^3.52.0",

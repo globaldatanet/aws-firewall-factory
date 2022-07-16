@@ -7,7 +7,8 @@ const skeletonConfig : Config = {
     Prefix: "myPrefix",
     Stage: "dev|int|clone|live",
     S3LoggingBucketName: "myBucketName",
-    SecuredDomain: "yourapp.<stage>.<domain>"
+    SecuredDomain: "yourapp.<stage>.<domain>",
+    CreateDashboard: true,
   },
   WebAcl: {
     IncludeMap: {
