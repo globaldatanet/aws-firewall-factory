@@ -14,6 +14,7 @@ export interface ResourcePrices {
     Captcha: number,
     AccountTakeoverPrevention: number,
     AccountTakeoverPreventionRequest: number,
+    Dashboard: number
 }
 
 export interface ProcessProperties {

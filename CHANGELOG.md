@@ -1,6 +1,10 @@
 # Change Log
 
 ## Released
+
+## 3.0.1
+
+- Added Cost Calculation for CloudWatch Dashboarding - The CloudWatch Dashboard will now be included in the cost calculation for the WAF. 
 ## 3.0.0
 
 - Added CloudWatch Dashboarding - Set "CreateDashboard": true to get a Dashboard deployed for your Firewall in the central Security Account. To use this Feature the cross-account functionality in CloudWatch must be enabled.
