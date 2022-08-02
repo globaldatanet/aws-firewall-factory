@@ -3,7 +3,7 @@
 ## Released
 
 ## 3.0.2
-
+### Added
 - Added Cost Calculation for CloudWatch Dashboarding - The CloudWatch Dashboard will now be included in the cost calculation for the WAF.
 
 ## 3.0.1
