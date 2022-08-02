@@ -498,6 +498,7 @@ export function initRuntimeProperties() : RuntimeProperties {
       Captcha: 0,
       AccountTakeoverPrevention: 0,
       AccountTakeoverPreventionRequest: 0,
+      Dashboard: 0
     }
   };
 }

@@ -1,6 +1,11 @@
 # Change Log
 
 ## Released
+
+## 3.0.2
+
+- Added Cost Calculation for CloudWatch Dashboarding - The CloudWatch Dashboard will now be included in the cost calculation for the WAF.
+
 ## 3.0.1
 ### Fixed
 Fix AWS Firewall Factory check for Dashboard
