@@ -63,7 +63,6 @@ export async function GetCurrentPrices(deploymentRegion: PriceRegions, runtimePr
     const AccountTakeoverPreventionRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Login Attempt");
     runtimeProps.Pricing.AccountTakeoverPreventionRequest = (AccountTakeoverPreventionRequest[0] * 1000);
     runtimeProps.Pricing.Dashboard = await getDashboardPrice(awsregion,config);
-    console.log(runtimeProps.Pricing.Dashboard);
     return true;
   }
   catch{
@@ -177,7 +176,7 @@ export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promis
   console.log("\n   ℹ The costs are calculated based on the provided information at https://aws.amazon.com/waf/pricing/. ");
   (botcontrolfixedcost !== 0) ? console.log("     The deployed WAF includes BotControl rules this costs an extra fee of "+runtimeProps.Pricing.BotControl +" $ and " +runtimeProps.Pricing.BotControlRequest +"$ pro 1 mio requests (10 mio request Free Tier). \n     These costs are already included in the price calculation.") : "";
   (atpfixedcost !== 0) ? console.log("     The deployed WAF includes Account Takeover Prevention rules this costs an extra fee of "+runtimeProps.Pricing.AccountTakeoverPrevention+" $ and " + runtimeProps.Pricing.AccountTakeoverPreventionRequest +" $ per thousand login attempts analyzed (10,000 attempts analyzed Free Tier). \n     These costs are already included in the price calculation.") : "";
-  (runtimeProps.Pricing.Dashboard !== 0) ? console.log("     The deployed WAF includes CloudWatch Dashboard and you have more than 3 Dashboards (Free tier), so you will need to pay " + runtimeProps.Pricing.Dashboard+ " $ for this CloudWatch Dashboard. \n     These costs are already included in the price calculation.") : "";
+  (runtimeProps.Pricing.Dashboard !== 0) ? console.log("     The deployed WAF includes CloudWatch Dashboard and you have more than 3 Dashboards (Free tier), so you will need to pay " + runtimeProps.Pricing.Dashboard+ "$ for this CloudWatch Dashboard. \n     These costs are already included in the price calculation.") : "";
   console.log("\n\n");
   const pricecalculated = "True";
   return pricecalculated;
