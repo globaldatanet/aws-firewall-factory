@@ -4,6 +4,7 @@
 [![gdn](https://img.shields.io/badge/opensource-@globaldatanet-%2300ecbd)](https://globaldatanet.com/opensource) [![dakn](https://img.shields.io/badge/by-dakn-%23ae0009.svg)](https://github.com/daknhh)
 [![language](https://img.shields.io/badge/typescript-3.9.7-purple.svg)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=AWS%20FIREWALL%20FACTORY%20-%20Deploy%2C%20update%2C%20and%20stage%20your%20WAFs%20while%20managing%20them%20centrally%20via%20FMS&url=https://github.com/globaldatanet/aws-firewall-factory&hashtags=aws,security,waf)
+[![roadmap](https://img.shields.io/badge/public-roadmap-yellow.svg)](https://github.com/orgs/globaldatanet/projects/1)
 
 <img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?description=1&font=Raleway&issues=1&logo=https://raw.githubusercontent.com/globaldatanet/aws-firewall-factory/master/static/icon/firewallfactory.svg&pattern=Solid&stargazers=1&theme=Dark" alt="AWSFirewallFactory" width="900" height="320"/>
 
