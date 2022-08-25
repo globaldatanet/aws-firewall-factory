@@ -83,7 +83,12 @@ tasks:
     desc: Test of your waf using GoTestWAF
     cmds:
       - echo 🧪  Testing of your new 🔥 WAF using GoTestWAF
-      - ./gotestwaf/gotestwaf --url=$(cat values/{{.config}}.json | jq -r '.[].SecuredDomain') --workers 50 --blockConnReset  --tlsVerify --wafName="$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --verbose --skipWAFBlockCheck --reportName /waf-evaluation-report-"$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')"
+      - |
+        items=$(cat values/{{.config}}.json | jq -r '.[] | .SecuredDomain[]?')
+        for item in ${items[@]}; do
+            echo "Using fqdn in 🖥 url : $item"
+            ./gotestwaf/gotestwaf --url https://$item --workers 50 --blockConnReset  --wafName="$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck --reportPath "./waf-evaluation-report/$(date '+%Y-%m-%d')" --reportName "$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')"
+        done
     silent: true
     preconditions:
       - sh: if [[ {{.WAF_TEST}} = true ]] ; then exit 0; else exit 1; fi

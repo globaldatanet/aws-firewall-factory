@@ -213,8 +213,11 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
           width: 14,
           height: 4
         });
+
+        const SecuredDomain = props.config.General.SecuredDomain.toString();
+
         const app = new cloudwatch.TextWidget({
-          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + ManagedRuleGroupsInfo.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+props.config.General.SecuredDomain+")",
+          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + ManagedRuleGroupsInfo.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+SecuredDomain+")",
           width: 7,
           height: 4
         });

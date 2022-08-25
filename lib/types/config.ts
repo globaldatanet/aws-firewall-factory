@@ -7,7 +7,7 @@ export interface Config {
     readonly FireHoseKeyArn: string,
     readonly S3LoggingBucketName: string,
     DeployHash: string,
-    readonly SecuredDomain: string,
+    readonly SecuredDomain: Array<string>,
     readonly CreateDashboard?: boolean,
   },
   readonly WebAcl:{

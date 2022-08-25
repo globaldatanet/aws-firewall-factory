@@ -2,6 +2,11 @@
 
 ## Released
 
+## 3.0.3
+### Added
+- Added multi domainname usage in waf-test
+### Fixed
+- Old GoTestWAF was deprecated. Updated to Version v0.3.1-178-g415bb4c
 ## 3.0.2
 ### Added
 - Added Cost Calculation for CloudWatch Dashboarding - The CloudWatch Dashboard will now be included in the cost calculation for the WAF.
