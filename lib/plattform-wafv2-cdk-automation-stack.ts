@@ -158,8 +158,8 @@ export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
       includeMap: props.config.WebAcl.IncludeMap,
       excludeMap: props.config.WebAcl.ExcludeMap,
       securityServicePolicyData: {
-        Type: "WAFV2",
-        ManagedServiceData: cdk.Fn.sub(
+        type: "WAFV2",
+        managedServiceData: cdk.Fn.sub(
           JSON.stringify(managedServiceData)
         ),
       },
