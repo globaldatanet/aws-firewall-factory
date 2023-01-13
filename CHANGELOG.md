@@ -1,6 +1,10 @@
 # Change Log
 
 ## Released
+## 3.1.0
+### Added
+- Added OWASP TOP TEN Example Config
+- Added OWASP TOP TEN Example Config Generation
 
 ## 3.0.3
 ### Added

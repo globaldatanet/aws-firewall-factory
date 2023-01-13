@@ -1,0 +1,64 @@
+{
+    "General": {
+      "Prefix": "",
+      "Stage": "",
+      "FireHoseKeyArn": "",
+      "DeployHash": "",
+      "SecuredDomain": [
+        ""
+      ],
+      "S3LoggingBucketName": "",
+      "CreateDashboard": true
+    },
+    "WebAcl": {
+      "Name": "owasptopten",
+      "Scope": "REGIONAL",
+      "Type": "",
+      "IncludeMap": {
+        "account": [
+          ""
+        ]
+      },
+      "PreProcess": {
+        "ManagedRuleGroups": [
+          {
+            "Vendor": "AWS",
+            "Name": "AWSManagedRulesAmazonIpReputationList",
+            "Version": "",
+            "Capacity": 25
+          },
+          {
+            "Vendor": "AWS",
+            "Name": "AWSManagedRulesAnonymousIpList",
+            "Version": "",
+            "Capacity": 50
+          },
+          {
+            "Vendor": "AWS",
+            "Name": "AWSManagedRulesBotControlRuleSet",
+            "Version": "",
+            "Capacity": 50
+          },
+          {
+            "Vendor": "AWS",
+            "Name": "AWSManagedRulesCommonRuleSet",
+            "Version": "",
+            "Capacity": 700
+          },
+          {
+            "Vendor": "AWS",
+            "Name": "AWSManagedRulesKnownBadInputsRuleSet",
+            "Version": "",
+            "Capacity": 200
+          },
+          {
+            "Vendor": "AWS",
+            "Name": "AWSManagedRulesSQLiRuleSet",
+            "Version": "",
+            "Capacity": 200
+          }
+        ],
+      },
+      "PostProcess": {}
+    }
+  }

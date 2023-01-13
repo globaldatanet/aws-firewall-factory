@@ -110,3 +110,8 @@ tasks:
     cmds:
       - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-skeleton.ts ; fi
     silent: true
+  generateowasptoptenconfig:
+    desc: Generate skeleton for a waf configuration file with owasp top 10
+    cmds:
+      - if [[ "{{.config}}" ]] ; then ts-node lib/tools/get-owasp-top10-waf.ts >> values/{{.config}}.json ; else ts-node lib/tools/get-owasp-top10-waf.ts ; fi
+    silent: true
