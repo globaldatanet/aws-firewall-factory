@@ -136,13 +136,14 @@ See example:
 ### Prerequisites
 
 1. [Organizations trusted access with Firewall Manager](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-fms.html)
-2. [AWS CDK](https://aws.amazon.com/cdk/)
-3. [cfn-dia](https://www.npmjs.com/package/@mhlabs/cfn-diagram?s=03)
-4. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
+2. [Taskfile](https://taskfile.dev/)
+3. [AWS CDK](https://aws.amazon.com/cdk/)
+4. [cfn-dia](https://www.npmjs.com/package/@mhlabs/cfn-diagram?s=03)
+5. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
 
-5. An central S3 Bucket with **write** permission for the security account needs to be in place.
+6. An central S3 Bucket with **write** permission for the security account needs to be in place.
 
-6. (Optional) If you want to use the CreateDashboard Feature to get a Dashboard deployed for your Firewall in the central Security Account, the cross-account functionality in CloudWatch must be enabled.
+7. (Optional) If you want to use the CreateDashboard Feature to get a Dashboard deployed for your Firewall in the central Security Account, the cross-account functionality in CloudWatch must be enabled.
 To enable enable your account to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) how to.
 
 ### Deployment via Taskfile

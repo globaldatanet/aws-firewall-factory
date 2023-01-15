@@ -6,6 +6,9 @@
 - Added OWASP TOP TEN Example Config
 - Added OWASP TOP TEN Example Config Generation
 
+### Fixed
+- Updated Prequisites section in Readme
+
 ## 3.0.3
 ### Added
 - Added multi domainname usage in waf-test
