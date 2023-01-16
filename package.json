@@ -1,8 +1,8 @@
 {
-  "name": "plattform-wafv2-cdk-automation",
+  "name": "aws-firewall-factory",
   "version": "3.0.2",
   "bin": {
-    "plattform-wafv2-cdk-automation": "bin/plattform-wafv2-cdk-automation.js"
+    "firewallfactory": "bin/aws-firewall-factory.js"
   },
   "scripts": {
     "build": "tsc",

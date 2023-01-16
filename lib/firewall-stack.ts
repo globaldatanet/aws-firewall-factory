@@ -23,7 +23,7 @@ export interface ConfigStackProps extends cdk.StackProps {
   runtimeProperties: RuntimeProperties;
 }
 
-export class PlattformWafv2CdkAutomationStack extends cdk.Stack {
+export class FirewallStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ConfigStackProps) {
     super(scope, id, props);
     const account_id = cdk.Aws.ACCOUNT_ID;
