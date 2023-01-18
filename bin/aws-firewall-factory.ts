@@ -35,7 +35,7 @@ if (configFile && existsSync(configFile)) {
     if(validateprerequisites(prerequisites)){
       (async () => {
         console.log(`
-      █████╗ ██╗    ██╗███████╗    ███████╗██╗██████╗ ███████╗██╗    ██╗ █████╗ ██╗     ██╗         ███████╗ █████╗  ██████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
+       █████╗ ██╗    ██╗███████╗    ███████╗██╗██████╗ ███████╗██╗    ██╗ █████╗ ██╗     ██╗         ███████╗ █████╗  ██████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
       ██╔══██╗██║    ██║██╔════╝    ██╔════╝██║██╔══██╗██╔════╝██║    ██║██╔══██╗██║     ██║         ██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
       ███████║██║ █╗ ██║███████╗    █████╗  ██║██████╔╝█████╗  ██║ █╗ ██║███████║██║     ██║         █████╗  ███████║██║        ██║   ██║   ██║██████╔╝ ╚████╔╝
       ██╔══██║██║███╗██║╚════██║    ██╔══╝  ██║██╔══██╗██╔══╝  ██║███╗██║██╔══██║██║     ██║         ██╔══╝  ██╔══██║██║        ██║   ██║   ██║██╔══██╗  ╚██╔╝
@@ -44,15 +44,15 @@ if (configFile && existsSync(configFile)) {
       `);
         console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
         console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-        console.log("👤 AWS Profile used: ","\x1b[33m","\n                      " + process.env.AWSUME_PROFILE,"\x1b[0m");
-        console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+process.env.REGION,"\x1b[0m \n");
+        console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
+        console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+process.env.AWS_REGION,"\x1b[0m \n");
 
         console.log("ℹ️   Deploying Prequisites Stack.");
         const app = new cdk.App();
         new PrerequisitesStack(app, config.General.Prefix.toUpperCase() + "-AWS-FIREWALL-FACTORY-PREQUISITES", {
           prerequisites,
           env: {
-            region: process.env.REGION,
+            region: process.env.AWS_REGION,
             account: process.env.CDK_DEFAULT_ACCOUNT,
           },
         });
@@ -90,7 +90,7 @@ if (configFile && existsSync(configFile)) {
     `);
       console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
       console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-      console.log("👤 AWS Profile used: ","\x1b[33m","\n                      " + process.env.AWSUME_PROFILE,"\x1b[0m");
+      console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
       console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentRegion,"\x1b[0m \n");
       (async () => {
         const isNewStack = (config.General.DeployHash === "");
