@@ -36,7 +36,7 @@ export interface Prerequisites {
         readonly KmsEncryptionKey: boolean,
         readonly ObjectLock?: {
           readonly Days: number,
-          readonly Mode: ObjectLockMode
+          readonly Mode: "GOVERNANCE" | "COMPLIANCE"
         }
 
       },

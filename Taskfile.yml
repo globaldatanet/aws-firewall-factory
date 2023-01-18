@@ -115,3 +115,8 @@ tasks:
     cmds:
       - if [[ "{{.config}}" ]] ; then ts-node lib/tools/get-owasp-top10-waf.ts >> values/{{.config}}.json ; else ts-node lib/tools/get-owasp-top10-waf.ts ; fi
     silent: true
+  generateprerequisitesskeleton:
+    desc: Generate skeleton for a prerequisites configuration
+    cmds:
+      - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-prerequisites-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-prerequisites-skeleton.ts ; fi
+    silent: true
