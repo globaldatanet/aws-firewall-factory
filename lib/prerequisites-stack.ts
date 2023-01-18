@@ -28,7 +28,7 @@ export class PrerequisitesStack extends cdk.Stack {
       }
     }
     if(props.prerequisites.Logging.BucketProperties){
-      console.log("🪣  Creating Bucket with Name: AWS-Firewall-Factory-Logging");
+      console.log("\n🪣  Creating Bucket with Name: AWS-Firewall-Factory-Logging");
       let encryptionKey = undefined;
       if(props.prerequisites.Logging.BucketProperties?.KmsEncryptionKey){
         console.log("🔑  Creating KMS Key for: AWS-Firewall-Factory-Logging Bucket.");
@@ -82,7 +82,7 @@ export class PrerequisitesStack extends cdk.Stack {
       }
       if(props.prerequisites.Logging.BucketProperties?.ObjectLock) {
         console.log("➕ Adding ObjectLock to Bucket: AWS-Firewall-Factory-Logging \n");
-        console.log("⚙️ Settings: \n Retention-Days: " + props.prerequisites.Logging.BucketProperties?.ObjectLock?.Days + "\n RetentionMode: " + props.prerequisites.Logging.BucketProperties?.ObjectLock?.Mode);
+        console.log("⚙️  Settings: \n Retention-Days: " + props.prerequisites.Logging.BucketProperties?.ObjectLock?.Days + "\n RetentionMode: " + props.prerequisites.Logging.BucketProperties?.ObjectLock?.Mode);
         // Get the CloudFormation resource because L2 Construct doenst support this Property
         const cfnBucket = bucket.node.defaultChild as s3.CfnBucket;
         // Add the ObjectLockConfiguration prop to the Bucket's CloudFormation output.
