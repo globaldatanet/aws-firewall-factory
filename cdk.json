@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/plattform-wafv2-cdk-automation.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/aws-firewall-factory.ts",
   "context": {
     "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": true,
     "@aws-cdk/core:stackRelativeExports": true,
