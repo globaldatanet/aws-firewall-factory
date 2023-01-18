@@ -4,10 +4,11 @@ env:
   SKIP_QUOTA_CHECK: true
   WAF_TEST: false
   CREATE_DIAGRAM: true
-  CDK_DIFF: false
+  CDK_DIFF: true
   LASTEST_FIREWALLFACTORY_VERSION:
     sh: curl --silent "https://api.github.com/repos/globaldatanet/aws-firewall-factory/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 vars:
+  prerequisites:
   config: # without .json
   REGION:
     sh: echo $AWS_REGION
@@ -48,6 +49,7 @@ tasks:
     interactive: true
     env:
       PROCESS_PARAMETERS: values/{{.config}}.json
+      PREREQUISITES: "{{.prerequisites}}"
     preconditions:
       - sh: "test {{.config}}"
         msg: "config Variable was not set"
@@ -70,6 +72,7 @@ tasks:
         msg: "Values file not found: values/{{.config}}.json"
     env:
       PROCESS_PARAMETERS: values/{{.config}}.json
+      PREREQUISITES: "{{.prerequisites}}"
     silent: true
     interactive: true
   creatediagram:
