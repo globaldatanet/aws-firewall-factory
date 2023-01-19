@@ -49,7 +49,7 @@ tasks:
     interactive: true
     env:
       PROCESS_PARAMETERS: values/{{.config}}.json
-      PREREQUISITE: "{{.prerequisites}}"
+      PREREQUISITE: "{{.prerequisite}}"
     preconditions:
       - sh: "test {{.config}}"
         msg: "config Variable was not set"
@@ -72,7 +72,7 @@ tasks:
         msg: "Values file not found: values/{{.config}}.json"
     env:
       PROCESS_PARAMETERS: values/{{.config}}.json
-      PREREQUISITE: "{{.prerequisites}}"
+      PREREQUISITE: "{{.prerequisite}}"
     silent: true
     interactive: true
   creatediagram:

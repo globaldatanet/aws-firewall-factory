@@ -31,7 +31,7 @@ export class PrerequisitesStack extends cdk.Stack {
       console.log("\n🪣  Creating Bucket with Name: AWS-Firewall-Factory-Logging");
       let encryptionKey = undefined;
       if(props.prerequisites.Logging.BucketProperties?.KmsEncryptionKey){
-        console.log("🔑  Creating KMS Key for: AWS-Firewall-Factory-Logging Bucket.");
+        console.log("   🔑 Creating KMS Key for: AWS-Firewall-Factory-Logging Bucket.");
         encryptionKey = new kms.Key(this, "AWS-Firewall-Factory-LoggingEncryptionKey", {
           enableKeyRotation: true,
           alias: props.prerequisites.General.Prefix.toLocaleLowerCase() + "-AWS-Firewall-Factory-" + "LogsKey"
@@ -77,12 +77,12 @@ export class PrerequisitesStack extends cdk.Stack {
       });
 
       if(props.prerequisites.Logging.CrossAccountIdforPermissions) {
-        console.log("➕ Adding CrossAccount Permission for Bucket: AWS-Firewall-Factory-Logging");
+        console.log("   ➕ Adding CrossAccount Permission for Bucket: AWS-Firewall-Factory-Logging");
         bucket.grantReadWrite(new iam.AccountPrincipal(props.prerequisites.Logging.CrossAccountIdforPermissions));
       }
       if(props.prerequisites.Logging.BucketProperties?.ObjectLock) {
-        console.log("➕ Adding ObjectLock to Bucket: AWS-Firewall-Factory-Logging \n");
-        console.log("⚙️  Settings: \n Retention-Days: " + props.prerequisites.Logging.BucketProperties?.ObjectLock?.Days + "\n RetentionMode: " + props.prerequisites.Logging.BucketProperties?.ObjectLock?.Mode);
+        console.log("   ➕ Adding ObjectLock to Bucket: AWS-Firewall-Factory-Logging \n");
+        console.log("   ⚙️  Settings: \n      🗓️  Retention-Days: " + props.prerequisites.Logging.BucketProperties?.ObjectLock?.Days + "\n      🛡️  Retention-Mode: " + props.prerequisites.Logging.BucketProperties?.ObjectLock?.Mode + "\n\n");
         // Get the CloudFormation resource because L2 Construct doenst support this Property
         const cfnBucket = bucket.node.defaultChild as s3.CfnBucket;
         // Add the ObjectLockConfiguration prop to the Bucket's CloudFormation output.
