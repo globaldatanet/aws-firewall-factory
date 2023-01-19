@@ -143,13 +143,24 @@ See example:
 
 6. Assume AWS Profile `awsume PROFILENAME`
 7. (Optional) Enter `task generateprerequisitesconfig`
+
+  | Parameter  | Value |
+  | ------------- | ------------- |
+  | Prefix  | Prefix for all Resources  |
+  | BucketName [^1] | Name of the S3 Bucket |
+  | KmsEncryptionKey | true or false  |
+  | ObjectLock - Days [^1]| A period of Days for ObjectLock |
+  | ObjectLock - Mode [^1]| COMPLIANCE or GOVERNANCE |
+  | FireHoseKey - KeyAlias [^1] | Alias for Key |
+  | CrossAccountIdforPermissions [^1] | Id of AWS Account for CrossAccount Permission for Bucket and KMS Key(s)|
+
 8. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
 ### Deployment via Taskfile
 
-0. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
-1. Assume AWS Profile `awsume PROFILENAME`
-2. (Optional) Enter `task generateconfig`
-3. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+1. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
+2. Assume AWS Profile `awsume PROFILENAME`
+3. (Optional) Enter `task generateconfig`
+4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 
 ## Contributors
 
@@ -174,3 +185,5 @@ Want to contribute to **AWS FIREWALL FACTORY**? Check out the [Contribution docs
 </br>
 
 <p align="center"><a href="https://github.com/globaldatanet/aws-firewall-factory"><img src="./static/barsSmallTransparentBackground.gif" width="100%"/></a></p>
+
+[^1]: Optional Fields. 
