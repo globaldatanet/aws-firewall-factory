@@ -5,7 +5,7 @@
 ### Added
 - Added OWASP TOP TEN Example Config
 - Added OWASP TOP TEN Example Config Generation
-- Added Prerequisite Stack Config Generation - Creates Skeleton of Parameters for the Prerequisite Stac
+- Added Prerequisite Stack Config Generation - Creates Skeleton of Parameters for the Prerequisite Stack
 - Added Prerequisite Stack:
   - Creation of S3 Bucket for Logs (Optional)
     - Optional Settings: ObjectLock and Kms Encrytion (Default SSE), CrossAccount Access to the Key and Bucket
