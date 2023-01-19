@@ -141,14 +141,12 @@ See example:
 4. [cfn-dia](https://www.npmjs.com/package/@mhlabs/cfn-diagram?s=03)
 5. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
 
-6. An central S3 Bucket with **write** permission for the security account needs to be in place.
-
-7. (Optional) If you want to use the CreateDashboard Feature to get a Dashboard deployed for your Firewall in the central Security Account, the cross-account functionality in CloudWatch must be enabled.
-To enable enable your account to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) how to.
-
+6. Assume AWS Profile `awsume PROFILENAME`
+7. (Optional) Enter `task generateprerequisitesconfig`
+8. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
 ### Deployment via Taskfile
 
-0. Create new json file for you WAF and configure Rules in the JSON (see [example.json](values/example-waf.json) to see structure)
+0. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
 1. Assume AWS Profile `awsume PROFILENAME`
 2. (Optional) Enter `task generateconfig`
 3. Enter `task deploy config=NAMEOFYOURCONFIGFILE`

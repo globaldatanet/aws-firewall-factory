@@ -31,7 +31,7 @@ if (configFile && existsSync(configFile)) {
   const config: Config = require(realpathSync(configFile));
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const prerequisites: Prerequisites = require(realpathSync(configFile));
-  if(process.env.PREREQUISITES === "true"){
+  if(process.env.PREREQUISITE === "true"){
     if(validateprerequisites(prerequisites)){
       (async () => {
         console.log(`
