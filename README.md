@@ -139,10 +139,11 @@ See example:
 2. [Taskfile](https://taskfile.dev/)
 3. [AWS CDK](https://aws.amazon.com/cdk/)
 4. [cfn-dia](https://www.npmjs.com/package/@mhlabs/cfn-diagram?s=03)
-5. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
+5. Invoke `npm i` to install dependencies
+6. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
 
-6. Assume AWS Profile `awsume PROFILENAME`
-7. (Optional) Enter `task generateprerequisitesconfig`
+7. Assume AWS Profile `awsume PROFILENAME`
+8. (Optional) Enter `task generateprerequisitesconfig`
 
   | Parameter  | Value |
   | ------------- | ------------- |
@@ -154,7 +155,7 @@ See example:
   | FireHoseKey - KeyAlias [^1] | Alias for Key |
   | CrossAccountIdforPermissions [^1] | Id of AWS Account for CrossAccount Permission for Bucket and KMS Key(s)|
 
-8. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
+9. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
 ### Deployment via Taskfile
 
 1. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
