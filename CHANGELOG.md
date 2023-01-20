@@ -11,9 +11,12 @@
     - Optional Settings: ObjectLock and Kms Encrytion (Default SSE), CrossAccount Access to the Key and Bucket
   - Creation of KMS Key for FireHose (Optional)
     - Optional Settings: CrossAccount Access to the Key
+- RuleActionOverride for ManagedRuleGroups: Action setting to use in the place of a rule action that is configured inside the rule group. You specify one override for each rule whose action you want to change.
+
 ### Fixed
 - Updated Prequisites section in Readme
 - Overwrite Action without Exclude Rules for Managed Rule Groups
+
 
 ## 3.0.3
 ### Added

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 export interface ManagedRuleGroup {
   Vendor: string,
   Name: string,
@@ -6,7 +7,24 @@ export interface ManagedRuleGroup {
   ExcludeRules?: NameObject[],
   OverrideAction?: {
     type: "COUNT" | "NONE"
-  }
+  },
+  RuleActionOverrides?: [
+    {
+      Name: string,
+      ActionToUse: | {
+        Block: {}
+      }
+      | {
+        Allow: {}
+      }
+      | {
+        Count: {}
+      }
+      | {
+        Captcha: {}
+      }
+    }
+  ]
 }
 
 export interface Rule {
@@ -51,6 +69,23 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
   },
   excludeRules: any,
   ruleGroupType: "ManagedRuleGroup",
+  ruleActionOverrides: [
+    {
+      Name: string,
+      ActionToUse: | {
+        Block: {}
+      }
+      | {
+        Allow: {}
+      }
+      | {
+        Count: {}
+      }
+      | {
+        Captcha: {}
+      }
+    }
+  ] | [],
 }
 
 export interface ServiceDataRuleGroup extends ServiceDataAbstactRuleGroup {

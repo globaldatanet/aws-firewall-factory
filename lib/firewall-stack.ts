@@ -407,7 +407,8 @@ function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : Ser
       overrideAction: managedRuleGroup.OverrideAction ? managedRuleGroup.OverrideAction : { type: "NONE" },
       ruleGroupArn: null,
       excludeRules: managedRuleGroup.ExcludeRules ?  toAwsCamel(managedRuleGroup.ExcludeRules) : [],
-      ruleGroupType: "ManagedRuleGroup"
+      ruleGroupType: "ManagedRuleGroup",
+      ruleActionOverrides: managedRuleGroup.RuleActionOverrides ?  managedRuleGroup.RuleActionOverrides : [],
     });
     let version ="";
     if(managedRuleGroup.Version !== ""){

@@ -4,7 +4,7 @@ env:
   SKIP_QUOTA_CHECK: true
   WAF_TEST: false
   CREATE_DIAGRAM: true
-  CDK_DIFF: true
+  CDK_DIFF: false
   LASTEST_FIREWALLFACTORY_VERSION:
     sh: curl --silent "https://api.github.com/repos/globaldatanet/aws-firewall-factory/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 vars:
