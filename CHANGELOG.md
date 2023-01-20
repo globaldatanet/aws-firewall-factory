@@ -13,6 +13,7 @@
     - Optional Settings: CrossAccount Access to the Key
 ### Fixed
 - Updated Prequisites section in Readme
+- Overwrite Action without Exclude Rules for Managed Rule Groups
 
 ## 3.0.3
 ### Added
