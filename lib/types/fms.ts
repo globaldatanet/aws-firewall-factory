@@ -11,17 +11,9 @@ export interface ManagedRuleGroup {
   RuleActionOverrides?: [
     {
       Name: string,
-      ActionToUse: | {
-        Block: {}
-      }
-      | {
-        Allow: {}
-      }
-      | {
+      ActionToUse:
+      {
         Count: {}
-      }
-      | {
-        Captcha: {}
       }
     }
   ]
@@ -70,21 +62,13 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
   excludeRules: any,
   ruleGroupType: "ManagedRuleGroup",
   ruleActionOverrides: [
-    {
-      Name: string,
-      ActionToUse: | {
-        Block: {}
+      {
+        Name: string,
+        ActionToUse:
+        {
+          Count: {}
+        }
       }
-      | {
-        Allow: {}
-      }
-      | {
-        Count: {}
-      }
-      | {
-        Captcha: {}
-      }
-    }
   ] | [],
 }
 
