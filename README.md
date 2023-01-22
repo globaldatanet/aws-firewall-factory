@@ -60,6 +60,11 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
 
+
+<details>
+    <summary> Features</summary>
+   <div>
+
 ## Features
 
 1. Automated capactiy calculation via [API - CheckCapacity](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html)
@@ -132,10 +137,16 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 See example:
 ![FirewallDashboard](./static/FirewallDashboard.jpg)
 
+</div>
+</details>
+
 ## Deployment
 
-### Prerequisites
+<details>
+    <summary> Prerequisites</summary>
+   <div>
 
+### Prerequisites
 1. [Organizations trusted access with Firewall Manager](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-fms.html)
 2. [Taskfile](https://taskfile.dev/)
 3. [AWS CDK](https://aws.amazon.com/cdk/)
@@ -157,6 +168,14 @@ See example:
   | CrossAccountIdforPermissions [^1] | Id of AWS Account for CrossAccount Permission for Bucket and KMS Key(s)|
 
 9. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
+
+</div>
+</details>
+
+<details>
+    <summary> Deployment via Taskfile </summary>
+   <div>
+
 ### Deployment via Taskfile
 
 1. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
@@ -174,6 +193,10 @@ See example:
 Any form of contribution is welcome. The above contributors have been officially released by globaldatanet.
 </br>
 </br>
+
+</div>
+
+</details>
 
 ### Contribute 
 
