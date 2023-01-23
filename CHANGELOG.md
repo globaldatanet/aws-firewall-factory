@@ -16,7 +16,7 @@
 ### Fixed
 - Updated Prequisites section in Readme
 - Overwrite Action without Exclude Rules for Managed Rule Groups
-
+- Task validateconfig fails because of missing /test/config-loader.ts - [Issue#46](https://github.com/globaldatanet/aws-firewall-factory/issues/46) - Thanks to @stoennies 
 
 ## 3.0.3
 ### Added
