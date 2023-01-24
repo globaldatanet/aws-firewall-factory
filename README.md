@@ -154,8 +154,9 @@ See example:
 5. Invoke `npm i` to install dependencies
 6. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
 
-7. Assume AWS Profile `awsume PROFILENAME`
-8. (Optional) Enter `task generateprerequisitesconfig`
+7. (Optional) If you want to use CloudWatch Dashboards - You need to enable your target accounts to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) to see how to do it.
+8. Assume AWS Profile `awsume PROFILENAME`
+9. (Optional) Enter `task generateprerequisitesconfig`
 
   | Parameter  | Value |
   | ------------- | ------------- |
@@ -167,7 +168,7 @@ See example:
   | FireHoseKey - KeyAlias [^1] | Alias for Key |
   | CrossAccountIdforPermissions [^1] | Id of AWS Account for CrossAccount Permission for Bucket and KMS Key(s)|
 
-9. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
+10. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
 
 </div>
 </details>
