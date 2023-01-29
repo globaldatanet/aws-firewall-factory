@@ -373,8 +373,8 @@ async function calculateCapacities(
       managedrule.Version ? console.log("      🏷  Latest " + managedrule.Version) : console.log("");
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
-      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
+      managedrule.Name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
+      managedrule.Name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
     }
   }
   if (!config.WebAcl.PostProcess.ManagedRuleGroups) {
@@ -401,8 +401,8 @@ async function calculateCapacities(
       managedrule.Version ? console.log("      🏷  Latest " + managedrule.Version) : console.log("");
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
-      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
+      managedrule.Name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
+      managedrule.Name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
     }
   }
   runtimeProperties.PostProcess.Capacity = PostProcessCapacity;

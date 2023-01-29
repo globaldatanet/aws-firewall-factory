@@ -3,7 +3,6 @@ import { RuntimeProperties } from "../types/runtimeprops";
 import { Config } from "../types/config";
 import { PriceRegions } from "../types/config";
 import {CloudWatchClient, ListDashboardsCommand, ListDashboardsCommandInput } from "@aws-sdk/client-cloudwatch";
-import * as cdk from "aws-cdk-lib";
 
 /**
  * Amazon Web Services Price List Service API Endpoint

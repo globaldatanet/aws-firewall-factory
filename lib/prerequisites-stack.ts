@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { Prerequisites, ObjectLockMode } from "./types/config";
+import { Prerequisites } from "./types/config";
 import { aws_s3 as s3 } from "aws-cdk-lib";
 import { aws_kms as kms } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";

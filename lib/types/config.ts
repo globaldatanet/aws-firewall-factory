@@ -1,6 +1,6 @@
 import { Rule, ManagedRuleGroup } from "./fms";
 import { aws_fms as fms } from "aws-cdk-lib";
-import internal = require("events");
+
 export interface Config {
   readonly General: {
     readonly Prefix: string,

@@ -17,7 +17,7 @@ const prerequisitesConfig : Prerequisites = {
       "KeyAlias": "aws-firewall-factory-firehosekey"
     },
     "CrossAccountIdforPermissions": "123456789012",
-}
+  }
 };
 
 console.log(JSON.stringify(prerequisitesConfig, null, 2));
