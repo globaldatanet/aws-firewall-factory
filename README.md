@@ -12,7 +12,7 @@
 
 - [𒋰 Table of contents](#𒋰-table-of-contents)
 - [🔭 Overview](#-overview)
-- [🎞️ Media](#️-media)
+- [🎬 Media](#-media)
     - [🔗 Useful Links](#-useful-links)
 - [🗺️ Architecture](#️-architecture)
 - [🧩 Features](#-features)
@@ -39,7 +39,7 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 
 ![Example Deployment](./static/example-deployment.gif "Example Deployment")
 
-## 🎞️ Media
+## 🎬 Media
 
 If you want to learn more about the AWS Firewall Factory feel free to look at the following media resources.
 
