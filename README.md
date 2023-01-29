@@ -8,19 +8,19 @@
 
 <img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?description=1&font=Raleway&issues=1&logo=https://raw.githubusercontent.com/globaldatanet/aws-firewall-factory/master/static/icon/firewallfactory.svg&pattern=Solid&stargazers=1&theme=Dark" alt="AWSFirewallFactory" width="900" height="320"/>
 
-## Table of contents
+## 𒋰 Table of contents
 
-- [Table of contents](#table-of-contents)
-- [Overview](#overview)
-- [Media](#media)
-    - [Useful Links](#useful-links)
-- [Architecture](#architecture)
-- [Features](#features)
-- [Deployment](#deployment)
-  - [Prerequisites](#prerequisites)
-  - [Deployment via Taskfile](#deployment-via-taskfile)
-- [Contributors](#contributors)
-  - [Contribute](#contribute)
+- [𒋰 Table of contents](#𒋰-table-of-contents)
+- [🔭 Overview](#-overview)
+- [🎞️ Media](#️-media)
+    - [🔗 Useful Links](#-useful-links)
+- [🗺️ Architecture](#️-architecture)
+- [🧩 Features](#-features)
+- [🛡️ Deployment](#️-deployment)
+  - [⚙️ Prerequisites](#️-prerequisites)
+  - [🏁 Deployment via Taskfile](#-deployment-via-taskfile)
+- [🦸🏼‍♀️ Contributors](#️-contributors)
+  - [👩‍💻 Contribute](#-contribute)
   - [👏 Supporters](#-supporters)
 
 </br>
@@ -31,7 +31,7 @@
 
 </br>
 
-## Overview
+## 🔭 Overview
 
 <img align="left" src="./static/icon/firewallfactory.svg" width="150">
 
@@ -39,7 +39,7 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 
 ![Example Deployment](./static/example-deployment.gif "Example Deployment")
 
-## Media
+## 🎞️ Media
 
 If you want to learn more about the AWS Firewall Factory feel free to look at the following media resources.
 
@@ -51,12 +51,12 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
   - [📊 Slides](https://docs.google.com/file/d/1YJCfTt8ILa2R9n23fHDFLpfLhTwhB4ea/edit?filetype=mspresentation) - [📺 Video](https://www.youtube.com/watch?v=jrYpr0DLKfo)
 - [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 
-#### Useful Links
+#### 🔗 Useful Links
 
 - [🐦🤖 Twitter Bot to get Notified for Managed Rules Updates](https://twitter.com/AWSMgMtRulesBot)
 - [🔔 Slack automation to get Notified for Managed Rules Updates](https://github.com/globaldatanet/WAF-Managed-Rules-Update-Slack-Notification-Service)
 - [🏫 AWS WAF Workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/c2f03000-cf61-42a6-8e62-9eaf04907417/en-US/02-custom-rules)
-## Architecture
+## 🗺️ Architecture
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
 
@@ -65,7 +65,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
     <summary> Features</summary>
    <div>
 
-## Features
+## 🧩 Features
 
 1. Automated capactiy calculation via [API - CheckCapacity](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html)
 
@@ -140,13 +140,13 @@ See example:
 </div>
 </details>
 
-## Deployment
+## 🛡️ Deployment
 
 <details>
     <summary> Prerequisites</summary>
    <div>
 
-### Prerequisites
+### ⚙️ Prerequisites
 1. [Organizations trusted access with Firewall Manager](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-fms.html)
 2. [Taskfile](https://taskfile.dev/)
 3. [AWS CDK](https://aws.amazon.com/cdk/)
@@ -177,14 +177,14 @@ See example:
     <summary> Deployment via Taskfile </summary>
    <div>
 
-### Deployment via Taskfile
+### 🏁 Deployment via Taskfile
 
 1. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
 2. Assume AWS Profile `awsume PROFILENAME`
 3. (Optional) Enter `task generateconfig`
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 
-## Contributors
+## 🦸🏼‍♀️ Contributors
 
 <a href="https://github.com/globaldatanet/aws-firewall-factory/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=globaldatanet/aws-firewall-factory" />
@@ -199,7 +199,7 @@ Any form of contribution is welcome. The above contributors have been officially
 
 </details>
 
-### Contribute 
+### 👩‍💻 Contribute
 
 Want to contribute to **AWS FIREWALL FACTORY**? Check out the [Contribution docs](./CONTRIBUTING.md)
 </br>
