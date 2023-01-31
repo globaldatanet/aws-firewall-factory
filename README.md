@@ -8,19 +8,20 @@
 
 <img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?description=1&font=Raleway&issues=1&logo=https://raw.githubusercontent.com/globaldatanet/aws-firewall-factory/master/static/icon/firewallfactory.svg&pattern=Solid&stargazers=1&theme=Dark" alt="AWSFirewallFactory" width="900" height="320"/>
 
-## Table of contents
+## 𒋰 Table of contents
 
-- [Overview](#overview)
-- [Media](#media)
-- [Architecture](#architecture)
-- [Features](#features)
-- [Coming soon](#coming-soon)
-- [Deployment](#deployment)
-  - [Prerequisites](#prerequisites)
-  - [Deployment via Taskfile](#deployment-via-taskfile)
-- [Contributors](#contributors)
-    - [Contribute](#contribute)
-- [👏 Supporters](#-👏-supporters)
+- [𒋰 Table of contents](#𒋰-table-of-contents)
+- [🔭 Overview](#-overview)
+- [🎬 Media](#-media)
+    - [🔗 Useful Links](#-useful-links)
+- [🗺️ Architecture](#️-architecture)
+- [🧩 Features](#-features)
+- [🛡️ Deployment](#️-deployment)
+  - [⚙️ Prerequisites](#️-prerequisites)
+  - [🏁 Deployment via Taskfile](#-deployment-via-taskfile)
+- [🦸🏼‍♀️ Contributors](#️-contributors)
+  - [👩‍💻 Contribute](#-contribute)
+  - [👏 Supporters](#-supporters)
 
 </br>
 
@@ -30,7 +31,7 @@
 
 </br>
 
-## Overview
+## 🔭 Overview
 
 <img align="left" src="./static/icon/firewallfactory.svg" width="150">
 
@@ -38,7 +39,7 @@ AWS Web Application Firewalls (WAFs) protect web applications and APIs from typi
 
 ![Example Deployment](./static/example-deployment.gif "Example Deployment")
 
-## Media
+## 🎬 Media
 
 If you want to learn more about the AWS Firewall Factory feel free to look at the following media resources.
 
@@ -46,19 +47,25 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 - [📺 Webinar: Managing AWS Web Application Firewalls at Scale - Language: 🇺🇸](https://globaldatanet.com/webinars/managing-aws-web-application-firewalls-at-scale)
 - [📺 Webinar: Secure Serverless Applications against OWASP TOP 10 in 5 mins - Language: 🇺🇸](https://serverless-summit.io/)
 - [📊 Slides: Managing AWS Web Application Firewalls at Scale - Language: 🇺🇸](https://docs.google.com/presentation/d/1jE_DmNk0cCc1XM8eBYPM2za0pzGyg9Lv/edit?usp=sharing&ouid=115444461121738087344&rtpof=true&sd=true)
-- [📊 Slides: Secure Serverless Applications against OWASP TOP 10 in 5 Minutes - Language: 🇺🇸](https://docs.google.com/file/d/1YJCfTt8ILa2R9n23fHDFLpfLhTwhB4ea/edit?filetype=mspresentation)
+- Secure Serverless Applications against OWASP TOP 10 in 5 Minutes - Language: 🇺🇸
+  - [📊 Slides](https://docs.google.com/file/d/1YJCfTt8ILa2R9n23fHDFLpfLhTwhB4ea/edit?filetype=mspresentation) - [📺 Video](https://www.youtube.com/watch?v=jrYpr0DLKfo)
 - [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 
-#### Useful Links
+#### 🔗 Useful Links
 
 - [🐦🤖 Twitter Bot to get Notified for Managed Rules Updates](https://twitter.com/AWSMgMtRulesBot)
 - [🔔 Slack automation to get Notified for Managed Rules Updates](https://github.com/globaldatanet/WAF-Managed-Rules-Update-Slack-Notification-Service)
 - [🏫 AWS WAF Workshop](https://catalog.us-east-1.prod.workshops.aws/workshops/c2f03000-cf61-42a6-8e62-9eaf04907417/en-US/02-custom-rules)
-## Architecture
+## 🗺️ Architecture
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
 
-## Features
+
+<details>
+    <summary> Features</summary>
+   <div>
+
+## 🧩 Features
 
 1. Automated capactiy calculation via [API - CheckCapacity](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html)
 
@@ -130,23 +137,54 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 See example:
 ![FirewallDashboard](./static/FirewallDashboard.jpg)
 
-## Deployment
+</div>
+</details>
 
-### Prerequisites
+## 🛡️ Deployment
 
-1. An central S3 Bucket with **write** permission for the security account needs to be in place.
+<details>
+    <summary> Prerequisites</summary>
+   <div>
 
-2. (Optional) If you want to use the CreateDashboard Feature to get a Dashboard deployed for your Firewall in the central Security Account, the cross-account functionality in CloudWatch must be enabled.
-To enable enable your account to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) how to.
+### ⚙️ Prerequisites
+1. [Organizations trusted access with Firewall Manager](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-fms.html)
+2. [Taskfile](https://taskfile.dev/)
+3. [AWS CDK](https://aws.amazon.com/cdk/)
+4. [cfn-dia](https://www.npmjs.com/package/@mhlabs/cfn-diagram?s=03)
+5. Invoke `npm i` to install dependencies
+6. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
 
-### Deployment via Taskfile
+7. (Optional) If you want to use CloudWatch Dashboards - You need to enable your target accounts to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) to see how to do it.
+8. Assume AWS Profile `awsume PROFILENAME`
+9. (Optional) Enter `task generateprerequisitesconfig`
 
-0. Create new json file for you WAF and configure Rules in the JSON (see [example.json](values/example-waf.json) to see structure)
-1. Assume AWS Profile `awsume PROFILENAME`
-2. (Optional) Enter `task generateconfig`
-3. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+  | Parameter  | Value |
+  | ------------- | ------------- |
+  | Prefix  | Prefix for all Resources  |
+  | BucketName [^1] | Name of the S3 Bucket |
+  | KmsEncryptionKey | true or false  |
+  | ObjectLock - Days [^1]| A period of Days for ObjectLock |
+  | ObjectLock - Mode [^1]| COMPLIANCE or GOVERNANCE |
+  | FireHoseKey - KeyAlias [^1] | Alias for Key |
+  | CrossAccountIdforPermissions [^1] | Id of AWS Account for CrossAccount Permission for Bucket and KMS Key(s)|
 
-## Contributors
+10. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
+
+</div>
+</details>
+
+<details>
+    <summary> Deployment via Taskfile </summary>
+   <div>
+
+### 🏁 Deployment via Taskfile
+
+1. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
+2. Assume AWS Profile `awsume PROFILENAME`
+3. (Optional) Enter `task generateconfig`
+4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+
+## 🦸🏼‍♀️ Contributors
 
 <a href="https://github.com/globaldatanet/aws-firewall-factory/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=globaldatanet/aws-firewall-factory" />
@@ -157,7 +195,11 @@ Any form of contribution is welcome. The above contributors have been officially
 </br>
 </br>
 
-### Contribute 
+</div>
+
+</details>
+
+### 👩‍💻 Contribute
 
 Want to contribute to **AWS FIREWALL FACTORY**? Check out the [Contribution docs](./CONTRIBUTING.md)
 </br>
@@ -169,3 +211,5 @@ Want to contribute to **AWS FIREWALL FACTORY**? Check out the [Contribution docs
 </br>
 
 <p align="center"><a href="https://github.com/globaldatanet/aws-firewall-factory"><img src="./static/barsSmallTransparentBackground.gif" width="100%"/></a></p>
+
+[^1]: Optional Fields. 

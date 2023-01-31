@@ -1,7 +1,23 @@
 # Change Log
 
 ## Released
+## 3.1.0
+### Added
+- Added OWASP TOP TEN Example Config
+- Added OWASP TOP TEN Example Config Generation
+- Added Prerequisite Stack Config Generation - Creates Skeleton of Parameters for the Prerequisite Stack
+- Added Prerequisite Stack:
+  - Creation of S3 Bucket for Logs (Optional)
+    - Optional Settings: ObjectLock and Kms Encrytion (Default SSE), CrossAccount Access to the Key and Bucket
+  - Creation of KMS Key for FireHose (Optional)
+    - Optional Settings: CrossAccount Access to the Key
+- RuleActionOverride for ManagedRuleGroups: Action setting to use in the place of a rule action that is configured inside the rule group. You specify one override for each rule whose action you want to change.
 
+### Fixed
+- Updated Prequisites section in Readme
+- Overwrite Action without Exclude Rules for Managed Rule Groups
+- Task validateconfig fails because of missing /test/config-loader.ts - [Issue#46](https://github.com/globaldatanet/aws-firewall-factory/issues/46) - Thanks to [@stoennies](https://github.com/globaldatanet/aws-firewall-factory/issues/46)
+- Added OWASP TOP TEN Example Config [Issue#45](https://github.com/globaldatanet/aws-firewall-factory/issues/45) - Thanks to [@mmoallemi99](https://github.com/mmoallemi99)
 ## 3.0.3
 ### Added
 - Added multi domainname usage in waf-test

@@ -8,6 +8,7 @@ env:
   LASTEST_FIREWALLFACTORY_VERSION:
     sh: curl --silent "https://api.github.com/repos/globaldatanet/aws-firewall-factory/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 vars:
+  prerequisite:
   config: # without .json
   REGION:
     sh: echo $AWS_REGION
@@ -48,6 +49,7 @@ tasks:
     interactive: true
     env:
       PROCESS_PARAMETERS: values/{{.config}}.json
+      PREREQUISITE: "{{.prerequisite}}"
     preconditions:
       - sh: "test {{.config}}"
         msg: "config Variable was not set"
@@ -70,6 +72,7 @@ tasks:
         msg: "Values file not found: values/{{.config}}.json"
     env:
       PROCESS_PARAMETERS: values/{{.config}}.json
+      PREREQUISITE: "{{.prerequisite}}"
     silent: true
     interactive: true
   creatediagram:
@@ -109,4 +112,14 @@ tasks:
     desc: Generate skeleton for a waf configuration file
     cmds:
       - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-skeleton.ts ; fi
+    silent: true
+  generateowasptoptenconfig:
+    desc: Generate skeleton for a waf configuration file with owasp top 10
+    cmds:
+      - if [[ "{{.config}}" ]] ; then ts-node lib/tools/get-owasp-top10-waf.ts >> values/{{.config}}.json ; else ts-node lib/tools/get-owasp-top10-waf.ts ; fi
+    silent: true
+  generateprerequisitesconfig:
+    desc: Generate skeleton for a prerequisites configuration
+    cmds:
+      - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-prerequisites-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-prerequisites-skeleton.ts ; fi
     silent: true

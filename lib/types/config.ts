@@ -1,5 +1,6 @@
 import { Rule, ManagedRuleGroup } from "./fms";
 import { aws_fms as fms } from "aws-cdk-lib";
+
 export interface Config {
   readonly General: {
     readonly Prefix: string,
@@ -23,6 +24,32 @@ export interface Config {
     readonly PreProcess: RuleGroupSet,
     readonly PostProcess: RuleGroupSet
   },
+}
+
+export interface Prerequisites {
+  readonly General: {
+    readonly Prefix: string,
+  },
+  readonly Logging: {
+      readonly BucketProperties?: {
+        readonly BucketName?: string,
+        readonly KmsEncryptionKey: boolean,
+        readonly ObjectLock?: {
+          readonly Days: number,
+          readonly Mode: "GOVERNANCE" | "COMPLIANCE"
+        }
+
+      },
+      readonly FireHoseKey?: {
+        readonly KeyAlias: string
+      },
+      readonly CrossAccountIdforPermissions?: string,
+  }
+}
+
+export enum ObjectLockMode {
+  GOVERNANCE = "GOVERNANCE",
+  COMPLIANCE = "COMPLIANCE"
 }
 
 

@@ -1,5 +1,5 @@
 import Ajv, {JSONSchemaType} from "ajv";
-import {Config} from "../types/config";
+import { Config , Prerequisites} from "../types/config";
 import { resolve } from "path";
 import * as TJS from "typescript-json-schema";
 
@@ -17,8 +17,12 @@ const program = TJS.getProgramFromFiles(
   compilerOptions
 );
 
-const schema = TJS.generateSchema(program, "Config", settings);
+const wafschema = TJS.generateSchema(program, "Config", settings);
+
+const prerequisitesschema = TJS.generateSchema(program, "Prerequisites", settings);
 
 const ajv = new Ajv();
 
-export const validate = ajv.compile(schema as JSONSchemaType<Config>);
+export const validatewaf = ajv.compile(wafschema as JSONSchemaType<Config>);
+
+export const validateprerequisites = ajv.compile(prerequisitesschema as JSONSchemaType<Prerequisites>);

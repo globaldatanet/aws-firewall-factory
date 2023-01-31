@@ -1,8 +1,8 @@
 {
-  "name": "plattform-wafv2-cdk-automation",
-  "version": "3.0.2",
+  "name": "aws-firewall-factory",
+  "version": "3.1.0",
   "bin": {
-    "plattform-wafv2-cdk-automation": "bin/plattform-wafv2-cdk-automation.js"
+    "firewallfactory": "bin/aws-firewall-factory.js"
   },
   "scripts": {
     "build": "tsc",
@@ -15,7 +15,7 @@
     "@types/node": "10.17.27",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
     "@typescript-eslint/parser": "^4.32.0",
-    "aws-cdk": "^2.2.0",
+    "aws-cdk": "^2.61.1",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.24.2",
@@ -36,7 +36,7 @@
     "@mhlabs/cfn-diagram": "^1.1.32",
     "@types/lodash": "^4.14.178",
     "ajv": "^8.10.0",
-    "aws-cdk-lib": "^2.8.0",
+    "aws-cdk-lib": "^2.61.1",
     "constructs": "^10.0.0",
     "lodash": "^4.17.21",
     "process": "^0.11.10",

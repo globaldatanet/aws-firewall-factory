@@ -373,8 +373,8 @@ async function calculateCapacities(
       managedrule.Version ? console.log("      🏷  Latest " + managedrule.Version) : console.log("");
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
-      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
+      managedrule.Name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
+      managedrule.Name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
     }
   }
   if (!config.WebAcl.PostProcess.ManagedRuleGroups) {
@@ -401,8 +401,8 @@ async function calculateCapacities(
       managedrule.Version ? console.log("      🏷  Latest " + managedrule.Version) : console.log("");
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
-      managedrule.Name == "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.Name == "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
+      managedrule.Name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
+      managedrule.Name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
     }
   }
   runtimeProperties.PostProcess.Capacity = PostProcessCapacity;
@@ -555,6 +555,7 @@ function convertStringToUint8Array(stringToConvert: string): Uint8Array {
  * @param o object which property names has to be transformed to camel case
  * @returns the object with the transformed property names in camel case
  */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function toAwsCamel(o: any): any {
   let newO: any, origKey: any, newKey: any, value: any;
   if (o instanceof Array) {
