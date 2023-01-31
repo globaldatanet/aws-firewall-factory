@@ -555,6 +555,7 @@ function convertStringToUint8Array(stringToConvert: string): Uint8Array {
  * @param o object which property names has to be transformed to camel case
  * @returns the object with the transformed property names in camel case
  */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function toAwsCamel(o: any): any {
   let newO: any, origKey: any, newKey: any, value: any;
   if (o instanceof Array) {

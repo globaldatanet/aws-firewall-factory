@@ -16,8 +16,8 @@
 ### Fixed
 - Updated Prequisites section in Readme
 - Overwrite Action without Exclude Rules for Managed Rule Groups
-- Task validateconfig fails because of missing /test/config-loader.ts - [Issue#46](https://github.com/globaldatanet/aws-firewall-factory/issues/46) - Thanks to @stoennies 
-
+- Task validateconfig fails because of missing /test/config-loader.ts - [Issue#46](https://github.com/globaldatanet/aws-firewall-factory/issues/46) - Thanks to [@stoennies](https://github.com/globaldatanet/aws-firewall-factory/issues/46)
+- Added OWASP TOP TEN Example Config [Issue#45](https://github.com/globaldatanet/aws-firewall-factory/issues/45) - Thanks to [@mmoallemi99](https://github.com/mmoallemi99)
 ## 3.0.3
 ### Added
 - Added multi domainname usage in waf-test

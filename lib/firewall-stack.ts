@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { aws_wafv2 as wafv2, Tag } from "aws-cdk-lib";
+import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
@@ -167,7 +167,7 @@ export class FirewallStack extends cdk.Stack {
       resourceTags: props.config.WebAcl.ResourceTags,
       excludeResourceTags: props.config.WebAcl.ExcludeResourceTags ? props.config.WebAcl.ExcludeResourceTags : false,
     };
-    const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
+    new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
       console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", props.config.General.Prefix.toUpperCase() +
@@ -236,7 +236,7 @@ export class FirewallStack extends cdk.Stack {
         const firstrow = new cloudwatch.Row(infowidget,app,fwfactory);
         cwdashboard.addWidgets(firstrow);
         for(const account of props.config.WebAcl.IncludeMap.account){
-
+          // eslint-disable-next-line no-useless-escape
           const countexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\CountedRequests\"', '\Sum', 300)";
 
           const CountedRequests = new cloudwatch.GraphWidget({
@@ -253,6 +253,7 @@ export class FirewallStack extends cdk.Stack {
               searchRegion: region,
               color: "#9dbcd4"
             }));
+          // eslint-disable-next-line no-useless-escape
           const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
           const BlockedRequests = new cloudwatch.GraphWidget({
             title: "❌ Blocked Requests in " + account,
@@ -268,7 +269,7 @@ export class FirewallStack extends cdk.Stack {
               searchRegion: region,
               color: "#ff0000"
             }));
-
+          // eslint-disable-next-line no-useless-escape  
           const allowedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\AllowedRequests\"', '\Sum', 300)";
           const AllowedRequests = new cloudwatch.GraphWidget({
             title: "✅ Allowed Requests in " + account,
@@ -284,11 +285,15 @@ export class FirewallStack extends cdk.Stack {
               searchRegion: region,
               color: "#00FF00"
             }));
-
+          // eslint-disable-next-line no-useless-escape
           const sinlevaluecountedrequestsexpression = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"CountedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+          // eslint-disable-next-line no-useless-escape
           const expression1 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+          // eslint-disable-next-line no-useless-escape
           const expression2 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+          // eslint-disable-next-line no-useless-escape
           const expression3 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+          // eslint-disable-next-line no-useless-escape
           const expression4 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
           const expression5 = "SUM([e3,e4])";
           const expression6 = "SUM([e1,e2,-e3,-e4])";
@@ -489,6 +494,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
       if (statement.RuleLabels) {
         CfnRuleProperties = CfnRuleProperty;
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty;
         CfnRuleProperties = CfnRulePropertii;
       }
@@ -831,6 +837,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         ) {
           CfnRuleProperti = CfnRuleProperty;
         } else {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty;
           CfnRuleProperti = CfnRulePropertii;
         }
