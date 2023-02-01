@@ -1,6 +1,11 @@
 # Change Log
 
 ## Released
+
+## 3.1.1
+### Added
+- Feature [Issue#48](https://github.com/globaldatanet/aws-firewall-factory/issues/48) - The firewall manager policy description is now configurable per policy. - Thanks to [@andre1AB](https://github.com/andre1AB)
+
 ## 3.1.0
 ### Added
 - Added OWASP TOP TEN Example Config
