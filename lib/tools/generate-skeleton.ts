@@ -15,6 +15,7 @@ const skeletonConfig : Config = {
       account: ["123456789123"]
     },
     Name: "myWAF-Name",
+    Description: "myWAF-Description",
     PreProcess: {
       ManagedRuleGroups: [
         {

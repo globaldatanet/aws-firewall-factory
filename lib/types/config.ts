@@ -13,6 +13,7 @@ export interface Config {
   },
   readonly WebAcl:{
     readonly Name: string,
+    readonly Description?: string,
     readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
     readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
     readonly Scope: "CLOUDFRONT" | "REGIONAL",
