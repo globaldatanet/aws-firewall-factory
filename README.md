@@ -180,7 +180,8 @@ See example:
 ### 🏁 Deployment via Taskfile
 
 1. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
-   ⚠️ When deploying a firewall for the first time, the **DeployHash** must be empty. The AWS Firewall Factory takes care of creating a DeployHash. The DeployHash is used to identify which CloudFormation stack is associated with which configuration file.
+
+⚠️ When deploying a firewall for the first time, the **DeployHash** must be empty. The AWS Firewall Factory takes care of creating a DeployHash. The DeployHash is used to identify which CloudFormation stack is associated with which configuration file.
 2. Assume AWS Profile `awsume PROFILENAME`
 3. (Optional) Enter `task generateconfig`
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
