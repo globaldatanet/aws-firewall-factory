@@ -1,0 +1,40 @@
+{
+  "General": {
+    "Prefix": "",
+    "Stage": "",
+    "FireHoseKeyArn": "",
+    "DeployHash": "",
+    "SecuredDomain": [
+      ""
+    ],
+    "S3LoggingBucketName": "",
+    "CreateDashboard": true
+  },
+  "WebAcl": {
+    "Name": "test",
+    "Scope": "REGIONAL",
+    "Description": "",
+    "Type": "ResourceTypeList",
+    "TypeList": [
+      "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "AWS::ApiGateway::Stage"
+    ],
+    "RemediationEnabled": true,
+    "IncludeMap": {
+      "account": [
+        ""
+      ]
+    },
+    "PreProcess": {
+      "ManagedRuleGroups": [
+        {
+          "Vendor": "AWS",
+          "Name": "AWSManagedRulesAnonymousIpList",
+          "Version": "",
+          "Capacity": 50
+        }
+      ]
+    },
+    "PostProcess": {}
+  }
+}

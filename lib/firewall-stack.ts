@@ -147,6 +147,7 @@ export class FirewallStack extends cdk.Stack {
     const CfnPolicyProps = {
       remediationEnabled: props.config.WebAcl.RemediationEnabled ? props.config.WebAcl.RemediationEnabled : false,
       resourceType: props.config.WebAcl.Type,
+      resourceTypeList: props.config.WebAcl.TypeList ? props.config.WebAcl.TypeList : undefined,
       policyName:
         props.config.General.Prefix.toUpperCase() +
         "-" +
