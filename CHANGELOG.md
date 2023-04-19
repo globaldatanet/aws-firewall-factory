@@ -2,6 +2,9 @@
 
 ## Released
 
+## 3.1.3
+### Fixed
+- Fix counter in package.json for versioning
 ## 3.1.2
 ### Added
 - Feature [Issue#52](https://github.com/globaldatanet/aws-firewall-factory/issues/52) - Added Regex for FMS Description Pattern: ^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$. -> Thanks to [@vboufleur](https://github.com/vboufleur)
