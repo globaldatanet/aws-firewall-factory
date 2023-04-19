@@ -69,7 +69,7 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
           Count: {}
         }
       }
-  ] | [],
+  ] | undefined,
 }
 
 export interface ServiceDataRuleGroup extends ServiceDataAbstactRuleGroup {
