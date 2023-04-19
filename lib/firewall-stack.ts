@@ -167,7 +167,7 @@ export class FirewallStack extends cdk.Stack {
       resourcesCleanUp: props.config.WebAcl.ResourcesCleanUp ? props.config.WebAcl.ResourcesCleanUp : false,
       resourceTags: props.config.WebAcl.ResourceTags,
       excludeResourceTags: props.config.WebAcl.ExcludeResourceTags ? props.config.WebAcl.ExcludeResourceTags : false,
-      policyDescription: props.config.WebAcl.Description ? props.config.WebAcl.Description : ""
+      policyDescription: props.config.WebAcl.Description ? props.config.WebAcl.Description : undefined
     };
     new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
 

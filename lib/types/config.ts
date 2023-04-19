@@ -13,6 +13,9 @@ export interface Config {
   },
   readonly WebAcl:{
     readonly Name: string,
+    /**
+      * @TJS-pattern "^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$"
+    */
     readonly Description?: string,
     readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
     readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
