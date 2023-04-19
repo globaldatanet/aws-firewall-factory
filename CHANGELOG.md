@@ -5,11 +5,12 @@
 ## 3.1.2
 ### Added
 - Feature [Issue#52](https://github.com/globaldatanet/aws-firewall-factory/issues/52) - Added Regex for FMS Description Pattern: ^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$. -> Thanks to [@vboufleur](https://github.com/vboufleur)
+- Allow a list of resource types to apply firewall -> Kudos to [@vboufleur](https://github.com/vboufleur) for implementing this feature.
 
 ### Fixed
 - Updated Readme for DeployHash usage. -> Thanks to [@vboufleur](https://github.com/vboufleur)
 - PropertyOverride for s3 Bucket in prerequisites-stack for ObjectLockEnabled
-
+- No empty arrays are allowed on RuleActionOverrides Kudos to [@vboufleur](https://github.com/vboufleur) for fix this.
 ## 3.1.1
 ### Added
 - Feature [Issue#48](https://github.com/globaldatanet/aws-firewall-factory/issues/48) - The firewall manager policy description is now configurable per policy. - Thanks to [@andre1AB](https://github.com/andre1AB)
