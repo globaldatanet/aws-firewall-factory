@@ -86,6 +86,7 @@ export class PrerequisitesStack extends cdk.Stack {
         // Get the CloudFormation resource because L2 Construct doenst support this Property
         const cfnBucket = bucket.node.defaultChild as s3.CfnBucket;
         // Add the ObjectLockConfiguration prop to the Bucket's CloudFormation output.
+        cfnBucket.addPropertyOverride("ObjectLockEnabled", true);
         cfnBucket.addPropertyOverride("ObjectLockConfiguration.ObjectLockEnabled", "Enabled");
         cfnBucket.addPropertyOverride("ObjectLockConfiguration.Rule.DefaultRetention.Days", props.prerequisites.Logging.BucketProperties?.ObjectLock?.Days);
         // Can be `GOVERNANCE` or `COMPLIANCE` - https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket-defaultretention.html
