@@ -13,7 +13,6 @@
   "WebAcl": {
     "Name": "test",
     "Scope": "REGIONAL",
-    "Description": "",
     "Type": "ResourceTypeList",
     "TypeList": [
       "AWS::ElasticLoadBalancingV2::LoadBalancer",

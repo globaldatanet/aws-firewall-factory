@@ -21,7 +21,7 @@ export interface Config {
     readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
     readonly Scope: "CLOUDFRONT" | "REGIONAL",
     readonly Type: "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage" | "ResourceTypeList",
-    readonly TypeList?: string[],
+    readonly TypeList?: WebAclType[],
     readonly ResourceTags?: Array<fms.CfnPolicy.ResourceTagProperty>,
     readonly ExcludeResourceTags?: boolean,
     readonly RemediationEnabled?: boolean,
@@ -31,6 +31,7 @@ export interface Config {
   },
 }
 
+export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage"
 export interface Prerequisites {
   readonly General: {
     readonly Prefix: string,
