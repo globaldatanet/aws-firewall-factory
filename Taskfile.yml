@@ -59,7 +59,7 @@ tasks:
     desc: CDK Deploy
     cmds:
       - cdk deploy --require-approval never {{.TAGS}}
-      - rm -f $(find ./cdk.out/*assets.json -type f)
+      - rm -f $(find ./cdk.out/*assets.json -type f) &> /dev/null
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
