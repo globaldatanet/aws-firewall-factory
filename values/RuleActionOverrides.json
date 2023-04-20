@@ -1,0 +1,49 @@
+{
+  "General": {
+    "Prefix": "",
+    "Stage": "",
+    "S3LoggingBucketName": "",
+    "CreateDashboard": true,
+    "DeployHash": "",
+    "FireHoseKeyArn": "",
+    "SecuredDomain": []
+  },
+  "WebAcl": {
+    "Name": "Test",
+    "Scope": "REGIONAL",
+    "Description": "",
+    "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+    "RemediationEnabled": true,
+    "ResourcesCleanUp": true,
+    "IncludeMap": {
+      "account": [
+        ""
+      ]
+    },
+    "PreProcess": {},
+    "PostProcess": {
+      "ManagedRuleGroups": [
+        {
+          "Vendor": "AWS",
+          "Name": "AWSManagedRulesAnonymousIpList",
+          "Version": "",
+          "Capacity": 50,
+          "RuleActionOverrides": [
+            {
+              "Name": "AnonymousIPList",
+              "ActionToUse": {
+                "Count": {}
+              }
+            },
+            {
+              "Name": "HostingProviderIPList",
+              "ActionToUse": {
+                "Allow": {}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
