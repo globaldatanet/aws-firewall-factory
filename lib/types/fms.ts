@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
+type RuleActionOverrideProperty = { Name: string, ActionToUse: { Count: {} }}
 export interface ManagedRuleGroup {
   Vendor: string,
   Name: string,
@@ -8,15 +9,7 @@ export interface ManagedRuleGroup {
   OverrideAction?: {
     type: "COUNT" | "NONE"
   },
-  RuleActionOverrides?: [
-    {
-      Name: string,
-      ActionToUse:
-      {
-        Count: {}
-      }
-    }
-  ]
+  RuleActionOverrides?: RuleActionOverrideProperty[] | undefined
 }
 
 export interface Rule {
@@ -61,15 +54,7 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
   },
   excludeRules: any,
   ruleGroupType: "ManagedRuleGroup",
-  ruleActionOverrides: [
-      {
-        Name: string,
-        ActionToUse:
-        {
-          Count: {}
-        }
-      }
-  ] | undefined,
+  ruleActionOverrides: RuleActionOverrideProperty[] | undefined,
 }
 
 export interface ServiceDataRuleGroup extends ServiceDataAbstactRuleGroup {
