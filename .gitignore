@@ -7,4 +7,3 @@ node_modules
 .cdk.staging
 cdk.out
 cdk.context.json
-package-lock.json
