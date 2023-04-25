@@ -2,6 +2,10 @@
 
 ## Released
 
+## 3.1.4
+### Fixed
+- Pattern for the WebAcl Description Kudos to [@vboufleur](https://github.com/vboufleur) for fixing this.
+- Allow many rule action overrides Kudos to [@vboufleur](https://github.com/vboufleur) for fixing this.
 ## 3.1.3
 ### Fixed
 - Fix counter in package.json for versioning
