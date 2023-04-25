@@ -1,7 +1,11 @@
 # Change Log
 
 ## Released
-
+## 3.1.5
+### Fixed
+- `versionEnabled` must be set to true if version is defined
+- Don't fail in CI is job is skipped
+- Enable commiting package-lock.json to repo
 ## 3.1.4
 ### Fixed
 - Pattern for the WebAcl Description Kudos to [@vboufleur](https://github.com/vboufleur) for fixing this.
