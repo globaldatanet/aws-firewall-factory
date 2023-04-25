@@ -410,6 +410,7 @@ function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : Ser
         vendorName: managedRuleGroup.Vendor,
         managedRuleGroupName: managedRuleGroup.Name,
         version: managedRuleGroup.Version !== "" ? managedRuleGroup.Version : null,
+        versionEnabled: managedRuleGroup.Version !== "" ? true : undefined,
       },
       overrideAction: managedRuleGroup.OverrideAction ? managedRuleGroup.OverrideAction : { type: "NONE" },
       ruleGroupArn: null,
