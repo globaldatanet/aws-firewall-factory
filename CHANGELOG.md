@@ -1,7 +1,12 @@
 # Change Log
 
 ## Released
-## 3.1.5
+
+## 3.1.6
+### Added
+- added [dependabot](https://github.com/dependabot)
+  
+- ## 3.1.5
 ### Fixed
 - `versionEnabled` must be set to true if version is defined
 - Don't fail in CI is job is skipped
