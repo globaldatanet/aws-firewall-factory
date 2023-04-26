@@ -2,6 +2,15 @@
 
 ## Released
 
+## 3.1.8
+### Fixed
+- Bump @aws-sdk/client-cloudformation from 3.315.0 to 3.319.0
+- Bump @aws-sdk/client-pricing from 3.315.0 to 3.319.0
+- Bump @aws-sdk/client-fms from 3.315.0 to 3.319.0
+- Bump aws-cdk-lib from 2.74.0 to 2.76.0
+- Bump eslint-plugin-promise from 5.2.0 to 6.1.1
+- Bump @aws-sdk/client-wafv2 from 3.52.0 to 3.319.0
+
 ## 3.1.7
 ### Fixed
 - Bump @aws-sdk/client-cloudwatch from 3.315.0 to 3.319.0
