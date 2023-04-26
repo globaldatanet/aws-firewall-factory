@@ -60,6 +60,7 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
     vendorName: string,
     managedRuleGroupName: string,
     version: string | null,
+    versionEnabled?: boolean
   },
   excludeRules: any,
   ruleGroupType: "ManagedRuleGroup",
