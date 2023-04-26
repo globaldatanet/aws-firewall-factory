@@ -26,6 +26,7 @@ export interface Config {
     readonly ExcludeResourceTags?: boolean,
     readonly RemediationEnabled?: boolean,
     readonly ResourcesCleanUp?: boolean,
+    readonly IPSetFiles?: string[],
     readonly PreProcess: RuleGroupSet,
     readonly PostProcess: RuleGroupSet,
   },

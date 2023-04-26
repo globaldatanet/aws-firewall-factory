@@ -1,5 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
+import get from "lodash/get";
+import cloneDeep from "lodash/cloneDeep";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
@@ -7,6 +9,7 @@ import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_logs as logs } from "aws-cdk-lib";
 import { Config, CustomResponseBodies } from "./types/config";
 import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule } from "./types/fms";
+import { IPSet } from "./types/ipset";
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import { promises as fsp } from "fs";
 import { toAwsCamel } from "./tools/helpers";
@@ -20,6 +23,7 @@ const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
+  readonly ipSets: IPSet[];
   runtimeProperties: RuntimeProperties;
 }
 
@@ -42,7 +46,6 @@ export class FirewallStack extends cdk.Stack {
         ],
       },
     });
-
     const CfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
       retentionInDays: 90,
     });
@@ -108,6 +111,56 @@ export class FirewallStack extends cdk.Stack {
           "AWSLogs/" + account_id + "/FirewallManager/" + region + "/Errors",
       },
     });
+
+    // --------------------------------------------------------------------
+    // IPSets
+
+    const ipSetsNames: string[] = [];
+
+    for(const ipSet of props.ipSets) {
+      const addresses: string[] = [];
+      for(const address of ipSet.Addresses) {
+        if(typeof address === "string") addresses.push(address);
+        else addresses.push(address.IP);
+      }
+      
+      new wafv2.CfnIPSet(this, ipSet.Name, {
+        name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
+        description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory",
+        addresses: addresses,
+        ipAddressVersion: ipSet.IPAddressVersion,
+        scope: ipSet.Scope,
+        tags: ipSet.Tags ? ipSet.Tags : undefined
+      });
+
+      ipSetsNames.push(ipSet.Name);
+    }
+  
+    // Checks if the ipsets are configured correctly
+    const validateIPSetsInConfig = (customRulesPath: string) => {
+      const logErrorAndExit = (error: string) => {
+        console.error("\u001B[31m 🚨 Invalid Configuration File 🚨 \n\n", `\x1b[0m ${error} \n\n`);
+        process.exit(1);
+      };
+      
+      const rules = get(props, customRulesPath);
+      if(!Array.isArray(rules)) return;
+
+      for (const rule of rules) {
+        const ipSetARN = rule.Statement?.IPSetReferenceStatement?.ARN;
+
+        if(!ipSetARN) continue;
+        if(ipSetARN.startsWith("arn:aws:")) continue; // ARN was manually defined by the user, skip checking
+        if(!ipSetARN.startsWith("${") || !ipSetARN.endsWith(".Arn}")) logErrorAndExit(`IPSetReferenceStatement.ARN must be indicating the name of the IPSet, accessing its ARN, which CloudFormation will substitute on deploying.\n  Detected value: '${ipSetARN}'.\n` +  "  Example of expected value: '${IPsString.Arn}'");
+
+        const ipSetName = ipSetARN.split(".")[0].replace(/[${]/g, "");
+        if(!ipSetsNames.includes(ipSetName)) logErrorAndExit(`IPSet named '${ipSetName}' not found on the names of the ipsets on the JSON files defined in the 'config.WebAcl.IPSetFiles' prop.\n  These were the ones which were defined: ${ipSetsNames.reduce((acc, curr) => acc === "" ? `'${curr}'` : `${acc} | '${curr}'`, "")}`);
+      }
+    };
+    validateIPSetsInConfig("config.WebAcl.PreProcess.CustomRules");
+    validateIPSetsInConfig("config.WebAcl.PostProcess.CustomRules");
+
+    // --------------------------------------------------------------------
 
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
@@ -205,9 +258,6 @@ export class FirewallStack extends cdk.Stack {
       props.config.General.Stage +
       "-" +
       props.config.General.DeployHash;
-
-
-
 
       if(props.config.WebAcl.IncludeMap.account){
         const infowidget = new cloudwatch.TextWidget({
@@ -401,6 +451,7 @@ export class FirewallStack extends cdk.Stack {
     })();
   }
 }
+
 const ManagedRuleGroupsInfo: string[]= [""];
 function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : ServiceDataManagedRuleGroup[] {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
@@ -440,6 +491,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
     "\n"+icon+"  Custom Rules " + type + "Process: ",
     "\x1b[0m\n"
   );
+
   if (capacity < 1000) {
     const rules = [];
     let count = 1;
@@ -460,13 +512,20 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
           "-" +
           deployHash;
       }
+
+      // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
+      const subStatement = cloneDeep(statement.Statement);
+      if (subStatement.IPSetReferenceStatement && subStatement.IPSetReferenceStatement.ARN.startsWith("${")) {
+        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.sub(subStatement.IPSetReferenceStatement.ARN);
+      }
+
       let CfnRuleProperty;
       if ("Captcha" in statement.Action) {
         CfnRuleProperty = {
           name: rulename,
           priority: count,
           action: toAwsCamel(statement.Action),
-          statement: toAwsCamel(statement.Statement),
+          statement: toAwsCamel(subStatement),
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,
@@ -482,7 +541,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
           name: rulename,
           priority: count,
           action: toAwsCamel(statement.Action),
-          statement: toAwsCamel(statement.Statement),
+          statement: toAwsCamel(subStatement),
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,
@@ -783,6 +842,13 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
             "-" +
             deployHash;
         }
+        
+        // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
+        const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
+        if (subStatement.IPSetReferenceStatement && subStatement.IPSetReferenceStatement.ARN.startsWith("${")) {
+          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.sub(subStatement.IPSetReferenceStatement.ARN);
+        }
+
         let CfnRuleProperty;
         if (
           "Captcha" in
@@ -796,10 +862,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
               ruleGroupSet[statementindex]
                 .Action
             ),
-            statement: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .Statement
-            ),
+            statement: toAwsCamel(subStatement),
             visibilityConfig: {
               sampledRequestsEnabled:
                 ruleGroupSet[statementindex]
@@ -826,10 +889,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
               ruleGroupSet[statementindex]
                 .Action
             ),
-            statement: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .Statement
-            ),
+            statement: toAwsCamel(subStatement),
             visibilityConfig: {
               sampledRequestsEnabled:
                 ruleGroupSet[statementindex]

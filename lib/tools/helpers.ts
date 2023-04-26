@@ -245,6 +245,24 @@ async function calculateCapacities(
     );
   } else {
     while (count < config.WebAcl.PreProcess.CustomRules.length) {
+      // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
+      // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
+      const ipSetReferenceStatement = config.WebAcl.PreProcess.CustomRules[count].Statement.IPSetReferenceStatement;
+      if(ipSetReferenceStatement && !ipSetReferenceStatement.ARN.startsWith("arn:aws:")) {
+        runtimeProperties.PreProcess.CustomRuleCount += 1;
+        if("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
+        
+        // Capacity for IPSet statements:
+        // "WCUs – 2 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
+        // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
+        let ipSetRuleCapacity = 2;
+        if(ipSetReferenceStatement.IPSetForwardedIPConfig?.Position === "ANY") ipSetRuleCapacity += 4;
+        runtimeProperties.PreProcess.RuleCapacities.push(ipSetRuleCapacity);
+
+        count++;
+        continue;
+      }
+      
       runtimeProperties.PreProcess.CustomRuleCount += 1;
       if ("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) {
         runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
@@ -317,6 +335,24 @@ async function calculateCapacities(
     );
   } else {
     while (count < config.WebAcl.PostProcess.CustomRules.length) {
+      // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
+      // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
+      const ipSetReferenceStatement = config.WebAcl.PostProcess.CustomRules[count].Statement.IPSetReferenceStatement;
+      if(ipSetReferenceStatement && !ipSetReferenceStatement.ARN.startsWith("arn:aws:")) {
+        runtimeProperties.PostProcess.CustomRuleCount += 1;
+        if("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action) runtimeProperties.PostProcess.CustomCaptchaRuleCount += 1;
+        
+        // Capacity for IPSet statements:
+        // "WCUs – 2 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
+        // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
+        let ipSetRuleCapacity = 2;
+        if(ipSetReferenceStatement.IPSetForwardedIPConfig?.Position === "ANY") ipSetRuleCapacity += 4;
+        runtimeProperties.PostProcess.RuleCapacities.push(ipSetRuleCapacity);
+
+        count++;
+        continue;
+      }
+
       runtimeProperties.PostProcess.CustomRuleCount += 1;
       const rule_calculated_capacity_json = [];
       const { CloudWatchMetricsEnabled, SampledRequestsEnabled } =
