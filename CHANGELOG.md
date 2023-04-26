@@ -2,8 +2,18 @@
 
 ## Released
 
-## 3.1.6
-### Added
+## 3.1.7
+### Fixed
+- Bump @aws-sdk/client-cloudwatch from 3.315.0 to 3.319.0
+- Bump @types/node from 10.17.27 to 18.16.1
+- Bump ts-node from 9.1.1 to 10.9.1
+- Bump @aws-sdk/client-service-quotas from 3.315.0 to 3.319.0
+- Bump typescript-json-schema from 0.53.1 to 0.56.0
+
+### Changed:
+- adjust dependabot interval to weekly
+
+- ### Added
 - added [dependabot](https://github.com/dependabot)
   
 - ## 3.1.5
