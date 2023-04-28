@@ -263,6 +263,10 @@ async function calculateCapacities(
             MetricName: "Metric" + Math.random().toString(),
           },
         };
+        if (config.WebAcl.PreProcess.CustomRules[count].RuleLabels) {
+          rule.RuleLabels =
+            config.WebAcl.PreProcess.CustomRules[count].RuleLabels;
+        }
         rules.push(rule);
         const capacity = await getTotalCapacityOfRules(
           deploymentRegion,
@@ -284,6 +288,10 @@ async function calculateCapacities(
             MetricName: "Metric" + Math.random().toString(),
           },
         };
+        if (config.WebAcl.PreProcess.CustomRules[count].RuleLabels) {
+          temp_template.RuleLabels =
+            config.WebAcl.PreProcess.CustomRules[count].RuleLabels;
+        }
         rule_calculated_capacity_json.push(temp_template);
         const capacity = await getTotalCapacityOfRules(
           deploymentRegion,
