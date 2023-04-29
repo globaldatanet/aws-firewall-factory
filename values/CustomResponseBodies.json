@@ -1,0 +1,109 @@
+{
+  "General": {
+    "Prefix": "",
+    "Stage": "",
+    "S3LoggingBucketName": "",
+    "DeployHash": "",
+    "FireHoseKeyArn": "",
+    "SecuredDomain": []
+  },
+  "WebAcl": {
+    "Name": "test",
+    "Scope": "REGIONAL",
+    "Description": "",
+    "Type": "AWS::ApiGateway::Stage",
+    "RemediationEnabled": true,
+    "ResourcesCleanUp": true,
+    "IncludeMap": {
+      "account": [
+        
+      ]
+    },
+    "CustomResponseBodies": {
+      "CustomResponseBodyKey": {
+        "ContentType": "TEXT_PLAIN",
+        "Content": "this is a plain text"
+      },
+      "AnotherCustomResponseKey": {
+        "ContentType": "APPLICATION_JSON",
+        "Content": "{\"jsonfieldname\": \"jsonfieldvalue\"}"
+      }
+    },
+    "PreProcess": {
+      "CustomRules": [
+        {
+          "Name": "TestCustomActions",
+          "Action": {
+            "Block": {
+              "CustomResponse": {
+                "ResponseCode": 503,
+                "CustomResponseBodyKey": "CustomResponseBodyKey",
+                "ResponseHeaders": [
+                  {
+                    "Name": "TestHeader1",
+                    "Value": "BlockActionHeader1Value"
+                  },
+                  {
+                    "Name": "TestHeader2",
+                    "Value": "BlockActionHeader2Value"
+                  }
+                ]
+              }
+            }
+          },
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "BlockXssAttackMetric"
+          },
+          "Statement": {
+            "XssMatchStatement": {
+              "FieldToMatch": {
+                "AllQueryArguments": {}
+              },
+              "TextTransformations": [
+                {
+                  "Priority": 1,
+                  "Type": "NONE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "PostProcess": {
+      "CustomRules": [
+        {
+          "Name": "TestCustomActions2",
+          "Action": {
+            "Block": {
+              "CustomResponse": {
+                "ResponseCode": 503,
+                "CustomResponseBodyKey": "AnotherCustomResponseKey"
+              }
+            }
+          },
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "BlockXssAttackMetric"
+          },
+          "Statement": {
+            "XssMatchStatement": {
+              "FieldToMatch": {
+                "AllQueryArguments": {}
+              },
+              "TextTransformations": [
+                {
+                  "Priority": 1,
+                  "Type": "NONE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}
