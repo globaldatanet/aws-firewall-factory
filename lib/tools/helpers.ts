@@ -70,7 +70,7 @@ async function getFmsQuota(deploymentRegion: string, quotaCode: string): Promise
     };
     const command = new quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommand(input);
     const newquota = await quoata_client.send(command);
-    if(newquota.RequestedQuotas !== []){
+    if(newquota.RequestedQuotas?.length !== 0){
       if(newquota.RequestedQuotas?.length || 0 === 0){
         const sortquota = lodash.sortBy(newquota.RequestedQuotas,["Created"]);
         if(sortquota?.length === 1){
