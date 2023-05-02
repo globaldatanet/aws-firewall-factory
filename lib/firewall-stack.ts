@@ -122,13 +122,13 @@ export class FirewallStack extends cdk.Stack {
       console.log("ℹ️  No ManagedRuleGroups defined in PostProcess.");
     }
     if (props.config.WebAcl.PreProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRGs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.CustomResponseBodies);
+      const customRgs = buildServiceDataCustomRGs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.PreProcess.CustomResponseBodies);
       preProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PreProcess.");
     }
     if (props.config.WebAcl.PostProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRGs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.CustomResponseBodies);
+      const customRgs = buildServiceDataCustomRGs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.PostProcess.CustomResponseBodies);
       postProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PostProcess.");

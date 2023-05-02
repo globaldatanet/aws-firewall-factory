@@ -1,14 +1,6 @@
 import { Rule, ManagedRuleGroup } from "./fms";
 import { aws_fms as fms } from "aws-cdk-lib";
 
-export type CustomResponseBodies = { [key:string]: {
-  /**
-    * @TJS-pattern [\s\S]*
-  */
-  Content: string,
-  ContentType: "APPLICATION_JSON" | "TEXT_HTML" | "TEXT_PLAIN",
-}};
-
 export interface Config {
   readonly General: {
     readonly Prefix: string,
@@ -36,7 +28,6 @@ export interface Config {
     readonly ResourcesCleanUp?: boolean,
     readonly PreProcess: RuleGroupSet,
     readonly PostProcess: RuleGroupSet,
-    readonly CustomResponseBodies?: CustomResponseBodies,
   },
 }
 
@@ -95,7 +86,17 @@ export enum PriceRegions{
   "eu-north-1" = "Europe (Stockholm)",
   "me-south-1" = "Middle East (Bahrain)"
 }
+
+export type CustomResponseBodies = { [key:string]: {
+  /**
+    * @TJS-pattern [\s\S]*
+  */
+  Content: string,
+  ContentType: "APPLICATION_JSON" | "TEXT_HTML" | "TEXT_PLAIN",
+}};
+
 export interface RuleGroupSet {
+  CustomResponseBodies?: CustomResponseBodies,
   CustomRules?: Rule[],
   ManagedRuleGroups?: ManagedRuleGroup[];
 }

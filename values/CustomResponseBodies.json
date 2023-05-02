@@ -19,17 +19,13 @@
         
       ]
     },
-    "CustomResponseBodies": {
-      "CustomResponseBodyKey": {
-        "ContentType": "TEXT_PLAIN",
-        "Content": "this is a plain text"
-      },
-      "AnotherCustomResponseKey": {
-        "ContentType": "APPLICATION_JSON",
-        "Content": "{\"jsonfieldname\": \"jsonfieldvalue\"}"
-      }
-    },
     "PreProcess": {
+      "CustomResponseBodies": {
+        "CustomResponseBodyKey": {
+          "ContentType": "TEXT_PLAIN",
+          "Content": "this is a plain text"
+        }
+      },
       "CustomRules": [
         {
           "Name": "TestCustomActions",
@@ -73,6 +69,12 @@
       ]
     },
     "PostProcess": {
+      "CustomResponseBodies": {
+        "AnotherCustomResponseKey": {
+          "ContentType": "APPLICATION_JSON",
+          "Content": "{\"jsonfieldname\": \"jsonfieldvalue\"}"
+        }
+      },
       "CustomRules": [
         {
           "Name": "TestCustomActions2",
