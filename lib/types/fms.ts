@@ -2,7 +2,13 @@
 interface CustomRequestHandling {
   CustomRequestHandling?: {
     InsertHeaders: {
+      /**
+        * @TJS-pattern ^[a-zA-Z0-9._$-]+$
+      */
       Name: string,
+      /**
+        * @TJS-pattern .*
+      */
       Value: string,
     }[],
   }
@@ -12,9 +18,18 @@ interface CustomResponse {
   CustomResponse?: {
     ResponseCode: number,
 
+    /**
+      * @TJS-pattern ^[\w\-]+$
+    */
     CustomResponseBodyKey?: string,
     ResponseHeaders?: {
+      /**
+        * @TJS-pattern ^[a-zA-Z0-9._$-]+$
+      */
       Name: string,
+      /**
+        * @TJS-pattern .*
+      */
       Value: string,
     }[],
   }

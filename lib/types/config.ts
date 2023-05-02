@@ -2,8 +2,11 @@ import { Rule, ManagedRuleGroup } from "./fms";
 import { aws_fms as fms } from "aws-cdk-lib";
 
 export type CustomResponseBodies = { [key:string]: {
+  /**
+    * @TJS-pattern [\s\S]*
+  */
   Content: string,
-  ContentType: string,
+  ContentType: "APPLICATION_JSON" | "TEXT_HTML" | "TEXT_PLAIN",
 }};
 
 export interface Config {
