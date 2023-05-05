@@ -2,10 +2,13 @@
 
 ## Released
 ## 3.2.0
-- Fix: conflict peer dependency on package.json
-- Fix: Add RuleLabels when calculating capacity (its needed)
-- Feat: Add CustomResponseBodies + custom actions for custom rules
+### Fixed
+- conflict peer dependency on package.json
+- Add RuleLabels when calculating capacity (its needed)
 
+### Added
+- Add CustomResponseBodies + custom actions for custom rules
+  This feature adds specifying CustomResponseBodies on the WebAcl and custom actions for custom rules.
 ## 3.1.9
 ### Fixed
 - Bump @aws-sdk/client-cloudformation from 3.319.0 to 3.321.1
