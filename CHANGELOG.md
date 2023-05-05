@@ -1,6 +1,11 @@
 # Change Log
 
 ## Released
+## 3.2.0
+- Fix: conflict peer dependency on package.json
+- Fix: Add RuleLabels when calculating capacity (its needed)
+- Feat: Add CustomResponseBodies + custom actions for custom rules
+
 ## 3.1.9
 ### Fixed
 - Bump @aws-sdk/client-cloudformation from 3.319.0 to 3.321.1
@@ -11,6 +16,7 @@
 - Bump typescript from 3.9.10 to 4.9.5
 - Bump @types/node from 18.16.1 to 18.16.3
 - Helpers - newquota.RequestedQuotas false positive
+
 ## 3.1.8
 ### Fixed
 - Bump @aws-sdk/client-cloudformation from 3.315.0 to 3.319.0

@@ -1,13 +1,58 @@
 /* eslint-disable @typescript-eslint/ban-types */
+interface CustomRequestHandling {
+  CustomRequestHandling?: {
+    InsertHeaders: {
+      /**
+        * @TJS-pattern ^[a-zA-Z0-9._$-]+$
+      */
+      Name: string,
+      /**
+        * @TJS-pattern .*
+      */
+      Value: string,
+    }[],
+  }
+}
+
+interface CustomResponse {
+  CustomResponse?: {
+    ResponseCode: number,
+
+    /**
+      * @TJS-pattern ^[\w\-]+$
+    */
+    CustomResponseBodyKey?: string,
+    ResponseHeaders?: {
+      /**
+        * @TJS-pattern ^[a-zA-Z0-9._$-]+$
+      */
+      Name: string,
+      /**
+        * @TJS-pattern .*
+      */
+      Value: string,
+    }[],
+  }
+}
+
+interface Action  {
+  Block?: CustomResponse,
+  Allow?: CustomRequestHandling,
+  Count?: CustomRequestHandling,
+  Captcha?: CustomRequestHandling,
+  Challenge?: CustomRequestHandling
+}
+
 interface RuleActionOverrideProperty {
   Name: string, 
-  ActionToUse: {
-    "Allow"?: {},
-    "Block"?: {},
-    "Count"?: {},
-    "Captcha"?: {},
-    "Challenge"?: {}
-  }
+  ActionToUse: Action
+}
+
+type NameObject = {
+  /**
+    * @TJS-pattern ^[0-9A-Za-z_\-:]+$
+  */
+  Name: string
 }
 export interface ManagedRuleGroup {
   Vendor: string,
@@ -18,7 +63,7 @@ export interface ManagedRuleGroup {
   OverrideAction?: {
     type: "COUNT" | "NONE"
   },
-  RuleActionOverrides?: RuleActionOverrideProperty[] | undefined
+  RuleActionOverrides?: RuleActionOverrideProperty[]
 }
 
 export interface Rule {
@@ -51,10 +96,6 @@ export interface ManagedServiceData {
   }
 }
 
-type NameObject = {
-  Name: string
-}
-
 export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup {
   managedRuleGroupIdentifier: {
     vendorName: string,
@@ -77,17 +118,4 @@ interface ServiceDataAbstactRuleGroup {
   },
   ruleGroupArn: string | null,
   ruleGroupType: string
-}
-
-type Action = | {
-  Block: Record<string, never>
-}
-| {
-  Allow: Record<string, never>
-}
-| {
-  Count: Record<string, never>
-}
-| {
-  Captcha: Record<string, never>
 }

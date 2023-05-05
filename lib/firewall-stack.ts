@@ -5,7 +5,7 @@ import { aws_fms as fms } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_logs as logs } from "aws-cdk-lib";
-import { Config } from "./types/config";
+import { Config, CustomResponseBodies } from "./types/config";
 import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule } from "./types/fms";
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import { promises as fsp } from "fs";
@@ -122,13 +122,13 @@ export class FirewallStack extends cdk.Stack {
       console.log("ℹ️  No ManagedRuleGroups defined in PostProcess.");
     }
     if (props.config.WebAcl.PreProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRGs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules);
+      const customRgs = buildServiceDataCustomRGs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.PreProcess.CustomResponseBodies);
       preProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PreProcess.");
     }
     if (props.config.WebAcl.PostProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRGs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules);
+      const customRgs = buildServiceDataCustomRGs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.PostProcess.CustomResponseBodies);
       postProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PostProcess.");
@@ -427,7 +427,7 @@ function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : Ser
   return cfnManagedRuleGroup;
 }
 
-function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capacity: number, deployHash: string, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[]) : ServiceDataRuleGroup[] {
+function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capacity: number, deployHash: string, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined) : ServiceDataRuleGroup[] {
   const serviceDataRuleGroup : ServiceDataRuleGroup[] = [];
   let icon;
   if (type === "Pre") {
@@ -557,11 +557,23 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         console.log(" 📇 New Identifier: " + rulegroupidentifier);
       }
     }
+    
+    // Don't lowercase the first char of the Key of the Custom Response Body,
+    // only toAwsCamel the properties below the Key
+    let cstResBodies: { [key:string]: any} | undefined = {};
+    if(customResponseBodies) {
+      cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = toAwsCamel(customResponseBodies[curr]); return acc; }, cstResBodies);
+    }
+    else {
+      cstResBodies = undefined;
+    }
+
     new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
       capacity: processRuntimeProps.Capacity,
       scope: webAclScope,
       rules: rules,
       name: name,
+      customResponseBodies: cstResBodies,
       visibilityConfig: {
         sampledRequestsEnabled: false,
         cloudWatchMetricsEnabled: false,
@@ -847,11 +859,23 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         CfnRuleProperties.push(CfnRuleProperti);
         rulegroupcounter++;
       }
+
+      // Don't lowercase the first char of the Key of the Custom Response Body,
+      // only toAwsCamel the properties below the Key
+      let cstResBodies: { [key:string]: any} | undefined = {};
+      if(customResponseBodies) {
+        cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = toAwsCamel(customResponseBodies[curr]); return acc; }, cstResBodies);
+      }
+      else {
+        cstResBodies = undefined;
+      }
+
       new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
         capacity: rulegroupcapacities[count],
         scope: webAclScope,
         rules: CfnRuleProperties,
         name: name,
+        customResponseBodies: cstResBodies,
         visibilityConfig: {
           sampledRequestsEnabled: false,
           cloudWatchMetricsEnabled: false,

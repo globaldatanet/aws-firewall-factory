@@ -27,7 +27,7 @@ export interface Config {
     readonly RemediationEnabled?: boolean,
     readonly ResourcesCleanUp?: boolean,
     readonly PreProcess: RuleGroupSet,
-    readonly PostProcess: RuleGroupSet
+    readonly PostProcess: RuleGroupSet,
   },
 }
 
@@ -86,7 +86,17 @@ export enum PriceRegions{
   "eu-north-1" = "Europe (Stockholm)",
   "me-south-1" = "Middle East (Bahrain)"
 }
+
+export type CustomResponseBodies = { [key:string]: {
+  /**
+    * @TJS-pattern [\s\S]*
+  */
+  Content: string,
+  ContentType: "APPLICATION_JSON" | "TEXT_HTML" | "TEXT_PLAIN",
+}};
+
 export interface RuleGroupSet {
+  CustomResponseBodies?: CustomResponseBodies,
   CustomRules?: Rule[],
   ManagedRuleGroups?: ManagedRuleGroup[];
 }
