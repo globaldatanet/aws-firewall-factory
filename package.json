@@ -6,6 +6,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   "version": "3.3.0",
 =======
   "version": "3.2.1",
@@ -25,6 +26,12 @@
 =======
   "version": "3.2.6",
 >>>>>>> 689e0a60 (prepare release 3.2.6)
+=======
+  "version": "3.2.6",
+=======
+  "version": "3.3.0",
+>>>>>>> a7b025e0 (Bump versions)
+>>>>>>> 6e630e1b (Bump versions)
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },

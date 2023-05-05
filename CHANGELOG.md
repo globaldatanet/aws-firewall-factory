@@ -2,6 +2,7 @@
 
 ## Released
 
+<<<<<<< HEAD
 ## 3.2.6
 ### Add
 - Linting Github Action for typescript 18 & 20
@@ -76,7 +77,19 @@
 - Bump @typescript-eslint/parser from 4.32.0 to 4.4.0
 - Bump eslint-config-standard from 16.0.3 to 17.0.0
 - Bump eslint from 7.32.0 to 8.4.0
+<<<<<<< HEAD
 >>>>>>> be4283d0 (3.2.1)
+=======
+=======
+## 3.3.0
+### Added
+- Refactor of `bin/aws-firewall-factory.ts`, grouping duplicated code on a function, adding comments and better organizing the file.
+
+- Adds a centralized IPSets management feature.
+  No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets on `values/ipsets/*` and for using them in the WebACLs on `values/ip-sets.json`.
+
+>>>>>>> a7b025e0 (Bump versions)
+>>>>>>> 6e630e1b (Bump versions)
 ## 3.2.0
 ### Fixed
 - conflict peer dependency on package.json
