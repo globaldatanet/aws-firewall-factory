@@ -91,26 +91,6 @@ if(!configFile || !existsSync(configFile)) {
       deploymentRegion = process.env.REGION || "eu-central-1";
     }
 
-    // Loading IPSets if IPSetFiles is defined and contains items
-    const ipSets: IPSet[] = [];
-
-    const ipSetsFiles = config.WebAcl.IPSetFiles;
-    if(Array.isArray(ipSetsFiles) && ipSetsFiles.length > 0) {
-      for(const ipSetFile of ipSetsFiles) {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const ipSet: IPSet = require(realpathSync(`values/ipsets/${ipSetFile}.json`));
-        
-        if(!validateIPSets(ipSet)) logInvalidConfigFileAndExit("IPSet", realpathSync(`values/ipsets/${ipSetFile}.json`), validateIPSets);
-
-        if(ipSet.Scope === "CLOUDFRONT|REGIONAL") {
-          if(config.WebAcl.Scope === "CLOUDFRONT") ipSet.Scope = "CLOUDFRONT";
-          if(config.WebAcl.Scope === "REGIONAL")   ipSet.Scope = "REGIONAL";
-        }
-
-        ipSets.push(ipSet);
-      }
-    }
-
     outputBanner();
     console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
     console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
@@ -140,6 +120,24 @@ if(!configFile || !existsSync(configFile)) {
     }
 
     console.log("🔥 Deploy FMS Policy: " + config.General.Prefix.toUpperCase() + "-" + config.WebAcl.Name.toUpperCase()+ "-" + config.General.Stage + "-" + config.General.DeployHash + "\n ⦂ Type: " +config.WebAcl.Type + "\n📚 Stackname: ","\u001b[32m",config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase(),"\u001b[0m");
+    // Loading IPSets if IPSetFiles is defined and contains items
+    const ipSets: IPSet[] = [];
+
+    const ipSetsFiles = config.WebAcl.IPSetFiles;
+    if(Array.isArray(ipSetsFiles) && ipSetsFiles.length > 0) {
+      console.log("\n𝍂  Loading IPSets from IPSetFiles")
+      for(const ipSetFile of ipSetsFiles) {
+        console.log("   ➕ " + ipSetFile)
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const ipSet: IPSet = require(realpathSync(`values/ipsets/${ipSetFile}.json`));
+        if(!validateIPSets(ipSet)) logInvalidConfigFileAndExit("IPSet", realpathSync(`values/ipsets/${ipSetFile}.json`), validateIPSets);
+        if(ipSet.Scope === "CLOUDFRONT|REGIONAL") {
+          if(config.WebAcl.Scope === "CLOUDFRONT") ipSet.Scope = "CLOUDFRONT";
+          if(config.WebAcl.Scope === "REGIONAL")   ipSet.Scope = "REGIONAL";
+        }
+        ipSets.push(ipSet);
+      }
+    }
     const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
     if(wcuQuotaReached) {
       console.error("\u001B[31m","🚨 Exit process due Quota Check for WCU 🚨 \n\n","\x1b[0m" + "\n\n");
