@@ -136,6 +136,7 @@ if(!configFile || !existsSync(configFile)) {
           if(config.WebAcl.Scope === "REGIONAL")   ipSet.Scope = "REGIONAL";
         }
         ipSets.push(ipSet);
+        console.log("      ⚙️  [" + ipSet.IPAddressVersion + "] | 🌎 [" + ipSet.Scope+ "]")
       }
     }
     const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
