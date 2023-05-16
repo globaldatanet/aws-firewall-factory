@@ -17,16 +17,12 @@ const program = TJS.getProgramFromFiles(
   compilerOptions
 );
 
-const ipsets = TJS.getProgramFromFiles(
-  [resolve("lib/types/ipset.ts")],
-  compilerOptions
-);
 
 const wafschema = TJS.generateSchema(program, "Config", settings);
 
 const prerequisitesschema = TJS.generateSchema(program, "Prerequisites", settings);
 
-const ipSetsSchema = TJS.generateSchema(ipsets, "IPSet", settings);
+const ipSetsSchema = TJS.generateSchema(program, "IPSet", settings);
 
 const ajv = new Ajv();
 
