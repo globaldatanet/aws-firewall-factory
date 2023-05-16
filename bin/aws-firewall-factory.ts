@@ -7,6 +7,7 @@ import * as cdk from "aws-cdk-lib";
 import { realpathSync, existsSync } from "fs";
 import { validatewaf, validateIPSets, validateprerequisites } from "../lib/tools/config-validator";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { Config, Prerequisites, PriceRegions, RegionString, IPSet } from "../lib/types/config";
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
 import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
@@ -20,6 +21,9 @@ import { ValidateFunction } from "ajv";
 =======
 import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
 import { IPSet } from "../lib/types/ipset";
+=======
+import { Config, Prerequisites, PriceRegions, RegionString, IPSet } from "../lib/types/config";
+>>>>>>> fbaef5d8 (add ipset config to general config.ts file)
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
 import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
