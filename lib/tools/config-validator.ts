@@ -1,6 +1,5 @@
 import Ajv, {JSONSchemaType} from "ajv";
-import { Config , Prerequisites} from "../types/config";
-import { IPSet } from "../types/ipset";
+import { Config , Prerequisites, IPSet} from "../types/config";
 import { resolve } from "path";
 import * as TJS from "typescript-json-schema";
 
