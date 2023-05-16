@@ -10,9 +10,8 @@ import { aws_fms as fms } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_logs as logs } from "aws-cdk-lib";
-import { Config, CustomResponseBodies } from "./types/config";
+import { Config, CustomResponseBodies, IPSet } from "./types/config";
 import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule } from "./types/fms";
-import { IPSet } from "./types/ipset";
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import { promises as fsp } from "fs";
 import { toAwsCamel } from "./tools/helpers";
@@ -164,7 +163,7 @@ export class FirewallStack extends cdk.Stack {
         if(typeof address === "string") addresses.push(address);
         else addresses.push(address.IP);
       }
-      
+
       new wafv2.CfnIPSet(this, ipSet.Name, {
         name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
         description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory",
@@ -176,14 +175,14 @@ export class FirewallStack extends cdk.Stack {
 
       ipSetsNames.push(ipSet.Name);
     }
-  
+
     // Checks if the ipsets are configured correctly
     const validateIPSetsInConfig = (customRulesPath: string) => {
       const logErrorAndExit = (error: string) => {
         console.error("\u001B[31m 🚨 Invalid Configuration File 🚨 \n\n", `\x1b[0m ${error} \n\n`);
         process.exit(1);
       };
-      
+
       const rules = get(props, customRulesPath);
       if(!Array.isArray(rules)) return;
 
