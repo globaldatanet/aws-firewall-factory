@@ -1,6 +1,18 @@
 # Change Log
 
 ## Released
+
+## 3.2.1
+### Fixed
+- Bump aws-cdk from 2.74.0 to 2.79.1 
+- Bump @aws-sdk/client-pricing from 3.321.1 to 3.332.0
+- Bump constructs from 10.1.314 to 10.2.24 
+- Bump @aws-sdk/client-fms from 3.321.1 to 3.332.0 
+- Bump eslint-plugin-promise from 5.2.0 to 6.1.1
+- Bump @typescript-eslint/eslint-plugin from 4.32.0 to 4.4.0
+- Bump @typescript-eslint/parser from 4.32.0 to 4.4.0
+- Bump eslint-config-standard from 16.0.3 to 17.0.0
+- Bump eslint from 7.32.0 to 8.4.0
 ## 3.2.0
 ### Fixed
 - conflict peer dependency on package.json
