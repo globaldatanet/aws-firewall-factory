@@ -20,7 +20,7 @@ export interface Config {
     readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
     readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
     readonly Scope: "CLOUDFRONT" | "REGIONAL",
-    readonly Type: "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage" | "ResourceTypeList",
+    readonly Type: WebAclType | "ResourceTypeList",
     readonly TypeList?: WebAclType[],
     readonly ResourceTags?: Array<fms.CfnPolicy.ResourceTagProperty>,
     readonly ExcludeResourceTags?: boolean,
@@ -32,6 +32,7 @@ export interface Config {
 }
 
 export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage"
+// | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi" - waiting for support if you need a GraphQLApi Firewall just use an ApiGateway:Stage Firewall
 export interface Prerequisites {
   readonly General: {
     readonly Prefix: string,

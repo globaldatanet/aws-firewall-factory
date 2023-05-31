@@ -2,6 +2,13 @@
 
 ## Released
 
+## 3.2.2
+### Fixed
+- Bump @aws-sdk/client-pricing from 3.332.0 to 3.341.0
+- Bump eslint from 8.40.0 to 8.41.0
+- Bump @aws-sdk/client-cloudwatch from 3.321.1 to 3.341.0
+- Bump @aws-sdk/client-service-quotas from 3.321.1 to 3.342.0
+- Bump @aws-sdk/client-fms from 3.332.0 to 3.342.0
 ## 3.2.1
 ### Fixed
 - Bump aws-cdk from 2.74.0 to 2.79.1 
