@@ -33,7 +33,12 @@ export interface Config {
   },
 }
 
+<<<<<<< HEAD
 export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage" | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi"
+=======
+export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage"
+// | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi" - waiting for support if you need a GraphQLApi Firewall just use an ApiGateway:Stage Firewall
+>>>>>>> 447c4564 (Version 3.2.2)
 export interface Prerequisites {
   readonly General: {
     readonly Prefix: string,

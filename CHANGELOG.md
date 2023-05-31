@@ -3,6 +3,7 @@
 ## Released
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## 3.3.0
 ### Added
 - Refactor of `bin/aws-firewall-factory.ts`, grouping duplicated code on a function, adding comments and better organizing the file.
@@ -11,6 +12,15 @@
   No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets on `values/ipsets/*` and for using them in the WebACLs on `values/ip-sets.json`.
 
 =======
+=======
+## 3.2.2
+### Fixed
+- Bump @aws-sdk/client-pricing from 3.332.0 to 3.341.0
+- Bump eslint from 8.40.0 to 8.41.0
+- Bump @aws-sdk/client-cloudwatch from 3.321.1 to 3.341.0
+- Bump @aws-sdk/client-service-quotas from 3.321.1 to 3.342.0
+- Bump @aws-sdk/client-fms from 3.332.0 to 3.342.0
+>>>>>>> 447c4564 (Version 3.2.2)
 ## 3.2.1
 ### Fixed
 - Bump aws-cdk from 2.74.0 to 2.79.1 

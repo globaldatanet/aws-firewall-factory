@@ -1,10 +1,14 @@
 {
   "name": "aws-firewall-factory",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "version": "3.3.0",
 =======
   "version": "3.2.1",
 >>>>>>> be4283d0 (3.2.1)
+=======
+  "version": "3.2.2",
+>>>>>>> 447c4564 (Version 3.2.2)
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },
