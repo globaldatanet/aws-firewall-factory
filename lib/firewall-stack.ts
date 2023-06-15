@@ -482,7 +482,8 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
           name: rulename,
           priority: count,
           action: toAwsCamel(statement.Action),
-          statement: toAwsCamel(statement.Statement),
+          // fixes cloudformation warning "required key [Name] not found" in statements like "SingleHeader"
+          statement: JSON.parse(JSON.stringify(toAwsCamel(statement.Statement))?.replace(/name/g,"Name")),
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,

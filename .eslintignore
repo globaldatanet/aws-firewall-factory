@@ -1,3 +1,4 @@
 node_modules
 dist
 cdk.out
+jest.config.js
