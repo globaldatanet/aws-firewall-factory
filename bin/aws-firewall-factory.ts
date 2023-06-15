@@ -8,7 +8,6 @@ import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
 import {isPriceCalculated, GetCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
-import { env } from "process";
 
 
 /**
@@ -128,8 +127,8 @@ if (configFile && existsSync(configFile)) {
             account: process.env.CDK_DEFAULT_ACCOUNT,
           },
         });
-        const Prices = await GetCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
-        const PriceCalculated = await isPriceCalculated(runtimeProperties);
+        await GetCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
+        await isPriceCalculated(runtimeProperties);
       })();
     } else {
       console.log(`
