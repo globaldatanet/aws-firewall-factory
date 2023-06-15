@@ -182,7 +182,7 @@ export async function setOutputsFromStack(deploymentRegion: string, runtimeprops
   const command = new cloudformation.DescribeStacksCommand(params);
   const responsestack = await cloudformation_client.send(command);
   if(responsestack.Stacks?.[0].StackName && responsestack.Stacks?.[0].Outputs !== undefined){
-    for(const output of responsestack.Stacks?.[0].Outputs){
+    for(const output of responsestack.Stacks?.[0]?.Outputs ?? []){
       if(output.OutputKey === "DeployedRuleGroupNames")
       {
         runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];

@@ -8,8 +8,12 @@ import { Config, Prerequisites, PriceRegions, RegionString, IPSet } from "../lib
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
 import {isPriceCalculated, GetCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
+<<<<<<< HEAD
 import { env } from "process";
 import { ValidateFunction } from "ajv";
+=======
+
+>>>>>>> 2d597da6 (fix: dependencies, single-header cloudformation warning and log bucket encryption bug)
 
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
@@ -112,6 +116,7 @@ if(!configFile || !existsSync(configFile)) {
           console.error("\u001B[31m","🚨 Exit process due Quota Check for Policies 🚨 \n\n","\x1b[0m" + "\n\n");
           process.exit(1);
         }
+<<<<<<< HEAD
       }
     }
     else{
@@ -131,6 +136,31 @@ if(!configFile || !existsSync(configFile)) {
     const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
     if(wcuQuotaReached) {
       console.error("\u001B[31m","🚨 Exit process due Quota Check for WCU 🚨 \n\n","\x1b[0m" + "\n\n");
+=======
+        const app = new cdk.App();
+        new FirewallStack(app, config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase(), {
+          config, runtimeProperties: runtimeProperties,
+          env: {
+            region: deploymentRegion,
+            account: process.env.CDK_DEFAULT_ACCOUNT,
+          },
+        });
+        await GetCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
+        await isPriceCalculated(runtimeProperties);
+      })();
+    } else {
+      console.log(`
+      █████╗ ██╗    ██╗███████╗    ███████╗██╗██████╗ ███████╗██╗    ██╗ █████╗ ██╗     ██╗         ███████╗ █████╗  ██████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
+     ██╔══██╗██║    ██║██╔════╝    ██╔════╝██║██╔══██╗██╔════╝██║    ██║██╔══██╗██║     ██║         ██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
+     ███████║██║ █╗ ██║███████╗    █████╗  ██║██████╔╝█████╗  ██║ █╗ ██║███████║██║     ██║         █████╗  ███████║██║        ██║   ██║   ██║██████╔╝ ╚████╔╝
+     ██╔══██║██║███╗██║╚════██║    ██╔══╝  ██║██╔══██╗██╔══╝  ██║███╗██║██╔══██║██║     ██║         ██╔══╝  ██╔══██║██║        ██║   ██║   ██║██╔══██╗  ╚██╔╝
+     ██║  ██║╚███╔███╔╝███████║    ██║     ██║██║  ██║███████╗╚███╔███╔╝██║  ██║███████╗███████╗    ██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║  ██║   ██║
+     ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
+     `);
+      console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
+      console.log("\n 🧪 Validation of your ConfigFile: \n   📂 " + configFile + "\n\n");
+      console.error("\u001B[31m","🚨 Invalid Configuration File 🚨 \n\n","\x1b[0m" + JSON.stringify(validatewaf.errors, null, 2)+ "\n\n");
+>>>>>>> 2d597da6 (fix: dependencies, single-header cloudformation warning and log bucket encryption bug)
       process.exit(1);
     }
 

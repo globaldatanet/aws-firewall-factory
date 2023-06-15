@@ -53,12 +53,11 @@ export class PrerequisitesStack extends cdk.Stack {
 
       const accesslogsbucket = new s3.Bucket(this, "AWS-Firewall-Factory-LoggingBucket-AccessLogs", {
         blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-        encryption: props.prerequisites.Logging.BucketProperties?.KmsEncryptionKey ? s3.BucketEncryption.KMS : s3.BucketEncryption.S3_MANAGED,
-        encryptionKey,
+        encryption: s3.BucketEncryption.S3_MANAGED,
         enforceSSL: true,
         lifecycleRules: [lifecycleRule],
         versioned: true,
-        objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
+        objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
         removalPolicy: cdk.RemovalPolicy.RETAIN,
         bucketName: props.prerequisites.Logging.BucketProperties?.BucketName ? props.prerequisites.General.Prefix.toLocaleLowerCase().toLocaleLowerCase() + "-" + props.prerequisites.Logging.BucketProperties?.BucketName + "-access-logs" : props.prerequisites.General.Prefix.toLocaleLowerCase() + "-awsfirewallfactory-logging-access-logs" + account_id + "-" + region
       });
@@ -71,7 +70,7 @@ export class PrerequisitesStack extends cdk.Stack {
         lifecycleRules: [lifecycleRule],
         serverAccessLogsBucket: accesslogsbucket,
         versioned: props.prerequisites.Logging.BucketProperties?.ObjectLock ? true : false,
-        objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,
+        objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_PREFERRED,
         removalPolicy: cdk.RemovalPolicy.RETAIN,
         bucketName: props.prerequisites.Logging.BucketProperties?.BucketName ? props.prerequisites.General.Prefix.toLocaleLowerCase() + "-" + props.prerequisites.Logging.BucketProperties?.BucketName : props.prerequisites.General.Prefix.toLocaleLowerCase() + "-awsfirewallfactory-logging-" + account_id + "-" + region
       });
