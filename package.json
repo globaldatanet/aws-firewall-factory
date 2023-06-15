@@ -38,7 +38,7 @@
     "@types/lodash": "4.14.178",
     "ajv": "8.10.0",
     "aws-cdk-lib": "2.77.0",
-    "constructs": "10.2.25",
+    "constructs": "10.2.52",
     "lodash": "4.17.21",
     "process": "0.11.10",
     "shapes": "0.4.0",
