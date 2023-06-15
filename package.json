@@ -34,7 +34,7 @@
     "@aws-sdk/client-pricing": "3.341.0",
     "@aws-sdk/client-service-quotas": "3.342.0",
     "@aws-sdk/client-wafv2": "3.321.1",
-    "@mhlabs/cfn-diagram": "1.1.32",
+    "@mhlabs/cfn-diagram": "1.1.36",
     "@types/lodash": "4.14.178",
     "ajv": "8.10.0",
     "aws-cdk-lib": "2.77.0",
