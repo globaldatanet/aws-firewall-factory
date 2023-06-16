@@ -4,6 +4,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   "version": "3.3.0",
 =======
   "version": "3.2.1",
@@ -17,6 +18,9 @@
 =======
   "version": "3.2.4",
 >>>>>>> ea863de7 (prepare relase)
+=======
+  "version": "3.2.5",
+>>>>>>> fd488eb8 (Fix Pricing Shield Advanced)
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },
@@ -49,6 +53,7 @@
     "@aws-sdk/client-fms": "3.342.0",
     "@aws-sdk/client-pricing": "3.341.0",
     "@aws-sdk/client-service-quotas": "3.342.0",
+    "@aws-sdk/client-shield": "^3.353.0",
     "@aws-sdk/client-wafv2": "3.321.1",
     "@mhlabs/cfn-diagram": "1.1.32",
     "@types/lodash": "4.14.178",

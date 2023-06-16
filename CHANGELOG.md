@@ -1,6 +1,12 @@
 # Change Log
 
 ## Released
+## 3.2.5
+### Fixed
+- Pricing Calculation - Check for Shield Advanced State
+  - All public regions & Global (Amazon CloudFront locations) - No charge per policy per Region
+  - AWS WAF WebACLs or Rules created by Firewall Manager - Included. No additional charge.
+
 ## 3.2.4
 ### Fixed
 - Update TestCases for WAF Testing
