@@ -1,6 +1,6 @@
 {
   "name": "aws-firewall-factory",
-  "version": "3.2.4",
+  "version": "3.2.5",
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },
@@ -33,6 +33,7 @@
     "@aws-sdk/client-fms": "3.342.0",
     "@aws-sdk/client-pricing": "3.341.0",
     "@aws-sdk/client-service-quotas": "3.342.0",
+    "@aws-sdk/client-shield": "^3.353.0",
     "@aws-sdk/client-wafv2": "3.321.1",
     "@mhlabs/cfn-diagram": "1.1.32",
     "@types/lodash": "4.14.178",
