@@ -1,6 +1,12 @@
 # Change Log
 
 ## Released
+## 3.2.4
+### Fixed
+- Update TestCases for WAF Testing
+  - community-user-agent testcases 
+  - improve owasp testcases
+- Update Testing bin Version
 
 <<<<<<< HEAD
 <<<<<<< HEAD

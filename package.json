@@ -3,6 +3,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   "version": "3.3.0",
 =======
   "version": "3.2.1",
@@ -13,6 +14,9 @@
 =======
   "version": "3.2.3",
 >>>>>>> 2d597da6 (fix: dependencies, single-header cloudformation warning and log bucket encryption bug)
+=======
+  "version": "3.2.4",
+>>>>>>> ea863de7 (prepare relase)
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },
