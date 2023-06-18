@@ -3,7 +3,7 @@ import { RuntimeProperties } from "../types/runtimeprops";
 import { Config } from "../types/config";
 import { PriceRegions } from "../types/config";
 import {CloudWatchClient, ListDashboardsCommand, ListDashboardsCommandInput } from "@aws-sdk/client-cloudwatch";
-import { ShieldClient, GetSubscriptionStateCommand } from "@aws-sdk/client-shield"
+import { ShieldClient, GetSubscriptionStateCommand } from "@aws-sdk/client-shield";
 
 
 /**
@@ -168,10 +168,10 @@ export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promis
   const requestscost = runtimeProps.Pricing.Request;
   const totalcost = fixedcost + (requestscost * 5) + (captchacost * 5);
   const ShieldSubscriptionState = await getShieldSubscriptionState();
-  console.log("\n🛡️  Shield Advanced State: " + ShieldSubscriptionState?.toLowerCase())
+  console.log("\n🛡️  Shield Advanced State: " + ShieldSubscriptionState?.toLowerCase());
   console.log("\n💰 Cost: \n");
   if(ShieldSubscriptionState === "ACTIVE"){
-    fixedcost = botcontrolfixedcost  + atpfixedcost + runtimeProps.Pricing.Dashboard
+    fixedcost = botcontrolfixedcost  + atpfixedcost + runtimeProps.Pricing.Dashboard;
   }
   console.log("   WAF Rules cost: " + fixedcost + " $ per month");
   console.log("   WAF Requests: "+ requestscost + " $ pro 1 mio requests");
@@ -194,5 +194,5 @@ async function getShieldSubscriptionState(){
   const input = {};
   const command = new GetSubscriptionStateCommand(input);
   const SubscriptionState = (await client.send(command)).SubscriptionState;
-  return SubscriptionState
+  return SubscriptionState;
 }
