@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import get from "lodash/get";
@@ -28,10 +31,10 @@ export interface ConfigStackProps extends cdk.StackProps {
 export class FirewallStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ConfigStackProps) {
     super(scope, id, props);
-    const account_id = cdk.Aws.ACCOUNT_ID;
+    const accountId = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
 
-    const CfnRole = new iam.CfnRole(this, "KinesisS3DeliveryRole", {
+    const cfnRole = new iam.CfnRole(this, "KinesisS3DeliveryRole", {
       assumeRolePolicyDocument: {
         Version: "2012-10-17",
         Statement: [
@@ -44,7 +47,12 @@ export class FirewallStack extends cdk.Stack {
         ],
       },
     });
+<<<<<<< HEAD
     const CfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
+=======
+
+    const cfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
+>>>>>>> 09328a24 (adjust linting)
       retentionInDays: 90,
     });
 
@@ -70,7 +78,7 @@ export class FirewallStack extends cdk.Stack {
         {
           Effect: "Allow",
           Action: ["logs:PutLogEvents"],
-          Resource: [CfnLogGroup.attrArn],
+          Resource: [cfnLogGroup.attrArn],
         },
         {
           Effect: "Allow",
@@ -83,7 +91,7 @@ export class FirewallStack extends cdk.Stack {
     new iam.CfnPolicy(this, "KinesisS3DeliveryPolicy", {
       policyDocument: policy,
       policyName: "firehose_delivery_policy",
-      roles: [CfnRole.ref],
+      roles: [cfnRole.ref],
     });
 
     new firehouse.CfnDeliveryStream(this, "S3DeliveryStream", {
@@ -101,12 +109,12 @@ export class FirewallStack extends cdk.Stack {
             awskmsKeyArn: props.config.General.FireHoseKeyArn,
           },
         },
-        roleArn: CfnRole.attrArn,
+        roleArn: cfnRole.attrArn,
         bufferingHints: { sizeInMBs: 50, intervalInSeconds: 60 },
         compressionFormat: "UNCOMPRESSED",
-        prefix: "AWSLogs/" + account_id + "/FirewallManager/" + region + "/",
+        prefix: "AWSLogs/" + accountId + "/FirewallManager/" + region + "/",
         errorOutputPrefix:
-          "AWSLogs/" + account_id + "/FirewallManager/" + region + "/Errors",
+          "AWSLogs/" + accountId + "/FirewallManager/" + region + "/Errors",
       },
     });
 
@@ -144,23 +152,23 @@ export class FirewallStack extends cdk.Stack {
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
-      preProcessRuleGroups.push(...buildServiceDataManagedRGs(props.config.WebAcl.PreProcess.ManagedRuleGroups));
+      preProcessRuleGroups.push(...buildServiceDataManagedRgs(props.config.WebAcl.PreProcess.ManagedRuleGroups));
     } else {
       console.log("\nℹ️  No ManagedRuleGroups defined in PreProcess.");
     }
     if (props.config.WebAcl.PostProcess.ManagedRuleGroups) {
-      postProcessRuleGroups.push(...buildServiceDataManagedRGs(props.config.WebAcl.PostProcess.ManagedRuleGroups));
+      postProcessRuleGroups.push(...buildServiceDataManagedRgs(props.config.WebAcl.PostProcess.ManagedRuleGroups));
     } else {
       console.log("ℹ️  No ManagedRuleGroups defined in PostProcess.");
     }
     if (props.config.WebAcl.PreProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRGs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.PreProcess.CustomResponseBodies);
+      const customRgs = buildServiceDataCustomRgs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.PreProcess.CustomResponseBodies);
       preProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PreProcess.");
     }
     if (props.config.WebAcl.PostProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRGs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.PostProcess.CustomResponseBodies);
+      const customRgs = buildServiceDataCustomRgs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.PostProcess.CustomResponseBodies);
       postProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PostProcess.");
@@ -176,7 +184,7 @@ export class FirewallStack extends cdk.Stack {
         logDestinationConfigs: ["${S3DeliveryStream.Arn}"],
       },
     };
-    const CfnPolicyProps = {
+    const cfnPolicyProps = {
       remediationEnabled: props.config.WebAcl.RemediationEnabled ? props.config.WebAcl.RemediationEnabled : false,
       resourceType: props.config.WebAcl.Type,
       resourceTypeList: props.config.WebAcl.TypeList ? props.config.WebAcl.TypeList : undefined,
@@ -201,12 +209,16 @@ export class FirewallStack extends cdk.Stack {
       excludeResourceTags: props.config.WebAcl.ExcludeResourceTags ? props.config.WebAcl.ExcludeResourceTags : false,
       policyDescription: props.config.WebAcl.Description ? props.config.WebAcl.Description : undefined
     };
+<<<<<<< HEAD
     const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
     if(IpSets.length !== 0){
       for(const Ipset of IpSets){
         fmspolicy.addDependency(Ipset);
       }
     }
+=======
+    new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
+>>>>>>> 09328a24 (adjust linting)
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
       console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", props.config.General.Prefix.toUpperCase() +
@@ -250,10 +262,10 @@ export class FirewallStack extends cdk.Stack {
           height: 4
         });
 
-        const SecuredDomain = props.config.General.SecuredDomain.toString();
+        const securedDomain = props.config.General.SecuredDomain.toString();
 
         const app = new cloudwatch.TextWidget({
-          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + ManagedRuleGroupsInfo.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+SecuredDomain+")",
+          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + MANAGEDRULEGROUPSINFO.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+securedDomain+")",
           width: 7,
           height: 4
         });
@@ -275,12 +287,12 @@ export class FirewallStack extends cdk.Stack {
           // eslint-disable-next-line no-useless-escape
           const countexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\CountedRequests\"', '\Sum', 300)";
 
-          const CountedRequests = new cloudwatch.GraphWidget({
+          const countedRequests = new cloudwatch.GraphWidget({
             title: "🔢 Counted Requests in " + account,
             width: 8,
             height: 8
           });
-          CountedRequests.addLeftMetric(
+          countedRequests.addLeftMetric(
             new cloudwatch.MathExpression({
               expression: countexpression,
               usingMetrics: {},
@@ -291,12 +303,12 @@ export class FirewallStack extends cdk.Stack {
             }));
           // eslint-disable-next-line no-useless-escape
           const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
-          const BlockedRequests = new cloudwatch.GraphWidget({
+          const blockedRequests = new cloudwatch.GraphWidget({
             title: "❌ Blocked Requests in " + account,
             width: 8,
             height: 8
           });
-          BlockedRequests.addLeftMetric(
+          blockedRequests.addLeftMetric(
             new cloudwatch.MathExpression({
               expression: blockedexpression,
               usingMetrics: {},
@@ -307,12 +319,12 @@ export class FirewallStack extends cdk.Stack {
             }));
           // eslint-disable-next-line no-useless-escape  
           const allowedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\AllowedRequests\"', '\Sum', 300)";
-          const AllowedRequests = new cloudwatch.GraphWidget({
+          const allowedRequests = new cloudwatch.GraphWidget({
             title: "✅ Allowed Requests in " + account,
             width: 8,
             height: 8
           });
-          AllowedRequests.addLeftMetric(
+          allowedRequests.addLeftMetric(
             new cloudwatch.MathExpression({
               expression: allowedexpression,
               usingMetrics: {},
@@ -414,13 +426,13 @@ export class FirewallStack extends cdk.Stack {
           });
           const row = new cloudwatch.Row(sinlevaluecountedrequests,singlevalueallowedrequest,singlevaluebockedrequest);
           const row2 = new cloudwatch.Row(botrequestsvsnonbotrequests);
-          const row1 = new cloudwatch.Row(CountedRequests,AllowedRequests, BlockedRequests);
+          const row1 = new cloudwatch.Row(countedRequests,allowedRequests, blockedRequests);
           cwdashboard.addWidgets(row,row1,row2);
         }
       }
     }
     const options = { flag: "w", force: true };
-    (async () => {
+    void (async () => {
       try {
         if (process.env.PROCESS_PARAMETERS) {
           await fsp.writeFile(
@@ -430,14 +442,20 @@ export class FirewallStack extends cdk.Stack {
           );
         }
       } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         console.log("Error " + error);
       }
     })();
   }
 }
+<<<<<<< HEAD
 
 const ManagedRuleGroupsInfo: string[]= [""];
 function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : ServiceDataManagedRuleGroup[] {
+=======
+const MANAGEDRULEGROUPSINFO: string[]= [""];
+function buildServiceDataManagedRgs(managedRuleGroups: ManagedRuleGroup[]) : ServiceDataManagedRuleGroup[] {
+>>>>>>> 09328a24 (adjust linting)
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
     cfnManagedRuleGroup.push({
@@ -449,20 +467,22 @@ function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : Ser
       },
       overrideAction: managedRuleGroup.OverrideAction ? managedRuleGroup.OverrideAction : { type: "NONE" },
       ruleGroupArn: null,
+      
       excludeRules: managedRuleGroup.ExcludeRules ?  toAwsCamel(managedRuleGroup.ExcludeRules) : [],
       ruleGroupType: "ManagedRuleGroup",
+      
       ruleActionOverrides: managedRuleGroup.RuleActionOverrides ?  toAwsCamel(managedRuleGroup.RuleActionOverrides) : undefined,
     });
     let version ="";
     if(managedRuleGroup.Version !== ""){
       version = "**"+ managedRuleGroup.Version+"**";
     }
-    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] " + version);
+    MANAGEDRULEGROUPSINFO.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] " + version);
   }
   return cfnManagedRuleGroup;
 }
 
-function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capacity: number, deployHash: string, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined) : ServiceDataRuleGroup[] {
+function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capacity: number, deployHash: string, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined) : ServiceDataRuleGroup[] {
   const serviceDataRuleGroup : ServiceDataRuleGroup[] = [];
   let icon;
   if (type === "Pre") {
@@ -496,6 +516,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
           "-" +
           deployHash;
       }
+<<<<<<< HEAD
 
       // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
       const subStatement = cloneDeep(statement.Statement);
@@ -504,12 +525,21 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
       }
 
       let CfnRuleProperty;
+=======
+      let cfnRuleProperty;
+>>>>>>> 09328a24 (adjust linting)
       if ("Captcha" in statement.Action) {
-        CfnRuleProperty = {
+        cfnRuleProperty = {
           name: rulename,
           priority: count,
+          
           action: toAwsCamel(statement.Action),
+<<<<<<< HEAD
           statement: toAwsCamel(subStatement),
+=======
+          
+          statement: toAwsCamel(statement.Statement),
+>>>>>>> 09328a24 (adjust linting)
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,
@@ -517,18 +547,22 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
               statement.VisibilityConfig.CloudWatchMetricsEnabled,
             metricName: rulename + "-metric",
           },
+          
           captchaConfig: toAwsCamel(statement.CaptchaConfig),
+          
           ruleLabels: toAwsCamel(statement.RuleLabels),
         };
       } else {
-        CfnRuleProperty = {
+        cfnRuleProperty = {
           name: rulename,
           priority: count,
+          
           action: toAwsCamel(statement.Action),
 <<<<<<< HEAD
           statement: toAwsCamel(subStatement),
 =======
           // fixes cloudformation warning "required key [Name] not found" in statements like "SingleHeader"
+          
           statement: JSON.parse(JSON.stringify(toAwsCamel(statement.Statement))?.replace(/name/g,"Name")),
 >>>>>>> 2d597da6 (fix: dependencies, single-header cloudformation warning and log bucket encryption bug)
           visibilityConfig: {
@@ -538,18 +572,19 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
               statement.VisibilityConfig.CloudWatchMetricsEnabled,
             metricName: rulename + "-metric",
           },
+          
           ruleLabels: toAwsCamel(statement.RuleLabels),
         };
       }
-      let CfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty;
+      let cfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty;
       if (statement.RuleLabels) {
-        CfnRuleProperties = CfnRuleProperty;
+        cfnRuleProperties = cfnRuleProperty;
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty;
-        CfnRuleProperties = CfnRulePropertii;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
+        const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
+        cfnRuleProperties = cfnRulePropertii;
       }
-      rules.push(CfnRuleProperties);
+      rules.push(cfnRuleProperties);
       count += 1;
     }
 
@@ -569,6 +604,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
           "⭕️ Deploy new RuleGroup because the Capacity has changed!"
         );
         console.log(
+          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
           "\n 🟥 Old Capacity: [" +
             processRuntimeProps.DeployedRuleGroupCapacities[0] +
             "]\n 🟩 New Capacity: [" +
@@ -605,7 +641,6 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         console.log(" 📇 New Identifier: " + rulegroupidentifier);
       }
     }
-    
     // Don't lowercase the first char of the Key of the Custom Response Body,
     // only toAwsCamel the properties below the Key
     let cstResBodies: { [key:string]: any} | undefined = {};
@@ -641,6 +676,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
       overrideAction: { type: "NONE" },
     });
     console.log(
+      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
       "  ➡️  Creating " +
         rulegroupidentifier +
         " with calculated capacity: [" +
@@ -738,6 +774,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
               " !"
           );
           console.log(
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             "\n 🟥 Old Capacity: [" +
               processRuntimeProps.DeployedRuleGroupCapacities[
                 count
@@ -806,21 +843,25 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
           "-" +
           deployHash;
       }
-      const CfnRuleProperties = [];
+      const cfnRuleProperties = [];
       let rulegroupcounter = 0;
+      
       while (rulegroupcounter < rulesets[count].length) {
+        
         const statementindex = rulesets[count][rulegroupcounter];
         let rulename = "";
         if (
+          
           ruleGroupSet[statementindex]
             .Name !== undefined
         ) {
-          const Temp_Hash = Date.now().toString(36);
+          const tempHash = Date.now().toString(36);
           rulename =
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands, @typescript-eslint/no-unsafe-member-access
             ruleGroupSet[statementindex]
               .Name +
             "-" +
-            Temp_Hash;
+            tempHash;
         } else {
           rulename =
             webaclName +
@@ -831,6 +872,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
             "-" +
             deployHash;
         }
+<<<<<<< HEAD
         
         // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
         const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
@@ -839,12 +881,15 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         }
 
         let CfnRuleProperty;
+=======
+        let cfnRuleProperty;
+>>>>>>> 09328a24 (adjust linting)
         if (
           "Captcha" in
           ruleGroupSet[statementindex]
             .Action
         ) {
-          CfnRuleProperty = {
+          cfnRuleProperty = {
             name: rulename,
             priority: rulegroupcounter,
             action: toAwsCamel(
@@ -871,7 +916,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
             ),
           };
         } else {
-          CfnRuleProperty = {
+          cfnRuleProperty = {
             name: rulename,
             priority: rulegroupcounter,
             action: toAwsCamel(
@@ -894,18 +939,18 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
             ),
           };
         }
-        let CfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty;
+        let cfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty;
         if (
           ruleGroupSet[statementindex]
             .RuleLabels
         ) {
-          CfnRuleProperti = CfnRuleProperty;
+          cfnRuleProperti = cfnRuleProperty;
         } else {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { ruleLabels, ...CfnRulePropertii } = CfnRuleProperty;
-          CfnRuleProperti = CfnRulePropertii;
+          const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
+          cfnRuleProperti = cfnRulePropertii;
         }
-        CfnRuleProperties.push(CfnRuleProperti);
+        cfnRuleProperties.push(cfnRuleProperti);
         rulegroupcounter++;
       }
 
@@ -922,7 +967,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
       const rulegroup = new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
         capacity: rulegroupcapacities[count],
         scope: webAclScope,
-        rules: CfnRuleProperties,
+        rules: cfnRuleProperties,
         name: name,
         customResponseBodies: cstResBodies,
         visibilityConfig: {
