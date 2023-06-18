@@ -26,15 +26,3 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
-      - name: Build
-        run: npm run build
-
-  finish:
-    needs: nodejs-test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.github_token }}
-          parallel-finished: true
