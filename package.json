@@ -5,6 +5,7 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   "version": "3.3.0",
 =======
   "version": "3.2.1",
@@ -21,6 +22,9 @@
 =======
   "version": "3.2.5",
 >>>>>>> fd488eb8 (Fix Pricing Shield Advanced)
+=======
+  "version": "3.2.6",
+>>>>>>> 689e0a60 (prepare release 3.2.6)
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },
@@ -48,14 +52,14 @@
     "typescript": "4.9.5"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudformation": "3.353.0",
-    "@aws-sdk/client-cloudwatch": "3.353.0",
-    "@aws-sdk/client-fms": "3.353.0",
-    "@aws-sdk/client-pricing": "3.353.0",
-    "@aws-sdk/client-service-quotas": "3.353.0",
+    "@aws-sdk/client-cloudformation": "^3.353.0",
+    "@aws-sdk/client-cloudwatch": "^3.353.0",
+    "@aws-sdk/client-fms": "^3.353.0",
+    "@aws-sdk/client-pricing": "^3.353.0",
+    "@aws-sdk/client-service-quotas": "^3.353.0",
     "@aws-sdk/client-shield": "^3.353.0",
-    "@aws-sdk/client-wafv2": "3.353.0",
-    "@mhlabs/cfn-diagram": "1.1.36",
+    "@aws-sdk/client-wafv2": "^3.353.0",
+    "@mhlabs/cfn-diagram": "^1.1.36",
     "@types/lodash": "4.14.178",
     "ajv": "8.10.0",
     "aws-cdk-lib": "2.77.0",

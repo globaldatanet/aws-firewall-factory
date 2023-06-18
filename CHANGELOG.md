@@ -1,6 +1,20 @@
 # Change Log
 
 ## Released
+
+## 3.2.6
+### Add
+- Linting Github Action for typescript 18 & 20
+### Fixed
+- Bump @aws-sdk/client-cloudformation from 3.321.1 to 3.353.0
+- Bump @aws-sdk/client-cloudwatch 3.341.0 to 3.353.0
+- Bump @aws-sdk/client-fms 3.342.0 to 3.353.0
+- Bump @aws-sdk/client-pricing 3.341 .0 to 3.353.0
+- Bump @aws-sdk/client-service-quotas 3.342.0 to 3.353.0
+- Bump @aws-sdk/client-wafv2  from 3.321.1 to 3.353.0
+- Bump @mhlabs/cfn-diagram from 1.1.32 to 1.1.36
+- Add more Linting rules see ./eslintrc
+
 ## 3.2.5
 ### Fixed
 - Pricing Calculation - Check for Shield Advanced State
