@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { FirewallStack } from "../lib/firewall-stack";
 import { PrerequisitesStack } from "../lib/prerequisites-stack";
 import * as cdk from "aws-cdk-lib";
@@ -6,7 +8,7 @@ import { realpathSync, existsSync } from "fs";
 import { validatewaf, validateprerequisites } from "../lib/tools/config-validator";
 import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
-import {isPriceCalculated, GetCurrentPrices} from "../lib/tools/price-calculator";
+import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
 
 
@@ -18,21 +20,22 @@ const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
 /**
  * relative path to config file imported from the env PROCESS_PARAMETERS
  */
-const configFile = process.env.PROCESS_PARAMETERS;
+const CONFIGFILE = process.env.PROCESS_PARAMETERS;
 
 /**
  * the region into which the stack is deployed
  */
 let deploymentRegion = "";
 
-if (configFile && existsSync(configFile)) {
+if (CONFIGFILE && existsSync(CONFIGFILE)) {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const config: Config = require(realpathSync(configFile));
+  const config: Config = require(realpathSync(CONFIGFILE));
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const prerequisites: Prerequisites = require(realpathSync(configFile));
+  const prerequisites: Prerequisites = require(realpathSync(CONFIGFILE));
   if(process.env.PREREQUISITE === "true"){
     if(validateprerequisites(prerequisites)){
-      (async () => {
+      // eslint-disable-next-line @typescript-eslint/require-await
+      void (async () => {
         console.log(`
        █████╗ ██╗    ██╗███████╗    ███████╗██╗██████╗ ███████╗██╗    ██╗ █████╗ ██╗     ██╗         ███████╗ █████╗  ██████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
       ██╔══██╗██║    ██║██╔════╝    ██╔════╝██║██╔══██╗██╔════╝██║    ██║██╔══██╗██║     ██║         ██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
@@ -66,7 +69,7 @@ if (configFile && existsSync(configFile)) {
      ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
      `);
       console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-      console.log("\n 🧪 Validation of your ConfigFile: \n   📂 " + configFile + "\n\n");
+      console.log("\n 🧪 Validation of your ConfigFile: \n   📂 " + CONFIGFILE + "\n\n");
       console.error("\u001B[31m","🚨 Invalid Configuration File 🚨 \n\n","\x1b[0m" + JSON.stringify(validateprerequisites.errors, null, 2)+ "\n\n");
       process.exit(1);
     }
@@ -91,7 +94,7 @@ if (configFile && existsSync(configFile)) {
       console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
       console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
       console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentRegion,"\x1b[0m \n");
-      (async () => {
+      void (async () => {
         const isNewStack = (config.General.DeployHash === "");
         const runtimeProperties = initRuntimeProperties();
         if(isNewStack){
@@ -127,7 +130,7 @@ if (configFile && existsSync(configFile)) {
             account: process.env.CDK_DEFAULT_ACCOUNT,
           },
         });
-        await GetCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
+        await getCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
         await isPriceCalculated(runtimeProperties);
       })();
     } else {
@@ -140,13 +143,13 @@ if (configFile && existsSync(configFile)) {
      ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
      `);
       console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-      console.log("\n 🧪 Validation of your ConfigFile: \n   📂 " + configFile + "\n\n");
+      console.log("\n 🧪 Validation of your ConfigFile: \n   📂 " + CONFIGFILE + "\n\n");
       console.error("\u001B[31m","🚨 Invalid Configuration File 🚨 \n\n","\x1b[0m" + JSON.stringify(validatewaf.errors, null, 2)+ "\n\n");
       process.exit(1);
     }
   }
 }
 else {
-  console.log("File", configFile, "not found. - NO CDK ERROR");
+  console.log("File", CONFIGFILE, "not found. - NO CDK ERROR");
 }
 

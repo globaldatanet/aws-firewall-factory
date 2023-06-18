@@ -1,9 +1,18 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-for-in-array */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { PricingClient, GetProductsCommand, GetProductsCommandInput } from "@aws-sdk/client-pricing";
 import { RuntimeProperties } from "../types/runtimeprops";
 import { Config } from "../types/config";
 import { PriceRegions } from "../types/config";
 import {CloudWatchClient, ListDashboardsCommand, ListDashboardsCommandInput } from "@aws-sdk/client-cloudwatch";
-import { ShieldClient, GetSubscriptionStateCommand } from "@aws-sdk/client-shield"
+import { ShieldClient, GetSubscriptionStateCommand } from "@aws-sdk/client-shield";
 
 
 /**
@@ -50,19 +59,19 @@ function findValuesHelper(obj:any, key:string, list: any) {
  * @param runtimeProps runtime properties object, where to store prices
  * @returns true if prices are update in runtimeprops
  */
-export async function GetCurrentPrices(deploymentRegion: PriceRegions, runtimeProps: RuntimeProperties, config: Config, awsregion: string): Promise<boolean> {
+export async function getCurrentPrices(deploymentRegion: PriceRegions, runtimeProps: RuntimeProperties, config: Config, awsregion: string): Promise<boolean> {
   try{
     runtimeProps.Pricing.Policy = Number(await getProductPrice(deploymentRegion,"AWSFMS","WAFv2"));
     runtimeProps.Pricing.Rule = Number(await getProductPrice(deploymentRegion,"awswaf",undefined,"Rule"));
     runtimeProps.Pricing.WebACL = Number(await getProductPrice(deploymentRegion,"awswaf",undefined,"Web ACL"));
     runtimeProps.Pricing.Request =  (await getProductPrice(deploymentRegion,"awswaf",undefined,"Request") * 1000000);
     runtimeProps.Pricing.BotControl = Number(await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR Bot Control Entity"));
-    const BotControlRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,undefined,"AMR Bot Control Request Processed");
-    runtimeProps.Pricing.BotControlRequest = (BotControlRequest[0] * 1000000);
+    const botControlRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,undefined,"AMR Bot Control Request Processed");
+    runtimeProps.Pricing.BotControlRequest = (botControlRequest[0] * 1000000);
     runtimeProps.Pricing.Captcha = 0.4;
     runtimeProps.Pricing.AccountTakeoverPrevention = Number(await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Entity"));
-    const AccountTakeoverPreventionRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Login Attempt");
-    runtimeProps.Pricing.AccountTakeoverPreventionRequest = (AccountTakeoverPreventionRequest[0] * 1000);
+    const accountTakeoverPreventionRequest: any = await getProductPrice(deploymentRegion,"awswaf",undefined,"AMR ATP Login Attempt");
+    runtimeProps.Pricing.AccountTakeoverPreventionRequest = (accountTakeoverPreventionRequest[0] * 1000);
     runtimeProps.Pricing.Dashboard = await getDashboardPrice(awsregion,config);
     return true;
   }
@@ -87,17 +96,17 @@ async function getDashboardPrice(deploymentRegion: string, config: Config ): Pro
   if(config.General.CreateDashboard){
     const dashboardcount = response.DashboardEntries.length + 1;
     if(dashboardcount > 3){
-      const USD = 3;
-      return USD;
+      const usd = 3;
+      return usd;
     }
     else{
-      const USD = 0;
-      return USD;
+      const usd = 0;
+      return usd;
     }
   }
   else{
-    const USD = 0;
-    return USD;
+    const usd = 0;
+    return usd;
   }
 
 }
@@ -112,34 +121,34 @@ async function getDashboardPrice(deploymentRegion: string, config: Config ): Pro
  */
 async function getProductPrice(deploymentRegion: PriceRegions, servicecode: string, operation?: string,group?: string, groupDescription?: string): Promise<number> {
   const client = new PricingClient({region: PRICING_API_ENDPOINT_REGION});
-  const Filters: {Type: string, Field: string, Value: string}[] = [];
+  const filters: {Type: string, Field: string, Value: string}[] = [];
   if(groupDescription){
-    Filters.push({
+    filters.push({
       Type: "TERM_MATCH",
       Field: "groupDescription",
       Value: groupDescription});
   }
   if(group){
-    Filters.push({
+    filters.push({
       Type: "TERM_MATCH",
       Field: "group",
       Value: group});
   }
   if(operation){
-    Filters.push({
+    filters.push({
       Type: "TERM_MATCH",
       Field: "operation",
       Value: operation
     });
   }
-  Filters.push({
+  filters.push({
     Type: "TERM_MATCH",
     Field: "location",
     Value: deploymentRegion
   });
 
   const input: GetProductsCommandInput = {
-    Filters,
+    Filters: filters,
     ServiceCode: servicecode
   };
   const command = new GetProductsCommand(input);
@@ -148,8 +157,8 @@ async function getProductPrice(deploymentRegion: PriceRegions, servicecode: stri
     throw new Error("Price list does not exist");
   }
   const priceList = response.PriceList[0] as any;
-  const USD = findValues(JSON.parse(priceList.toJSON()),"USD");
-  return USD || 0;
+  const usd = findValues(JSON.parse(priceList.toJSON()),"USD");
+  return usd || 0;
 }
 
 
@@ -167,11 +176,11 @@ export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promis
   let fixedcost = runtimeProps.Pricing.Policy + runtimeProps.Pricing.WebACL + postprocessfixedcost + preprocessfixedcost + botcontrolfixedcost  + atpfixedcost + runtimeProps.Pricing.Dashboard;
   const requestscost = runtimeProps.Pricing.Request;
   const totalcost = fixedcost + (requestscost * 5) + (captchacost * 5);
-  const ShieldSubscriptionState = await getShieldSubscriptionState();
-  console.log("\n🛡️  Shield Advanced State: " + ShieldSubscriptionState?.toLowerCase())
+  const shieldSubscriptionState = await getShieldSubscriptionState();
+  console.log("\n🛡️  Shield Advanced State: " + shieldSubscriptionState?.toLowerCase());
   console.log("\n💰 Cost: \n");
-  if(ShieldSubscriptionState === "ACTIVE"){
-    fixedcost = botcontrolfixedcost  + atpfixedcost + runtimeProps.Pricing.Dashboard
+  if(shieldSubscriptionState === "ACTIVE"){
+    fixedcost = botcontrolfixedcost  + atpfixedcost + runtimeProps.Pricing.Dashboard;
   }
   console.log("   WAF Rules cost: " + fixedcost + " $ per month");
   console.log("   WAF Requests: "+ requestscost + " $ pro 1 mio requests");
@@ -183,7 +192,7 @@ export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promis
   (botcontrolfixedcost !== 0) ? console.log("     The deployed WAF includes BotControl rules this costs an extra fee of "+runtimeProps.Pricing.BotControl +" $ and " +runtimeProps.Pricing.BotControlRequest +"$ pro 1 mio requests (10 mio request Free Tier). \n     These costs are already included in the price calculation.") : "";
   (atpfixedcost !== 0) ? console.log("     The deployed WAF includes Account Takeover Prevention rules this costs an extra fee of "+runtimeProps.Pricing.AccountTakeoverPrevention+" $ and " + runtimeProps.Pricing.AccountTakeoverPreventionRequest +" $ per thousand login attempts analyzed (10,000 attempts analyzed Free Tier). \n     These costs are already included in the price calculation.") : "";
   (runtimeProps.Pricing.Dashboard !== 0) ? console.log("     The deployed WAF includes CloudWatch Dashboard and you have more than 3 Dashboards (Free tier), so you will need to pay " + runtimeProps.Pricing.Dashboard+ "$ for this CloudWatch Dashboard. \n     These costs are already included in the price calculation.") : "";
-  (ShieldSubscriptionState === "Active") ? console.log("     AWS WAF WebACLs or Rules created by Firewall Manager - are Included in AWS Shield Advanced. More information at https://aws.amazon.com/firewall-manager/pricing/.") : "";
+  (shieldSubscriptionState === "Active") ? console.log("     AWS WAF WebACLs or Rules created by Firewall Manager - are Included in AWS Shield Advanced. More information at https://aws.amazon.com/firewall-manager/pricing/.") : "";
   console.log("\n\n");
   const pricecalculated = "True";
   return pricecalculated;
@@ -193,6 +202,6 @@ async function getShieldSubscriptionState(){
   const client = new ShieldClient({region: PRICING_API_ENDPOINT_REGION});
   const input = {};
   const command = new GetSubscriptionStateCommand(input);
-  const SubscriptionState = (await client.send(command)).SubscriptionState;
-  return SubscriptionState
+  const subscriptionState = (await client.send(command)).SubscriptionState;
+  return subscriptionState;
 }
