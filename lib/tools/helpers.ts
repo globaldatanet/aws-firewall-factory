@@ -1,3 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput } from "@aws-sdk/client-wafv2";
 import * as quota from "@aws-sdk/client-service-quotas";
 import * as cloudformation from "@aws-sdk/client-cloudformation";
@@ -55,48 +62,48 @@ async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONA
  * @returns returns the specified quota of the FMS Service
  */
 async function getFmsQuota(deploymentRegion: string, quotaCode: string): Promise<number>{
-  let current_quota = 0;
-  const quoata_client = new quota.ServiceQuotasClient({ region: deploymentRegion });
+  let currentQuota = 0;
+  const quoataClient = new quota.ServiceQuotasClient({ region: deploymentRegion });
   const input: quota.GetAWSDefaultServiceQuotaCommandInput = {
     QuotaCode: quotaCode,
     ServiceCode: "fms"
   };
   const command = new quota.GetAWSDefaultServiceQuotaCommand(input);
-  const responsequoata = await quoata_client.send(command);
+  const responsequoata = await quoataClient.send(command);
   if(responsequoata.Quota?.Adjustable === true){
     const input: quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommandInput = {
       QuotaCode: quotaCode,
       ServiceCode: "fms"
     };
     const command = new quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommand(input);
-    const newquota = await quoata_client.send(command);
+    const newquota = await quoataClient.send(command);
     if(newquota.RequestedQuotas?.length !== 0){
       if(newquota.RequestedQuotas?.length || 0 === 0){
         const sortquota = lodash.sortBy(newquota.RequestedQuotas,["Created"]);
         if(sortquota?.length === 1){
           if(sortquota?.[0].Status !== "APPROVED"){
             console.log("ℹ️  There is an open Quota request for " + quotaCode + " but it is still not approved using DEFAULT Quota.");
-            current_quota = responsequoata.Quota?.Value || 0;
-            return current_quota;
+            currentQuota = responsequoata.Quota?.Value || 0;
+            return currentQuota;
           }
           if(sortquota?.[0].Status === "APPROVED"){
-            current_quota = sortquota?.[0].DesiredValue  || 0;
-            return current_quota;
+            currentQuota = sortquota?.[0].DesiredValue  || 0;
+            return currentQuota;
           }
         }
       }
       else{
-        current_quota = responsequoata.Quota?.Value || 0;
-        return current_quota;
+        currentQuota = responsequoata.Quota?.Value || 0;
+        return currentQuota;
       }
     }
     else{
-      current_quota = responsequoata.Quota?.Value || 0;
-      return current_quota;
+      currentQuota = responsequoata.Quota?.Value || 0;
+      return currentQuota;
     }
   }
-  current_quota = responsequoata.Quota?.Value || 0;
-  return current_quota;
+  currentQuota = responsequoata.Quota?.Value || 0;
+  return currentQuota;
 }
 
 /**
@@ -166,7 +173,7 @@ export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string
  * @param config the config object from the values json
  */
 export async function setOutputsFromStack(deploymentRegion: string, runtimeprops: RuntimeProperties, config: Config): Promise<void>{
-  const StackName =
+  const stackName =
   config.General.Prefix.toUpperCase() +
   "-WAF-" +
   config.WebAcl.Name.toUpperCase() +
@@ -175,12 +182,12 @@ export async function setOutputsFromStack(deploymentRegion: string, runtimeprops
   "-" +
   config.General.DeployHash.toUpperCase();
 
-  const cloudformation_client = new cloudformation.CloudFormationClient({ region: deploymentRegion });
+  const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
   const params ={
-    StackName
+    StackName: stackName
   };
   const command = new cloudformation.DescribeStacksCommand(params);
-  const responsestack = await cloudformation_client.send(command);
+  const responsestack = await cloudformationClient.send(command);
   if(responsestack.Stacks?.[0].StackName && responsestack.Stacks?.[0].Outputs !== undefined){
     for(const output of responsestack.Stacks?.[0]?.Outputs ?? []){
       if(output.OutputKey === "DeployedRuleGroupNames")
@@ -249,7 +256,7 @@ async function calculateCapacities(
       if ("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) {
         runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
         const rules : Rule[] = [];
-        const { CloudWatchMetricsEnabled, SampledRequestsEnabled } =
+        const { CloudWatchMetricsEnabled: cloudWatchMetricsEnabled, SampledRequestsEnabled: sampledRequestsEnabled } =
           config.WebAcl.PreProcess.CustomRules[count].VisibilityConfig;
         const rule: Rule = {
           Statement: config.WebAcl.PreProcess.CustomRules[count].Statement,
@@ -258,8 +265,8 @@ async function calculateCapacities(
           CaptchaConfig:
             config.WebAcl.PreProcess.CustomRules[count].CaptchaConfig,
           VisibilityConfig: {
-            CloudWatchMetricsEnabled,
-            SampledRequestsEnabled,
+            CloudWatchMetricsEnabled: cloudWatchMetricsEnabled,
+            SampledRequestsEnabled: sampledRequestsEnabled,
             MetricName: "Metric" + Math.random().toString(),
           },
         };
@@ -275,28 +282,28 @@ async function calculateCapacities(
         );
         runtimeProperties.PreProcess.RuleCapacities.push(capacity);
       } else {
-        const rule_calculated_capacity_json = [];
-        const { CloudWatchMetricsEnabled, SampledRequestsEnabled } =
+        const ruleCalculatedCapacityJson = [];
+        const { CloudWatchMetricsEnabled: cloudWatchMetricsEnabled, SampledRequestsEnabled: sampledRequestsEnabled } =
           config.WebAcl.PreProcess.CustomRules[count].VisibilityConfig;
-        const temp_template: Rule = {
+        const tempTemplate: Rule = {
           Statement: config.WebAcl.PreProcess.CustomRules[count].Statement,
           Name: "Rule",
           Action: config.WebAcl.PreProcess.CustomRules[count].Action,
           VisibilityConfig: {
-            CloudWatchMetricsEnabled,
-            SampledRequestsEnabled,
+            CloudWatchMetricsEnabled: cloudWatchMetricsEnabled,
+            SampledRequestsEnabled: sampledRequestsEnabled,
             MetricName: "Metric" + Math.random().toString(),
           },
         };
         if (config.WebAcl.PreProcess.CustomRules[count].RuleLabels) {
-          temp_template.RuleLabels =
+          tempTemplate.RuleLabels =
             config.WebAcl.PreProcess.CustomRules[count].RuleLabels;
         }
-        rule_calculated_capacity_json.push(temp_template);
+        ruleCalculatedCapacityJson.push(tempTemplate);
         const capacity = await getTotalCapacityOfRules(
           deploymentRegion,
           config.WebAcl.Scope,
-          rule_calculated_capacity_json
+          ruleCalculatedCapacityJson
         );
         runtimeProperties.PreProcess.RuleCapacities.push(capacity);
       }
@@ -310,7 +317,7 @@ async function calculateCapacities(
     );
   }
   count = 0;
-  let PostProcessCapacity = 0;
+  let postProcessCapacity = 0;
   if (!config.WebAcl.PostProcess.CustomRules) {
     console.log(
       "\n ⏭  Skip Rule Capacity Calculation for PostProcess Custom Rules."
@@ -318,16 +325,16 @@ async function calculateCapacities(
   } else {
     while (count < config.WebAcl.PostProcess.CustomRules.length) {
       runtimeProperties.PostProcess.CustomRuleCount += 1;
-      const rule_calculated_capacity_json = [];
-      const { CloudWatchMetricsEnabled, SampledRequestsEnabled } =
+      const ruleCalculatedCapacityJson = [];
+      const { CloudWatchMetricsEnabled: cloudWatchMetricsEnabled, SampledRequestsEnabled: sampledRequestsEnabled } =
         config.WebAcl.PostProcess.CustomRules[count].VisibilityConfig;
       const rule: Rule = {
         Statement: config.WebAcl.PostProcess.CustomRules[count].Statement,
         Name: "Rule",
         Action: config.WebAcl.PostProcess.CustomRules[count].Action,
         VisibilityConfig: {
-          CloudWatchMetricsEnabled,
-          SampledRequestsEnabled,
+          CloudWatchMetricsEnabled: cloudWatchMetricsEnabled,
+          SampledRequestsEnabled: sampledRequestsEnabled,
           MetricName: "Metric" + Math.random().toString(),
         },
       };
@@ -340,16 +347,16 @@ async function calculateCapacities(
         rule.RuleLabels =
           config.WebAcl.PostProcess.CustomRules[count].RuleLabels;
       }
-      rule_calculated_capacity_json.push(rule);
+      ruleCalculatedCapacityJson.push(rule);
       const capacity = await getTotalCapacityOfRules(
         deploymentRegion,
         config.WebAcl.Scope,
-        rule_calculated_capacity_json
+        ruleCalculatedCapacityJson
       );
       runtimeProperties.PostProcess.RuleCapacities.push(capacity);
       count++;
     }
-    PostProcessCapacity = runtimeProperties.PostProcess.RuleCapacities.reduce(
+    postProcessCapacity = runtimeProperties.PostProcess.RuleCapacities.reduce(
       function (a, b) {
         return a + b;
       },
@@ -413,7 +420,7 @@ async function calculateCapacities(
       managedrule.Name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
     }
   }
-  runtimeProperties.PostProcess.Capacity = PostProcessCapacity;
+  runtimeProperties.PostProcess.Capacity = postProcessCapacity;
 }
 
 /**
@@ -446,19 +453,19 @@ export async function isPolicyQuotaReached(deploymentRegion: string): Promise<bo
  */
 export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: RuntimeProperties, config: Config): Promise<boolean> {
   await calculateCapacities(config, deploymentRegion, runtimeProps);
-  const custom_capacity = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity;
-  const total_wcu = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity + runtimeProps.ManagedRuleCapacity;
-  const quote_wcu = await getFmsQuota(deploymentRegion, WCU_QUOTA_CODE);
-  const wcuLimitReached = (total_wcu > Number(quote_wcu));
+  const customCapacity = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity;
+  const totalWcu = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity + runtimeProps.ManagedRuleCapacity;
+  const quoteWcu = await getFmsQuota(deploymentRegion, WCU_QUOTA_CODE);
+  const wcuLimitReached = (totalWcu > Number(quoteWcu));
   if (wcuLimitReached) {
     console.log("\n🔎 Capacity Check result: 🔴 \n  ﹗ Stopping deployment ﹗\n");
-    console.log(" 💡 Account WAF-WCU Quota: " +Number(quote_wcu).toString());
-    console.log(" 🧮 Calculated Custom Rule Capacity is: [" + custom_capacity + "] \n ➕ ManagedRulesCapacity: ["+ runtimeProps.ManagedRuleCapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n");
+    console.log(" 💡 Account WAF-WCU Quota: " +Number(quoteWcu).toString());
+    console.log(" 🧮 Calculated Custom Rule Capacity is: [" + customCapacity + "] \n ➕ ManagedRulesCapacity: ["+ runtimeProps.ManagedRuleCapacity +"] \n ＝ Total Waf Capacity: " + totalWcu.toString() + "\n");
   }
   else {
     console.log("\n🔎 Capacity Check result: 🟢 \n");
-    console.log(" 💡 Account WAF-WCU Quota: " +Number(quote_wcu).toString());
-    console.log(" 🧮 Calculated Custom Rule Capacity is: [" + custom_capacity + "] (🥇[" + runtimeProps.PreProcess.Capacity + "] + 🥈[" + runtimeProps.PostProcess.Capacity + "]) \n ➕ ManagedRulesCapacity: ["+ runtimeProps.ManagedRuleCapacity +"] \n ＝ Total Waf Capacity: " + total_wcu.toString() + "\n");
+    console.log(" 💡 Account WAF-WCU Quota: " +Number(quoteWcu).toString());
+    console.log(" 🧮 Calculated Custom Rule Capacity is: [" + customCapacity + "] (🥇[" + runtimeProps.PreProcess.Capacity + "] + 🥈[" + runtimeProps.PostProcess.Capacity + "]) \n ➕ ManagedRulesCapacity: ["+ runtimeProps.ManagedRuleCapacity +"] \n ＝ Total Waf Capacity: " + totalWcu.toString() + "\n");
   }
   return wcuLimitReached;
 }

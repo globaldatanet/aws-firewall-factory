@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Rule, ManagedRuleGroup } from "./fms";
 import { aws_fms as fms } from "aws-cdk-lib";
 

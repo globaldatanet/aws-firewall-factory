@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
 interface CustomRequestHandling {
   CustomRequestHandling?: {
@@ -44,7 +45,7 @@ interface Action  {
 }
 
 interface RuleActionOverrideProperty {
-  Name: string, 
+  Name: string,
   ActionToUse: Action
 }
 
@@ -103,6 +104,7 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
     version: string | null,
     versionEnabled?: boolean
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   excludeRules: any,
   ruleGroupType: "ManagedRuleGroup",
   ruleActionOverrides: RuleActionOverrideProperty[] | undefined,
