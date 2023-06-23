@@ -7,7 +7,7 @@ import { aws_fms as fms } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_logs as logs } from "aws-cdk-lib";
-import { Config, CustomResponseBodies, IPSet } from "./types/config";
+import { Config, CustomResponseBodies } from "./types/config";
 import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule } from "./types/fms";
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import { promises as fsp } from "fs";
@@ -22,7 +22,6 @@ const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
-  readonly ipSets: IPSet[];
   runtimeProperties: RuntimeProperties;
 }
 
@@ -113,53 +112,34 @@ export class FirewallStack extends cdk.Stack {
 
     // --------------------------------------------------------------------
     // IPSets
+    const IpSets: cdk.aws_wafv2.CfnIPSet[] = [];
+    if(props.config.WebAcl.IPSets) {
+      const ipSetsNames: string[] =[];
+      for(const ipSet of props.config.WebAcl.IPSets) {
+        const addresses: string[] = [];
+        for(const address of ipSet.Addresses) {
+          if(typeof address === "string") addresses.push(address);
+          else addresses.push(address.IP);
+        }
 
-    const ipSetsNames: string[] = [];
-
-    for(const ipSet of props.ipSets) {
-      const addresses: string[] = [];
-      for(const address of ipSet.Addresses) {
-        if(typeof address === "string") addresses.push(address);
-        else addresses.push(address.IP);
+        const cfnipset = new wafv2.CfnIPSet(this, ipSet.Name+props.config.General.DeployHash, {
+          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
+          description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory \n used in " +props.config.General.Prefix.toUpperCase() +
+          "-" +
+          props.config.WebAcl.Name +
+          "-" +
+          props.config.General.Stage +
+          "-" +
+          props.config.General.DeployHash + " Firewall",
+          addresses: addresses,
+          ipAddressVersion: ipSet.IPAddressVersion,
+          scope: ipSet.Scope,
+          tags: ipSet.Tags ? ipSet.Tags : undefined
+        });
+        ipSetsNames.push(ipSet.Name);
+        IpSets.push(cfnipset);
       }
-
-      new wafv2.CfnIPSet(this, ipSet.Name, {
-        name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
-        description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory",
-        addresses: addresses,
-        ipAddressVersion: ipSet.IPAddressVersion,
-        scope: ipSet.Scope,
-        tags: ipSet.Tags ? ipSet.Tags : undefined
-      });
-
-      ipSetsNames.push(ipSet.Name);
     }
-
-    // Checks if the ipsets are configured correctly
-    const validateIPSetsInConfig = (customRulesPath: string) => {
-      const logErrorAndExit = (error: string) => {
-        console.error("\u001B[31m 🚨 Invalid Configuration File 🚨 \n\n", `\x1b[0m ${error} \n\n`);
-        process.exit(1);
-      };
-
-      const rules = get(props, customRulesPath);
-      if(!Array.isArray(rules)) return;
-
-      for (const rule of rules) {
-        const ipSetARN = rule.Statement?.IPSetReferenceStatement?.ARN;
-
-        if(!ipSetARN) continue;
-        if(ipSetARN.startsWith("arn:aws:")) continue; // ARN was manually defined by the user, skip checking
-        if(!ipSetARN.startsWith("${") || !ipSetARN.endsWith(".Arn}")) logErrorAndExit(`IPSetReferenceStatement.ARN must be indicating the name of the IPSet, accessing its ARN, which CloudFormation will substitute on deploying.\n  Detected value: '${ipSetARN}'.\n` +  "  Example of expected value: '${IPsString.Arn}'");
-
-        const ipSetName = ipSetARN.split(".")[0].replace(/[${]/g, "");
-        if(!ipSetsNames.includes(ipSetName)) logErrorAndExit(`IPSet named '${ipSetName}' not found on the names of the ipsets on the JSON files defined in the 'config.WebAcl.IPSetFiles' prop.\n  These were the ones which were defined: ${ipSetsNames.reduce((acc, curr) => acc === "" ? `'${curr}'` : `${acc} | '${curr}'`, "")}`);
-      }
-    };
-    validateIPSetsInConfig("config.WebAcl.PreProcess.CustomRules");
-    validateIPSetsInConfig("config.WebAcl.PostProcess.CustomRules");
-
-    // --------------------------------------------------------------------
 
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
@@ -221,7 +201,12 @@ export class FirewallStack extends cdk.Stack {
       excludeResourceTags: props.config.WebAcl.ExcludeResourceTags ? props.config.WebAcl.ExcludeResourceTags : false,
       policyDescription: props.config.WebAcl.Description ? props.config.WebAcl.Description : undefined
     };
-    new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
+    const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
+    if(IpSets.length !== 0){
+      for(const Ipset of IpSets){
+        fmspolicy.addDependency(Ipset);
+      }
+    }
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
       console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", props.config.General.Prefix.toUpperCase() +
@@ -491,7 +476,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
     "\x1b[0m\n"
   );
 
-  if (capacity < 1000) {
+  if (capacity < 1500) {
     const rules = [];
     let count = 1;
     for (const statement of ruleGroupSet) {
@@ -514,8 +499,8 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
 
       // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
       const subStatement = cloneDeep(statement.Statement);
-      if (subStatement.IPSetReferenceStatement && subStatement.IPSetReferenceStatement.ARN.startsWith("${")) {
-        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.sub(subStatement.IPSetReferenceStatement.ARN);
+      if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
       }
 
       let CfnRuleProperty;
@@ -626,7 +611,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
       cstResBodies = undefined;
     }
 
-    new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
+    const rulegroup = new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
       capacity: processRuntimeProps.Capacity,
       scope: webAclScope,
       rules: rules,
@@ -694,7 +679,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         deployHash,
     });
   } else {
-    const threshold = 1000;
+    const threshold = 1500;
     const rulesets: any[] = [];
     const indexes: number[] = [];
     const rulegroupcapacities = [];
@@ -844,8 +829,8 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         
         // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
         const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
-        if (subStatement.IPSetReferenceStatement && subStatement.IPSetReferenceStatement.ARN.startsWith("${")) {
-          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.sub(subStatement.IPSetReferenceStatement.ARN);
+        if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
         }
 
         let CfnRuleProperty;
@@ -929,7 +914,7 @@ function buildServiceDataCustomRGs(scope: Construct, type: "Pre" | "Post", capac
         cstResBodies = undefined;
       }
 
-      new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
+      const rulegroup = new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
         capacity: rulegroupcapacities[count],
         scope: webAclScope,
         rules: CfnRuleProperties,
