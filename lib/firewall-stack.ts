@@ -10,7 +10,7 @@ import { aws_fms as fms } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_logs as logs } from "aws-cdk-lib";
-import { Config, CustomResponseBodies, IPSet } from "./types/config";
+import { Config, CustomResponseBodies } from "./types/config";
 import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule } from "./types/fms";
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import { promises as fsp } from "fs";
@@ -25,7 +25,6 @@ const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
-  readonly ipSets: IPSet[];
   runtimeProperties: RuntimeProperties;
 }
 
@@ -125,6 +124,9 @@ export class FirewallStack extends cdk.Stack {
     // --------------------------------------------------------------------
     // IPSets
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 4e310f14 (fix ipset feature)
     const IpSets: cdk.aws_wafv2.CfnIPSet[] = [];
     if(props.config.WebAcl.IPSets) {
       const ipSetsNames: string[] =[];
@@ -134,6 +136,7 @@ export class FirewallStack extends cdk.Stack {
           if(typeof address === "string") addresses.push(address);
           else addresses.push(address.IP);
         }
+<<<<<<< HEAD
 
         const cfnipset = new wafv2.CfnIPSet(this, ipSet.Name+props.config.General.DeployHash, {
           name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
@@ -154,28 +157,29 @@ export class FirewallStack extends cdk.Stack {
       }
     }
 =======
+=======
+>>>>>>> 4e310f14 (fix ipset feature)
 
-    const ipSetsNames: string[] = [];
-
-    for(const ipSet of props.ipSets) {
-      const addresses: string[] = [];
-      for(const address of ipSet.Addresses) {
-        if(typeof address === "string") addresses.push(address);
-        else addresses.push(address.IP);
+        const cfnipset = new wafv2.CfnIPSet(this, ipSet.Name+props.config.General.DeployHash, {
+          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
+          description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory \n used in " +props.config.General.Prefix.toUpperCase() +
+          "-" +
+          props.config.WebAcl.Name +
+          "-" +
+          props.config.General.Stage +
+          "-" +
+          props.config.General.DeployHash + " Firewall",
+          addresses: addresses,
+          ipAddressVersion: ipSet.IPAddressVersion,
+          scope: ipSet.Scope,
+          tags: ipSet.Tags ? ipSet.Tags : undefined
+        });
+        ipSetsNames.push(ipSet.Name);
+        IpSets.push(cfnipset);
       }
-
-      new wafv2.CfnIPSet(this, ipSet.Name, {
-        name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
-        description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory",
-        addresses: addresses,
-        ipAddressVersion: ipSet.IPAddressVersion,
-        scope: ipSet.Scope,
-        tags: ipSet.Tags ? ipSet.Tags : undefined
-      });
-
-      ipSetsNames.push(ipSet.Name);
     }
 
+<<<<<<< HEAD
     // Checks if the ipsets are configured correctly
     const validateIPSetsInConfig = (customRulesPath: string) => {
       const logErrorAndExit = (error: string) => {
@@ -203,6 +207,8 @@ export class FirewallStack extends cdk.Stack {
     // --------------------------------------------------------------------
 >>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
 
+=======
+>>>>>>> 4e310f14 (fix ipset feature)
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
@@ -264,6 +270,7 @@ export class FirewallStack extends cdk.Stack {
       policyDescription: props.config.WebAcl.Description ? props.config.WebAcl.Description : undefined
     };
 <<<<<<< HEAD
+<<<<<<< HEAD
     const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
     if(IpSets.length !== 0){
       for(const Ipset of IpSets){
@@ -273,6 +280,17 @@ export class FirewallStack extends cdk.Stack {
 =======
     new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
 >>>>>>> 09328a24 (adjust linting)
+=======
+    new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
+=======
+    const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
+    if(IpSets.length !== 0){
+      for(const Ipset of IpSets){
+        fmspolicy.addDependency(Ipset);
+      }
+    }
+>>>>>>> 9a23d124 (fix ipset feature)
+>>>>>>> 4e310f14 (fix ipset feature)
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
       console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", props.config.General.Prefix.toUpperCase() +
@@ -555,10 +573,14 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
   );
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   if (capacity < 1500) {
 =======
   if (capacity < 1000) {
 >>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
+=======
+  if (capacity < 1500) {
+>>>>>>> 4e310f14 (fix ipset feature)
     const rules = [];
     let count = 1;
     for (const statement of ruleGroupSet) {
@@ -593,8 +615,8 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
 
       // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
       const subStatement = cloneDeep(statement.Statement);
-      if (subStatement.IPSetReferenceStatement && subStatement.IPSetReferenceStatement.ARN.startsWith("${")) {
-        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.sub(subStatement.IPSetReferenceStatement.ARN);
+      if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
       }
 
 >>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
@@ -967,8 +989,8 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         
         // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
         const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
-        if (subStatement.IPSetReferenceStatement && subStatement.IPSetReferenceStatement.ARN.startsWith("${")) {
-          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.sub(subStatement.IPSetReferenceStatement.ARN);
+        if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
         }
 
 >>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)

@@ -275,12 +275,23 @@ if(!configFile || !existsSync(configFile)) {
 
     console.log("🔥 Deploy FMS Policy: " + config.General.Prefix.toUpperCase() + "-" + config.WebAcl.Name.toUpperCase()+ "-" + config.General.Stage + "-" + config.General.DeployHash + "\n ⦂ Type: " +config.WebAcl.Type + "\n📚 Stackname: ","\u001b[32m",config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase(),"\u001b[0m");
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 4e310f14 (fix ipset feature)
 
     if(Array.isArray(config.WebAcl.IPSets) &&  config.WebAcl.IPSets.length > 0) {
       console.log("\n𝍂 IPSets");
       for(const IpSet of config.WebAcl.IPSets) {
         console.log("   ➕ " + IpSet.Name);
+<<<<<<< HEAD
         console.log("      ⚙️  [" + IpSet.IPAddressVersion + "] | 🌎 [" + config.WebAcl.Scope+ "]");
+=======
+        if(IpSet.Scope === "CLOUDFRONT|REGIONAL") {
+          if(config.WebAcl.Scope === "CLOUDFRONT") IpSet.Scope = "CLOUDFRONT";
+          if(config.WebAcl.Scope === "REGIONAL")   IpSet.Scope = "REGIONAL";
+        }
+        console.log("      ⚙️  [" + IpSet.IPAddressVersion + "] | 🌎 [" + IpSet.Scope+ "]");
+>>>>>>> 4e310f14 (fix ipset feature)
       }
     }
     const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
@@ -334,8 +345,12 @@ else {
 
     const app = new cdk.App();
     new FirewallStack(app, config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase(), {
+<<<<<<< HEAD
       config, ipSets, runtimeProperties: runtimeProperties,
 >>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
+=======
+      config, runtimeProperties: runtimeProperties,
+>>>>>>> 4e310f14 (fix ipset feature)
       env: {
         region: deploymentRegion,
         account: process.env.CDK_DEFAULT_ACCOUNT

@@ -29,10 +29,14 @@ export interface Config {
     readonly RemediationEnabled?: boolean,
     readonly ResourcesCleanUp?: boolean,
 <<<<<<< HEAD
+<<<<<<< HEAD
     readonly IPSets?: IPSet[],
 =======
     readonly IPSetFiles?: string[],
 >>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
+=======
+    readonly IPSets?: IPSet[],
+>>>>>>> 4e310f14 (fix ipset feature)
     readonly PreProcess: RuleGroupSet,
     readonly PostProcess: RuleGroupSet,
   },
