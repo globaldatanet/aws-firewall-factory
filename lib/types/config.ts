@@ -124,6 +124,5 @@ export interface IPSet {
   Description?: string,
   Addresses: Array<IPAddressWithDescription | IPAddress>,
   IPAddressVersion: "IPV4" | "IPV6",
-  Scope: "CLOUDFRONT" | "REGIONAL" | "CLOUDFRONT|REGIONAL",
   Tags?: CfnTag[]
 }

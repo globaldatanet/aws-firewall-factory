@@ -125,11 +125,7 @@ if(!configFile || !existsSync(configFile)) {
       console.log("\n𝍂 IPSets");
       for(const IpSet of config.WebAcl.IPSets) {
         console.log("   ➕ " + IpSet.Name);
-        if(IpSet.Scope === "CLOUDFRONT|REGIONAL") {
-          if(config.WebAcl.Scope === "CLOUDFRONT") IpSet.Scope = "CLOUDFRONT";
-          if(config.WebAcl.Scope === "REGIONAL")   IpSet.Scope = "REGIONAL";
-        }
-        console.log("      ⚙️  [" + IpSet.IPAddressVersion + "] | 🌎 [" + IpSet.Scope+ "]");
+        console.log("      ⚙️  [" + IpSet.IPAddressVersion + "] | 🌎 [" + config.WebAcl.Scope+ "]");
       }
     }
     const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);

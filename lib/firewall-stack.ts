@@ -133,7 +133,7 @@ export class FirewallStack extends cdk.Stack {
           props.config.General.DeployHash + " Firewall",
           addresses: addresses,
           ipAddressVersion: ipSet.IPAddressVersion,
-          scope: ipSet.Scope,
+          scope: props.config.WebAcl.Scope,
           tags: ipSet.Tags ? ipSet.Tags : undefined
         });
         ipSetsNames.push(ipSet.Name);
