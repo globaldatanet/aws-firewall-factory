@@ -536,7 +536,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
           name: rulename,
           priority: count,
           action: toAwsCamel(statement.Action),
-          statement: JSON.parse(JSON.stringify(toAwsCamel(subStatement))?.replace(/name/g,"Name")),
+          statement: toAwsCamel(subStatement),
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,
@@ -848,7 +848,9 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
 
         // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
         const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
           subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
         }
 
