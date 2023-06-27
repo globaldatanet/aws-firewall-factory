@@ -1,24 +1,30 @@
 {
   "General": {
-    "Prefix": "",
-    "Stage": "",
-    "S3LoggingBucketName": "",
+    "Prefix": "gdn",
+    "Stage": "dev",
+    "FireHoseKeyArn": "arn:aws:kms:eu-central-1:859220371210:key/017515ee-7aa1-45cf-bf6d-f87361d72c88",
     "DeployHash": "",
-    "FireHoseKeyArn": "",
-    "SecuredDomain": []
+    "SecuredDomain": [
+      "https://vnhd4ha6p9.execute-api.eu-central-1.amazonaws.com/Stage/api/convert"
+    ],
+    "S3LoggingBucketName": "gdn-859220371210-kinesis-wafv2log3",
+    "CreateDashboard": true
   },
   "WebAcl": {
-    "Name": "test-ipsets",
+    "Name": "serverlesssummit22",
     "Scope": "REGIONAL",
-    "Description": "Testing ipsets out",
-    "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-    "RemediationEnabled": true,
-    "ResourcesCleanUp": true,
+    "Type": "AWS::ApiGateway::Stage",
     "IncludeMap": {
-      "account": []
+      "account": [
+        "859220371210"
+      ]
     },
-    "IPSetFiles": [
-      "ips-string"
+    "IpSets": [
+      {
+        "Name": "IPsString",
+        "Addresses": ["1.1.1.1"],
+        "IPAddressVersion": "IPV4"
+      }
     ],
     "PreProcess": {
       "CustomRules": [
@@ -26,7 +32,7 @@
           "Name": "ip-allow",
           "Statement": {
             "IPSetReferenceStatement": {
-              "ARN": "${IPsString.Arn}"
+              "ARN": "IPsString"
             }
           },
           "Action": {

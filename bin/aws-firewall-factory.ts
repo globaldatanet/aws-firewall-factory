@@ -3,8 +3,8 @@ import { FirewallStack } from "../lib/firewall-stack";
 import { PrerequisitesStack } from "../lib/prerequisites-stack";
 import * as cdk from "aws-cdk-lib";
 import { realpathSync, existsSync } from "fs";
-import { validatewaf, validateIPSets, validateprerequisites } from "../lib/tools/config-validator";
-import { Config, Prerequisites, PriceRegions, RegionString, IPSet } from "../lib/types/config";
+import { validateWaf, validatePrerequisites } from "../lib/tools/config-validator";
+import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
 import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
@@ -53,7 +53,7 @@ if(!configFile || !existsSync(configFile)) {
 (async () => { 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const config: Config = require(realpathSync(configFile));
-  if (!validatewaf(config)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(configFile), validatewaf);
+  if (!validateWaf(config)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(configFile), validateWaf);
 
   // ---------------------------------------------------------------------
   // Deploying prerequisite stack
@@ -61,7 +61,7 @@ if(!configFile || !existsSync(configFile)) {
   if(process.env.PREREQUISITE === "true") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const prerequisites: Prerequisites = require(realpathSync(configFile));
-    if(!validateprerequisites(prerequisites)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(configFile), validateprerequisites);
+    if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(configFile), validatePrerequisites);
 
     outputBanner();
     console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
