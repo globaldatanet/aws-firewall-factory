@@ -1,28 +1,28 @@
 {
   "General": {
-    "Prefix": "gdn",
-    "Stage": "dev",
-    "FireHoseKeyArn": "arn:aws:kms:eu-central-1:859220371210:key/017515ee-7aa1-45cf-bf6d-f87361d72c88",
+    "Prefix": "",
+    "Stage": "",
+    "S3LoggingBucketName": "",
     "DeployHash": "",
-    "SecuredDomain": [
-      "https://vnhd4ha6p9.execute-api.eu-central-1.amazonaws.com/Stage/api/convert"
-    ],
-    "S3LoggingBucketName": "gdn-859220371210-kinesis-wafv2log3",
-    "CreateDashboard": true
+    "FireHoseKeyArn": "",
+    "SecuredDomain": []
   },
   "WebAcl": {
-    "Name": "serverlesssummit22",
+    "Name": "test-ipsets",
     "Scope": "REGIONAL",
-    "Type": "AWS::ApiGateway::Stage",
+    "Description": "IPsets",
+    "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+    "RemediationEnabled": true,
+    "ResourcesCleanUp": true,
     "IncludeMap": {
-      "account": [
-        "859220371210"
-      ]
+      "account": []
     },
-    "IpSets": [
+    "IPSets": [
       {
         "Name": "IPsString",
-        "Addresses": ["1.1.1.1"],
+        "Addresses": [
+          "192.168.178.1/32"
+        ],
         "IPAddressVersion": "IPV4"
       }
     ],
