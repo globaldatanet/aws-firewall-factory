@@ -1,37 +1,6 @@
 {
   "name": "aws-firewall-factory",
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   "version": "3.3.0",
-=======
-  "version": "3.2.1",
->>>>>>> be4283d0 (3.2.1)
-=======
-  "version": "3.2.2",
->>>>>>> 447c4564 (Version 3.2.2)
-=======
-  "version": "3.2.3",
->>>>>>> 2d597da6 (fix: dependencies, single-header cloudformation warning and log bucket encryption bug)
-=======
-  "version": "3.2.4",
->>>>>>> ea863de7 (prepare relase)
-=======
-  "version": "3.2.5",
->>>>>>> fd488eb8 (Fix Pricing Shield Advanced)
-=======
-  "version": "3.2.6",
->>>>>>> 689e0a60 (prepare release 3.2.6)
-=======
-  "version": "3.2.6",
-=======
-  "version": "3.3.0",
->>>>>>> a7b025e0 (Bump versions)
->>>>>>> 6e630e1b (Bump versions)
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },

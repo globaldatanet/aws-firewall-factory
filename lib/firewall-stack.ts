@@ -3,7 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { aws_fms as fms } from "aws-cdk-lib";
@@ -116,7 +115,7 @@ export class FirewallStack extends cdk.Stack {
 
     // --------------------------------------------------------------------
     // IPSets
-    const IpSets: cdk.aws_wafv2.CfnIPSet[] = [];
+    const ipSets: cdk.aws_wafv2.CfnIPSet[] = [];
     if(props.config.WebAcl.IPSets) {
       const ipSetsNames: string[] =[];
       for(const ipSet of props.config.WebAcl.IPSets) {
@@ -141,21 +140,9 @@ export class FirewallStack extends cdk.Stack {
           tags: ipSet.Tags ? ipSet.Tags : undefined
         });
         ipSetsNames.push(ipSet.Name);
-        IpSets.push(cfnipset);
+        ipSets.push(cfnipset);
       }
     }
-    // Checks if the ipsets are configured correctly
-    const validateIPSetsInConfig = (customRulesPath: string) => {
-      const logErrorAndExit = (error: string) => {
-        console.error("\u001B[31m 🚨 Invalid Configuration File 🚨 \n\n", `\x1b[0m ${error} \n\n`);
-        process.exit(1);
-      };
-
-      const rules = get(props, customRulesPath);
-      if(!Array.isArray(rules)) return;
-    };
-    validateIPSetsInConfig("config.WebAcl.PreProcess.CustomRules");
-    validateIPSetsInConfig("config.WebAcl.PostProcess.CustomRules");
 
     // --------------------------------------------------------------------
     const preProcessRuleGroups = [];
@@ -217,12 +204,12 @@ export class FirewallStack extends cdk.Stack {
       resourceTags: props.config.WebAcl.ResourceTags,
       excludeResourceTags: props.config.WebAcl.ExcludeResourceTags ? props.config.WebAcl.ExcludeResourceTags : false,
       policyDescription: props.config.WebAcl.Description ? props.config.WebAcl.Description : undefined
-    }
+    };
 
     const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
-    if(IpSets.length !== 0){
-      for(const Ipset of IpSets){
-        fmspolicy.addDependency(Ipset);
+    if(ipSets.length !== 0){
+      for(const ipSet of ipSets){
+        fmspolicy.addDependency(ipSet);
       }
     }
 
@@ -271,7 +258,7 @@ export class FirewallStack extends cdk.Stack {
         const securedDomain = props.config.General.SecuredDomain.toString();
 
         const app = new cloudwatch.TextWidget({
-          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + ManagedRuleGroupsInfo.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+securedDomain+")",
+          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + MANAGEDRULEGROUPSINFO.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+securedDomain+")",
           width: 7,
           height: 4
         });
@@ -351,7 +338,7 @@ export class FirewallStack extends cdk.Stack {
           const expression4 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
           const expression5 = "SUM([e3,e4])";
           const expression6 = "SUM([e1,e2,-e3,-e4])";
-          
+
           const botrequestsvsnonbotrequests = new cloudwatch.GraphWidget({
             title: "🤖 Bot requests vs 😁 Non-bot requests in " + account,
             width: 24,
@@ -454,7 +441,7 @@ export class FirewallStack extends cdk.Stack {
     })();
   }
 }
-const ManagedRuleGroupsInfo: string[]= [""];
+const MANAGEDRULEGROUPSINFO: string[]= [""];
 function buildServiceDataManagedRgs(managedRuleGroups: ManagedRuleGroup[]) : ServiceDataManagedRuleGroup[] {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
@@ -477,7 +464,7 @@ function buildServiceDataManagedRgs(managedRuleGroups: ManagedRuleGroup[]) : Ser
     if(managedRuleGroup.Version !== ""){
       version = "**"+ managedRuleGroup.Version+"**";
     }
-    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] " + version);
+    MANAGEDRULEGROUPSINFO.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] " + version);
   }
   return cfnManagedRuleGroup;
 }
@@ -521,7 +508,9 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
 
       // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
       const subStatement = cloneDeep(statement.Statement);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
       }
       let cfnRuleProperty;

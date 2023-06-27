@@ -138,7 +138,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 See example:
 ![FirewallDashboard](./static/FirewallDashboard.jpg)
 
-21.  Centralized IPSets management -  No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets on `values/ipsets/*` and for using them in the WebACLs on `values/ip-sets-managed.json` & `values/ip-sets-manual-entry-not-managed.json`.
+21.   Centralized IPSets management -  No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets and using them in the WebACLs on `values/ip-sets-managed.json`.
 
 </div>
 </details>
