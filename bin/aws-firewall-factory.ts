@@ -8,7 +8,6 @@ import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
 import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
-import { env } from "process";
 import { ValidateFunction } from "ajv";
 
 /**
@@ -19,7 +18,7 @@ const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
 /**
  * relative path to config file imported from the env PROCESS_PARAMETERS
  */
-const configFile = process.env.PROCESS_PARAMETERS;
+const CONFIGFILE = process.env.PROCESS_PARAMETERS;
 
 /**
  * the region into which the stack is deployed
@@ -45,23 +44,23 @@ const logInvalidConfigFileAndExit = (invalidFileType: "ConfigFile" | "IPSet", va
   process.exit(1);
 };
 
-if(!configFile || !existsSync(configFile)) {
-  console.log("Config file ", configFile, " not found. - NO CDK ERROR");
+if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
+  console.log("Config file ", CONFIGFILE, " not found. - NO CDK ERROR");
   process.exit(1);
 }
 
 (async () => { 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const config: Config = require(realpathSync(configFile));
-  if (!validateWaf(config)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(configFile), validateWaf);
+  const config: Config = require(realpathSync(CONFIGFILE));
+  if (!validateWaf(config)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(CONFIGFILE), validateWaf);
 
   // ---------------------------------------------------------------------
   // Deploying prerequisite stack
 
   if(process.env.PREREQUISITE === "true") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const prerequisites: Prerequisites = require(realpathSync(configFile));
-    if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(configFile), validatePrerequisites);
+    const prerequisites: Prerequisites = require(realpathSync(CONFIGFILE));
+    if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(CONFIGFILE), validatePrerequisites);
 
     outputBanner();
     console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
