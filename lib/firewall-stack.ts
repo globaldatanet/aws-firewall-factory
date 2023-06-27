@@ -47,15 +47,8 @@ export class FirewallStack extends cdk.Stack {
         ],
       },
     });
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const CfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
-=======
 
-=======
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
     const cfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
->>>>>>> 09328a24 (adjust linting)
       retentionInDays: 90,
     });
 
@@ -123,10 +116,6 @@ export class FirewallStack extends cdk.Stack {
 
     // --------------------------------------------------------------------
     // IPSets
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 4e310f14 (fix ipset feature)
     const IpSets: cdk.aws_wafv2.CfnIPSet[] = [];
     if(props.config.WebAcl.IPSets) {
       const ipSetsNames: string[] =[];
@@ -136,7 +125,6 @@ export class FirewallStack extends cdk.Stack {
           if(typeof address === "string") addresses.push(address);
           else addresses.push(address.IP);
         }
-<<<<<<< HEAD
 
         const cfnipset = new wafv2.CfnIPSet(this, ipSet.Name+props.config.General.DeployHash, {
           name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
@@ -156,30 +144,6 @@ export class FirewallStack extends cdk.Stack {
         IpSets.push(cfnipset);
       }
     }
-=======
-=======
->>>>>>> 4e310f14 (fix ipset feature)
-
-        const cfnipset = new wafv2.CfnIPSet(this, ipSet.Name+props.config.General.DeployHash, {
-          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
-          description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory \n used in " +props.config.General.Prefix.toUpperCase() +
-          "-" +
-          props.config.WebAcl.Name +
-          "-" +
-          props.config.General.Stage +
-          "-" +
-          props.config.General.DeployHash + " Firewall",
-          addresses: addresses,
-          ipAddressVersion: ipSet.IPAddressVersion,
-          scope: ipSet.Scope,
-          tags: ipSet.Tags ? ipSet.Tags : undefined
-        });
-        ipSetsNames.push(ipSet.Name);
-        IpSets.push(cfnipset);
-      }
-    }
-
-<<<<<<< HEAD
     // Checks if the ipsets are configured correctly
     const validateIPSetsInConfig = (customRulesPath: string) => {
       const logErrorAndExit = (error: string) => {
@@ -189,26 +153,11 @@ export class FirewallStack extends cdk.Stack {
 
       const rules = get(props, customRulesPath);
       if(!Array.isArray(rules)) return;
-
-      for (const rule of rules) {
-        const ipSetARN = rule.Statement?.IPSetReferenceStatement?.ARN;
-
-        if(!ipSetARN) continue;
-        if(ipSetARN.startsWith("arn:aws:")) continue; // ARN was manually defined by the user, skip checking
-        if(!ipSetARN.startsWith("${") || !ipSetARN.endsWith(".Arn}")) logErrorAndExit(`IPSetReferenceStatement.ARN must be indicating the name of the IPSet, accessing its ARN, which CloudFormation will substitute on deploying.\n  Detected value: '${ipSetARN}'.\n` +  "  Example of expected value: '${IPsString.Arn}'");
-
-        const ipSetName = ipSetARN.split(".")[0].replace(/[${]/g, "");
-        if(!ipSetsNames.includes(ipSetName)) logErrorAndExit(`IPSet named '${ipSetName}' not found on the names of the ipsets on the JSON files defined in the 'config.WebAcl.IPSetFiles' prop.\n  These were the ones which were defined: ${ipSetsNames.reduce((acc, curr) => acc === "" ? `'${curr}'` : `${acc} | '${curr}'`, "")}`);
-      }
     };
     validateIPSetsInConfig("config.WebAcl.PreProcess.CustomRules");
     validateIPSetsInConfig("config.WebAcl.PostProcess.CustomRules");
 
     // --------------------------------------------------------------------
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
-
-=======
->>>>>>> 4e310f14 (fix ipset feature)
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
@@ -268,29 +217,14 @@ export class FirewallStack extends cdk.Stack {
       resourceTags: props.config.WebAcl.ResourceTags,
       excludeResourceTags: props.config.WebAcl.ExcludeResourceTags ? props.config.WebAcl.ExcludeResourceTags : false,
       policyDescription: props.config.WebAcl.Description ? props.config.WebAcl.Description : undefined
-    };
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
+    }
+
+    const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
     if(IpSets.length !== 0){
       for(const Ipset of IpSets){
         fmspolicy.addDependency(Ipset);
       }
     }
-=======
-    new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
->>>>>>> 09328a24 (adjust linting)
-=======
-    new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
-=======
-    const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", CfnPolicyProps);
-    if(IpSets.length !== 0){
-      for(const Ipset of IpSets){
-        fmspolicy.addDependency(Ipset);
-      }
-    }
->>>>>>> 9a23d124 (fix ipset feature)
->>>>>>> 4e310f14 (fix ipset feature)
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
       console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", props.config.General.Prefix.toUpperCase() +
@@ -337,7 +271,7 @@ export class FirewallStack extends cdk.Stack {
         const securedDomain = props.config.General.SecuredDomain.toString();
 
         const app = new cloudwatch.TextWidget({
-          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + MANAGEDRULEGROUPSINFO.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+securedDomain+")",
+          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + ManagedRuleGroupsInfo.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+securedDomain+")",
           width: 7,
           height: 4
         });
@@ -520,18 +454,8 @@ export class FirewallStack extends cdk.Stack {
     })();
   }
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-
 const ManagedRuleGroupsInfo: string[]= [""];
-function buildServiceDataManagedRGs(managedRuleGroups: ManagedRuleGroup[]) : ServiceDataManagedRuleGroup[] {
-=======
-=======
-
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
-const MANAGEDRULEGROUPSINFO: string[]= [""];
 function buildServiceDataManagedRgs(managedRuleGroups: ManagedRuleGroup[]) : ServiceDataManagedRuleGroup[] {
->>>>>>> 09328a24 (adjust linting)
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
     cfnManagedRuleGroup.push({
@@ -553,7 +477,7 @@ function buildServiceDataManagedRgs(managedRuleGroups: ManagedRuleGroup[]) : Ser
     if(managedRuleGroup.Version !== ""){
       version = "**"+ managedRuleGroup.Version+"**";
     }
-    MANAGEDRULEGROUPSINFO.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] " + version);
+    ManagedRuleGroupsInfo.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] " + version);
   }
   return cfnManagedRuleGroup;
 }
@@ -572,15 +496,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
     "\x1b[0m\n"
   );
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   if (capacity < 1500) {
-=======
-  if (capacity < 1000) {
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
-=======
-  if (capacity < 1500) {
->>>>>>> 4e310f14 (fix ipset feature)
     const rules = [];
     let count = 1;
     for (const statement of ruleGroupSet) {
@@ -600,44 +516,22 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
           "-" +
           deployHash;
       }
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
 
       // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
       const subStatement = cloneDeep(statement.Statement);
       if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
         subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
       }
-
-      let CfnRuleProperty;
-=======
-=======
-
-      // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
-      const subStatement = cloneDeep(statement.Statement);
-      if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
-        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
-      }
-
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
       let cfnRuleProperty;
->>>>>>> 09328a24 (adjust linting)
       if ("Captcha" in statement.Action) {
         cfnRuleProperty = {
           name: rulename,
           priority: count,
-          
+
           action: toAwsCamel(statement.Action),
-<<<<<<< HEAD
           statement: toAwsCamel(subStatement),
-=======
-          
-<<<<<<< HEAD
-          statement: toAwsCamel(statement.Statement),
->>>>>>> 09328a24 (adjust linting)
-=======
-          statement: toAwsCamel(subStatement),
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,
@@ -645,28 +539,15 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
               statement.VisibilityConfig.CloudWatchMetricsEnabled,
             metricName: rulename + "-metric",
           },
-          
           captchaConfig: toAwsCamel(statement.CaptchaConfig),
-          
           ruleLabels: toAwsCamel(statement.RuleLabels),
         };
       } else {
         cfnRuleProperty = {
           name: rulename,
           priority: count,
-          
           action: toAwsCamel(statement.Action),
-<<<<<<< HEAD
-          statement: toAwsCamel(subStatement),
-=======
-          // fixes cloudformation warning "required key [Name] not found" in statements like "SingleHeader"
-          
-<<<<<<< HEAD
-          statement: JSON.parse(JSON.stringify(toAwsCamel(statement.Statement))?.replace(/name/g,"Name")),
->>>>>>> 2d597da6 (fix: dependencies, single-header cloudformation warning and log bucket encryption bug)
-=======
           statement: JSON.parse(JSON.stringify(toAwsCamel(subStatement))?.replace(/name/g,"Name")),
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,
@@ -674,7 +555,6 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
               statement.VisibilityConfig.CloudWatchMetricsEnabled,
             metricName: rulename + "-metric",
           },
-          
           ruleLabels: toAwsCamel(statement.RuleLabels),
         };
       }
@@ -974,28 +854,15 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
             "-" +
             deployHash;
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-        
-        // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
-        const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
-        if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
-          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
-        }
 
-        let CfnRuleProperty;
-=======
-=======
-        
-        // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
-        const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
-        if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
-          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
-        }
-
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
         let cfnRuleProperty;
->>>>>>> 09328a24 (adjust linting)
+
+        // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
+        const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
+        if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
+        }
+
         if (
           "Captcha" in
           ruleGroupSet[statementindex]

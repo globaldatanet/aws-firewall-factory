@@ -28,34 +28,14 @@ export interface Config {
     readonly ExcludeResourceTags?: boolean,
     readonly RemediationEnabled?: boolean,
     readonly ResourcesCleanUp?: boolean,
-<<<<<<< HEAD
-<<<<<<< HEAD
     readonly IPSets?: IPSet[],
-=======
-    readonly IPSetFiles?: string[],
->>>>>>> 6e7db7ab (Add repo managed IPSets + refactor bin)
-=======
-    readonly IPSets?: IPSet[],
->>>>>>> 4e310f14 (fix ipset feature)
     readonly PreProcess: RuleGroupSet,
     readonly PostProcess: RuleGroupSet,
   },
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage" | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi"
-=======
 export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage"
 // | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi" - waiting for support if you need a GraphQLApi Firewall just use an ApiGateway:Stage Firewall
->>>>>>> 447c4564 (Version 3.2.2)
-=======
-export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage"
-// | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi" - waiting for support if you need a GraphQLApi Firewall just use an ApiGateway:Stage Firewall
-=======
-export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage" | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi"
->>>>>>> 3e3b9b6e (add ipset config to general config.ts file)
->>>>>>> 47dd323e (add ipset config to general config.ts file)
 export interface Prerequisites {
   readonly General: {
     readonly Prefix: string,
@@ -146,9 +126,5 @@ export interface IPSet {
   Description?: string,
   Addresses: Array<IPAddressWithDescription | IPAddress>,
   IPAddressVersion: "IPV4" | "IPV6",
-<<<<<<< HEAD
-=======
-  Scope: "CLOUDFRONT" | "REGIONAL" | "CLOUDFRONT|REGIONAL",
->>>>>>> 47dd323e (add ipset config to general config.ts file)
   Tags?: CfnTag[]
 }
