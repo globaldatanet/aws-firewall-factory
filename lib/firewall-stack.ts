@@ -33,86 +33,92 @@ export class FirewallStack extends cdk.Stack {
     const accountId = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
 
-    const cfnRole = new iam.CfnRole(this, "KinesisS3DeliveryRole", {
-      assumeRolePolicyDocument: {
+    let loggingConfiguration;
+    if(props.config.General.LoggingConfiguration === "Firehose"){
+      const cfnRole = new iam.CfnRole(this, "KinesisS3DeliveryRole", {
+        assumeRolePolicyDocument: {
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Sid: "",
+              Effect: "Allow",
+              Principal: { Service: "firehose.amazonaws.com" },
+              Action: "sts:AssumeRole",
+            },
+          ],
+        },
+      });
+
+      const cfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
+        retentionInDays: 90,
+      });
+
+      const policy = {
         Version: "2012-10-17",
         Statement: [
           {
-            Sid: "",
             Effect: "Allow",
-            Principal: { Service: "firehose.amazonaws.com" },
-            Action: "sts:AssumeRole",
+            Action: [
+              "s3:AbortMultipartUpload",
+              "s3:GetBucketLocation",
+              "s3:GetObject",
+              "s3:ListBucket",
+              "s3:ListBucketMultipartUploads",
+              "s3:PutObject",
+              "s3:PutObjectAcl",
+            ],
+            Resource: [
+              "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
+              "arn:aws:s3:::" + props.config.General.S3LoggingBucketName + "/*",
+            ],
+          },
+          {
+            Effect: "Allow",
+            Action: ["logs:PutLogEvents"],
+            Resource: [cfnLogGroup.attrArn],
+          },
+          {
+            Effect: "Allow",
+            Action: ["kms:Decrypt", "kms:GenerateDataKey"],
+            Resource: [props.config.General.FireHoseKeyArn],
           },
         ],
-      },
-    });
+      };
 
-    const cfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
-      retentionInDays: 90,
-    });
+      new iam.CfnPolicy(this, "KinesisS3DeliveryPolicy", {
+        policyDocument: policy,
+        policyName: "firehose_delivery_policy",
+        roles: [cfnRole.ref],
+      });
 
-    const policy = {
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Effect: "Allow",
-          Action: [
-            "s3:AbortMultipartUpload",
-            "s3:GetBucketLocation",
-            "s3:GetObject",
-            "s3:ListBucket",
-            "s3:ListBucketMultipartUploads",
-            "s3:PutObject",
-            "s3:PutObjectAcl",
-          ],
-          Resource: [
-            "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
-            "arn:aws:s3:::" + props.config.General.S3LoggingBucketName + "/*",
-          ],
-        },
-        {
-          Effect: "Allow",
-          Action: ["logs:PutLogEvents"],
-          Resource: [cfnLogGroup.attrArn],
-        },
-        {
-          Effect: "Allow",
-          Action: ["kms:Decrypt", "kms:GenerateDataKey"],
-          Resource: [props.config.General.FireHoseKeyArn],
-        },
-      ],
-    };
-
-    new iam.CfnPolicy(this, "KinesisS3DeliveryPolicy", {
-      policyDocument: policy,
-      policyName: "firehose_delivery_policy",
-      roles: [cfnRole.ref],
-    });
-
-    new firehouse.CfnDeliveryStream(this, "S3DeliveryStream", {
-      deliveryStreamName:
+      new firehouse.CfnDeliveryStream(this, "S3DeliveryStream", {
+        deliveryStreamName:
         "aws-waf-logs-" +
         props.config.General.Prefix +
         "-kinesis-wafv2log-" +
         props.config.WebAcl.Name +
         props.config.General.Stage +
         props.config.General.DeployHash,
-      extendedS3DestinationConfiguration: {
-        bucketArn: "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
-        encryptionConfiguration: {
-          kmsEncryptionConfig: {
-            awskmsKeyArn: props.config.General.FireHoseKeyArn,
+        extendedS3DestinationConfiguration: {
+          bucketArn: "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
+          encryptionConfiguration: {
+            kmsEncryptionConfig: {
+              awskmsKeyArn: props.config.General.FireHoseKeyArn || "",
+            },
           },
-        },
-        roleArn: cfnRole.attrArn,
-        bufferingHints: { sizeInMBs: 50, intervalInSeconds: 60 },
-        compressionFormat: "UNCOMPRESSED",
-        prefix: "AWSLogs/" + accountId + "/FirewallManager/" + region + "/",
-        errorOutputPrefix:
+          roleArn: cfnRole.attrArn,
+          bufferingHints: { sizeInMBs: 50, intervalInSeconds: 60 },
+          compressionFormat: "UNCOMPRESSED",
+          prefix: "AWSLogs/" + accountId + "/FirewallManager/" + region + "/",
+          errorOutputPrefix:
           "AWSLogs/" + accountId + "/FirewallManager/" + region + "/Errors",
-      },
-    });
-
+        },
+      });
+      loggingConfiguration = "${S3DeliveryStream.Arn}";
+    }
+    if(props.config.General.LoggingConfiguration === "S3"){
+      loggingConfiguration = "arn:aws:s3:::"+props.config.General.S3LoggingBucketName;
+    }
     // --------------------------------------------------------------------
     // IPSets
     const ipSets: cdk.aws_wafv2.CfnIPSet[] = [];
@@ -177,7 +183,7 @@ export class FirewallStack extends cdk.Stack {
       postProcessRuleGroups: postProcessRuleGroups,
       overrideCustomerWebACLAssociation: true,
       loggingConfiguration: {
-        logDestinationConfigs: ["${S3DeliveryStream.Arn}"],
+        logDestinationConfigs: [loggingConfiguration || ""],
       },
     };
     const cfnPolicyProps = {

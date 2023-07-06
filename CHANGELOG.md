@@ -7,6 +7,8 @@
 
 - Adds a centralized IPSets management feature.
   No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets and  using them in the WebACLs on `values/ip-sets-managed.json`.
+
+- Logging to S3, you can now decide if you want to send your WAF logs directly to S3 or via Firehose
 ## 3.2.6
 ### Add
 - Linting Github Action for typescript 18 & 20

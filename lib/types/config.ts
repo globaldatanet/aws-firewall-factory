@@ -7,7 +7,8 @@ export interface Config {
   readonly General: {
     readonly Prefix: string,
     readonly Stage: string,
-    readonly FireHoseKeyArn: string,
+    readonly LoggingConfiguration: "S3" | "Firehose"
+    readonly FireHoseKeyArn?: string,
     readonly S3LoggingBucketName: string,
     DeployHash: string,
     readonly SecuredDomain: Array<string>,
@@ -15,6 +16,7 @@ export interface Config {
   },
   readonly WebAcl:{
     readonly Name: string,
+    
     /**
       * @TJS-pattern ^([\p{L}\p{Z}\p{N}_.:\/=+\-@]*)$
     */
