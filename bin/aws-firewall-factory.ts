@@ -5,38 +5,16 @@ import * as cdk from "aws-cdk-lib";
 import { realpathSync, existsSync } from "fs";
 import { validateWaf, validatePrerequisites, wrongLoggingConfiguration } from "../lib/tools/config-validator";
 import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
-import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties } from "../lib/tools/helpers";
+import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties, outputInfoBanner } from "../lib/tools/helpers";
 import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
-import * as packageJsonObject from "../package.json";
 import { ValidateFunction } from "ajv";
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
-import cfonts = require("cfonts");
-/**
- * Version of the AWS Firewall Factory - extracted from package.json
- */
-const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
-
 /**
  * relative path to config file imported from the env PROCESS_PARAMETERS
  */
 const CONFIGFILE = process.env.PROCESS_PARAMETERS;
 
-/**
- * the region into which the stack is deployed
- */
-let deploymentRegion = "";
-
-const outputInfoBanner = (): void => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  cfonts.say("AWS FIREWALL FACTORY", {font: "block",align: "left",colors: ["#00ecbd"],background: "transparent",letterSpacing: 0,lineHeight: 0,space: true,maxLength: "13",gradient: false,independentGradient: false,transitionGradient: false,env: "node",width:"80%"});
-  console.log("\n © by globaldatanet");
-  console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-  console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
-};
-
-const logInvalidConfigFileAndExit = (invalidFileType: "ConfigFile" | "IPSet", validationFilePath: string, ajvValidatorFunction: ValidateFunction): void => {
-  outputInfoBanner();
+const logInvalidConfigFileAndExit = (config:Config,invalidFileType: "ConfigFile" | "IPSet", validationFilePath: string, ajvValidatorFunction: ValidateFunction): void => {
+  outputInfoBanner(config);
   console.log(`\n 🧪 Validation of your ${invalidFileType}: \n   📂 ` + validationFilePath + "\n\n");
   console.error("\u001B[31m",`🚨 Invalid ${invalidFileType} File 🚨 \n\n`,"\x1b[0m" + JSON.stringify(ajvValidatorFunction.errors, null, 2)+ "\n\n");
   process.exit(1);
@@ -50,7 +28,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
 (async () => { 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const config: Config = require(realpathSync(CONFIGFILE));
-  if (!validateWaf(config)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(CONFIGFILE), validateWaf);
+  if (!validateWaf(config)) logInvalidConfigFileAndExit(config,"ConfigFile", realpathSync(CONFIGFILE), validateWaf);
 
   // ---------------------------------------------------------------------
   // Deploying prerequisite stack
@@ -58,10 +36,9 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
   if(process.env.PREREQUISITE === "true") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const prerequisites: Prerequisites = require(realpathSync(CONFIGFILE));
-    if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(CONFIGFILE), validatePrerequisites);
+    if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit(config,"ConfigFile", realpathSync(CONFIGFILE), validatePrerequisites);
 
-    outputInfoBanner();
-    console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+process.env.AWS_REGION,"\x1b[0m \n");
+    outputInfoBanner(config);
 
     console.log("ℹ️   Deploying Prerequisites Stack.");
     const app = new cdk.App();
@@ -78,16 +55,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
   // Deploying Firewall stack
   
   else {
-    if(config.WebAcl.Scope === "CLOUDFRONT"){
-      deploymentRegion = "us-east-1";
-    }
-    else{
-      deploymentRegion = process.env.REGION || "eu-central-1";
-    }
-
-    outputInfoBanner();
-    console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentRegion,"\x1b[0m \n");
-
+    const deploymentRegion= outputInfoBanner(config);
     const isNewStack = (config.General.DeployHash === "");
     const runtimeProperties = initRuntimeProperties();
     if(isNewStack){

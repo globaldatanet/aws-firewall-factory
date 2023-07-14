@@ -13,6 +13,10 @@ import { Rule } from "../types/fms";
 import * as lodash from "lodash";
 import { RuntimeProperties } from "../types/runtimeprops";
 import { Config } from "../types/config";
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
+import cfonts = require("cfonts");
+import * as packageJsonObject from "../../package.json";
+
 /**
  * Service Quota Code for Firewall Manager Total WAF WCU in account & region
  */
@@ -259,7 +263,6 @@ async function calculateCapacities(
       if(ipSetReferenceStatement && !ipSetReferenceStatement.ARN.startsWith("arn:aws:")) {
         runtimeProperties.PreProcess.CustomRuleCount += 1;
         if("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
-        
         // Capacity for IPSet statements:
         // "WCUs – 2 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
         // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
@@ -270,7 +273,6 @@ async function calculateCapacities(
         count++;
         continue;
       }
-      
       runtimeProperties.PreProcess.CustomRuleCount += 1;
       if ("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) {
         runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
@@ -349,7 +351,6 @@ async function calculateCapacities(
       if(ipSetReferenceStatement && !ipSetReferenceStatement.ARN.startsWith("arn:aws:")) {
         runtimeProperties.PostProcess.CustomRuleCount += 1;
         if("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action) runtimeProperties.PostProcess.CustomCaptchaRuleCount += 1;
-        
         // Capacity for IPSet statements:
         // "WCUs – 2 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
         // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
@@ -647,3 +648,41 @@ export function toAwsCamel(o: any): any {
   }
   return newO;
 }
+
+/**
+ * Version of the AWS Firewall Factory - extracted from package.json
+ */
+const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
+
+
+/**
+ * The function will display info banner and returns deploymentRegion for WAF Stack
+ * @param config configuration object of the values.json
+ * @return deploymentRegion AWS region, e.g. eu-central-1
+ */
+export const outputInfoBanner = (config:Config): string => {
+  /**
+   * the region into which the stack is deployed
+   */
+  let deploymentRegion = "";
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  cfonts.say("AWS FIREWALL FACTORY", {font: "block",align: "left",colors: ["#00ecbd"],background: "transparent",letterSpacing: 0,lineHeight: 0,space: true,maxLength: "13",gradient: false,independentGradient: false,transitionGradient: false,env: "node",width:"80%"});
+  console.log("\n © by globaldatanet");
+  console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
+  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+  console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
+  if(process.env.PREREQUISITE === "true"){
+    console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+process.env.AWS_REGION,"\x1b[0m \n");
+  }
+  else{
+    if(config.WebAcl.Scope === "CLOUDFRONT"){
+      deploymentRegion = "us-east-1";
+    }
+    else{
+      deploymentRegion = process.env.REGION || "eu-central-1";
+    }
+    console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentRegion,"\x1b[0m \n");
+  }
+  return deploymentRegion;
+};
