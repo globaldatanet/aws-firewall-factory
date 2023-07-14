@@ -25,7 +25,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
   process.exit(1);
 }
 
-(async () => { 
+void (async () => { 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const config: Config = require(realpathSync(CONFIGFILE));
   if (!validateWaf(config)) logInvalidConfigFileAndExit(config,"ConfigFile", realpathSync(CONFIGFILE), validateWaf);
@@ -34,7 +34,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
   // Deploying prerequisite stack
 
   if(process.env.PREREQUISITE === "true") {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
     const prerequisites: Prerequisites = require(realpathSync(CONFIGFILE));
     if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit(config,"ConfigFile", realpathSync(CONFIGFILE), validatePrerequisites);
 
@@ -91,9 +91,9 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
     }
     if(Array.isArray(config.WebAcl.IPSets) &&  config.WebAcl.IPSets.length > 0) {
       console.log("\n𝍂 IPSets");
-      for(const IpSet of config.WebAcl.IPSets) {
-        console.log("   ➕ " + IpSet.Name);
-        console.log("      ⚙️  [" + IpSet.IPAddressVersion + "] | 🌎 [" + config.WebAcl.Scope+ "]");
+      for(const ipSet of config.WebAcl.IPSets) {
+        console.log("   ➕ " + ipSet.Name);
+        console.log("      ⚙️  [" + ipSet.IPAddressVersion + "] | 🌎 [" + config.WebAcl.Scope+ "]");
       }
     }
     const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
@@ -114,7 +114,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
       },
     });
 
-    const Prices = await getCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
-    const PriceCalculated = await isPriceCalculated(runtimeProperties);
+    await getCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
+    await isPriceCalculated(runtimeProperties);
   }
 })();
