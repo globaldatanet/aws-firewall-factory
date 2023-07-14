@@ -9,7 +9,8 @@ import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRunti
 import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
 import * as packageJsonObject from "../package.json";
 import { ValidateFunction } from "ajv";
-
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
+import cfonts = require("cfonts");
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
  */
@@ -26,14 +27,8 @@ const CONFIGFILE = process.env.PROCESS_PARAMETERS;
 let deploymentRegion = "";
 
 const outputBanner = (): void => {
-  console.log(`
-      █████╗ ██╗    ██╗███████╗    ███████╗██╗██████╗ ███████╗██╗    ██╗ █████╗ ██╗     ██╗         ███████╗ █████╗  ██████╗████████╗ ██████╗ ██████╗ ██╗   ██╗
-     ██╔══██╗██║    ██║██╔════╝    ██╔════╝██║██╔══██╗██╔════╝██║    ██║██╔══██╗██║     ██║         ██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗╚██╗ ██╔╝
-     ███████║██║ █╗ ██║███████╗    █████╗  ██║██████╔╝█████╗  ██║ █╗ ██║███████║██║     ██║         █████╗  ███████║██║        ██║   ██║   ██║██████╔╝ ╚████╔╝
-     ██╔══██║██║███╗██║╚════██║    ██╔══╝  ██║██╔══██╗██╔══╝  ██║███╗██║██╔══██║██║     ██║         ██╔══╝  ██╔══██║██║        ██║   ██║   ██║██╔══██╗  ╚██╔╝
-     ██║  ██║╚███╔███╔╝███████║    ██║     ██║██║  ██║███████╗╚███╔███╔╝██║  ██║███████╗███████╗    ██║     ██║  ██║╚██████╗   ██║   ╚██████╔╝██║  ██║   ██║
-     ╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝     ╚═╝  ╚═╝ ╚═════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝
-      `);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  cfonts.say("AWS FIREWALL FACTORY", {font: "block",align: "left",colors: ["#00ecbd"],background: "transparent",letterSpacing: 0,lineHeight: 0,space: true,maxLength: "13",gradient: false,independentGradient: false,transitionGradient: false,env: "node",width:"80%"});
 };
 
 const logInvalidConfigFileAndExit = (invalidFileType: "ConfigFile" | "IPSet", validationFilePath: string, ajvValidatorFunction: ValidateFunction): void => {
@@ -63,7 +58,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
     if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(CONFIGFILE), validatePrerequisites);
 
     outputBanner();
-    console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
+    console.log("\n © by globaldatanet");
     console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
     console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
     console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+process.env.AWS_REGION,"\x1b[0m \n");
@@ -91,7 +86,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
     }
 
     outputBanner();
-    console.log("\x1b[36m","\n                                                                                                                                        by globaldatanet","\x1b[0m");
+    console.log("\n © by globaldatanet");
     console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
     console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
     console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentRegion,"\x1b[0m \n");
@@ -122,12 +117,12 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
 
     console.log("\n 📑 Logging:");
     if(config.General.LoggingConfiguration ==="Firehose"){
-      console.log("   🧯  " + config.General.LoggingConfiguration)
-      console.log("      ⚙️  [" + config.General.S3LoggingBucketName +"]")
+      console.log("   🧯  " + config.General.LoggingConfiguration);
+      console.log("      ⚙️  [" + config.General.S3LoggingBucketName +"]");
     }
     if(config.General.LoggingConfiguration ==="S3"){
-      console.log("   🪣  " + config.General.LoggingConfiguration)
-      console.log("      ⚙️  [" + config.General.S3LoggingBucketName +"]")
+      console.log("   🪣  " + config.General.LoggingConfiguration);
+      console.log("      ⚙️  [" + config.General.S3LoggingBucketName +"]");
     }
     if(Array.isArray(config.WebAcl.IPSets) &&  config.WebAcl.IPSets.length > 0) {
       console.log("\n𝍂 IPSets");
@@ -144,7 +139,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
     if(wrongLoggingConfiguration(config)){
       console.error("\u001B[31m"," 🚨 ERROR: Amazon S3 bucket name is invalid 🚨 ", "\x1b[0m" +"\n     🪣 Amazon S3 bucket name must begin with \"aws-waf-logs-\" followed by at least one \n     of the following characters [a-z0-9_.-]\n\n","\x1b[0m" + "\n\n");
       process.exit(1);
-    };
+    }
     const app = new cdk.App();
     new FirewallStack(app, config.General.Prefix.toUpperCase() + "-WAF-" + config.WebAcl.Name.toUpperCase() +"-"+config.General.Stage.toUpperCase() +"-"+config.General.DeployHash.toUpperCase(), {
       config, runtimeProperties: runtimeProperties,
