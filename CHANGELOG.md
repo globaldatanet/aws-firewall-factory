@@ -4,6 +4,7 @@
 ## 3.3.0
 ### Added
 - Refactor of `bin/aws-firewall-factory.ts`, grouping duplicated code on a function, adding comments and better organizing the file.
+- Refactor of `lib/firewall-stack.ts`, outsource the creation of the CloudWatch Dashboard into an own Construct
 
 - Adds a centralized IPSets management feature.
   No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets and  using them in the WebACLs on `values/ip-sets-managed.json`.
