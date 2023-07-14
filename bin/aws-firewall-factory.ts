@@ -26,14 +26,17 @@ const CONFIGFILE = process.env.PROCESS_PARAMETERS;
  */
 let deploymentRegion = "";
 
-const outputBanner = (): void => {
+const outputInfoBanner = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   cfonts.say("AWS FIREWALL FACTORY", {font: "block",align: "left",colors: ["#00ecbd"],background: "transparent",letterSpacing: 0,lineHeight: 0,space: true,maxLength: "13",gradient: false,independentGradient: false,transitionGradient: false,env: "node",width:"80%"});
+  console.log("\n © by globaldatanet");
+  console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
+  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+  console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
 };
 
 const logInvalidConfigFileAndExit = (invalidFileType: "ConfigFile" | "IPSet", validationFilePath: string, ajvValidatorFunction: ValidateFunction): void => {
-  outputBanner();
-  console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
+  outputInfoBanner();
   console.log(`\n 🧪 Validation of your ${invalidFileType}: \n   📂 ` + validationFilePath + "\n\n");
   console.error("\u001B[31m",`🚨 Invalid ${invalidFileType} File 🚨 \n\n`,"\x1b[0m" + JSON.stringify(ajvValidatorFunction.errors, null, 2)+ "\n\n");
   process.exit(1);
@@ -57,10 +60,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
     const prerequisites: Prerequisites = require(realpathSync(CONFIGFILE));
     if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit("ConfigFile", realpathSync(CONFIGFILE), validatePrerequisites);
 
-    outputBanner();
-    console.log("\n © by globaldatanet");
-    console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-    console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
+    outputInfoBanner();
     console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+process.env.AWS_REGION,"\x1b[0m \n");
 
     console.log("ℹ️   Deploying Prerequisites Stack.");
@@ -85,10 +85,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
       deploymentRegion = process.env.REGION || "eu-central-1";
     }
 
-    outputBanner();
-    console.log("\n © by globaldatanet");
-    console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-    console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
+    outputInfoBanner();
     console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentRegion,"\x1b[0m \n");
 
     const isNewStack = (config.General.DeployHash === "");
