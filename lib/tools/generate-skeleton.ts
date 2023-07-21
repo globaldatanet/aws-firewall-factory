@@ -9,6 +9,7 @@ const skeletonConfig : Config = {
     S3LoggingBucketName: "myBucketName",
     SecuredDomain: ["yourapp.<stage>.<domain>"],
     CreateDashboard: true,
+    LoggingConfiguration: "Firehose",
   },
   WebAcl: {
     IncludeMap: {
