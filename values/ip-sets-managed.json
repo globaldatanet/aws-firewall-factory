@@ -1,0 +1,50 @@
+{
+  "General": {
+    "Prefix": "",
+    "Stage": "",
+    "S3LoggingBucketName": "",
+    "DeployHash": "",
+    "FireHoseKeyArn": "",
+    "SecuredDomain": []
+  },
+  "WebAcl": {
+    "Name": "test-ipsets",
+    "Scope": "REGIONAL",
+    "Description": "IPsets",
+    "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+    "RemediationEnabled": true,
+    "ResourcesCleanUp": true,
+    "IncludeMap": {
+      "account": []
+    },
+    "IPSets": [
+      {
+        "Name": "IPsString",
+        "Addresses": [
+          "192.168.178.1/32"
+        ],
+        "IPAddressVersion": "IPV4"
+      }
+    ],
+    "PreProcess": {
+      "CustomRules": [
+        {
+          "Name": "ip-allow",
+          "Statement": {
+            "IPSetReferenceStatement": {
+              "ARN": "IPsString"
+            }
+          },
+          "Action": {
+            "Allow": {}
+          },
+          "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true
+          }
+        }
+      ]
+    },
+    "PostProcess": {}
+  }
+}

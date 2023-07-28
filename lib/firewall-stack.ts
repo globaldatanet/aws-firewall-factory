@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
+import cloneDeep from "lodash/cloneDeep";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
@@ -11,15 +12,9 @@ import { aws_logs as logs } from "aws-cdk-lib";
 import { Config, CustomResponseBodies } from "./types/config";
 import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule } from "./types/fms";
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
+import {WafCloudWatchDashboard} from "./constructs/cloudwatch";
 import { promises as fsp } from "fs";
 import { toAwsCamel } from "./tools/helpers";
-import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
-import * as packageJsonObject from "../package.json";
-
-/**
- * Version of the AWS Firewall Factory - extracted from package.json
- */
-const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
@@ -31,87 +26,124 @@ export class FirewallStack extends cdk.Stack {
     super(scope, id, props);
     const accountId = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
+    let loggingConfiguration;
+    if(props.config.General.LoggingConfiguration === "Firehose"){
+      const cfnRole = new iam.CfnRole(this, "KinesisS3DeliveryRole", {
+        assumeRolePolicyDocument: {
+          Version: "2012-10-17",
+          Statement: [
+            {
+              Sid: "",
+              Effect: "Allow",
+              Principal: { Service: "firehose.amazonaws.com" },
+              Action: "sts:AssumeRole",
+            },
+          ],
+        },
+      });
 
-    const cfnRole = new iam.CfnRole(this, "KinesisS3DeliveryRole", {
-      assumeRolePolicyDocument: {
+      const cfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
+        retentionInDays: 90,
+      });
+
+      const policy = {
         Version: "2012-10-17",
         Statement: [
           {
-            Sid: "",
             Effect: "Allow",
-            Principal: { Service: "firehose.amazonaws.com" },
-            Action: "sts:AssumeRole",
+            Action: [
+              "s3:AbortMultipartUpload",
+              "s3:GetBucketLocation",
+              "s3:GetObject",
+              "s3:ListBucket",
+              "s3:ListBucketMultipartUploads",
+              "s3:PutObject",
+              "s3:PutObjectAcl",
+            ],
+            Resource: [
+              "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
+              "arn:aws:s3:::" + props.config.General.S3LoggingBucketName + "/*",
+            ],
+          },
+          {
+            Effect: "Allow",
+            Action: ["logs:PutLogEvents"],
+            Resource: [cfnLogGroup.attrArn],
+          },
+          {
+            Effect: "Allow",
+            Action: ["kms:Decrypt", "kms:GenerateDataKey"],
+            Resource: [props.config.General.FireHoseKeyArn],
           },
         ],
-      },
-    });
+      };
 
-    const cfnLogGroup = new logs.CfnLogGroup(this, "KinesisErrorLogging", {
-      retentionInDays: 90,
-    });
+      new iam.CfnPolicy(this, "KinesisS3DeliveryPolicy", {
+        policyDocument: policy,
+        policyName: "firehose_delivery_policy",
+        roles: [cfnRole.ref],
+      });
 
-    const policy = {
-      Version: "2012-10-17",
-      Statement: [
-        {
-          Effect: "Allow",
-          Action: [
-            "s3:AbortMultipartUpload",
-            "s3:GetBucketLocation",
-            "s3:GetObject",
-            "s3:ListBucket",
-            "s3:ListBucketMultipartUploads",
-            "s3:PutObject",
-            "s3:PutObjectAcl",
-          ],
-          Resource: [
-            "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
-            "arn:aws:s3:::" + props.config.General.S3LoggingBucketName + "/*",
-          ],
-        },
-        {
-          Effect: "Allow",
-          Action: ["logs:PutLogEvents"],
-          Resource: [cfnLogGroup.attrArn],
-        },
-        {
-          Effect: "Allow",
-          Action: ["kms:Decrypt", "kms:GenerateDataKey"],
-          Resource: [props.config.General.FireHoseKeyArn],
-        },
-      ],
-    };
-
-    new iam.CfnPolicy(this, "KinesisS3DeliveryPolicy", {
-      policyDocument: policy,
-      policyName: "firehose_delivery_policy",
-      roles: [cfnRole.ref],
-    });
-
-    new firehouse.CfnDeliveryStream(this, "S3DeliveryStream", {
-      deliveryStreamName:
+      new firehouse.CfnDeliveryStream(this, "S3DeliveryStream", {
+        deliveryStreamName:
         "aws-waf-logs-" +
         props.config.General.Prefix +
         "-kinesis-wafv2log-" +
         props.config.WebAcl.Name +
         props.config.General.Stage +
         props.config.General.DeployHash,
-      extendedS3DestinationConfiguration: {
-        bucketArn: "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
-        encryptionConfiguration: {
-          kmsEncryptionConfig: {
-            awskmsKeyArn: props.config.General.FireHoseKeyArn,
+        extendedS3DestinationConfiguration: {
+          bucketArn: "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
+          encryptionConfiguration: {
+            kmsEncryptionConfig: {
+              awskmsKeyArn: props.config.General.FireHoseKeyArn || "",
+            },
           },
-        },
-        roleArn: cfnRole.attrArn,
-        bufferingHints: { sizeInMBs: 50, intervalInSeconds: 60 },
-        compressionFormat: "UNCOMPRESSED",
-        prefix: "AWSLogs/" + accountId + "/FirewallManager/" + region + "/",
-        errorOutputPrefix:
+          roleArn: cfnRole.attrArn,
+          bufferingHints: { sizeInMBs: 50, intervalInSeconds: 60 },
+          compressionFormat: "UNCOMPRESSED",
+          prefix: "AWSLogs/" + accountId + "/FirewallManager/" + region + "/",
+          errorOutputPrefix:
           "AWSLogs/" + accountId + "/FirewallManager/" + region + "/Errors",
-      },
-    });
+        },
+      });
+      loggingConfiguration = "${S3DeliveryStream.Arn}";
+    }
+    if(props.config.General.LoggingConfiguration === "S3"){
+      loggingConfiguration = "arn:aws:s3:::"+props.config.General.S3LoggingBucketName;
+    }
+    // --------------------------------------------------------------------
+    // IPSets
+    const ipSets: cdk.aws_wafv2.CfnIPSet[] = [];
+    if(props.config.WebAcl.IPSets) {
+      const ipSetsNames: string[] =[];
+      for(const ipSet of props.config.WebAcl.IPSets) {
+        const addresses: string[] = [];
+        for(const address of ipSet.Addresses) {
+          if(typeof address === "string") addresses.push(address);
+          else addresses.push(address.IP);
+        }
 
+        const cfnipset = new wafv2.CfnIPSet(this, ipSet.Name+props.config.General.DeployHash, {
+          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
+          description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory \n used in " +props.config.General.Prefix.toUpperCase() +
+          "-" +
+          props.config.WebAcl.Name +
+          "-" +
+          props.config.General.Stage +
+          "-" +
+          props.config.General.DeployHash + " Firewall",
+          addresses: addresses,
+          ipAddressVersion: ipSet.IPAddressVersion,
+          scope: props.config.WebAcl.Scope,
+          tags: ipSet.Tags ? ipSet.Tags : undefined
+        });
+        ipSetsNames.push(ipSet.Name);
+        ipSets.push(cfnipset);
+      }
+    }
+
+    // --------------------------------------------------------------------
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
@@ -144,7 +176,7 @@ export class FirewallStack extends cdk.Stack {
       postProcessRuleGroups: postProcessRuleGroups,
       overrideCustomerWebACLAssociation: true,
       loggingConfiguration: {
-        logDestinationConfigs: ["${S3DeliveryStream.Arn}"],
+        logDestinationConfigs: [loggingConfiguration || ""],
       },
     };
     const cfnPolicyProps = {
@@ -172,221 +204,17 @@ export class FirewallStack extends cdk.Stack {
       excludeResourceTags: props.config.WebAcl.ExcludeResourceTags ? props.config.WebAcl.ExcludeResourceTags : false,
       policyDescription: props.config.WebAcl.Description ? props.config.WebAcl.Description : undefined
     };
-    new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
+
+    const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", cfnPolicyProps);
+    if(ipSets.length !== 0){
+      for(const ipSet of ipSets){
+        fmspolicy.addDependency(ipSet);
+      }
+    }
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
-      console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", props.config.General.Prefix.toUpperCase() +
-      "-" +
-      props.config.WebAcl.Name +
-      "-" +
-      props.config.General.Stage +
-      "-" +
-      props.config.General.DeployHash,"\u001b[0m");
-      console.log("   ℹ️  Warnings for Math expressions can be ignored.");
-      const cwdashboard = new cloudwatch.Dashboard(this, "cloudwatch-dashboard", {
-        dashboardName: props.config.General.Prefix.toUpperCase() +
-        "-" +
-        props.config.WebAcl.Name +
-        "-" +
-        props.config.General.Stage +
-        "-" +
-        props.config.General.DeployHash,
-        periodOverride: cloudwatch.PeriodOverride.AUTO,
-        start: "-PT24H"
-      });
-      const webaclName = props.config.General.Prefix.toUpperCase() +
-      "-" +
-      props.config.WebAcl.Name +
-      "-" +
-      props.config.General.Stage +
-      "-" +
-      props.config.General.DeployHash;
-      const webaclNamewithPrefix =  "FMManagedWebACLV2-" + props.config.General.Prefix.toUpperCase() +
-      "-" +
-      props.config.WebAcl.Name +
-      "-" +
-      props.config.General.Stage +
-      "-" +
-      props.config.General.DeployHash;
-
-
-
-
-      if(props.config.WebAcl.IncludeMap.account){
-        const infowidget = new cloudwatch.TextWidget({
-          markdown: "# 🔥 "+webaclName+"\n + 🏗  Deployed to: \n\n 📦 Accounts: "+props.config.WebAcl.IncludeMap.account.toString() + "\n\n 🌎 Region: " + region + "\n\n 💡 Type: " + props.config.WebAcl.Type,
-          width: 14,
-          height: 4
-        });
-
-        const securedDomain = props.config.General.SecuredDomain.toString();
-
-        const app = new cloudwatch.TextWidget({
-          markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + MANAGEDRULEGROUPSINFO.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+securedDomain+")",
-          width: 7,
-          height: 4
-        });
-        let fwmessage = "";
-        if(process.env.LASTEST_FIREWALLFACTORY_VERSION !== FIREWALL_FACTORY_VERSION){
-          fwmessage = "🚨 old or beta version";
-        }
-        else{
-          fwmessage = "💚 latest version";
-        }
-        const fwfactory = new cloudwatch.TextWidget({
-          markdown: "**AWS FIREWALL FACTORY** \n\n ![Image](https://github.com/globaldatanet/aws-firewall-factory/raw/master/static/icon/firewallfactory.png) \n\n 🏷 Version: [" + FIREWALL_FACTORY_VERSION + "](https://github.com/globaldatanet/aws-firewall-factory/releases/tag/" + FIREWALL_FACTORY_VERSION + ")  \n" + fwmessage,
-          width: 3,
-          height: 4
-        });
-        const firstrow = new cloudwatch.Row(infowidget,app,fwfactory);
-        cwdashboard.addWidgets(firstrow);
-        for(const account of props.config.WebAcl.IncludeMap.account){
-          // eslint-disable-next-line no-useless-escape
-          const countexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\CountedRequests\"', '\Sum', 300)";
-
-          const countedRequests = new cloudwatch.GraphWidget({
-            title: "🔢 Counted Requests in " + account,
-            width: 8,
-            height: 8
-          });
-          countedRequests.addLeftMetric(
-            new cloudwatch.MathExpression({
-              expression: countexpression,
-              usingMetrics: {},
-              label: "CountedRequests",
-              searchAccount: account,
-              searchRegion: region,
-              color: "#9dbcd4"
-            }));
-          // eslint-disable-next-line no-useless-escape
-          const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
-          const blockedRequests = new cloudwatch.GraphWidget({
-            title: "❌ Blocked Requests in " + account,
-            width: 8,
-            height: 8
-          });
-          blockedRequests.addLeftMetric(
-            new cloudwatch.MathExpression({
-              expression: blockedexpression,
-              usingMetrics: {},
-              label: "BlockedRequests",
-              searchAccount: account,
-              searchRegion: region,
-              color: "#ff0000"
-            }));
-          // eslint-disable-next-line no-useless-escape  
-          const allowedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\AllowedRequests\"', '\Sum', 300)";
-          const allowedRequests = new cloudwatch.GraphWidget({
-            title: "✅ Allowed Requests in " + account,
-            width: 8,
-            height: 8
-          });
-          allowedRequests.addLeftMetric(
-            new cloudwatch.MathExpression({
-              expression: allowedexpression,
-              usingMetrics: {},
-              label: "AllowedRequests",
-              searchAccount: account,
-              searchRegion: region,
-              color: "#00FF00"
-            }));
-          // eslint-disable-next-line no-useless-escape
-          const sinlevaluecountedrequestsexpression = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"CountedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-          // eslint-disable-next-line no-useless-escape
-          const expression1 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-          // eslint-disable-next-line no-useless-escape
-          const expression2 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-          // eslint-disable-next-line no-useless-escape
-          const expression3 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-          // eslint-disable-next-line no-useless-escape
-          const expression4 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-          const expression5 = "SUM([e3,e4])";
-          const expression6 = "SUM([e1,e2,-e3,-e4])";
-          
-          const botrequestsvsnonbotrequests = new cloudwatch.GraphWidget({
-            title: "🤖 Bot requests vs 😁 Non-bot requests in " + account,
-            width: 24,
-            height: 8
-          });
-
-          botrequestsvsnonbotrequests.addLeftMetric(
-            new cloudwatch.MathExpression({
-              expression: expression5,
-              usingMetrics: {
-                "e3": new cloudwatch.MathExpression({expression: expression3,searchAccount: account, searchRegion: region}),
-                "e4": new cloudwatch.MathExpression({expression: expression4,searchAccount: account, searchRegion: region})
-              },
-              label: "Bot requests",
-              searchAccount: account,
-              searchRegion: region,
-              color: "#ff0000"
-            }));
-          botrequestsvsnonbotrequests.addLeftMetric(new cloudwatch.MathExpression({
-            expression: expression6,
-            usingMetrics: {
-              "e1": new cloudwatch.MathExpression({expression: expression1,searchAccount: account, searchRegion: region}),
-              "e2": new cloudwatch.MathExpression({expression: expression2,searchAccount: account, searchRegion: region}),
-              "e3": new cloudwatch.MathExpression({expression: expression3,searchAccount: account, searchRegion: region}),
-              "e4": new cloudwatch.MathExpression({expression: expression4,searchAccount: account, searchRegion: region})
-            },
-            label: "Non-bot requests",
-            searchAccount: account,
-            searchRegion: region,
-            color: "#00FF00"
-          }));
-
-
-          const sinlevaluecountedrequests = new cloudwatch.SingleValueWidget({
-            title: "🔢 Counted Request in " + account,
-            metrics: [
-              new cloudwatch.MathExpression({
-                expression: "SUM(" +sinlevaluecountedrequestsexpression +")",
-                usingMetrics: {},
-                label: "CountedRequests",
-                searchAccount: account,
-                searchRegion: region,
-                color: "#9dbcd4"
-              })
-            ],
-            width: 8,
-            height: 3
-          });
-          const singlevalueallowedrequest = new cloudwatch.SingleValueWidget({
-            title: "✅ Allowed Request in " + account,
-            metrics: [
-              new cloudwatch.MathExpression({
-                expression: "SUM(" +expression1 +")",
-                usingMetrics: {},
-                label: "AllowedRequests",
-                searchAccount: account,
-                searchRegion: region,
-                color: "#00FF00"
-              })
-            ],
-            width: 8,
-            height: 3
-          });
-          const singlevaluebockedrequest = new cloudwatch.SingleValueWidget({
-            title: "❌ Blocked Request in " + account,
-            metrics: [
-              new cloudwatch.MathExpression({
-                expression: "SUM(" +expression2 +")",
-                usingMetrics: {},
-                label: "BlockedRequests",
-                searchAccount: account,
-                searchRegion: region,
-                color: "#ff0000"
-              })
-            ],
-            width: 8,
-            height: 3
-          });
-          const row = new cloudwatch.Row(sinlevaluecountedrequests,singlevalueallowedrequest,singlevaluebockedrequest);
-          const row2 = new cloudwatch.Row(botrequestsvsnonbotrequests);
-          const row1 = new cloudwatch.Row(countedRequests,allowedRequests, blockedRequests);
-          cwdashboard.addWidgets(row,row1,row2);
-        }
-      }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      new WafCloudWatchDashboard(this, "cloudwatch",props.config, MANAGEDRULEGROUPSINFO);
     }
     const options = { flag: "w", force: true };
     void (async () => {
@@ -446,7 +274,8 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
     "\n"+icon+"  Custom Rules " + type + "Process: ",
     "\x1b[0m\n"
   );
-  if (capacity < 1000) {
+
+  if (capacity < 1500) {
     const rules = [];
     let count = 1;
     for (const statement of ruleGroupSet) {
@@ -466,15 +295,24 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
           "-" +
           deployHash;
       }
+
+
+
+      // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
+      const subStatement = cloneDeep(statement.Statement);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
+      }
       let cfnRuleProperty;
       if ("Captcha" in statement.Action) {
         cfnRuleProperty = {
           name: rulename,
           priority: count,
-          
+
           action: toAwsCamel(statement.Action),
-          
-          statement: toAwsCamel(statement.Statement),
+          statement: toAwsCamel(subStatement),
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,
@@ -482,20 +320,15 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
               statement.VisibilityConfig.CloudWatchMetricsEnabled,
             metricName: rulename + "-metric",
           },
-          
           captchaConfig: toAwsCamel(statement.CaptchaConfig),
-          
           ruleLabels: toAwsCamel(statement.RuleLabels),
         };
       } else {
         cfnRuleProperty = {
           name: rulename,
           priority: count,
-          
           action: toAwsCamel(statement.Action),
-          // fixes cloudformation warning "required key [Name] not found" in statements like "SingleHeader"
-          
-          statement: JSON.parse(JSON.stringify(toAwsCamel(statement.Statement))?.replace(/name/g,"Name")),
+          statement: toAwsCamel(subStatement),
           visibilityConfig: {
             sampledRequestsEnabled:
               statement.VisibilityConfig.SampledRequestsEnabled,
@@ -503,7 +336,6 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
               statement.VisibilityConfig.CloudWatchMetricsEnabled,
             metricName: rulename + "-metric",
           },
-          
           ruleLabels: toAwsCamel(statement.RuleLabels),
         };
       }
@@ -582,7 +414,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       cstResBodies = undefined;
     }
 
-    new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
+    const rulegroup = new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
       capacity: processRuntimeProps.Capacity,
       scope: webAclScope,
       rules: rules,
@@ -651,7 +483,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         deployHash,
     });
   } else {
-    const threshold = 1000;
+    const threshold = 1500;
     const rulesets: any[] = [];
     const indexes: number[] = [];
     const rulegroupcapacities = [];
@@ -803,7 +635,17 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
             "-" +
             deployHash;
         }
+
         let cfnRuleProperty;
+
+        // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
+        const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
+        }
+
         if (
           "Captcha" in
           ruleGroupSet[statementindex]
@@ -816,10 +658,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
               ruleGroupSet[statementindex]
                 .Action
             ),
-            statement: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .Statement
-            ),
+            statement: toAwsCamel(subStatement),
             visibilityConfig: {
               sampledRequestsEnabled:
                 ruleGroupSet[statementindex]
@@ -846,10 +685,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
               ruleGroupSet[statementindex]
                 .Action
             ),
-            statement: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .Statement
-            ),
+            statement: toAwsCamel(subStatement),
             visibilityConfig: {
               sampledRequestsEnabled:
                 ruleGroupSet[statementindex]
@@ -890,7 +726,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         cstResBodies = undefined;
       }
 
-      new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
+      const rulegroup = new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
         capacity: rulegroupcapacities[count],
         scope: webAclScope,
         rules: cfnRuleProperties,

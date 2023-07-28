@@ -167,7 +167,7 @@ async function getProductPrice(deploymentRegion: PriceRegions, servicecode: stri
  * @param runtimeProps runtime properties object, where to get prices
  * @returns whether price is successfully calculated or not
  */
-export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promise<string> {
+export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promise<boolean> {
   const preprocessfixedcost = (runtimeProps.PreProcess.CustomRuleCount * runtimeProps.Pricing.Rule) + runtimeProps.PreProcess.CustomRuleGroupCount + runtimeProps.PreProcess.ManagedRuleGroupCount;
   const postprocessfixedcost = (runtimeProps.PostProcess.CustomRuleCount * runtimeProps.Pricing.Rule) + runtimeProps.PostProcess.CustomRuleGroupCount + runtimeProps.PostProcess.ManagedRuleGroupCount;
   const captchacost = (runtimeProps.PostProcess.CustomCaptchaRuleCount + runtimeProps.PreProcess.CustomCaptchaRuleCount) * runtimeProps.Pricing.Captcha;
@@ -194,7 +194,7 @@ export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promis
   (runtimeProps.Pricing.Dashboard !== 0) ? console.log("     The deployed WAF includes CloudWatch Dashboard and you have more than 3 Dashboards (Free tier), so you will need to pay " + runtimeProps.Pricing.Dashboard+ "$ for this CloudWatch Dashboard. \n     These costs are already included in the price calculation.") : "";
   (shieldSubscriptionState === "Active") ? console.log("     AWS WAF WebACLs or Rules created by Firewall Manager - are Included in AWS Shield Advanced. More information at https://aws.amazon.com/firewall-manager/pricing/.") : "";
   console.log("\n\n");
-  const pricecalculated = "True";
+  const pricecalculated = true;
   return pricecalculated;
 }
 

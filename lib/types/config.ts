@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Rule, ManagedRuleGroup } from "./fms";
 import { aws_fms as fms } from "aws-cdk-lib";
+import { CfnTag } from "aws-cdk-lib";
 
 export interface Config {
   readonly General: {
     readonly Prefix: string,
     readonly Stage: string,
-    readonly FireHoseKeyArn: string,
+    readonly LoggingConfiguration: "S3" | "Firehose"
+    readonly FireHoseKeyArn?: string,
     readonly S3LoggingBucketName: string,
     DeployHash: string,
     readonly SecuredDomain: Array<string>,
@@ -14,6 +16,7 @@ export interface Config {
   },
   readonly WebAcl:{
     readonly Name: string,
+    
     /**
       * @TJS-pattern ^([\p{L}\p{Z}\p{N}_.:\/=+\-@]*)$
     */
@@ -27,6 +30,7 @@ export interface Config {
     readonly ExcludeResourceTags?: boolean,
     readonly RemediationEnabled?: boolean,
     readonly ResourcesCleanUp?: boolean,
+    readonly IPSets?: IPSet[],
     readonly PreProcess: RuleGroupSet,
     readonly PostProcess: RuleGroupSet,
   },
@@ -101,4 +105,28 @@ export interface RuleGroupSet {
   CustomResponseBodies?: CustomResponseBodies,
   CustomRules?: Rule[],
   ManagedRuleGroups?: ManagedRuleGroup[];
+}
+
+/**
+  * @TJS-pattern (?:^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}\/(3[0-2]|[12]?[0-9])$)|(?:^(?:(?:[a-fA-F\d]{1,4}:){7}(?:[a-fA-F\d]{1,4}|:)|(?:[a-fA-F\d]{1,4}:){6}(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|:[a-fA-F\d]{1,4}|:)|(?:[a-fA-F\d]{1,4}:){5}(?::(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,2}|:)|(?:[a-fA-F\d]{1,4}:){4}(?:(?::[a-fA-F\d]{1,4}){0,1}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,3}|:)|(?:[a-fA-F\d]{1,4}:){3}(?:(?::[a-fA-F\d]{1,4}){0,2}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,4}|:)|(?:[a-fA-F\d]{1,4}:){2}(?:(?::[a-fA-F\d]{1,4}){0,3}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,5}|:)|(?:[a-fA-F\d]{1,4}:){1}(?:(?::[a-fA-F\d]{1,4}){0,4}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,6}|:)|(?::(?:(?::[a-fA-F\d]{1,4}){0,5}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,7}|:)))(?:%[0-9a-zA-Z]{1,})?\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$)
+*/
+type IPAddress = string; // The regex above matches both IPv4 and IPv6 in CIDR notation, e.g. 123.4.3.0/32
+
+interface IPAddressWithDescription {
+  Description: string,
+  IP: IPAddress
+}
+
+export interface IPSet {
+  /**
+    * @TJS-pattern ^[a-zA-Z0-9]+$
+  */
+  Name: string, // This name will be used as a CloudFormation logical ID, so it can't have a already used name and must be alphanumeric
+  /*
+    * @TJS-pattern ^[\w+=:#@\/\-,\.][\w+=:#@\/\-,\.\s]+[\w+=:#@\/\-,\.]$
+  */
+  Description?: string,
+  Addresses: Array<IPAddressWithDescription | IPAddress>,
+  IPAddressVersion: "IPV4" | "IPV6",
+  Tags?: CfnTag[]
 }

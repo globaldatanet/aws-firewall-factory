@@ -1,7 +1,15 @@
 # Change Log
 
 ## Released
+## 3.3.0
+### Added
+- Refactor of `bin/aws-firewall-factory.ts`, grouping duplicated code on a function, adding comments and better organizing the file.
+- Refactor of `lib/firewall-stack.ts`, outsource the creation of the CloudWatch Dashboard into an own Construct
 
+- Adds a centralized IPSets management feature.
+  No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets and  using them in the WebACLs on `values/ip-sets-managed.json`.
+
+- Logging to S3, you can now decide if you want to send your WAF logs directly to S3 or via Firehose
 ## 3.2.6
 ### Add
 - Linting Github Action for typescript 18 & 20
@@ -24,7 +32,7 @@
 ## 3.2.4
 ### Fixed
 - Update TestCases for WAF Testing
-  - community-user-agent testcases 
+  - community-user-agent testcases
   - improve owasp testcases
 - Update Testing bin Version
 
@@ -43,6 +51,7 @@
 
 ### Added
 - Added Linting command `lint` to npm scripts which can be run via `npm run lint`◊
+
 ## 3.2.2
 ### Fixed
 - Bump @aws-sdk/client-pricing from 3.332.0 to 3.341.0
@@ -50,6 +59,7 @@
 - Bump @aws-sdk/client-cloudwatch from 3.321.1 to 3.341.0
 - Bump @aws-sdk/client-service-quotas from 3.321.1 to 3.342.0
 - Bump @aws-sdk/client-fms from 3.332.0 to 3.342.0
+
 ## 3.2.1
 ### Fixed
 - Bump aws-cdk from 2.74.0 to 2.79.1 
@@ -61,6 +71,7 @@
 - Bump @typescript-eslint/parser from 4.32.0 to 4.4.0
 - Bump eslint-config-standard from 16.0.3 to 17.0.0
 - Bump eslint from 7.32.0 to 8.4.0
+
 ## 3.2.0
 ### Fixed
 - conflict peer dependency on package.json
