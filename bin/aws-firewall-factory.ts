@@ -26,7 +26,7 @@ if(!CONFIGFILE || !existsSync(CONFIGFILE)) {
 }
 
 void (async () => { 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
   const config: Config = require(realpathSync(CONFIGFILE));
   if (!validateWaf(config)) logInvalidConfigFileAndExit(config,"ConfigFile", realpathSync(CONFIGFILE), validateWaf);
 

@@ -9,7 +9,7 @@ const owasptop10Config : Config = {
     S3LoggingBucketName: "myBucketName",
     SecuredDomain: ["yourapp.<stage>.<domain>"],
     CreateDashboard: true,
-    LoggingConfiguratio: "Firehose",
+    LoggingConfiguration: "Firehose",
   },
   WebAcl: {
     IncludeMap: {
