@@ -250,7 +250,7 @@ async function calculateCapacities(
 ): Promise<void> {
 
   let count = 0;
-  console.log("\n👀 Get CustomRule Capacity:")
+  console.log("\n👀 Get CustomRule Capacity:");
   if (!config.WebAcl.PreProcess.CustomRules) {
     console.log(
       "\n ⏭  Skip Rule Capacity Calculation for PreProcess Custom Rules."
