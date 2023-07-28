@@ -1,4 +1,4 @@
-<a href="https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/linting.yml"><img alt="github-badge" src="https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/linting.yml/badge.svg"></a>
+
 [![Mentioned in Awesome CDK](https://awesome.re/mentioned-badge.svg)](https://github.com/kolomied/awesome-cdk)
 [![License: Apache2](https://img.shields.io/badge/license-Apache%202-lightgrey.svg)](http://www.apache.org/licenses/) [![cdk](https://img.shields.io/badge/aws_cdk-v2-orange.svg)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 [![latest](https://img.shields.io/badge/latest-release-yellow.svg)](https://github.com/globaldatanet/aws-firewall-factory/releases)
