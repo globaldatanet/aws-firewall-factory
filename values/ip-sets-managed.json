@@ -1,21 +1,23 @@
 {
   "General": {
-    "Prefix": "",
-    "Stage": "",
-    "S3LoggingBucketName": "",
+    "Prefix": "gdn",
+    "Stage": "dev",
     "DeployHash": "",
-    "FireHoseKeyArn": "",
-    "SecuredDomain": []
+    "SecuredDomain": [
+      ""
+    ],
+    "LoggingConfiguration": "S3",
+    "S3LoggingBucketName": "",
+    "CreateDashboard": true
   },
   "WebAcl": {
-    "Name": "test-ipsets",
+    "Name": "firewall-factory-demo",
     "Scope": "REGIONAL",
-    "Description": "IPsets",
-    "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-    "RemediationEnabled": true,
-    "ResourcesCleanUp": true,
+    "Type": "AWS::ApiGateway::Stage",
     "IncludeMap": {
-      "account": []
+      "account": [
+        ""
+      ]
     },
     "IPSets": [
       {
@@ -45,6 +47,21 @@
         }
       ]
     },
-    "PostProcess": {}
+    "PostProcess": {
+      "ManagedRuleGroups": [
+        {
+          "Vendor": "AWS",
+          "Name": "AWSManagedRulesAmazonIpReputationList",
+          "Capacity": 25,
+          "Version": ""
+        },
+        {
+          "Vendor": "AWS",
+          "Name": "AWSManagedRulesCommonRuleSet",
+          "Capacity": 700,
+          "Version": "Version_1.6"
+        }
+      ]
+    }
   }
 }

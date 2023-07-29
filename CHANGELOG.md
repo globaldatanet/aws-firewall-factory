@@ -1,6 +1,15 @@
 # Change Log
 
 ## Released
+
+## 3.3.1
+### Fixed
+- example Json Files
+- Bump @aws-cdk from 2.79.1 to 2.89.0
+- Bump @mhlabs/cfn-diagram from 1.1.36 to 1.1.29
+- Bump @aws-cdk-lib from 2.77.0 to 2.80.0
+- Bump typescript-json-schema from 0.56.0 to 0.59.0
+
 ## 3.3.0
 ### Added
 - Refactor of `bin/aws-firewall-factory.ts`, grouping duplicated code on a function, adding comments and better organizing the file.
