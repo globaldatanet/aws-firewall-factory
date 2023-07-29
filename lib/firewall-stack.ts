@@ -414,7 +414,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       cstResBodies = undefined;
     }
 
-    const rulegroup = new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
+    new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
       capacity: processRuntimeProps.Capacity,
       scope: webAclScope,
       rules: rules,
@@ -726,7 +726,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         cstResBodies = undefined;
       }
 
-      const rulegroup = new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
+      new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
         capacity: rulegroupcapacities[count],
         scope: webAclScope,
         rules: cfnRuleProperties,

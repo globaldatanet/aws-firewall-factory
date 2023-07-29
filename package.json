@@ -1,6 +1,6 @@
 {
   "name": "aws-firewall-factory",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },
@@ -16,7 +16,7 @@
     "@types/node": "18.16.3",
     "@typescript-eslint/eslint-plugin": "5.59.11",
     "@typescript-eslint/parser": "5.59.11",
-    "aws-cdk": "^2.79.1",
+    "aws-cdk": "^2.89.0",
     "eslint": "8.42.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "2.27.5",
@@ -35,15 +35,15 @@
     "@aws-sdk/client-service-quotas": "^3.353.0",
     "@aws-sdk/client-shield": "^3.353.0",
     "@aws-sdk/client-wafv2": "^3.353.0",
-    "@mhlabs/cfn-diagram": "^1.1.36",
+    "@mhlabs/cfn-diagram": "^1.1.29",
     "@types/lodash": "4.14.178",
     "ajv": "8.10.0",
-    "aws-cdk-lib": "2.77.0",
+    "aws-cdk-lib": "2.80.0",
     "cfonts": "^3.2.0",
     "constructs": "10.2.25",
     "lodash": "4.17.21",
     "process": "0.11.10",
     "shapes": "0.4.0",
-    "typescript-json-schema": "0.56.0"
+    "typescript-json-schema": "0.59.0"
   }
 }

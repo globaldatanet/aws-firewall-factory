@@ -8,7 +8,8 @@
         ""
       ],
       "S3LoggingBucketName": "",
-      "CreateDashboard": true
+      "CreateDashboard": true,
+      "LoggingConfiguration": "Firehose"
     },
     "WebAcl": {
       "Name": "owasptopten",

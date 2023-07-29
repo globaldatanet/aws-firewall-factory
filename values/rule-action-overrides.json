@@ -6,7 +6,8 @@
     "CreateDashboard": true,
     "DeployHash": "",
     "FireHoseKeyArn": "",
-    "SecuredDomain": []
+    "SecuredDomain": [],
+    "LoggingConfiguration": "Firehose"
   },
   "WebAcl": {
     "Name": "Test",
