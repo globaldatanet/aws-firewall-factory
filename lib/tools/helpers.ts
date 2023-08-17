@@ -16,6 +16,7 @@ import { Config } from "../types/config";
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 import cfonts = require("cfonts");
 import * as packageJsonObject from "../../package.json";
+import * as cdk from "aws-cdk-lib";
 
 /**
  * Service Quota Code for Firewall Manager Total WAF WCU in account & region
@@ -249,6 +250,38 @@ async function calculateCapacities(
   runtimeProperties: RuntimeProperties
 ): Promise<void> {
 
+  type IpSetNamesSubStatementsStats = {
+    quantity: number,
+    howManyIPSetForwardedIPConfigsWithAnyPosition: number
+  }
+  // TODO: If the statement has several sub-statements inside a AND/OR logic, and one of them is a
+  //       IPSetReferenceStatement, the capacity of the other statements won't be calculated. 
+  //
+  //       We need to fix this by calculating all other statements capacity usage and adding it
+  //       to the total capacity of the rule, together with the IPSets statements capacity.
+  //
+  //       Maybe this can be done smartly by removing the "IPSetReferenceStatement" sub-statements (which don't reference a real ipset ARN)
+  //       from the main statement object, sending this new object to AWS's API to get the statement capacity calculation,
+  //       and adding the manually calculated capacity value from the code below with the one returned from AWS's API?
+  const getIpSetNamesSubStatementsStats = (statement: any): IpSetNamesSubStatementsStats => {
+    const stats: IpSetNamesSubStatementsStats = {
+      quantity: 0,
+      howManyIPSetForwardedIPConfigsWithAnyPosition: 0
+    };
+    
+    getPathes(statement)
+      .filter(path => path.includes("IPSetReferenceStatement"))
+      .forEach(path => {
+        if(path.endsWith("IPSetReferenceStatement.ARN")) {
+          stats.quantity++;
+        } else if(path.endsWith("IPSetForwardedIPConfig.Position")) {
+          if(lodash.get(statement, path) === "ANY") stats.howManyIPSetForwardedIPConfigsWithAnyPosition++;
+        }
+      });
+
+    return stats;
+  };
+
   let count = 0;
   console.log("\n👀 Get CustomRule Capacity:");
   if (!config.WebAcl.PreProcess.CustomRules) {
@@ -257,22 +290,28 @@ async function calculateCapacities(
     );
   } else {
     while (count < config.WebAcl.PreProcess.CustomRules.length) {
-      // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
-      // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
-      const ipSetReferenceStatement = config.WebAcl.PreProcess.CustomRules[count].Statement.IPSetReferenceStatement;
-      if(ipSetReferenceStatement && !ipSetReferenceStatement.ARN.startsWith("arn:aws:")) {
+      // Manually calculate and return capacity if rule has a ipset statement with the name of the IPSet (e.g. IPAllow})
+      //
+      // Having a ipset statement with the name of the IPSet means the IPSet will be created by this repo, maybe it doesn't exists yet
+      // If the ipset doesn't exists it fails this code when checking the capacity of rules on AWS's API on the getTotalCapacityOfRules function
+      //
+      // So, that's why the code below is needed
+      const ipSetReferSttmsStats = getIpSetNamesSubStatementsStats(config.WebAcl.PreProcess.CustomRules[count]);
+      if(ipSetReferSttmsStats.quantity > 0) {
         runtimeProperties.PreProcess.CustomRuleCount += 1;
-        if("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
+        if ("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
+        
         // Capacity for IPSet statements:
         // "WCUs – 2 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
         // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
-        let ipSetRuleCapacity = 2;
-        if(ipSetReferenceStatement.IPSetForwardedIPConfig?.Position === "ANY") ipSetRuleCapacity += 4;
-        runtimeProperties.PreProcess.RuleCapacities.push(ipSetRuleCapacity);
+        if(ipSetReferSttmsStats.howManyIPSetForwardedIPConfigsWithAnyPosition > 0) 
+          runtimeProperties.PreProcess.RuleCapacities.push((ipSetReferSttmsStats.howManyIPSetForwardedIPConfigsWithAnyPosition * 6) + ((ipSetReferSttmsStats.quantity - ipSetReferSttmsStats.howManyIPSetForwardedIPConfigsWithAnyPosition) * 2));
+        else runtimeProperties.PreProcess.RuleCapacities.push(ipSetReferSttmsStats.quantity * 2);
 
         count++;
         continue;
       }
+
       runtimeProperties.PreProcess.CustomRuleCount += 1;
       if ("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) {
         runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
@@ -345,18 +384,23 @@ async function calculateCapacities(
     );
   } else {
     while (count < config.WebAcl.PostProcess.CustomRules.length) {
-      // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
-      // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
-      const ipSetReferenceStatement = config.WebAcl.PostProcess.CustomRules[count].Statement.IPSetReferenceStatement;
-      if(ipSetReferenceStatement && !ipSetReferenceStatement.ARN.startsWith("arn:aws:")) {
-        runtimeProperties.PostProcess.CustomRuleCount += 1;
-        if("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action) runtimeProperties.PostProcess.CustomCaptchaRuleCount += 1;
+      // Manually calculate and return capacity if rule has a ipset statement with the name of the IPSet (e.g. IPAllow})
+      //
+      // Having a ipset statement with the name of the IPSet means the IPSet will be created by this repo, maybe it doesn't exists yet
+      // If the ipset doesn't exists it fails this code when checking the capacity of rules on AWS's API on the getTotalCapacityOfRules function
+      //
+      // So, that's why the code below is needed
+      const ipSetReferSttmsStats = getIpSetNamesSubStatementsStats(config.WebAcl.PostProcess.CustomRules[count]);
+      if(ipSetReferSttmsStats.quantity > 0) {
+        runtimeProperties.PreProcess.CustomRuleCount += 1;
+        if ("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action) runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
+        
         // Capacity for IPSet statements:
         // "WCUs – 2 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
         // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
-        let ipSetRuleCapacity = 2;
-        if(ipSetReferenceStatement.IPSetForwardedIPConfig?.Position === "ANY") ipSetRuleCapacity += 4;
-        runtimeProperties.PostProcess.RuleCapacities.push(ipSetRuleCapacity);
+        if(ipSetReferSttmsStats.howManyIPSetForwardedIPConfigsWithAnyPosition > 0) 
+          runtimeProperties.PreProcess.RuleCapacities.push((ipSetReferSttmsStats.howManyIPSetForwardedIPConfigsWithAnyPosition * 6) + ((ipSetReferSttmsStats.quantity - ipSetReferSttmsStats.howManyIPSetForwardedIPConfigsWithAnyPosition) * 2));
+        else runtimeProperties.PreProcess.RuleCapacities.push(ipSetReferSttmsStats.quantity * 2);
 
         count++;
         continue;
@@ -685,4 +729,34 @@ export const outputInfoBanner = (config:Config): string => {
     console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentRegion,"\x1b[0m \n");
   }
   return deploymentRegion;
+};
+
+/**
+ * This function will return a array of the paths of all keys in the object
+ * 
+ * e.g. for the object "{a: 0, c: {d: [1, 2], e: 'ok'}}"
+ * it'll return "[ 'a', 'c.d.0', 'c.d.1', 'c.e' ]"
+ * @param o object to get all paths of its keys
+ * @return a array of the paths of the object keys 
+ */
+export const getPathes = (o:any): string[] => {
+  return Object.entries(o)
+    .flatMap(([k, v]) => v && typeof v === "object"
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      ? getPathes(v).map(p => `${k}.${p}`)
+      : k);
+};
+
+/**
+ * This function will add a call to "Fn::GetAtt" on the IPSetReferenceStatement, for replacing IPSets names with its ARN during deployment on CloudFormation
+ * @param statement WAF statement, which can contain several sub-statements under AND or OR logics, each possibly containing a IPSetReferenceStatement
+ * @param deployHash Deploy hash of the stack, which is part of the IPSet logical name on the CNF template, used for referencing it
+ */
+export const setIpSetNamesToReferencesToTheirCnfLogicalIds = (statement: any, deployHash: string): void => {
+  getPathes(statement).filter(sttm => sttm.endsWith("IPSetReferenceStatement.ARN")).forEach(path => {
+    const ipSetArn = lodash.get(statement, path);
+    if (!ipSetArn.startsWith("arn:")) {
+      lodash.set(statement, path, cdk.Fn.getAtt(ipSetArn+deployHash, "Arn"));
+    }
+  });
 };

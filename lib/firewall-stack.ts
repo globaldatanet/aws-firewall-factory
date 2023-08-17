@@ -14,7 +14,7 @@ import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, Serv
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import {WafCloudWatchDashboard} from "./constructs/cloudwatch";
 import { promises as fsp } from "fs";
-import { toAwsCamel } from "./tools/helpers";
+import { toAwsCamel, setIpSetNamesToReferencesToTheirCnfLogicalIds } from "./tools/helpers";
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
@@ -261,7 +261,7 @@ function buildServiceDataManagedRgs(managedRuleGroups: ManagedRuleGroup[]) : Ser
   return cfnManagedRuleGroup;
 }
 
-function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capacity: number, deployHash: string, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined) : ServiceDataRuleGroup[] {
+function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capacity: number, deployHash: string, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined) : ServiceDataRuleGroup[] { 
   const serviceDataRuleGroup : ServiceDataRuleGroup[] = [];
   let icon;
   if (type === "Pre") {
@@ -296,15 +296,10 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
           deployHash;
       }
 
-
-
-      // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
+      // Add Fn::GetAtt for replacing IPSets names with its ARN during deployment
       const subStatement = cloneDeep(statement.Statement);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
-      }
+      setIpSetNamesToReferencesToTheirCnfLogicalIds(subStatement, deployHash);
+      
       let cfnRuleProperty;
       if ("Captcha" in statement.Action) {
         cfnRuleProperty = {
@@ -638,13 +633,9 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
 
         let cfnRuleProperty;
 
-        // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
+        // Add Fn::GetAtt for replacing IPSets names with its ARN during deployment
         const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
-          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
-        }
+        setIpSetNamesToReferencesToTheirCnfLogicalIds(subStatement, deployHash);
 
         if (
           "Captcha" in
