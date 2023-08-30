@@ -5,17 +5,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput } from "@aws-sdk/client-wafv2";
+import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput, ListAvailableManagedRuleGroupVersionsCommand, Rule as SdkRule, ListAvailableManagedRuleGroupVersionsCommandInput} from "@aws-sdk/client-wafv2";
 import * as quota from "@aws-sdk/client-service-quotas";
 import * as cloudformation from "@aws-sdk/client-cloudformation";
+import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
-import { Rule } from "../types/fms";
 import * as lodash from "lodash";
 import { RuntimeProperties } from "../types/runtimeprops";
 import { Config } from "../types/config";
+import { Rule as FmsRule } from "../types/fms";
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
 import cfonts = require("cfonts");
 import * as packageJsonObject from "../../package.json";
+import {transformCdkRuletoSdkRule} from "./transformer";
+// import * as fs from "fs";
 
 /**
  * Service Quota Code for Firewall Manager Total WAF WCU in account & region
@@ -48,11 +51,11 @@ async function getPolicyCount(deploymentRegion: string): Promise<number> {
  * @param rules rules for which you want to calculate the capacity
  * @returns the total capacity of the supplied rules
  */
-async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: Rule[]): Promise<number> {
+async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: SdkRule[]): Promise<number> {
   const client = new WAFV2Client({ region: deploymentRegion });
   const input: CheckCapacityCommandInput = {
     Scope: scope,
-    Rules: convertPropValuesToUint8Array(rules, "SearchString")
+    Rules: rules,
   };
   const command = new CheckCapacityCommand(input);
   const response : any = await client.send(command);
@@ -177,63 +180,61 @@ export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string
  * @param config the config object from the values json
  */
 export async function setOutputsFromStack(deploymentRegion: string, runtimeprops: RuntimeProperties, config: Config): Promise<void>{
-  const stackName =
-  config.General.Prefix.toUpperCase() +
-  "-WAF-" +
-  config.WebAcl.Name.toUpperCase() +
-  "-" +
-  config.General.Stage.toUpperCase() +
-  "-" +
-  config.General.DeployHash.toUpperCase();
-
+  const stackName = `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}`;
   const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
   const params ={
     StackName: stackName
   };
   const command = new cloudformation.DescribeStacksCommand(params);
-  const responsestack = await cloudformationClient.send(command);
-  if(responsestack.Stacks?.[0].StackName && responsestack.Stacks?.[0].Outputs !== undefined){
-    for(const output of responsestack.Stacks?.[0]?.Outputs ?? []){
-      if(output.OutputKey === "DeployedRuleGroupNames")
-      {
-        runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-      }
-      else if(output.OutputKey === "DeployedRuleGroupIdentifier")
-      {
-        runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-      }
-      else if(output.OutputKey === "DeployedRuleGroupCapacities")
-      {
-        const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-        runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
-      }
-      if(output.OutputKey === "PreProcessDeployedRuleGroupNames")
-      {
-        runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-      }
-      else if(output.OutputKey === "PreProcessDeployedRuleGroupIdentifier")
-      {
-        runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-      }
-      else if(output.OutputKey === "PreProcessDeployedRuleGroupCapacities")
-      {
-        const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-        runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
-      }
-      if(output.OutputKey === "PostProcessDeployedRuleGroupNames")
-      {
-        runtimeprops.PostProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-      }
-      else if(output.OutputKey === "PostProcessDeployedRuleGroupIdentifier")
-      {
-        runtimeprops.PostProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-      }
-      else if(output.OutputKey === "PostProcessDeployedRuleGroupCapacities")
-      {
-        const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-        runtimeprops.PostProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
+  try{
+    const responsestack = await cloudformationClient.send(command);
+    console.log("🫗  Get Outputs from existing CloudFormation Stack.\n");
+    if(responsestack.Stacks?.[0].StackName && responsestack.Stacks?.[0].Outputs !== undefined){
+      for(const output of responsestack.Stacks?.[0]?.Outputs ?? []){
+        if(output.OutputKey === "DeployedRuleGroupNames")
+        {
+          runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        }
+        else if(output.OutputKey === "DeployedRuleGroupIdentifier")
+        {
+          runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        }
+        else if(output.OutputKey === "DeployedRuleGroupCapacities")
+        {
+          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
+          runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
+        }
+        if(output.OutputKey === "PreProcessDeployedRuleGroupNames")
+        {
+          runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        }
+        else if(output.OutputKey === "PreProcessDeployedRuleGroupIdentifier")
+        {
+          runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        }
+        else if(output.OutputKey === "PreProcessDeployedRuleGroupCapacities")
+        {
+          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
+          runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
+        }
+        if(output.OutputKey === "PostProcessDeployedRuleGroupNames")
+        {
+          runtimeprops.PostProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        }
+        else if(output.OutputKey === "PostProcessDeployedRuleGroupIdentifier")
+        {
+          runtimeprops.PostProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+        }
+        else if(output.OutputKey === "PostProcessDeployedRuleGroupCapacities")
+        {
+          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
+          runtimeprops.PostProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
+        }
       }
     }
+  }
+  catch (e){
+    console.log("🆕 Creating new CloudFormation Stack.\n");
   }
 }
 
@@ -248,158 +249,24 @@ async function calculateCapacities(
   deploymentRegion: string,
   runtimeProperties: RuntimeProperties
 ): Promise<void> {
-
-  let count = 0;
   console.log("\n👀 Get CustomRule Capacity:");
   if (!config.WebAcl.PreProcess.CustomRules) {
     console.log(
       "\n ⏭  Skip Rule Capacity Calculation for PreProcess Custom Rules."
     );
   } else {
-    while (count < config.WebAcl.PreProcess.CustomRules.length) {
-      // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
-      // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
-      const ipSetReferenceStatement = config.WebAcl.PreProcess.CustomRules[count].Statement.IPSetReferenceStatement;
-      if(ipSetReferenceStatement && !ipSetReferenceStatement.ARN.startsWith("arn:aws:")) {
-        runtimeProperties.PreProcess.CustomRuleCount += 1;
-        if("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
-        // Capacity for IPSet statements:
-        // "WCUs – 2 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
-        // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
-        let ipSetRuleCapacity = 2;
-        if(ipSetReferenceStatement.IPSetForwardedIPConfig?.Position === "ANY") ipSetRuleCapacity += 4;
-        runtimeProperties.PreProcess.RuleCapacities.push(ipSetRuleCapacity);
-
-        count++;
-        continue;
-      }
-      runtimeProperties.PreProcess.CustomRuleCount += 1;
-      if ("Captcha" in config.WebAcl.PreProcess.CustomRules[count].Action) {
-        runtimeProperties.PreProcess.CustomCaptchaRuleCount += 1;
-        const rules : Rule[] = [];
-        const { CloudWatchMetricsEnabled: cloudWatchMetricsEnabled, SampledRequestsEnabled: sampledRequestsEnabled } =
-          config.WebAcl.PreProcess.CustomRules[count].VisibilityConfig;
-        const rule: Rule = {
-          Statement: config.WebAcl.PreProcess.CustomRules[count].Statement,
-          Name: "Rule",
-          Action: config.WebAcl.PreProcess.CustomRules[count].Action,
-          CaptchaConfig:
-            config.WebAcl.PreProcess.CustomRules[count].CaptchaConfig,
-          VisibilityConfig: {
-            CloudWatchMetricsEnabled: cloudWatchMetricsEnabled,
-            SampledRequestsEnabled: sampledRequestsEnabled,
-            MetricName: "Metric" + Math.random().toString(),
-          },
-        };
-        if (config.WebAcl.PreProcess.CustomRules[count].RuleLabels) {
-          rule.RuleLabels =
-            config.WebAcl.PreProcess.CustomRules[count].RuleLabels;
-        }
-        rules.push(rule);
-        const capacity = await getTotalCapacityOfRules(
-          deploymentRegion,
-          config.WebAcl.Scope,
-          rules
-        );
-        runtimeProperties.PreProcess.RuleCapacities.push(capacity);
-      } else {
-        const ruleCalculatedCapacityJson = [];
-        const { CloudWatchMetricsEnabled: cloudWatchMetricsEnabled, SampledRequestsEnabled: sampledRequestsEnabled } =
-          config.WebAcl.PreProcess.CustomRules[count].VisibilityConfig;
-        const tempTemplate: Rule = {
-          Statement: config.WebAcl.PreProcess.CustomRules[count].Statement,
-          Name: "Rule",
-          Action: config.WebAcl.PreProcess.CustomRules[count].Action,
-          VisibilityConfig: {
-            CloudWatchMetricsEnabled: cloudWatchMetricsEnabled,
-            SampledRequestsEnabled: sampledRequestsEnabled,
-            MetricName: "Metric" + Math.random().toString(),
-          },
-        };
-        if (config.WebAcl.PreProcess.CustomRules[count].RuleLabels) {
-          tempTemplate.RuleLabels =
-            config.WebAcl.PreProcess.CustomRules[count].RuleLabels;
-        }
-        ruleCalculatedCapacityJson.push(tempTemplate);
-        const capacity = await getTotalCapacityOfRules(
-          deploymentRegion,
-          config.WebAcl.Scope,
-          ruleCalculatedCapacityJson
-        );
-        runtimeProperties.PreProcess.RuleCapacities.push(capacity);
-      }
-      count++;
-    }
-    runtimeProperties.PreProcess.Capacity = runtimeProperties.PreProcess.RuleCapacities.reduce(
-      function (a, b) {
-        return a + b;
-      },
-      0
-    );
+    runtimeProperties.PreProcess.CustomRuleCount = config.WebAcl.PreProcess.CustomRules.length;
+    runtimeProperties.PreProcess.CustomCaptchaRuleCount = config.WebAcl.PreProcess.CustomRules.filter(rule => rule.action.captcha).length;
+    runtimeProperties.PreProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PreProcess.CustomRules, deploymentRegion, config.WebAcl.Scope)).reduce((a,b) => a+b, 0);
   }
-  count = 0;
-  let postProcessCapacity = 0;
   if (!config.WebAcl.PostProcess.CustomRules) {
     console.log(
       "\n ⏭  Skip Rule Capacity Calculation for PostProcess Custom Rules."
     );
   } else {
-    while (count < config.WebAcl.PostProcess.CustomRules.length) {
-      // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
-      // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
-      const ipSetReferenceStatement = config.WebAcl.PostProcess.CustomRules[count].Statement.IPSetReferenceStatement;
-      if(ipSetReferenceStatement && !ipSetReferenceStatement.ARN.startsWith("arn:aws:")) {
-        runtimeProperties.PostProcess.CustomRuleCount += 1;
-        if("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action) runtimeProperties.PostProcess.CustomCaptchaRuleCount += 1;
-        // Capacity for IPSet statements:
-        // "WCUs – 2 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
-        // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
-        let ipSetRuleCapacity = 2;
-        if(ipSetReferenceStatement.IPSetForwardedIPConfig?.Position === "ANY") ipSetRuleCapacity += 4;
-        runtimeProperties.PostProcess.RuleCapacities.push(ipSetRuleCapacity);
-
-        count++;
-        continue;
-      }
-
-      runtimeProperties.PostProcess.CustomRuleCount += 1;
-      const ruleCalculatedCapacityJson = [];
-      const { CloudWatchMetricsEnabled: cloudWatchMetricsEnabled, SampledRequestsEnabled: sampledRequestsEnabled } =
-        config.WebAcl.PostProcess.CustomRules[count].VisibilityConfig;
-      const rule: Rule = {
-        Statement: config.WebAcl.PostProcess.CustomRules[count].Statement,
-        Name: "Rule",
-        Action: config.WebAcl.PostProcess.CustomRules[count].Action,
-        VisibilityConfig: {
-          CloudWatchMetricsEnabled: cloudWatchMetricsEnabled,
-          SampledRequestsEnabled: sampledRequestsEnabled,
-          MetricName: "Metric" + Math.random().toString(),
-        },
-      };
-      if ("Captcha" in config.WebAcl.PostProcess.CustomRules[count].Action) {
-        runtimeProperties.PostProcess.CustomCaptchaRuleCount += 1;
-        rule.CaptchaConfig =
-          config.WebAcl.PostProcess.CustomRules[count].CaptchaConfig;
-      }
-      if (config.WebAcl.PostProcess.CustomRules[count].RuleLabels) {
-        rule.RuleLabels =
-          config.WebAcl.PostProcess.CustomRules[count].RuleLabels;
-      }
-      ruleCalculatedCapacityJson.push(rule);
-      const capacity = await getTotalCapacityOfRules(
-        deploymentRegion,
-        config.WebAcl.Scope,
-        ruleCalculatedCapacityJson
-      );
-      runtimeProperties.PostProcess.RuleCapacities.push(capacity);
-      count++;
-    }
-    postProcessCapacity = runtimeProperties.PostProcess.RuleCapacities.reduce(
-      function (a, b) {
-        return a + b;
-      },
-      0
-    );
+    runtimeProperties.PostProcess.CustomRuleCount = config.WebAcl.PostProcess.CustomRules.length;
+    runtimeProperties.PostProcess.CustomCaptchaRuleCount = config.WebAcl.PostProcess.CustomRules.filter(rule => rule.action.captcha).length;
+    runtimeProperties.PostProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PostProcess.CustomRules, deploymentRegion, config.WebAcl.Scope)).reduce((a,b) => a+b, 0);
   }
   console.log("\n👀 Get ManagedRule Capacity:\n");
   if (!config.WebAcl.PreProcess.ManagedRuleGroups) {
@@ -407,27 +274,27 @@ async function calculateCapacities(
   } else {
     console.log(" 🥇 PreProcess: ");
     for (const managedrule of config.WebAcl.PreProcess.ManagedRuleGroups) {
-      managedrule.Version ? managedrule.Version : managedrule.Version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.Vendor, managedrule.Name, config.WebAcl.Scope);
+      managedrule.version ? managedrule.version : managedrule.version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
       const capacity = await getManagedRuleCapacity(
         deploymentRegion,
-        managedrule.Vendor,
-        managedrule.Name,
+        managedrule.vendor,
+        managedrule.name,
         config.WebAcl.Scope,
-        managedrule.Version
+        managedrule.version
       );
-      managedrule.Capacity = capacity;
+      managedrule.capacity = capacity;
       console.log(
         "   ➕ Capacity for " +
-          managedrule.Name +
+          managedrule.name +
           " is [" +
-          managedrule.Capacity +
+          managedrule.capacity +
           "]"
       );
-      managedrule.Version ? console.log("      🏷  Latest " + managedrule.Version) : console.log("");
+      managedrule.version ? console.log("      🏷  Specified " + managedrule.version) : console.log("");
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
-      managedrule.Name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.Name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
+      managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
+      managedrule.name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
     }
   }
   if (!config.WebAcl.PostProcess.ManagedRuleGroups) {
@@ -435,30 +302,140 @@ async function calculateCapacities(
   } else {
     console.log("\n 🥈 PostProcess: ");
     for (const managedrule of config.WebAcl.PostProcess.ManagedRuleGroups) {
-      managedrule.Version ? managedrule.Version : managedrule.Version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.Vendor, managedrule.Name, config.WebAcl.Scope);
+      managedrule.version ? managedrule.version : managedrule.version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
       const capacity = await getManagedRuleCapacity(
         deploymentRegion,
-        managedrule.Vendor,
-        managedrule.Name,
+        managedrule.vendor,
+        managedrule.name,
         config.WebAcl.Scope,
-        managedrule.Version
+        managedrule.version
       );
-      managedrule.Capacity = capacity;
+      managedrule.capacity = capacity;
       console.log(
         "   ➕ Capacity for " +
-          managedrule.Name +
+          managedrule.name +
           " is [" +
-          managedrule.Capacity +
+          managedrule.capacity +
           "]"
       );
-      managedrule.Version ? console.log("      🏷  Latest " + managedrule.Version) : console.log("");
+      managedrule.version ? console.log("      🏷  Specified " + managedrule.version) : console.log("");
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
-      managedrule.Name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.Name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
+      managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
+      managedrule.name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
     }
   }
-  runtimeProperties.PostProcess.Capacity = postProcessCapacity;
+}
+
+/**
+ * 
+ * @param customRules PreProcess Custom Rules or PostProcess Custom Rules
+ * @param deploymentRegion the AWS region, e.g. eu-central-1
+ * @param scope the scope of the WebACL, e.g. REGIONAL or CLOUDFRONT
+ * @returns an array with the capacities of the supplied custom rules
+ */
+async function calculateCustomRulesCapacities(customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT") {
+  const capacities = [];
+  for (const customRule of customRules) {
+    // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
+    // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
+    const ipSetReferenceStatement = customRule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+    // in case rule has an andStatement
+    const andStatement = customRule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
+    // in case rule has an orStatement
+    const orStatement = customRule.statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
+    if(ipSetReferenceStatement && !ipSetReferenceStatement.arn.startsWith("arn:aws:")) {
+      // Capacity for IPSet statements:
+      // "WCUs – 1 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
+      // https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
+      capacities.push(calculateIpsSetStatementCapacity(ipSetReferenceStatement));
+    } else if(andStatement && andStatement.statements) {
+      for (const statement of andStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
+        const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+        if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+          capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
+        }
+      }
+      const filteredAndStatements = {
+        statements: (andStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement => !statement.ipSetReferenceStatement || (statement.ipSetReferenceStatement && statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty).arn.startsWith("arn:aws:"))
+      };
+      if (filteredAndStatements && filteredAndStatements.statements && filteredAndStatements.statements.length > 0) {
+        const calcRule = buildCustomRuleWithoutIpReferenceStatements(customRule, filteredAndStatements, false);
+        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+        capacities.push(capacity);
+      }
+    }
+    else if(orStatement && orStatement.statements) {
+      for (const statement of orStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
+        const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+        if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+          capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
+        }
+      }
+      const filteredOrStatements = {
+        statements: (orStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement => !statement.ipSetReferenceStatement)
+      };
+      if (filteredOrStatements && filteredOrStatements.statements && filteredOrStatements.statements.length > 0) {
+        const calcRule = buildCustomRuleWithoutIpReferenceStatements(customRule, filteredOrStatements, false);
+        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+        capacities.push(capacity);
+      }
+    }
+    else {
+      capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope));
+    }
+  }
+  return capacities;
+}
+
+/**
+ * Implementation of the calculation of the capacity for IPSet statements according to https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
+ * @param ipSetReferenceStatement the IPSetReferenceStatement
+ * @returns the capacity of the IPSet statement
+ */
+function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty) {
+  let ipSetRuleCapacity = 1;
+  const ipSetForwardedIpConfig = ipSetReferenceStatement.ipSetForwardedIpConfig as wafv2.CfnWebACL.IPSetForwardedIPConfigurationProperty | undefined;
+  if(ipSetForwardedIpConfig && ipSetForwardedIpConfig.position === "ANY") ipSetRuleCapacity = 4;
+  return ipSetRuleCapacity;
+}
+
+async function calculateCustomRuleStatementsCapacity(customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT") {
+  const ruleCalculatedCapacityJson = [];
+  const rule = transformCdkRuletoSdkRule(customRule);
+  ruleCalculatedCapacityJson.push(rule);
+  const capacity = await getTotalCapacityOfRules(
+    deploymentRegion,
+    scope,
+    ruleCalculatedCapacityJson
+  );
+  return capacity;
+}
+
+function buildCustomRuleWithoutIpReferenceStatements(customRule: FmsRule, concatenatedStatement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isOrStatement: boolean) {
+  const statements = concatenatedStatement.statements as wafv2.CfnWebACL.StatementProperty[];
+  let statement;
+  if (statements.length === 1) {
+    statement = statements[0];
+  } else if (isOrStatement) {
+    statement = {
+      orStatement: concatenatedStatement
+    };
+  } else {
+    statement = {
+      andStatement: concatenatedStatement
+    };
+  }
+  const tempCalcRule : FmsRule = {
+    name: customRule.name,
+    priority: customRule.priority,
+    visibilityConfig: customRule.visibilityConfig,
+    ruleLabels: customRule.ruleLabels,
+    captchaConfig: customRule.captchaConfig,
+    statement,
+    action: customRule.action
+  };
+  return tempCalcRule;
 }
 
 /**
@@ -562,7 +539,7 @@ export function initRuntimeProperties() : RuntimeProperties {
  * @param propertyName name of the properties which have to be converted
  * @returns converted Rules
  */
-function convertPropValuesToUint8Array(rulesObject: any, propertyName: string): any {
+export function convertPropValuesToUint8Array(rulesObject: any, propertyName: string): any {
   const convertedObject: any = {};
   let value: any;
   if (rulesObject instanceof Array) {
@@ -594,7 +571,7 @@ function convertPropValuesToUint8Array(rulesObject: any, propertyName: string): 
  * @param stringToConvert string which has to be converted to Uint8Array
  * @returns the desired Uint8Array representation of the string
  */
-function convertStringToUint8Array(stringToConvert: string): Uint8Array {
+export function convertStringToUint8Array(stringToConvert: string): Uint8Array {
   const buf = new ArrayBuffer(stringToConvert.length * 2); // 2 bytes for each char
   const bufView = new Uint8Array(buf);
   for (let i = 0, strLen = stringToConvert.length; i < strLen; i++) {
@@ -603,51 +580,6 @@ function convertStringToUint8Array(stringToConvert: string): Uint8Array {
   return bufView;
 }
 
-/**
- * Function to transform property names into camel case like AWS needs it
- * @param o object which property names has to be transformed to camel case
- * @returns the object with the transformed property names in camel case
- */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function toAwsCamel(o: any): any {
-  let newO: any, origKey: any, newKey: any, value: any;
-  if (o instanceof Array) {
-    return o.map(function(value) {
-      if (typeof value === "object") {
-        value = toAwsCamel(value);
-      }
-      if(value === "aRN"){
-        value = "arn";
-      }
-      if(value === "iPSetReferenceStatement"){
-        value = "ipSetReferenceStatement";
-      }
-      return value;
-    });
-  } else {
-    newO = {};
-    for (origKey in o) {
-      if (Object.prototype.hasOwnProperty.call(o, origKey)) {
-        newKey = (origKey.charAt(0).toLowerCase() + origKey.slice(1) || origKey).toString();
-        if(newKey === "aRN"){
-          newKey = "arn";
-        }
-        if(newKey === "iPSetReferenceStatement"){
-          newKey = "ipSetReferenceStatement";
-        }
-        value = o[origKey];
-        if (value instanceof Array || (value !== null && value.constructor === Object)) {
-          value = toAwsCamel(value);
-          if(value === "aRN"){
-            value = "arn";
-          }
-        }
-        newO[newKey] = value;
-      }
-    }
-  }
-  return newO;
-}
 
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
@@ -660,29 +592,32 @@ const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
  * @param config configuration object of the values.json
  * @return deploymentRegion AWS region, e.g. eu-central-1
  */
-export const outputInfoBanner = (config:Config): string => {
+export const outputInfoBanner = (config?:Config) => {
   /**
    * the region into which the stack is deployed
    */
   let deploymentRegion = "";
-
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  cfonts.say("AWS FIREWALL FACTORY", {font: "block",align: "left",colors: ["#00ecbd"],background: "transparent",letterSpacing: 0,lineHeight: 0,space: true,maxLength: "13",gradient: false,independentGradient: false,transitionGradient: false,env: "node",width:"80%"});
+  cfonts.say("AWS FIREWALL FACTORY", {font: "block",align: "center",colors: ["#00ecbd"],background: "transparent",letterSpacing: 0,lineHeight: 0,space: true,maxLength: "13",gradient: false,independentGradient: false,transitionGradient: false,env: "node",width:"80%"});
   console.log("\n © by globaldatanet");
-  console.log("\n🏷  Version: ","\x1b[4m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-  console.log("👤 AWS Account used: ","\x1b[33m","\n                      " + process.env.CDK_DEFAULT_ACCOUNT,"\x1b[0m");
-  if(process.env.PREREQUISITE === "true"){
-    console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+process.env.AWS_REGION,"\x1b[0m \n");
-  }
-  else{
-    if(config.WebAcl.Scope === "CLOUDFRONT"){
-      deploymentRegion = "us-east-1";
+  console.log("\n🏷  Version: ","\x1B[1m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
+  if(config){
+    console.log("\n👤 AWS FMS Administrator Account: ");
+    console.log("\x1b[33m",`                        ${process.env.CDK_DEFAULT_ACCOUNT}`,"\x1b[0m");
+    if(process.env.PREREQUISITE === "true"){
+      console.log("🌎 Deployment region:");
+      console.log("\x1b[32m",`                      ${process.env.AWS_REGION}`,"\x1b[0m \n\n");
     }
     else{
-      deploymentRegion = process.env.REGION || "eu-central-1";
+      if(config.WebAcl.Scope === "CLOUDFRONT"){
+        deploymentRegion = "us-east-1";
+      }
+      else{
+        deploymentRegion = process.env.REGION || "eu-central-1";
+      }
+      console.log("🌎 CDK deployment region:");
+      console.log("\x1b[32m",`                      ${deploymentRegion}`,"\x1b[0m \n");
     }
-    console.log("🌎 CDK deployment region:","\x1b[33m","\n                      "+deploymentRegion,"\x1b[0m \n");
   }
   return deploymentRegion;
 };

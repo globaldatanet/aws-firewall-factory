@@ -83,23 +83,21 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 6. Checking of the softlimit quota for [WCU](https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works.html) set in the AWS account (stop deployment if calculated WCU is above the quota)
 
-7. Easy configuration of WAF rules trough JSON file.
+7. Easy configuration of WAF rules trough Typescript file.
+   
+8. Deploy same WAF more than once for testing and/or blue/green deployments.
 
-8. Deployment hash to deploy same WAF more than once for testing and/or blue/green deployments.
+9.  Stopping deployment if soft limit will be exceeded:  **Firewall Manager policies per organization per Region (L-0B28E140)** - **Maximum number of web ACL capacity units in a web ACL in WAF for regional (L-D9F31E8A)**
 
-9. Stopping deployment if soft limit will be exceeded:  **Firewall Manager policies per organization per Region (L-0B28E140)** - **Maximum number of web ACL capacity units in a web ACL in WAF for regional (L-D9F31E8A)**
+10. You can name your rules. If you define a name in your RulesArray, the name + a Base36 timestamp will be used for the creation of your rule - otherwise a name will be generated. This will help you to query your logs in Athena. The same rule name also applies to the metric by adding "-metric" to the name.
 
-10. **RegexMatchStatement** and **IPSetReferenceStatement** is working now 🚀
+11. Support for Captcha - You can add Captcha as an action to your WAFs. This helps you block unwanted bot traffic by requiring users to successfully complete challenges before their web request are allowed to reach AWS WAF protected resources. AWS WAF Captcha is available in the US East (N. Virginia), US West (Oregon), Europe (Frankfurt), South America (Sao Paulo), and Asia Pacific (Singapore) AWS Regions and supports Application Load Balancer, Amazon API Gateway, and AWS AppSync resources.
 
-11. You can name your rules. If you define a name in your RulesArray, the name + a Base36 timestamp will be used for the creation of your rule - otherwise a name will be generated. This will help you to query your logs in Athena. The same rule name also applies to the metric by adding "-metric" to the name.
+12. Added S3LoggingBucketName to JSON. You need to specify the S3 Bucket where logs should be placed in. We also added a prefix for the logs to be AWS conform (Prefix: AWSLogs/*AWS_ACCOUNTID*/FirewallManager/*AWS_REGION*/).
 
-12. Support for Captcha - You can add Captcha as an action to your WAFs. This helps you block unwanted bot traffic by requiring users to successfully complete challenges before their web request are allowed to reach AWS WAF protected resources. AWS WAF Captcha is available in the US East (N. Virginia), US West (Oregon), Europe (Frankfurt), South America (Sao Paulo), and Asia Pacific (Singapore) AWS Regions and supports Application Load Balancer, Amazon API Gateway, and AWS AppSync resources.
+13. Added testing your WAF with [GoTestWAF](https://github.com/wallarm/gotestwaf). To be able to check your WAF we introduced the **SecuredDomain** parameter in the JSON (which should be your domain) which will be checked using the WAF tool.
 
-13. Added S3LoggingBucketName to JSON. You need to specify the S3 Bucket where logs should be placed in. We also added a prefix for the logs to be AWS conform (Prefix: AWSLogs/*AWS_ACCOUNTID*/FirewallManager/*AWS_REGION*/).
-
-14. Added testing your WAF with [GoTestWAF](https://github.com/wallarm/gotestwaf). To be able to check your WAF we introduced the **SecuredDomain** parameter in the JSON (which should be your domain) which will be checked using the WAF tool.
-
-15. TaskFileParameters:
+14. TaskFileParameters:
 
     |     Parameter      |                                           Value                                              |
     |--------------------|----------------------------------------------------------------------------------------------|
@@ -107,14 +105,16 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
     | WAF_TEST           | true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)                    |
     | CREATE_DIAGRAM     | true (generating a diagram using draw.io) </br> false (Skipping diagram generation)          |
     | CDK_DIFF           | true (generating a cdk before invoking cdk deploy) </br> false (Skipping cdk diff)           |
+    | PREQUISITES        | true (deploys Prerequisites Stack) </br> false (deployment of WAF)           |
+    | TOOL_KIT_STACKNAME        | To Specify The name of the bootstrap stack ([see Bootstrapping your AWS environment](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-bootstrap))       |
 
-16. Validation of your ConfigFile using schema validation - if you miss a required parameter in your config file the deployment will stop automatically and show you the missing path.
+1.  Validation of your ConfigFile using schema validation - if you miss a required parameter in your config file the deployment will stop automatically and show you the missing path.
 
-17. PreProcess- and PostProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
+2.  PreProcess- and PostProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
 
     - New Structure see [example json](./values/example-waf.json).
 
-18. RuleLabels - A label is a string made up of a prefix, optional namespaces and a name. The components of a label are delimited with a colon. Labels have the following requirements and characteristics:
+3.  RuleLabels - A label is a string made up of a prefix, optional namespaces and a name. The components of a label are delimited with a colon. Labels have the following requirements and characteristics:
 
     - Labels are case-sensitive.
 
@@ -124,9 +124,9 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
     - Components of a label are separated by a colon ( : ).
 
-19. While Deployment the Price for your WAF will be calculated using the Pricing API
+4.  While Deployment the Price for your WAF will be calculated using the Pricing API
 
-20. Dashboard - The Firewall Factory is able to provision a CloudWatch Dashboard per Firewall.
+5.  Dashboard - The Firewall Factory is able to provision a CloudWatch Dashboard per Firewall.
   The Dashboard shows:
     - Where the WAF is deployed to [AWS Region and Account(s)]
     - Which resource type you are securing
@@ -141,7 +141,12 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 See example:
 ![FirewallDashboard](./static/FirewallDashboard.jpg)
 
-21.   Centralized IPSets management -  No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets and using them in the WebACLs on `values/ip-sets-managed.json`.
+20. Example Configurations
+    1.  Example WAF Configuration againts: [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
+    2.  Example Configuration for Prerequisite Stack
+    3.  Function to generate Skeleton for WAF Configuration
+
+21.   Centralized IPSets management -  No more we'll have to be manually updating ipsets across multiple AWS accounts, it can be defined in code and replicated for use by WAF rules everywhere its needed. Check the examples for defining ipsets and using them in the WebACLs on `values/examples/ip-sets-managed-test.ts`.
 
 </div>
 </details>
@@ -186,7 +191,7 @@ See example:
 
 ### 🏁 Deployment via Taskfile
 
-1. Create new json file for you WAF and configure Rules in the JSON (see [owasptopten.json](values/owasptopten.json) to see structure)
+1. Create new ts file for you WAF and configure Rules in the JSON (see [owasptopten.ts](values/examples/owasptop10.ts) to see structure)
 
 ⚠️ When deploying a firewall for the first time, the **DeployHash** must be empty. The AWS Firewall Factory takes care of creating a DeployHash. The DeployHash is used to identify which CloudFormation stack is associated with which configuration file.
 

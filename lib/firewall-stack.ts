@@ -3,18 +3,20 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import cloneDeep from "lodash/cloneDeep";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { aws_fms as fms } from "aws-cdk-lib";
+import { aws_lambda_nodejs as NodejsFunction } from "aws-cdk-lib";
+import { aws_lambda as lambda } from "aws-cdk-lib";
 import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_logs as logs } from "aws-cdk-lib";
-import { Config, CustomResponseBodies } from "./types/config";
+import { Config, CustomResponseBodies, NONEVERSIONEDMANAGEDRULEGRPOUP } from "./types/config";
 import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule } from "./types/fms";
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import {WafCloudWatchDashboard} from "./constructs/cloudwatch";
-import { promises as fsp } from "fs";
-import { toAwsCamel } from "./tools/helpers";
+import * as path from "path";
+import * as cr from "aws-cdk-lib/custom-resources";
+
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
@@ -119,51 +121,85 @@ export class FirewallStack extends cdk.Stack {
       const ipSetsNames: string[] =[];
       for(const ipSet of props.config.WebAcl.IPSets) {
         const addresses: string[] = [];
-        for(const address of ipSet.Addresses) {
+        for(const address of ipSet.addresses) {
           if(typeof address === "string") addresses.push(address);
-          else addresses.push(address.IP);
+          else addresses.push(address.ip);
         }
 
-        const cfnipset = new wafv2.CfnIPSet(this, ipSet.Name+props.config.General.DeployHash, {
-          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.Name}-${props.config.General.DeployHash}`,
-          description: ipSet.Description ? ipSet.Description : "IP Set created by AWS Firewall Factory \n used in " +props.config.General.Prefix.toUpperCase() +
+        const cfnipset = new wafv2.CfnIPSet(this, ipSet.name, {
+          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.name}`,
+          description: ipSet.description ? ipSet.description : "IP Set created by AWS Firewall Factory \n used in " +props.config.General.Prefix.toUpperCase() +
           "-" +
           props.config.WebAcl.Name +
           "-" +
           props.config.General.Stage +
-          "-" +
-          props.config.General.DeployHash + " Firewall",
+          "-Firewall",
           addresses: addresses,
-          ipAddressVersion: ipSet.IPAddressVersion,
+          ipAddressVersion: ipSet.ipAddressVersion,
           scope: props.config.WebAcl.Scope,
-          tags: ipSet.Tags ? ipSet.Tags : undefined
+          tags: ipSet.tags ? ipSet.tags : undefined
         });
-        ipSetsNames.push(ipSet.Name);
+        ipSetsNames.push(ipSet.name);
         ipSets.push(cfnipset);
       }
     }
+    // --------------------------------------------------------------------
 
     // --------------------------------------------------------------------
+    // ManagedRuleGroupsVersion
+    const managedRuleGroupVersionLambdaRole = new iam.Role(this, "managedRuleGroupVersionLambdaRole", {
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+    });
+    managedRuleGroupVersionLambdaRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName(
+      "service-role/AWSLambdaBasicExecutionRole",
+    ),);
+    const wafGetManagedRuleGroupVersion = new iam.PolicyStatement({
+      actions:["wafv2:ListAvailableManagedRuleGroupVersions"],
+      resources: ["*"]});
+
+    managedRuleGroupVersionLambdaRole.addToPolicy(wafGetManagedRuleGroupVersion);
+
+    const managedRuleGroupVersionLambda = new NodejsFunction.NodejsFunction(this, "managedRuleGroupVersionLambdaFunction", {
+      entry: path.join(__dirname, "../lib/lambda/ManagedRuleGRoupVersion/index.ts"),
+      handler: "handler",
+      timeout: cdk.Duration.seconds(30),
+      architecture:lambda.Architecture.ARM_64,
+      role: managedRuleGroupVersionLambdaRole,
+      memorySize: 128,
+      bundling: {
+        minify: true,
+      },
+      logRetention: logs.RetentionDays.TWO_WEEKS,
+      runtime: lambda.Runtime.NODEJS_18_X,
+    });
+
+    const managedRuleGroupVersionProvider = new cr.Provider(this, "CustomResourceProviderManagedRuleGroupVersionLambda", {
+      onEventHandler: managedRuleGroupVersionLambda
+    });
+
+
+    // --------------------------------------------------------------------
+
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
-      preProcessRuleGroups.push(...buildServiceDataManagedRgs(props.config.WebAcl.PreProcess.ManagedRuleGroups));
+      preProcessRuleGroups.push(...buildServiceDataManagedRgs(this, props.config.WebAcl.PreProcess.ManagedRuleGroups, managedRuleGroupVersionProvider, props.config.WebAcl.Scope));
     } else {
       console.log("\nℹ️  No ManagedRuleGroups defined in PreProcess.");
     }
     if (props.config.WebAcl.PostProcess.ManagedRuleGroups) {
-      postProcessRuleGroups.push(...buildServiceDataManagedRgs(props.config.WebAcl.PostProcess.ManagedRuleGroups));
+      postProcessRuleGroups.push(...buildServiceDataManagedRgs(this, props.config.WebAcl.PostProcess.ManagedRuleGroups, managedRuleGroupVersionProvider, props.config.WebAcl.Scope));
     } else {
       console.log("ℹ️  No ManagedRuleGroups defined in PostProcess.");
     }
     if (props.config.WebAcl.PreProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRgs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.PreProcess.CustomResponseBodies);
+      const customRgs = buildServiceDataCustomRgs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.PreProcess.CustomResponseBodies, ipSets, props.config.General.DeployHash);
       preProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PreProcess.");
     }
     if (props.config.WebAcl.PostProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRgs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.General.DeployHash, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.PostProcess.CustomResponseBodies);
+      const customRgs = buildServiceDataCustomRgs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.PostProcess.CustomResponseBodies, ipSets, props.config.General.DeployHash);
       postProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PostProcess.");
@@ -196,7 +232,8 @@ export class FirewallStack extends cdk.Stack {
       securityServicePolicyData: {
         type: "WAFV2",
         managedServiceData: cdk.Fn.sub(
-          JSON.stringify(managedServiceData)
+          JSON.stringify(managedServiceData),
+          subVariables
         ),
       },
       resourcesCleanUp: props.config.WebAcl.ResourcesCleanUp ? props.config.WebAcl.ResourcesCleanUp : false,
@@ -216,52 +253,73 @@ export class FirewallStack extends cdk.Stack {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       new WafCloudWatchDashboard(this, "cloudwatch",props.config, MANAGEDRULEGROUPSINFO);
     }
-    const options = { flag: "w", force: true };
-    void (async () => {
-      try {
-        if (process.env.PROCESS_PARAMETERS) {
-          await fsp.writeFile(
-            process.env.PROCESS_PARAMETERS,
-            JSON.stringify(props.config, null, 2),
-            options
-          );
-        }
-      } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        console.log("Error " + error);
-      }
-    })();
   }
 }
+
+
+interface SubVariables {
+  [key: string]: string;
+}
+
 const MANAGEDRULEGROUPSINFO: string[]= [""];
-function buildServiceDataManagedRgs(managedRuleGroups: ManagedRuleGroup[]) : ServiceDataManagedRuleGroup[] {
+const subVariables : SubVariables = {};
+function buildServiceDataManagedRgs(Scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, WafScope: string) : ServiceDataManagedRuleGroup[] {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
-    cfnManagedRuleGroup.push({
-      managedRuleGroupIdentifier: {
-        vendorName: managedRuleGroup.Vendor,
-        managedRuleGroupName: managedRuleGroup.Name,
-        version: managedRuleGroup.Version !== "" ? managedRuleGroup.Version : null,
-        versionEnabled: managedRuleGroup.Version !== "" ? true : undefined,
-      },
-      overrideAction: managedRuleGroup.OverrideAction ? managedRuleGroup.OverrideAction : { type: "NONE" },
-      ruleGroupArn: null,
-      
-      excludeRules: managedRuleGroup.ExcludeRules ?  toAwsCamel(managedRuleGroup.ExcludeRules) : [],
-      ruleGroupType: "ManagedRuleGroup",
-      
-      ruleActionOverrides: managedRuleGroup.RuleActionOverrides ?  toAwsCamel(managedRuleGroup.RuleActionOverrides) : undefined,
-    });
-    let version ="";
-    if(managedRuleGroup.Version !== ""){
-      version = "**"+ managedRuleGroup.Version+"**";
+
+    if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
+      console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
+      cfnManagedRuleGroup.push({
+        managedRuleGroupIdentifier: {
+          vendorName: managedRuleGroup.vendor,
+          managedRuleGroupName: managedRuleGroup.name,
+          version: null,
+          versionEnabled: undefined,
+        },
+        overrideAction: managedRuleGroup.overrideAction ? managedRuleGroup.overrideAction : { type: "NONE" },
+        ruleGroupArn: null,
+        excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : [],
+        ruleGroupType: "ManagedRuleGroup",
+        ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?  managedRuleGroup.ruleActionOverrides : undefined,
+      });
+      MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendor +"]");
+      continue;
     }
-    MANAGEDRULEGROUPSINFO.push(managedRuleGroup.Name+" ["+managedRuleGroup.Vendor +"] " + version);
+    else{
+      const crManagedRuleGroupanagedRuleGroupVersion = new cdk.CustomResource(Scope, `Cr${managedRuleGroup.name}` , {
+        properties: {
+          VendorName: managedRuleGroup.vendor,
+          Name: managedRuleGroup.name,
+          Scope: WafScope,
+          ManagedRuleGroupVersion: managedRuleGroup.version,
+          Latest: managedRuleGroup.latestVersion ? managedRuleGroup.latestVersion : false
+        },
+        serviceToken: managedRuleGroupVersionProvider.serviceToken,
+      });
+      const cwVersion = "**"+ crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version") +"**";
+      subVariables[managedRuleGroup.name] = crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version");
+      const version = `\${${managedRuleGroup.name}}`;
+
+      cfnManagedRuleGroup.push({
+        managedRuleGroupIdentifier: {
+          vendorName: managedRuleGroup.vendor,
+          managedRuleGroupName: managedRuleGroup.name,
+          version,
+          versionEnabled: managedRuleGroup.versionEnabled ? true : undefined,
+        },
+        overrideAction: managedRuleGroup.overrideAction ? managedRuleGroup.overrideAction : { type: "NONE" },
+        ruleGroupArn: null,
+        excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : [],
+        ruleGroupType: "ManagedRuleGroup",
+        ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?  managedRuleGroup.ruleActionOverrides : undefined,
+      });
+      MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendor +"] " + cwVersion);
+    }
   }
   return cfnManagedRuleGroup;
 }
 
-function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capacity: number, deployHash: string, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined) : ServiceDataRuleGroup[] {
+function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capacity: number, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined, ipSets: cdk.aws_wafv2.CfnIPSet[],deployHash?: string) : ServiceDataRuleGroup[] {
   const serviceDataRuleGroup : ServiceDataRuleGroup[] = [];
   let icon;
   if (type === "Pre") {
@@ -278,11 +336,11 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
   if (capacity < 1500) {
     const rules = [];
     let count = 1;
-    for (const statement of ruleGroupSet) {
+    for (const rule of ruleGroupSet) {
       let rulename = "";
-      if (statement.Name !== undefined) {
+      if (rule.name !== undefined) {
         rulename =
-          statement.Name + "-" + type.toLocaleLowerCase() + "-" + deployHash;
+          rule.name + "-" + type.toLocaleLowerCase() + "-" + deployHash;
       } else {
         rulename =
           webaclName +
@@ -296,56 +354,83 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
           deployHash;
       }
 
+      const ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
 
+      const andStatement = rule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
 
-      // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
-      const subStatement = cloneDeep(statement.Statement);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
-        // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
+      if (andStatement) {
+        const statements = andStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
+        for (let i=0; i<statements.length; i++) {
+          const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+          if (ipSetReferenceStatement) {
+            statements[i] = getActualIPReferenceStatementinStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+          }
+        }
       }
+
+      const orStatement = rule.statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
+
+      if (orStatement) {
+        const statements = orStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
+        for (let i=0; i<statements.length; i++) {
+          const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+          if (ipSetReferenceStatement) {
+            statements[i] = getActualIPReferenceStatementinStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+          }
+        }
+      }
+
+      let statement : wafv2.CfnWebACL.StatementProperty;
+      if (ipSetReferenceStatement) {
+        statement = getActualIPReferenceStatementinStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+      } else if (andStatement) {
+        statement = { andStatement };
+      } else if (orStatement) {
+        statement = { orStatement };
+      } else {
+        statement = rule.statement;
+      }
+
       let cfnRuleProperty;
-      if ("Captcha" in statement.Action) {
+      if (Object.keys(rule.action)[0] === "captcha") {
         cfnRuleProperty = {
           name: rulename,
-          priority: count,
-
-          action: toAwsCamel(statement.Action),
-          statement: toAwsCamel(subStatement),
+          priority: rule.priority,
+          action: rule.action,
+          statement: rule.statement,
           visibilityConfig: {
             sampledRequestsEnabled:
-              statement.VisibilityConfig.SampledRequestsEnabled,
+              rule.visibilityConfig.sampledRequestsEnabled,
             cloudWatchMetricsEnabled:
-              statement.VisibilityConfig.CloudWatchMetricsEnabled,
+              rule.visibilityConfig.cloudWatchMetricsEnabled,
             metricName: rulename + "-metric",
           },
-          captchaConfig: toAwsCamel(statement.CaptchaConfig),
-          ruleLabels: toAwsCamel(statement.RuleLabels),
+          captchaConfig: rule.captchaConfig,
+          ruleLabels: rule.ruleLabels,
         };
       } else {
         cfnRuleProperty = {
           name: rulename,
-          priority: count,
-          action: toAwsCamel(statement.Action),
-          statement: toAwsCamel(subStatement),
+          priority: rule.priority,
+          action: rule.action,
+          statement,
           visibilityConfig: {
             sampledRequestsEnabled:
-              statement.VisibilityConfig.SampledRequestsEnabled,
+              rule.visibilityConfig.sampledRequestsEnabled,
             cloudWatchMetricsEnabled:
-              statement.VisibilityConfig.CloudWatchMetricsEnabled,
+              rule.visibilityConfig.cloudWatchMetricsEnabled,
             metricName: rulename + "-metric",
           },
-          ruleLabels: toAwsCamel(statement.RuleLabels),
+          ruleLabels: rule.ruleLabels,
         };
       }
       let cfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty;
-      if (statement.RuleLabels) {
-        cfnRuleProperties = cfnRuleProperty;
+      if (rule.ruleLabels) {
+        cfnRuleProperties = cfnRuleProperty as wafv2.CfnWebACL.RuleProperty;
       } else {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
         const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
-        cfnRuleProperties = cfnRulePropertii;
+        cfnRuleProperties = cfnRulePropertii as wafv2.CfnWebACL.RuleProperty;
       }
       rules.push(cfnRuleProperties);
       count += 1;
@@ -408,12 +493,11 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
     // only toAwsCamel the properties below the Key
     let cstResBodies: { [key:string]: any} | undefined = {};
     if(customResponseBodies) {
-      cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = toAwsCamel(customResponseBodies[curr]); return acc; }, cstResBodies);
+      cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies[curr]; return acc; }, cstResBodies);
     }
     else {
       cstResBodies = undefined;
     }
-
     new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
       capacity: processRuntimeProps.Capacity,
       scope: webAclScope,
@@ -487,6 +571,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
     const rulesets: any[] = [];
     const indexes: number[] = [];
     const rulegroupcapacities = [];
+    //ORDER BY Priority DESC
     while (
       indexes.length < processRuntimeProps.RuleCapacities.length
     ) {
@@ -616,13 +701,13 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         if (
           
           ruleGroupSet[statementindex]
-            .Name !== undefined
+            .name !== undefined
         ) {
           const tempHash = Date.now().toString(36);
           rulename =
             // eslint-disable-next-line @typescript-eslint/restrict-plus-operands, @typescript-eslint/no-unsafe-member-access
             ruleGroupSet[statementindex]
-              .Name +
+              .name +
             "-" +
             tempHash;
         } else {
@@ -638,73 +723,55 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
 
         let cfnRuleProperty;
 
-        // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
-        const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
-          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-          subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
-        }
+        // // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
+        // const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
+        // // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        // if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
+        //   // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+        //   subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
+        // }
 
-        if (
-          "Captcha" in
-          ruleGroupSet[statementindex]
-            .Action
-        ) {
+        if (Object.keys(ruleGroupSet[statementindex]
+          .action)[0] === "captcha") {
           cfnRuleProperty = {
             name: rulename,
-            priority: rulegroupcounter,
-            action: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .Action
-            ),
-            statement: toAwsCamel(subStatement),
+            priority: ruleGroupSet[statementindex].priority,
+            action: ruleGroupSet[statementindex].action,
+            statement: ruleGroupSet[statementindex].statement,
             visibilityConfig: {
               sampledRequestsEnabled:
                 ruleGroupSet[statementindex]
-                  .VisibilityConfig.SampledRequestsEnabled,
+                  .visibilityConfig.sampledRequestsEnabled,
               cloudWatchMetricsEnabled:
                 ruleGroupSet[statementindex]
-                  .VisibilityConfig.CloudWatchMetricsEnabled,
+                  .visibilityConfig.cloudWatchMetricsEnabled,
               metricName: rulename + "-metric",
             },
-            captchaConfig: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .CaptchaConfig
-            ),
-            ruleLabels: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .RuleLabels
-            ),
+            captchaConfig: ruleGroupSet[statementindex].captchaConfig,
+            ruleLabels: ruleGroupSet[statementindex].ruleLabels,
           };
         } else {
           cfnRuleProperty = {
             name: rulename,
-            priority: rulegroupcounter,
-            action: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .Action
-            ),
-            statement: toAwsCamel(subStatement),
+            priority: ruleGroupSet[statementindex].priority,
+            action: ruleGroupSet[statementindex].action,
+            statement: ruleGroupSet[statementindex].statement,
             visibilityConfig: {
               sampledRequestsEnabled:
                 ruleGroupSet[statementindex]
-                  .VisibilityConfig.SampledRequestsEnabled,
+                  .visibilityConfig.sampledRequestsEnabled,
               cloudWatchMetricsEnabled:
                 ruleGroupSet[statementindex]
-                  .VisibilityConfig.CloudWatchMetricsEnabled,
+                  .visibilityConfig.cloudWatchMetricsEnabled,
               metricName: rulename + "-metric",
             },
-            ruleLabels: toAwsCamel(
-              ruleGroupSet[statementindex]
-                .RuleLabels
-            ),
+            ruleLabels: ruleGroupSet[statementindex].ruleLabels,
           };
         }
         let cfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty;
         if (
           ruleGroupSet[statementindex]
-            .RuleLabels
+            .ruleLabels
         ) {
           cfnRuleProperti = cfnRuleProperty;
         } else {
@@ -720,7 +787,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       // only toAwsCamel the properties below the Key
       let cstResBodies: { [key:string]: any} | undefined = {};
       if(customResponseBodies) {
-        cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = toAwsCamel(customResponseBodies[curr]); return acc; }, cstResBodies);
+        cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies[curr]; return acc; }, cstResBodies);
       }
       else {
         cstResBodies = undefined;
@@ -795,4 +862,24 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
     });
   }
   return serviceDataRuleGroup;
+}
+
+function getActualIPReferenceStatementinStatement(ipSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty, prefix: string, stage: string, ipSets: cdk.aws_wafv2.CfnIPSet[]) {
+  let actualIPSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  if (ipSetReferenceStatement.arn.startsWith("arn")) {
+    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
+    actualIPSetReferenceStatement = ipSetReferenceStatement;
+  } else {
+    const foundIpSet = ipSets.find((ipSet) => ipSet.name === `${prefix}-${stage}-${ipSetReferenceStatement.arn}`);
+    if (foundIpSet === undefined) throw new Error(`IPSet ${ipSetReferenceStatement.arn} not found in stack`);
+    actualIPSetReferenceStatement = {
+      arn: cdk.Fn.getAtt(foundIpSet.logicalId, "Arn").toString(),
+      ipSetForwardedIpConfig: ipSetReferenceStatement.ipSetForwardedIpConfig
+    };
+  }
+  const statement : wafv2.CfnWebACL.StatementProperty = {
+    ipSetReferenceStatement: actualIPSetReferenceStatement
+  };
+  return statement;
 }

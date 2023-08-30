@@ -1,87 +1,84 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-types */
+
+import { aws_wafv2 as waf } from "aws-cdk-lib";
+
 interface CustomRequestHandling {
-  CustomRequestHandling?: {
-    InsertHeaders: {
+  customRequestHandling?: {
+    insertHeaders: {
       /**
         * @TJS-pattern ^[a-zA-Z0-9._$-]+$
       */
-      Name: string,
+      name: string,
       /**
         * @TJS-pattern .*
       */
-      Value: string,
+      value: string,
     }[],
   }
 }
 
 interface CustomResponse {
-  CustomResponse?: {
-    ResponseCode: number,
+  customResponse?: {
+    responseCode: number,
 
     /**
       * @TJS-pattern ^[\w\-]+$
     */
-    CustomResponseBodyKey?: string,
-    ResponseHeaders?: {
+    customResponseBodyKey?: string,
+    responseHeaders?: {
       /**
         * @TJS-pattern ^[a-zA-Z0-9._$-]+$
       */
-      Name: string,
+      name: string,
       /**
         * @TJS-pattern .*
       */
-      Value: string,
+      value: string,
     }[],
   }
 }
 
 interface Action  {
-  Block?: CustomResponse,
-  Allow?: CustomRequestHandling,
-  Count?: CustomRequestHandling,
-  Captcha?: CustomRequestHandling,
-  Challenge?: CustomRequestHandling
+  block?: CustomResponse,
+  allow?: CustomRequestHandling,
+  count?: CustomRequestHandling,
+  captcha?: CustomRequestHandling,
+  challenge?: CustomRequestHandling
 }
 
 interface RuleActionOverrideProperty {
-  Name: string,
-  ActionToUse: Action
+  name: string,
+  actionToUse: Action
 }
 
 type NameObject = {
   /**
     * @TJS-pattern ^[0-9A-Za-z_\-:]+$
   */
-  Name: string
+  name: string
 }
 export interface ManagedRuleGroup {
-  Vendor: string,
-  Name: string,
-  Version: string,
-  Capacity: number,
-  ExcludeRules?: NameObject[],
-  OverrideAction?: {
+  vendor: string,
+  name: string,
+  version: string,
+  capacity: number,
+  excludeRules?: NameObject[],
+  overrideAction?: {
     type: "COUNT" | "NONE"
   },
-  RuleActionOverrides?: RuleActionOverrideProperty[]
+  ruleActionOverrides?: RuleActionOverrideProperty[],
+  versionEnabled?: boolean
+  latestVersion?: boolean
 }
-
 export interface Rule {
-  Name?: string,
-  Statement: any,
-  Action: Action,
-  VisibilityConfig: {
-    SampledRequestsEnabled: boolean,
-    CloudWatchMetricsEnabled: boolean,
-    MetricName?: string
-  },
-  CaptchaConfig?: {
-    ImmunityTimeProperty?: {
-      ImmunityTime: number
-    }
-  },
-  RuleLabels?: NameObject[]
+  name: string,
+  statement: waf.CfnWebACL.StatementProperty,
+  action: waf.CfnWebACL.RuleActionProperty,
+  visibilityConfig: waf.CfnWebACL.VisibilityConfigProperty,
+  captchaConfig?: waf.CfnWebACL.CaptchaConfigProperty,
+  ruleLabels?: waf.CfnWebACL.LabelProperty[],
+  priority: number,
 }
 
 export interface ManagedServiceData {
@@ -101,7 +98,7 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
   managedRuleGroupIdentifier: {
     vendorName: string,
     managedRuleGroupName: string,
-    version: string | null,
+    version?: string | null,
     versionEnabled?: boolean
   },
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

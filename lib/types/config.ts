@@ -10,7 +10,7 @@ export interface Config {
     readonly LoggingConfiguration: "S3" | "Firehose"
     readonly FireHoseKeyArn?: string,
     readonly S3LoggingBucketName: string,
-    DeployHash: string,
+    readonly DeployHash?: string,
     readonly SecuredDomain: Array<string>,
     readonly CreateDashboard?: boolean,
   },
@@ -113,20 +113,22 @@ export interface RuleGroupSet {
 type IPAddress = string; // The regex above matches both IPv4 and IPv6 in CIDR notation, e.g. 123.4.3.0/32
 
 interface IPAddressWithDescription {
-  Description: string,
-  IP: IPAddress
+  description: string,
+  ip: IPAddress
 }
 
 export interface IPSet {
   /**
     * @TJS-pattern ^[a-zA-Z0-9]+$
   */
-  Name: string, // This name will be used as a CloudFormation logical ID, so it can't have a already used name and must be alphanumeric
+  name: string, // This name will be used as a CloudFormation logical ID, so it can't have a already used name and must be alphanumeric
   /*
     * @TJS-pattern ^[\w+=:#@\/\-,\.][\w+=:#@\/\-,\.\s]+[\w+=:#@\/\-,\.]$
   */
-  Description?: string,
-  Addresses: Array<IPAddressWithDescription | IPAddress>,
-  IPAddressVersion: "IPV4" | "IPV6",
-  Tags?: CfnTag[]
+  description?: string,
+  addresses: Array<IPAddressWithDescription | IPAddress>,
+  ipAddressVersion: "IPV4" | "IPV6",
+  tags?: CfnTag[]
 }
+
+export const NONEVERSIONEDMANAGEDRULEGRPOUP = ["AWSManagedRulesBotControlRuleSet","AWSManagedRulesATPRuleSet","AWSManagedRulesACFPRuleSet","AWSManagedRulesAmazonIpReputationList","AWSManagedRulesAnonymousIpList"];
