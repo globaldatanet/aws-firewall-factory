@@ -84,12 +84,12 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 6. Checking of the softlimit quota for [WCU](https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works.html) set in the AWS account (stop deployment if calculated WCU is above the quota)
 
 7. Easy configuration of WAF rules trough Typescript file.
-   
+
 8. Deploy same WAF more than once for testing and/or blue/green deployments.
 
 9.  Stopping deployment if soft limit will be exceeded:  **Firewall Manager policies per organization per Region (L-0B28E140)** - **Maximum number of web ACL capacity units in a web ACL in WAF for regional (L-D9F31E8A)**
 
-10. You can name your rules. If you define a name in your RulesArray, the name + a Base36 timestamp will be used for the creation of your rule - otherwise a name will be generated. This will help you to query your logs in Athena. The same rule name also applies to the metric by adding "-metric" to the name.
+10. You can name your rules. If you define a name in your RulesArray, the name + a Base36 timestamp will be used for the creation of your rule. This will help you to query your logs in Athena.
 
 11. Support for Captcha - You can add Captcha as an action to your WAFs. This helps you block unwanted bot traffic by requiring users to successfully complete challenges before their web request are allowed to reach AWS WAF protected resources. AWS WAF Captcha is available in the US East (N. Virginia), US West (Oregon), Europe (Frankfurt), South America (Sao Paulo), and Asia Pacific (Singapore) AWS Regions and supports Application Load Balancer, Amazon API Gateway, and AWS AppSync resources.
 
@@ -108,13 +108,13 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
     | PREQUISITES        | true (deploys Prerequisites Stack) </br> false (deployment of WAF)           |
     | TOOL_KIT_STACKNAME        | To Specify The name of the bootstrap stack ([see Bootstrapping your AWS environment](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-bootstrap))       |
 
-1.  Validation of your ConfigFile using schema validation - if you miss a required parameter in your config file the deployment will stop automatically and show you the missing path.
+15. Validation of your ConfigFile using schema validation - if you miss a required parameter in your config file the deployment will stop automatically and show you the missing path.
 
-2.  PreProcess- and PostProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
+16. PreProcess- and PostProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
 
     - New Structure see [example json](./values/example-waf.json).
 
-3.  RuleLabels - A label is a string made up of a prefix, optional namespaces and a name. The components of a label are delimited with a colon. Labels have the following requirements and characteristics:
+17. RuleLabels - A label is a string made up of a prefix, optional namespaces and a name. The components of a label are delimited with a colon. Labels have the following requirements and characteristics:
 
     - Labels are case-sensitive.
 
@@ -124,9 +124,9 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
     - Components of a label are separated by a colon ( : ).
 
-4.  While Deployment the Price for your WAF will be calculated using the Pricing API
+18. While Deployment the Price for your WAF will be calculated using the Pricing API
 
-5.  Dashboard - The Firewall Factory is able to provision a CloudWatch Dashboard per Firewall.
+19. Dashboard - The Firewall Factory is able to provision a CloudWatch Dashboard per Firewall.
   The Dashboard shows:
     - Where the WAF is deployed to [AWS Region and Account(s)]
     - Which resource type you are securing
