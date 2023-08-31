@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
@@ -87,13 +86,7 @@ export class FirewallStack extends cdk.Stack {
       });
 
       new firehouse.CfnDeliveryStream(this, "S3DeliveryStream", {
-        deliveryStreamName:
-        "aws-waf-logs-" +
-        props.config.General.Prefix +
-        "-kinesis-wafv2log-" +
-        props.config.WebAcl.Name +
-        props.config.General.Stage +
-        props.config.General.DeployHash,
+        deliveryStreamName: `aws-waf-logs-${props.config.General.Prefix}-kinesis-wafv2log-${props.config.WebAcl.Name}${props.config.General.Stage}${props.config.General.DeployHash? props.config.General.DeployHash : ""}`,
         extendedS3DestinationConfiguration: {
           bucketArn: "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
           encryptionConfiguration: {
@@ -219,14 +212,7 @@ export class FirewallStack extends cdk.Stack {
       remediationEnabled: props.config.WebAcl.RemediationEnabled ? props.config.WebAcl.RemediationEnabled : false,
       resourceType: props.config.WebAcl.Type,
       resourceTypeList: props.config.WebAcl.TypeList ? props.config.WebAcl.TypeList : undefined,
-      policyName:
-        props.config.General.Prefix.toUpperCase() +
-        "-" +
-        props.config.WebAcl.Name +
-        "-" +
-        props.config.General.Stage +
-        "-" +
-        props.config.General.DeployHash,
+      policyName: `${props.config.General.Prefix.toUpperCase()}-WAF-${props.config.WebAcl.Name.toUpperCase()}-${props.config.General.Stage.toUpperCase()}${props.config.General.DeployHash ? "-"+props.config.General.DeployHash.toUpperCase() : ""}`,
       includeMap: props.config.WebAcl.IncludeMap,
       excludeMap: props.config.WebAcl.ExcludeMap,
       securityServicePolicyData: {
@@ -263,7 +249,7 @@ interface SubVariables {
 
 const MANAGEDRULEGROUPSINFO: string[]= [""];
 const subVariables : SubVariables = {};
-function buildServiceDataManagedRgs(Scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, WafScope: string) : ServiceDataManagedRuleGroup[] {
+function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string) : ServiceDataManagedRuleGroup[] {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
 
@@ -286,11 +272,11 @@ function buildServiceDataManagedRgs(Scope: Construct, managedRuleGroups: Managed
       continue;
     }
     else{
-      const crManagedRuleGroupanagedRuleGroupVersion = new cdk.CustomResource(Scope, `Cr${managedRuleGroup.name}` , {
+      const crManagedRuleGroupanagedRuleGroupVersion = new cdk.CustomResource(scope, `Cr${managedRuleGroup.name}` , {
         properties: {
           VendorName: managedRuleGroup.vendor,
           Name: managedRuleGroup.name,
-          Scope: WafScope,
+          Scope: wafScope,
           ManagedRuleGroupVersion: managedRuleGroup.version,
           Latest: managedRuleGroup.latestVersion ? managedRuleGroup.latestVersion : false
         },
@@ -339,19 +325,9 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
     for (const rule of ruleGroupSet) {
       let rulename = "";
       if (rule.name !== undefined) {
-        rulename =
-          rule.name + "-" + type.toLocaleLowerCase() + "-" + deployHash;
+        rulename = `${rule.name}-${type.toLocaleLowerCase()}${deployHash ? "-"+deployHash : ""}`;
       } else {
-        rulename =
-          webaclName +
-          "-" +
-          type.toLocaleLowerCase() +
-          "-" +
-          stage +
-          "-" +
-          count.toString() +
-          "-" +
-          deployHash;
+        rulename = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
       }
 
       const ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
@@ -363,7 +339,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         for (let i=0; i<statements.length; i++) {
           const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
           if (ipSetReferenceStatement) {
-            statements[i] = getActualIPReferenceStatementinStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+            statements[i] = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
           }
         }
       }
@@ -375,14 +351,14 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         for (let i=0; i<statements.length; i++) {
           const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
           if (ipSetReferenceStatement) {
-            statements[i] = getActualIPReferenceStatementinStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+            statements[i] = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
           }
         }
       }
 
       let statement : wafv2.CfnWebACL.StatementProperty;
       if (ipSetReferenceStatement) {
-        statement = getActualIPReferenceStatementinStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+        statement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
       } else if (andStatement) {
         statement = { andStatement };
       } else if (orStatement) {
@@ -403,7 +379,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
               rule.visibilityConfig.sampledRequestsEnabled,
             cloudWatchMetricsEnabled:
               rule.visibilityConfig.cloudWatchMetricsEnabled,
-            metricName: rulename + "-metric",
+            metricName: rule.visibilityConfig.metricName,
           },
           captchaConfig: rule.captchaConfig,
           ruleLabels: rule.ruleLabels,
@@ -419,7 +395,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
               rule.visibilityConfig.sampledRequestsEnabled,
             cloudWatchMetricsEnabled:
               rule.visibilityConfig.cloudWatchMetricsEnabled,
-            metricName: rulename + "-metric",
+            metricName: rule.visibilityConfig.metricName,
           },
           ruleLabels: rule.ruleLabels,
         };
@@ -436,12 +412,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       count += 1;
     }
 
-    let name =
-      webaclName +
-      "-"+type.toLocaleLowerCase()+"-" +
-      stage +
-      "-" +
-      deployHash;
+    let name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-"+deployHash : ""}`;
     let rulegroupidentifier = type + "RuleGroup";
     if (processRuntimeProps.DeployedRuleGroupCapacities[0]) {
       if (
@@ -467,23 +438,9 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         }
 
         if (
-          processRuntimeProps.DeployedRuleGroupNames[0] ===
-          webaclName +
-            "-" +
-            type.toLowerCase() +
-            "-" +
-            stage +
-            "-" +
-            deployHash
+          processRuntimeProps.DeployedRuleGroupNames[0] === `${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-"+deployHash : ""}`
         ) {
-          name =
-            prefix.toUpperCase() +
-            "-G" +
-            webaclName +
-            "-" +
-            stage +
-            "-" +
-            deployHash;
+          name = `${prefix.toUpperCase()}-G${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-"+deployHash : ""}`;
         }
         console.log(" 💬 New Name: " + name);
         console.log(" 📇 New Identifier: " + rulegroupidentifier);
@@ -507,14 +464,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       visibilityConfig: {
         sampledRequestsEnabled: false,
         cloudWatchMetricsEnabled: false,
-        metricName:
-          prefix.toUpperCase() +
-          "-" +
-          webaclName +
-          "-" +
-          stage +
-          "-" +
-          deployHash,
+        metricName: `${prefix.toUpperCase()}-${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-"+deployHash : ""}`,
       },
     });
     serviceDataRuleGroup.push({
@@ -544,27 +494,21 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       value:
         processRuntimeProps.DeployedRuleGroupNames.toString(),
       description: type+"ProcessDeployedRuleGroupNames",
-      exportName:
-        type+"ProcessDeployedRuleGroupNames" +
-        deployHash,
+      exportName: `${type}ProcessDeployedRuleGroupNames${deployHash ? "-"+deployHash : ""}`,
     });
 
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupCapacities", {
       value:
         processRuntimeProps.DeployedRuleGroupCapacities.toString(),
       description: type+"ProcessDeployedRuleGroupCapacities",
-      exportName:
-        type+"ProcessDeployedRuleGroupCapacities" +
-        deployHash,
+      exportName: `${type}ProcessDeployedRuleGroupCapacities${deployHash ? "-"+deployHash : ""}`,
     });
 
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupIdentifier", {
       value:
         processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
       description: type+"ProcessDeployedRuleGroupIdentifier",
-      exportName:
-        type+"ProcessDeployedRuleGroupIdentifier" +
-        deployHash,
+      exportName: `${type}ProcessDeployedRuleGroupIdentifier${deployHash ? "-"+deployHash : ""}`,
     });
   } else {
     const threshold = 1500;
@@ -603,16 +547,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
           processRuntimeProps.DeployedRuleGroupCapacities[count]
         ) {
           rulegroupidentifier = type + "R" + count.toString();
-          name =
-            webaclName +
-            "-" +
-            type.toLocaleLowerCase() +
-            "-" +
-            stage +
-            "-" +
-            count.toString() +
-            "-" +
-            deployHash;
+          name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
         } else {
           console.log(
             "\n⭕️ Deploy new RuleGroup because the Capacity has changed for " +
@@ -635,32 +570,11 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
             if (
               processRuntimeProps.DeployedRuleGroupNames[
                 count
-              ] ===
-              webaclName +
-                "-" +
-                stage +
-                "-" +
-                count.toString() +
-                "-" +
-                deployHash
+              ] === `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`
             ) {
-              name =
-                webaclName +
-                "-" +
-                stage +
-                "-"+ type.toLocaleLowerCase() + "R-" +
-                count.toString() +
-                "-" +
-                deployHash;
+              name = `${prefix.toUpperCase()}-G${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
             } else {
-              name =
-                webaclName +
-                "-" +
-                stage +
-                "-"+ type.toLocaleLowerCase() +"-" +
-                count.toString() +
-                "-" +
-                deployHash;
+              name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
             }
             console.log(" 💬 New Name: " + name);
           }
@@ -682,24 +596,14 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         }
       } else {
         rulegroupidentifier = type + "R" + count.toString();
-        name =
-          webaclName +
-          "-" +
-          stage +
-          "-" +
-          count.toString() +
-          "-" +
-          deployHash;
+        name = `${webaclName}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
       }
       const cfnRuleProperties = [];
       let rulegroupcounter = 0;
-      
       while (rulegroupcounter < rulesets[count].length) {
-        
         const statementindex = rulesets[count][rulegroupcounter];
         let rulename = "";
         if (
-          
           ruleGroupSet[statementindex]
             .name !== undefined
         ) {
@@ -711,26 +615,10 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
             "-" +
             tempHash;
         } else {
-          rulename =
-            webaclName +
-            "-" +
-            stage +
-            "-"+type.toLocaleLowerCase()+"-" +
-            rulegroupcounter.toString() +
-            "-" +
-            deployHash;
+          rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-"+deployHash : ""}`;
         }
 
         let cfnRuleProperty;
-
-        // // Add Fn::Sub for replacing IPSets logical name with its real ARN after deployment
-        // const subStatement = cloneDeep(ruleGroupSet[statementindex].Statement);
-        // // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        // if (subStatement.IPSetReferenceStatement && !subStatement.IPSetReferenceStatement.ARN.startsWith("arn")) {
-        //   // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-        //   subStatement.IPSetReferenceStatement.ARN = cdk.Fn.getAtt(subStatement.IPSetReferenceStatement.ARN+deployHash, "Arn");
-        // }
-
         if (Object.keys(ruleGroupSet[statementindex]
           .action)[0] === "captcha") {
           cfnRuleProperty = {
@@ -838,48 +726,40 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       value:
         processRuntimeProps.DeployedRuleGroupNames.toString(),
       description: type+"ProcessDeployedRuleGroupNames",
-      exportName:
-        type+"ProcessDeployedRuleGroupNames" +
-        deployHash,
+      exportName: `${type}ProcessDeployedRuleGroupNames${deployHash ? "-"+deployHash : ""}`,
     });
 
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupCapacities", {
       value:
         processRuntimeProps.DeployedRuleGroupCapacities.toString(),
       description: type+"ProcessDeployedRuleGroupCapacities",
-      exportName:
-        type+"ProcessDeployedRuleGroupCapacities" +
-        deployHash,
+      exportName: `${type}ProcessDeployedRuleGroupCapacities${deployHash ? "-"+deployHash : ""}`,
     });
 
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupIdentifier", {
       value:
         processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
       description: type+"ProcessDeployedRuleGroupIdentifier",
-      exportName:
-        type+"ProcessDeployedRuleGroupIdentifier" +
-        deployHash,
+      exportName: `${type}ProcessDeployedRuleGroupIdentifier${deployHash ? "-"+deployHash : ""}`,
     });
   }
   return serviceDataRuleGroup;
 }
 
-function getActualIPReferenceStatementinStatement(ipSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty, prefix: string, stage: string, ipSets: cdk.aws_wafv2.CfnIPSet[]) {
-  let actualIPSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+function getActualIpReferenceStatementInStatement(ipSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty, prefix: string, stage: string, ipSets: cdk.aws_wafv2.CfnIPSet[]) {
+  let actualIpSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty;
   if (ipSetReferenceStatement.arn.startsWith("arn")) {
-    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
-    actualIPSetReferenceStatement = ipSetReferenceStatement;
+    actualIpSetReferenceStatement = ipSetReferenceStatement;
   } else {
     const foundIpSet = ipSets.find((ipSet) => ipSet.name === `${prefix}-${stage}-${ipSetReferenceStatement.arn}`);
     if (foundIpSet === undefined) throw new Error(`IPSet ${ipSetReferenceStatement.arn} not found in stack`);
-    actualIPSetReferenceStatement = {
+    actualIpSetReferenceStatement = {
       arn: cdk.Fn.getAtt(foundIpSet.logicalId, "Arn").toString(),
       ipSetForwardedIpConfig: ipSetReferenceStatement.ipSetForwardedIpConfig
     };
   }
   const statement : wafv2.CfnWebACL.StatementProperty = {
-    ipSetReferenceStatement: actualIPSetReferenceStatement
+    ipSetReferenceStatement: actualIpSetReferenceStatement
   };
   return statement;
 }
