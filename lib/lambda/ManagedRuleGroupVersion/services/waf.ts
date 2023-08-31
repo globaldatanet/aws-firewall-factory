@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand} from "@aws-sdk/client-wafv2";
 import {ManagedRuleGroupVersionResponse, PaginatedManagedRuleGroupVersions} from "../types/index";
 
@@ -30,7 +31,7 @@ async function getManagedRuleGroupVersions(VendorName: string,Name: string,Scope
           console.log("⏱️ Throttled - waiting 1 second");
           await new Promise(r => setTimeout(r, 1000));
         } else {
-          console.log("❌ Error: " + error);
+          console.log(`❌ Error: ${error}`);
           console.log(error.message);
           console.log(error.name);
           allresponse.Error = error.message;

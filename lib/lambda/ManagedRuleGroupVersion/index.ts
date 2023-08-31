@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/naming-convention */
 import {
   CdkCustomResourceEvent,
   CdkCustomResourceResponse,
@@ -48,7 +52,7 @@ export const handler = async (
     }
   }
   catch (error) {
-    console.log("❌ Error: " + error);
+    console.log(`❌ Error: ${error}`);
     if (error instanceof Error) {
       response.Reason = error.message;
     }
