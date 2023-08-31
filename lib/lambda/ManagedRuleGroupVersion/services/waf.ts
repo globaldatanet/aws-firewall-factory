@@ -31,6 +31,7 @@ async function getManagedRuleGroupVersions(VendorName: string,Name: string,Scope
           console.log("⏱️ Throttled - waiting 1 second");
           await new Promise(r => setTimeout(r, 1000));
         } else {
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           console.log(`❌ Error: ${error}`);
           console.log(error.message);
           console.log(error.name);
