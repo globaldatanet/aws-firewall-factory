@@ -7,10 +7,14 @@
 - A custom resource to retrieve the latest version of the ManagedRuleGroup and to check that the specified version is valid.
 - Typescript configuration files for WAF configurations
 - A Function to convert CdkRule to SdkRule - with the introduction of Typescript configuration and CDK interfaces, we now need to convert every CDK rule to an SDK rule to be able to use the [CheckCapacity API Call](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html).
+- ManagedRuleGroupVersions to CloudFormation Output
 - Example Configurations
     1.  Example WAF Configuration againts: [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
     2.  Example Configuration for Prerequisite Stack
 - Added TOOL_KIT_STACKNAME to TaskFile - To Specify The name of the bootstrap stack ([see Bootstrapping your AWS environment](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-bootstrap)).
+- Migrate Script to migrate from json to ts Config (./values/migrate.ts)
+  - ts-node ./values/migrate.ts YOURJSON.json
+
 ### Fixed
 - Allow sub-statements of IPSetReferenceStatements -> Allow IPSetReferenceStatement.ARN entries that reference an aws-firewall-factory controlled ipset (i.e. the name of the ipset) within AND, OR and NOT statements (as sub-statements).
 - Adjusted Function to generate Skeleton for WAF Config for Typescript configuration
