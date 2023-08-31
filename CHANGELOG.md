@@ -14,7 +14,8 @@
 ### Fixed
 - Allow sub-statements of IPSetReferenceStatements -> Allow IPSetReferenceStatement.ARN entries that reference an aws-firewall-factory controlled ipset (i.e. the name of the ipset) within AND, OR and NOT statements (as sub-statements).
 - Adjusted Function to generate Skeleton for WAF Config for Typescript configuration
-
+- Updated dependencies to latest version
+  
 ### Removed
 - Json configuration files for WAF configurations
 - DeployHash generation for new configs - legacy functionality - we will now use Prefix, Stage & FirewallName to create unique WAF and CloudFormation StackNames.
