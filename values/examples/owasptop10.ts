@@ -18,40 +18,40 @@ export const config: Config = {
     PreProcess: {
       ManagedRuleGroups: [
         {
-          "vendor": "AWS",
-          "name": "AWSManagedRulesAmazonIpReputationList",
-          "version": "",
-          "capacity": 25
+          vendor: "AWS",
+          name: "AWSManagedRulesAmazonIpReputationList",
+          version: "",
+          capacity: 25
         },
         {
-          "vendor": "AWS",
-          "name": "AWSManagedRulesAnonymousIpList",
-          "version": "",
-          "capacity": 50
+          vendor: "AWS",
+          name: "AWSManagedRulesAnonymousIpList",
+          version: "",
+          capacity: 50
         },
         {
-          "vendor": "AWS",
-          "name": "AWSManagedRulesBotControlRuleSet",
-          "version": "",
-          "capacity": 50
+          vendor: "AWS",
+          name: "AWSManagedRulesBotControlRuleSet",
+          version: "",
+          capacity: 50
         },
         {
-          "vendor": "AWS",
-          "name": "AWSManagedRulesCommonRuleSet",
-          "version": "",
-          "capacity": 700
+          vendor: "AWS",
+          name: "AWSManagedRulesCommonRuleSet",
+          version: "",
+          capacity: 700
         },
         {
-          "vendor": "AWS",
-          "name": "AWSManagedRulesKnownBadInputsRuleSet",
-          "version": "",
-          "capacity": 200
+          vendor: "AWS",
+          name: "AWSManagedRulesKnownBadInputsRuleSet",
+          version: "",
+          capacity: 200
         },
         {
-          "vendor": "AWS",
-          "name": "AWSManagedRulesSQLiRuleSet",
-          "version": "",
-          "capacity": 200
+          vendor: "AWS",
+          name: "AWSManagedRulesSQLiRuleSet",
+          version: "",
+          capacity: 200
         }
       ]
     },

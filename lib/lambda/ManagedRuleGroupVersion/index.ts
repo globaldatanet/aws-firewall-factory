@@ -17,7 +17,7 @@ export const handler = async (
   let ManagedVersionInfo: ManagedRuleGroupVersionResponse;
   let ParamVersion: string | undefined;
   let Latest: boolean | undefined;
-  console.log("Lambda is invoked with:" + JSON.stringify(event));
+  console.log("Lambda is invoked with:" + JSON.stringify(event) +"-"+ JSON.stringify(context));
   
   const response: CdkCustomResourceResponse = {
     StackId: event.StackId,

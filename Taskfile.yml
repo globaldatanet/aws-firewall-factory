@@ -2,14 +2,13 @@ version: '3'
 #output: prefixed
 env:
   SKIP_QUOTA_CHECK: true
-  PREREQUISITE: false
   WAF_TEST: false
   CREATE_DIAGRAM: false
-  CDK_DIFF: true
   TOOL_KIT_STACKNAME: CDKToolkit
   LASTEST_FIREWALLFACTORY_VERSION:
     sh: curl --silent "https://api.github.com/repos/globaldatanet/aws-firewall-factory/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 vars:
+  prerequisite:
   config: # without .json
   REGION:
     sh: echo $AWS_REGION
@@ -19,14 +18,11 @@ tasks:
   deploy:
     desc: Deploy Stack
     cmds:
-      - task: clean
-      - task: cdkdiff
       - task: cdkdeploy
       - task: creatediagram
   synth:
     desc: synth Stack
     cmds:
-      - task: clean
       - cdk synth
     vars:
       ACCOUNT:
@@ -35,25 +31,19 @@ tasks:
         sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
     env:
       PROCESS_PARAMETERS: .config
-  clean:
-    desc: Clean CDK Out
-    cmds:
-      - rm -rf ./cdk.out
-      - rm -rf ./node-modules
-    silent: true
-  cdkdiff:
+  diff:
     desc: CDK Diff
     cmds:
-      - if [[ {{.CDK_DIFF}} = true ]];then cdk diff; echo -n "Continue  (y/n)?"; read CONT; if [ "$CONT" = "n" ]; then echo "NO" | exit 1; else echo "YES"; fi; else exit 0;fi;
+      - cdk diff
     silent: true
     interactive: true
     env:
       PROCESS_PARAMETERS: "{{.config}}"
+      PREREQUISITE: "{{.prerequisite}}"
   cdkdeploy:
     desc: CDK Deploy
     cmds:
       - cdk deploy --require-approval never {{.TAGS}} --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
-      - rm -f $(find ./cdk.out/*assets.json -type f)
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
@@ -61,6 +51,7 @@ tasks:
         sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
     env:
       PROCESS_PARAMETERS: "{{.config}}"
+      PREREQUISITE: "{{.prerequisite}}"
     silent: true
     interactive: true
   creatediagram:
@@ -84,20 +75,8 @@ tasks:
     preconditions:
       - sh: "[ '{{.WAF_TEST}}' != 'true' ]"
         msg: ⏭  Skipping WAF Testing 🧪
-  validateconfig:
-    desc: Validates the current config
-    cmds:
-      - ts-node test/config-loader.ts
+  generate-waf-skeleton:
+    desc: Generate Skeleton
     silent: true
-    env:
-      PROCESS_PARAMETERS: values/{{.config}}.json
-    preconditions:
-      - sh: "test {{.config}}"
-        msg: "config Variable was not set"
-      - sh: "test -f values/{{.config}}.json"
-        msg: "Values file not found: values/{{.config}}.json"
-  generateconfig:
-    desc: Generate skeleton for a waf configuration file
     cmds:
-      - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-skeleton.ts ; fi
-    silent: true
+      - ts-node ./lib/tools/generate-skeleton.ts

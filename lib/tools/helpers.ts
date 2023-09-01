@@ -19,7 +19,6 @@ import { Rule as FmsRule } from "../types/fms";
 import cfonts = require("cfonts");
 import * as packageJsonObject from "../../package.json";
 import {transformCdkRuletoSdkRule} from "./transformer";
-// import * as fs from "fs";
 
 /**
  * Service Quota Code for Firewall Manager Total WAF WCU in account & region

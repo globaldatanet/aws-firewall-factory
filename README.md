@@ -84,18 +84,18 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 6. Checking of the softlimit quota for [WCU](https://docs.aws.amazon.com/waf/latest/developerguide/how-aws-waf-works.html) set in the AWS account (stop deployment if calculated WCU is above the quota)
 
 7. Easy configuration of WAF rules trough Typescript file.
-
+   
 8. Deploy same WAF more than once for testing and/or blue/green deployments.
 
 9.  Stopping deployment if soft limit will be exceeded:  **Firewall Manager policies per organization per Region (L-0B28E140)** - **Maximum number of web ACL capacity units in a web ACL in WAF for regional (L-D9F31E8A)**
 
-10. You can name your rules. If you define a name in your RulesArray, the name + a Base36 timestamp will be used for the creation of your rule. This will help you to query your logs in Athena.
+10. You can name your rules. If you define a name in your RulesArray, the name + a Base36 timestamp will be used for the creation of your rule - otherwise a name will be generated. This will help you to query your logs in Athena.
 
 11. Support for Captcha - You can add Captcha as an action to your WAFs. This helps you block unwanted bot traffic by requiring users to successfully complete challenges before their web request are allowed to reach AWS WAF protected resources. AWS WAF Captcha is available in the US East (N. Virginia), US West (Oregon), Europe (Frankfurt), South America (Sao Paulo), and Asia Pacific (Singapore) AWS Regions and supports Application Load Balancer, Amazon API Gateway, and AWS AppSync resources.
 
-12. Added S3LoggingBucketName to JSON. You need to specify the S3 Bucket where logs should be placed in. We also added a prefix for the logs to be AWS conform (Prefix: AWSLogs/*AWS_ACCOUNTID*/FirewallManager/*AWS_REGION*/).
+12. Added S3LoggingBucketName to Configuration. You need to specify the S3 Bucket where logs should be placed in. We also added a prefix for the logs to be AWS conform (Prefix: AWSLogs/*AWS_ACCOUNTID*/FirewallManager/*AWS_REGION*/).
 
-13. Added testing your WAF with [GoTestWAF](https://github.com/wallarm/gotestwaf). To be able to check your WAF we introduced the **SecuredDomain** parameter in the JSON (which should be your domain) which will be checked using the WAF tool.
+13. Added testing your WAF with [GoTestWAF](https://github.com/wallarm/gotestwaf). To be able to check your WAF we introduced the **SecuredDomain** parameter in the Configuration (which should be your domain) which will be checked using the WAF tool.
 
 14. TaskFileParameters:
 
@@ -104,7 +104,6 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
     | SKIP_QUOTA_CHECK   | true (Stop deployment if calculated WCU is above the quota) </br> false (Skipping WCU Check) |
     | WAF_TEST           | true (testing your waf with GoTestWAF) </br> false (Skipping WAF testing)                    |
     | CREATE_DIAGRAM     | true (generating a diagram using draw.io) </br> false (Skipping diagram generation)          |
-    | CDK_DIFF           | true (generating a cdk before invoking cdk deploy) </br> false (Skipping cdk diff)           |
     | PREQUISITES        | true (deploys Prerequisites Stack) </br> false (deployment of WAF)           |
     | TOOL_KIT_STACKNAME        | To Specify The name of the bootstrap stack ([see Bootstrapping your AWS environment](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-bootstrap))       |
 
@@ -112,7 +111,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 
 16. PreProcess- and PostProcessRuleGroups - you can decide now where the Custom or ManagedRules should be added to.
 
-    - New Structure see [example json](./values/example-waf.json).
+    - New Structure see [example Configuration](./values/examples).
 
 17. RuleLabels - A label is a string made up of a prefix, optional namespaces and a name. The components of a label are delimited with a colon. Labels have the following requirements and characteristics:
 
@@ -191,12 +190,10 @@ See example:
 
 ### 🏁 Deployment via Taskfile
 
-1. Create new ts file for you WAF and configure Rules in the JSON (see [owasptopten.ts](values/examples/owasptop10.ts) to see structure)
+1. Create new ts file for you WAF and configure Rules in the Configuration (see [owasptopten.ts](values/examples/owasptop10.ts) to see structure) or use enter `task generate-waf-skeleton`
 
-⚠️ When deploying a firewall for the first time, the **DeployHash** must be empty. The AWS Firewall Factory takes care of creating a DeployHash. The DeployHash is used to identify which CloudFormation stack is associated with which configuration file.
-
-2. Assume AWS Profile `awsume PROFILENAME`
-3. (Optional) Enter `task generateconfig`
+2. Assume AWS Profile `awsume / assume PROFILENAME`
+3. (Optional) Enter `task generate-waf-skeleton`
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 
 ## 🦸🏼‍♀️ Contributors

@@ -4,24 +4,25 @@
 
 ## 4.0.0
 ### Added
-- A custom resource to retrieve the latest version of the ManagedRuleGroup and to check that the specified version is valid.
-- Typescript configuration files for WAF configurations
-- A Function to convert CdkRule to SdkRule - with the introduction of Typescript configuration and CDK interfaces, we now need to convert every CDK rule to an SDK rule to be able to use the [CheckCapacity API Call](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html).
-- ManagedRuleGroupVersions to CloudFormation Output
+- A custom resource to retrieve the latest version of the ManagedRuleGroup and check if the specified version is valid.
+- Typescript configuration files for WAF configurations - now it is easier to write custom rules because of the types for [rule statements](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_wafv2.CfnWebACL.RuleProperty.html).
+- A function to convert CdkRule to SdkRule - with the introduction of Typescript configuration and CDK interfaces, we now need to convert every CDK rule to an SDK rule to be able to use the [CheckCapacity API call](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html).
+- ManagedRuleGroupVersions for CloudFormation Output
 - Example Configurations
-    1.  Example WAF Configuration againts: [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
-    2.  Example Configuration for Prerequisite Stack
-- Added TOOL_KIT_STACKNAME to TaskFile - To Specify The name of the bootstrap stack ([see Bootstrapping your AWS environment](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-bootstrap)).
-- Migrate Script to migrate from json to ts Config (./values/migrate.ts)
-  - ts-node ./values/migrate.ts YOURJSON.json
+    1.  Example WAF configuration against: [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
+    2.  Example configuration for prerequisite stack
+- Added TOOL_KIT_STACKNAME to the TaskFile - to specify the name of the bootstrap stack ([see Bootstrapping your AWS environment](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-bootstrap)).
+- Migrate script to migrate from json to ts config (./values/migrate.ts)
+  - ts node ./values/migrate.ts YOURJSON.json
+- You now need to set the priority for your custom rules. If you want to learn more about processing order of rules and rule groups in a web ACL, check out this [link](https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-processing-order.html).
 
 ### Fixed
 - Allow sub-statements of IPSetReferenceStatements -> Allow IPSetReferenceStatement.ARN entries that reference an aws-firewall-factory controlled ipset (i.e. the name of the ipset) within AND, OR and NOT statements (as sub-statements).
-- Adjusted Function to generate Skeleton for WAF Config for Typescript configuration
-- Updated dependencies to latest version
-  
+- Adjusted WAF Config skeleton generation function for Typescript configuration.
+- Updated dependencies to the latest version
+
 ### Removed
-- Json configuration files for WAF configurations
+- Json config files for WAF configurations
 - DeployHash generation for new configs - legacy functionality - we will now use Prefix, Stage & FirewallName to create unique WAF and CloudFormation StackNames.
 
 ## 3.3.1

@@ -2,12 +2,10 @@
 import { FirewallStack } from "../lib/firewall-stack";
 import { PrerequisitesStack } from "../lib/prerequisites-stack";
 import * as cdk from "aws-cdk-lib";
-import { realpathSync } from "fs";
-import { validateWaf, validatePrerequisites, wrongLoggingConfiguration } from "../lib/tools/config-validator";
+import { wrongLoggingConfiguration } from "../lib/tools/config-validator";
 import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
 import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties, outputInfoBanner } from "../lib/tools/helpers";
 import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
-import { ValidateFunction } from "ajv";
 import * as values from "../values";
 
 /**
@@ -15,14 +13,7 @@ import * as values from "../values";
  */
 const CONFIG_OBJECT_NAME = process.env.PROCESS_PARAMETERS;
 
-const logInvalidConfigFileAndExit = (config:Config,invalidFileType: "ConfigFile" | "IPSet", validationFilePath: string, ajvValidatorFunction: ValidateFunction): void => {
-  outputInfoBanner(config);
-  console.log(`\n 🧪 Validation of your ${invalidFileType}: \n   📂 ` + validationFilePath + "\n\n");
-  console.error("\u001B[31m",`🚨 Invalid ${invalidFileType} File 🚨 \n\n`,"\x1b[0m" + JSON.stringify(ajvValidatorFunction.errors, null, 2)+ "\n\n");
-  process.exit(1);
-};
-
-if(!CONFIG_OBJECT_NAME || values.configs[CONFIG_OBJECT_NAME] === undefined) {
+if(!CONFIG_OBJECT_NAME || (values.configs[CONFIG_OBJECT_NAME] === undefined && values.prereq[CONFIG_OBJECT_NAME] === undefined)) {
   console.log("Configuration ", CONFIG_OBJECT_NAME, " not found.");
   process.exit(1);
 }
@@ -30,23 +21,17 @@ if(!CONFIG_OBJECT_NAME || values.configs[CONFIG_OBJECT_NAME] === undefined) {
 const app = new cdk.App();
 
 void (async () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const config: Config = values.configs[CONFIG_OBJECT_NAME];
-  if (!validateWaf(config)) logInvalidConfigFileAndExit(config,"ConfigFile", realpathSync(CONFIG_OBJECT_NAME), validateWaf);
-
   // ---------------------------------------------------------------------
   // Deploying prerequisite stack
-
+  console.log(process.env.PREREQUISITE);
   if(process.env.PREREQUISITE === "true") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
-    const prerequisites: Prerequisites = require(realpathSync(CONFIG_OBJECT_NAME));
-    if(!validatePrerequisites(prerequisites)) logInvalidConfigFileAndExit(config,"ConfigFile", realpathSync(CONFIG_OBJECT_NAME), validatePrerequisites);
-
-    outputInfoBanner(config);
+    const prerequisites: Prerequisites = values.prereq[CONFIG_OBJECT_NAME];
+    outputInfoBanner();
 
     console.log("ℹ️   Deploying Prerequisites Stack.");
     const app = new cdk.App();
-    new PrerequisitesStack(app, config.General.Prefix.toUpperCase() + "-AWS-FIREWALL-FACTORY-PREQUISITES", {
+    new PrerequisitesStack(app, prerequisites.General.Prefix.toUpperCase() + "-AWS-FIREWALL-FACTORY-PREQUISITES", {
       prerequisites,
       env: {
         region: process.env.AWS_REGION,
@@ -59,6 +44,8 @@ void (async () => {
   // Deploying Firewall stack
 
   else {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const config: Config = values.configs[CONFIG_OBJECT_NAME];
     const deploymentRegion= outputInfoBanner(config);
     const runtimeProperties = initRuntimeProperties();
     if (process.env.SKIP_QUOTA_CHECK === "true") {
@@ -82,12 +69,12 @@ void (async () => {
     console.log("\n 🎯 Targets:");
     if(config.WebAcl.IncludeMap.account){
       for (const account of config.WebAcl.IncludeMap.account) {
-        console.log("\x1b[31m", `   ▫️ ${account}`, "\x1b[0m");
+        console.log("\x1b[32m", `   🛬 ${account}`, "\x1b[0m");
       }
     }
     if(config.WebAcl.IncludeMap.orgunit){
       for (const unit of config.WebAcl.IncludeMap.orgunit) {
-        console.log("\x1b[31m", `   ▫️ ${unit}`, "\x1b[0m");
+        console.log("\x1b[32m", `   🛬 ${unit}`, "\x1b[0m");
       }
     }
     console.log("\n 📑 Logging:");

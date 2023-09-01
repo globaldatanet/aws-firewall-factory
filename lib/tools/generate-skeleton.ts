@@ -2,9 +2,12 @@ import { Config } from "../types/config";
 import util from "util";
 import { outputInfoBanner } from "./helpers";
 
+/**
+ * The script will output a example WAF Skeleton Config to the terminal
+ */
+
 const skeletonConfig : Config = {
   General: {
-    DeployHash: "",
     FireHoseKeyArn: "",
     Prefix: "myPrefix",
     Stage: "dev|int|clone|live",

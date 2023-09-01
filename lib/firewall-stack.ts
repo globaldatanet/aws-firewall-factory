@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
@@ -121,12 +122,7 @@ export class FirewallStack extends cdk.Stack {
 
         const cfnipset = new wafv2.CfnIPSet(this, ipSet.name, {
           name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.name}`,
-          description: ipSet.description ? ipSet.description : "IP Set created by AWS Firewall Factory \n used in " +props.config.General.Prefix.toUpperCase() +
-          "-" +
-          props.config.WebAcl.Name +
-          "-" +
-          props.config.General.Stage +
-          "-Firewall",
+          description: ipSet.description ? ipSet.description : `IP Set created by AWS Firewall Factory \n used in ${props.config.General.Prefix.toUpperCase()}-${props.config.WebAcl.Name}-${props.config.General.Stage}-Firewall${props.config.General.DeployHash ? "-"+props.config.General.DeployHash : ""}`,
           addresses: addresses,
           ipAddressVersion: ipSet.ipAddressVersion,
           scope: props.config.WebAcl.Scope,
@@ -212,7 +208,7 @@ export class FirewallStack extends cdk.Stack {
       remediationEnabled: props.config.WebAcl.RemediationEnabled ? props.config.WebAcl.RemediationEnabled : false,
       resourceType: props.config.WebAcl.Type,
       resourceTypeList: props.config.WebAcl.TypeList ? props.config.WebAcl.TypeList : undefined,
-      policyName: `${props.config.General.Prefix.toUpperCase()}-WAF-${props.config.WebAcl.Name.toUpperCase()}-${props.config.General.Stage.toUpperCase()}${props.config.General.DeployHash ? "-"+props.config.General.DeployHash.toUpperCase() : ""}`,
+      policyName: `${props.config.General.Prefix.toUpperCase()}-${props.config.WebAcl.Name}-${props.config.General.Stage}${props.config.General.DeployHash ? "-"+props.config.General.DeployHash : ""}`,
       includeMap: props.config.WebAcl.IncludeMap,
       excludeMap: props.config.WebAcl.ExcludeMap,
       securityServicePolicyData: {
@@ -241,14 +237,13 @@ export class FirewallStack extends cdk.Stack {
     }
   }
 }
-
-
 interface SubVariables {
   [key: string]: string;
 }
 
 const MANAGEDRULEGROUPSINFO: string[]= [""];
 const subVariables : SubVariables = {};
+
 function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string) : ServiceDataManagedRuleGroup[] {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
@@ -285,6 +280,12 @@ function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: Managed
       const cwVersion = "**"+ crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version") +"**";
       subVariables[managedRuleGroup.name] = crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version");
       const version = `\${${managedRuleGroup.name}}`;
+
+      // if a version is supplied, create an output
+      new cdk.CfnOutput(scope, `${managedRuleGroup.name}Version`, {
+        value: crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version"),
+        description: `Version of ${managedRuleGroup.name} used in ${managedRuleGroup.name} RuleGroup`
+      });
 
       cfnManagedRuleGroup.push({
         managedRuleGroupIdentifier: {
@@ -329,77 +330,24 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       } else {
         rulename = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
       }
+      // transform ipSetReferenceStatements
+      const statement = transformRuleStatements(rule, prefix, stage, ipSets);
 
-      const ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-
-      const andStatement = rule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
-
-      if (andStatement) {
-        const statements = andStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
-        for (let i=0; i<statements.length; i++) {
-          const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-          if (ipSetReferenceStatement) {
-            statements[i] = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
-          }
-        }
-      }
-
-      const orStatement = rule.statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
-
-      if (orStatement) {
-        const statements = orStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
-        for (let i=0; i<statements.length; i++) {
-          const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-          if (ipSetReferenceStatement) {
-            statements[i] = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
-          }
-        }
-      }
-
-      let statement : wafv2.CfnWebACL.StatementProperty;
-      if (ipSetReferenceStatement) {
-        statement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
-      } else if (andStatement) {
-        statement = { andStatement };
-      } else if (orStatement) {
-        statement = { orStatement };
-      } else {
-        statement = rule.statement;
-      }
-
-      let cfnRuleProperty;
-      if (Object.keys(rule.action)[0] === "captcha") {
-        cfnRuleProperty = {
-          name: rulename,
-          priority: rule.priority,
-          action: rule.action,
-          statement: rule.statement,
-          visibilityConfig: {
-            sampledRequestsEnabled:
-              rule.visibilityConfig.sampledRequestsEnabled,
-            cloudWatchMetricsEnabled:
-              rule.visibilityConfig.cloudWatchMetricsEnabled,
-            metricName: rule.visibilityConfig.metricName,
-          },
-          captchaConfig: rule.captchaConfig,
-          ruleLabels: rule.ruleLabels,
-        };
-      } else {
-        cfnRuleProperty = {
-          name: rulename,
-          priority: rule.priority,
-          action: rule.action,
-          statement,
-          visibilityConfig: {
-            sampledRequestsEnabled:
-              rule.visibilityConfig.sampledRequestsEnabled,
-            cloudWatchMetricsEnabled:
-              rule.visibilityConfig.cloudWatchMetricsEnabled,
-            metricName: rule.visibilityConfig.metricName,
-          },
-          ruleLabels: rule.ruleLabels,
-        };
-      }
+      const cfnRuleProperty = {
+        name: rulename,
+        priority: rule.priority,
+        action: rule.action,
+        statement,
+        captchaConfig: (Object.keys(rule.action)[0] === "captcha") ? rule.captchaConfig : undefined,
+        visibilityConfig: {
+          sampledRequestsEnabled:
+            rule.visibilityConfig.sampledRequestsEnabled,
+          cloudWatchMetricsEnabled:
+            rule.visibilityConfig.cloudWatchMetricsEnabled,
+          metricName: rule.visibilityConfig.metricName,
+        },
+        ruleLabels: rule.ruleLabels,
+      };
       let cfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty;
       if (rule.ruleLabels) {
         cfnRuleProperties = cfnRuleProperty as wafv2.CfnWebACL.RuleProperty;
@@ -448,6 +396,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
     }
     // Don't lowercase the first char of the Key of the Custom Response Body,
     // only toAwsCamel the properties below the Key
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let cstResBodies: { [key:string]: any} | undefined = {};
     if(customResponseBodies) {
       cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies[curr]; return acc; }, cstResBodies);
@@ -464,7 +413,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       visibilityConfig: {
         sampledRequestsEnabled: false,
         cloudWatchMetricsEnabled: false,
-        metricName: `${prefix.toUpperCase()}-${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-"+deployHash : ""}`,
+        metricName: `${prefix.toUpperCase()}-${webaclName}-${stage}${deployHash ? "-"+deployHash : ""}`,
       },
     });
     serviceDataRuleGroup.push({
@@ -618,44 +567,25 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
           rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-"+deployHash : ""}`;
         }
 
-        let cfnRuleProperty;
-        if (Object.keys(ruleGroupSet[statementindex]
-          .action)[0] === "captcha") {
-          cfnRuleProperty = {
-            name: rulename,
-            priority: ruleGroupSet[statementindex].priority,
-            action: ruleGroupSet[statementindex].action,
-            statement: ruleGroupSet[statementindex].statement,
-            visibilityConfig: {
-              sampledRequestsEnabled:
-                ruleGroupSet[statementindex]
-                  .visibilityConfig.sampledRequestsEnabled,
-              cloudWatchMetricsEnabled:
-                ruleGroupSet[statementindex]
-                  .visibilityConfig.cloudWatchMetricsEnabled,
-              metricName: rulename + "-metric",
-            },
-            captchaConfig: ruleGroupSet[statementindex].captchaConfig,
-            ruleLabels: ruleGroupSet[statementindex].ruleLabels,
-          };
-        } else {
-          cfnRuleProperty = {
-            name: rulename,
-            priority: ruleGroupSet[statementindex].priority,
-            action: ruleGroupSet[statementindex].action,
-            statement: ruleGroupSet[statementindex].statement,
-            visibilityConfig: {
-              sampledRequestsEnabled:
-                ruleGroupSet[statementindex]
-                  .visibilityConfig.sampledRequestsEnabled,
-              cloudWatchMetricsEnabled:
-                ruleGroupSet[statementindex]
-                  .visibilityConfig.cloudWatchMetricsEnabled,
-              metricName: rulename + "-metric",
-            },
-            ruleLabels: ruleGroupSet[statementindex].ruleLabels,
-          };
-        }
+        const statement = transformRuleStatements(ruleGroupSet[statementindex],prefix, stage, ipSets);
+        const cfnRuleProperty = {
+          name: rulename,
+          priority: ruleGroupSet[statementindex].priority,
+          action: ruleGroupSet[statementindex].action,
+          statement,
+          visibilityConfig: {
+            sampledRequestsEnabled:
+              ruleGroupSet[statementindex]
+                .visibilityConfig.sampledRequestsEnabled,
+            cloudWatchMetricsEnabled:
+              ruleGroupSet[statementindex]
+                .visibilityConfig.cloudWatchMetricsEnabled,
+            metricName: ruleGroupSet[statementindex].visibilityConfig.metricName,
+          },
+          captchaConfig: (Object.keys(ruleGroupSet[statementindex]
+            .action)[0] === "captcha") ? ruleGroupSet[statementindex].captchaConfig : undefined,
+          ruleLabels: ruleGroupSet[statementindex].ruleLabels,
+        };
         let cfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty;
         if (
           ruleGroupSet[statementindex]
@@ -671,8 +601,6 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         rulegroupcounter++;
       }
 
-      // Don't lowercase the first char of the Key of the Custom Response Body,
-      // only toAwsCamel the properties below the Key
       let cstResBodies: { [key:string]: any} | undefined = {};
       if(customResponseBodies) {
         cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies[curr]; return acc; }, cstResBodies);
@@ -690,7 +618,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         visibilityConfig: {
           sampledRequestsEnabled: false,
           cloudWatchMetricsEnabled: false,
-          metricName: name + "-metric",
+          metricName: name,
         },
       });
 
@@ -761,5 +689,45 @@ function getActualIpReferenceStatementInStatement(ipSetReferenceStatement: wafv2
   const statement : wafv2.CfnWebACL.StatementProperty = {
     ipSetReferenceStatement: actualIpSetReferenceStatement
   };
+  return statement;
+}
+
+function transformRuleStatements(rule: Rule, prefix: string, stage: string, ipSets: cdk.aws_wafv2.CfnIPSet[]) {
+  const ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+
+  const andStatement = rule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
+
+  if (andStatement) {
+    const statements = andStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
+    for (let i=0; i<statements.length; i++) {
+      const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+      if (ipSetReferenceStatement) {
+        statements[i] = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+      }
+    }
+  }
+
+  const orStatement = rule.statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
+
+  if (orStatement) {
+    const statements = orStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
+    for (let i=0; i<statements.length; i++) {
+      const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+      if (ipSetReferenceStatement) {
+        statements[i] = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+      }
+    }
+  }
+
+  let statement : wafv2.CfnWebACL.StatementProperty;
+  if (ipSetReferenceStatement) {
+    statement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+  } else if (andStatement) {
+    statement = { andStatement };
+  } else if (orStatement) {
+    statement = { orStatement };
+  } else {
+    statement = rule.statement;
+  }
   return statement;
 }
