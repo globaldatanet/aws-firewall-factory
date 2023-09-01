@@ -3,8 +3,8 @@ export const config: Config = {
   General: {
     DeployHash: "",
     FireHoseKeyArn: "",
-    Prefix: "myPrefix",
-    Stage: "dev|int|clone|live",
+    Prefix: "aws-firewall-factory",
+    Stage: "dev",
     S3LoggingBucketName: "myBucketName",
     SecuredDomain: ["yourapp.<stage>.<domain>"],
     CreateDashboard: true,
@@ -14,7 +14,7 @@ export const config: Config = {
     IncludeMap: {
       account: ["123456789123"]
     },
-    Name: "myWAF-Name",
+    Name: "owasptopTen",
     PreProcess: {
       ManagedRuleGroups: [
         {

@@ -1,8 +1,8 @@
 import { Config } from "../../lib/types/config";
 export const config: Config = {
   General: {
-    Prefix: "test",
-    Stage: "test",
+    Prefix: "aws-firewall-factory",
+    Stage: "dev",
     SecuredDomain: [
       "",
     ],
@@ -12,7 +12,7 @@ export const config: Config = {
     CreateDashboard: true,
   },
   WebAcl: {
-    Name: "firewall-factory-demo",
+    Name: "ip-sets-managed-test",
     Scope: "REGIONAL",
     Type: "AWS::ApiGateway::Stage",
     IncludeMap: {

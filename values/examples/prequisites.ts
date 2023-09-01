@@ -1,7 +1,7 @@
 import { Prerequisites } from "../../lib/types/config";
 export const prequisites: Prerequisites = {
   General: {
-    Prefix: "myPrefix",
+    Prefix: "aws-firewall-factory",
   },
   Logging: {
     BucketProperties: {
