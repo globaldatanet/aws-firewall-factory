@@ -3,8 +3,8 @@ version: '3'
 env:
   SKIP_QUOTA_CHECK: true
   WAF_TEST: false
-  CREATE_DIAGRAM: true
-  CDK_DIFF: false
+  CREATE_DIAGRAM: false
+  TOOL_KIT_STACKNAME: CDKToolkit
   LASTEST_FIREWALLFACTORY_VERSION:
     sh: curl --silent "https://api.github.com/repos/globaldatanet/aws-firewall-factory/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 vars:
@@ -18,15 +18,11 @@ tasks:
   deploy:
     desc: Deploy Stack
     cmds:
-      - task: clean
-      - task: cdkdiff
       - task: cdkdeploy
       - task: creatediagram
-      - task: testwaf
   synth:
     desc: synth Stack
     cmds:
-      - task: clean
       - cdk synth
     vars:
       ACCOUNT:
@@ -34,44 +30,27 @@ tasks:
       TAGS:
         sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
     env:
-      PROCESS_PARAMETERS: values/{{.config}}.json  
-  clean:
-    desc: Clean CDK Out
-    cmds:
-      - rm -rf ./cdk.out
-      - rm -rf ./node-modules
-    silent: true
-  cdkdiff:
+      PROCESS_PARAMETERS: .config
+  diff:
     desc: CDK Diff
     cmds:
-      - if [[ {{.CDK_DIFF}} = true ]];then cdk diff; echo -n "Continue  (y/n)?"; read CONT; if [ "$CONT" = "n" ]; then echo "NO" | exit 1; else echo "YES"; fi; else exit 0;fi;
+      - cdk diff
     silent: true
     interactive: true
     env:
-      PROCESS_PARAMETERS: values/{{.config}}.json
+      PROCESS_PARAMETERS: "{{.config}}"
       PREREQUISITE: "{{.prerequisite}}"
-    preconditions:
-      - sh: "test {{.config}}"
-        msg: "config Variable was not set"
-      - sh: "test -f values/{{.config}}.json"
-        msg: "Values file not found: values/{{.config}}.json"
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - cdk deploy --require-approval never {{.TAGS}}
-      - rm -f $(find ./cdk.out/*assets.json -type f) &> /dev/null
+      - cdk deploy --require-approval never {{.TAGS}} --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
       TAGS:
         sh: cat tags/tags.json | jq -j '.[]|"--tags " + (.Key)+"="+(.Value)+" "'
-    preconditions:
-      - sh: "test {{.config}}"
-        msg: "config Variable was not set"
-      - sh: "test -f values/{{.config}}.json"
-        msg: "Values file not found: values/{{.config}}.json"
     env:
-      PROCESS_PARAMETERS: values/{{.config}}.json
+      PROCESS_PARAMETERS: "{{.config}}"
       PREREQUISITE: "{{.prerequisite}}"
     silent: true
     interactive: true
@@ -85,43 +64,19 @@ tasks:
   testwaf:
     desc: Test of your waf using GoTestWAF
     cmds:
+      - echo 🧪  Testing of your new 🔥 WAF using GoTestWAF
       - |
-        if [[ {{.WAF_TEST}} == true ]]; then
-          echo 🧪  Testing of your new 🔥 WAF using GoTestWAF
-
-          items=$(cat values/{{.config}}.json | jq -r '.[] | .SecuredDomain[]?')
-          for item in ${items[@]}; do
-              echo "Using fqdn in 🖥 url : $item"
-              ./gotestwaf/gotestwaf --url https://$item --workers 50 --blockConnReset  --wafName="$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck --reportPath "./waf-evaluation-report/$(date '+%Y-%m-%d')" --reportName "$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')"
-          done
-        else
-          echo "⏭ Skipping WAF Testing 🧪"
-        fi
+        items=$(cat values/{{.config}}.json | jq -r '.[] | .SecuredDomain[]?')
+        for item in ${items[@]}; do
+            echo "Using fqdn in 🖥 url : $item"
+            ./gotestwaf/gotestwaf --url https://$item --workers 50 --blockConnReset  --wafName="$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck --reportPath "./waf-evaluation-report/$(date '+%Y-%m-%d')" --reportName "$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')"
+        done
     silent: true
-  validateconfig:
-    desc: Validates the current config
-    cmds:
-      - ts-node test/config-loader.ts
-    silent: true
-    env:
-      PROCESS_PARAMETERS: values/{{.config}}.json
     preconditions:
-      - sh: "test {{.config}}"
-        msg: "config Variable was not set"
-      - sh: "test -f values/{{.config}}.json"
-        msg: "Values file not found: values/{{.config}}.json"
-  generateconfig:
-    desc: Generate skeleton for a waf configuration file
-    cmds:
-      - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-skeleton.ts ; fi
+      - sh: "[ '{{.WAF_TEST}}' != 'true' ]"
+        msg: ⏭  Skipping WAF Testing 🧪
+  generate-waf-skeleton:
+    desc: Generate Skeleton
     silent: true
-  generateowasptoptenconfig:
-    desc: Generate skeleton for a waf configuration file with owasp top 10
     cmds:
-      - if [[ "{{.config}}" ]] ; then ts-node lib/tools/get-owasp-top10-waf.ts >> values/{{.config}}.json ; else ts-node lib/tools/get-owasp-top10-waf.ts ; fi
-    silent: true
-  generateprerequisitesconfig:
-    desc: Generate skeleton for a prerequisites configuration
-    cmds:
-      - if [[ "{{.config}}" ]] ; then ts-node lib/tools/generate-prerequisites-skeleton.ts >> values/{{.config}}.json ; else ts-node lib/tools/generate-prerequisites-skeleton.ts ; fi
-    silent: true
+      - ts-node ./lib/tools/generate-skeleton.ts

@@ -1,10 +1,6 @@
 [
     {
-        "Key": "gdn:ItContactMail",
-        "Value": "david@globaldatanet.com"
-    },
-    {
-        "Key": "gdn:ItContactPhone",
-        "Value": "+49800333004995627"
+        "Key": "gdn:App",
+        "Value": "AwsFirewallFactory"
     }
 ]

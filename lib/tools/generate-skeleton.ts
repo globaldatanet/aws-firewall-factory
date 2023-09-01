@@ -1,8 +1,13 @@
 import { Config } from "../types/config";
+import util from "util";
+import { outputInfoBanner } from "./helpers";
+
+/**
+ * The script will output a example WAF Skeleton Config to the terminal
+ */
 
 const skeletonConfig : Config = {
   General: {
-    DeployHash: "",
     FireHoseKeyArn: "",
     Prefix: "myPrefix",
     Stage: "dev|int|clone|live",
@@ -20,16 +25,16 @@ const skeletonConfig : Config = {
     PreProcess: {
       ManagedRuleGroups: [
         {
-          Vendor: "AWS",
-          Name: "AWSManagedRulesAmazonIpReputationList",
-          Capacity: 25,
-          Version: ""
+          vendor: "AWS",
+          name: "AWSManagedRulesAmazonIpReputationList",
+          capacity: 25,
+          version: ""
         },
         {
-          Vendor: "AWS",
-          Name: "AWSManagedRulesCommonRuleSet",
-          Capacity: 700,
-          Version: "",
+          vendor: "AWS",
+          name: "AWSManagedRulesCommonRuleSet",
+          capacity: 700,
+          version: "",
         }
       ]
     },
@@ -41,4 +46,8 @@ const skeletonConfig : Config = {
   }
 };
 
-console.log(JSON.stringify(skeletonConfig, null, 2));
+outputInfoBanner();
+console.log("ℹ️  Use the following snippet to create a skeleton config file for your Firewall. ℹ️\n");
+console.log("import { Config } from \"../../lib/types/config\";\nexport const config: Config = {");
+console.log(util.inspect(skeletonConfig, false, null, true));
+console.log("};");

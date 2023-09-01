@@ -2,6 +2,29 @@
 
 ## Released
 
+## 4.0.0
+### Added
+- A custom resource to retrieve the latest version of the ManagedRuleGroup and check if the specified version is valid.
+- Typescript configuration files for WAF configurations - now it is easier to write custom rules because of the types for [rule statements](https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_wafv2.CfnWebACL.RuleProperty.html).
+- A function to convert CdkRule to SdkRule - with the introduction of Typescript configuration and CDK interfaces, we now need to convert every CDK rule to an SDK rule to be able to use the [CheckCapacity API call](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html).
+- ManagedRuleGroupVersions for CloudFormation Output
+- Example Configurations
+    1.  Example WAF configuration against: [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
+    2.  Example configuration for prerequisite stack
+- Added TOOL_KIT_STACKNAME to the TaskFile - to specify the name of the bootstrap stack ([see Bootstrapping your AWS environment](https://docs.aws.amazon.com/cdk/v2/guide/cli.html#cli-bootstrap)).
+- Migrate script to migrate from json to ts config (./values/migrate.ts)
+  - ts node ./values/migrate.ts YOURJSON.json
+- You now need to set the priority for your custom rules. If you want to learn more about processing order of rules and rule groups in a web ACL, check out this [link](https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-processing-order.html).
+
+### Fixed
+- Allow sub-statements of IPSetReferenceStatements -> Allow IPSetReferenceStatement.ARN entries that reference an aws-firewall-factory controlled ipset (i.e. the name of the ipset) within AND, OR and NOT statements (as sub-statements).
+- Adjusted WAF Config skeleton generation function for Typescript configuration.
+- Updated dependencies to the latest version
+
+### Removed
+- Json config files for WAF configurations
+- DeployHash generation for new configs - legacy functionality - we will now use Prefix, Stage & FirewallName to create unique WAF and CloudFormation StackNames.
+
 ## 3.3.1
 ### Fixed
 - example Json Files
@@ -44,7 +67,6 @@
   - community-user-agent testcases
   - improve owasp testcases
 - Update Testing bin Version
-
 ## 3.2.3
 ### Fixed
 - Bump eslint from 8.41.0 to 8.42.0
@@ -60,7 +82,6 @@
 
 ### Added
 - Added Linting command `lint` to npm scripts which can be run via `npm run lint`◊
-
 ## 3.2.2
 ### Fixed
 - Bump @aws-sdk/client-pricing from 3.332.0 to 3.341.0
@@ -68,7 +89,6 @@
 - Bump @aws-sdk/client-cloudwatch from 3.321.1 to 3.341.0
 - Bump @aws-sdk/client-service-quotas from 3.321.1 to 3.342.0
 - Bump @aws-sdk/client-fms from 3.332.0 to 3.342.0
-
 ## 3.2.1
 ### Fixed
 - Bump aws-cdk from 2.74.0 to 2.79.1 
