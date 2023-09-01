@@ -1,4 +1,5 @@
 
+<a href="https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/linting.yml"><img alt="github-badge" src="https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/linting.yml/badge.svg"></a>
 [![Mentioned in Awesome CDK](https://awesome.re/mentioned-badge.svg)](https://github.com/kolomied/awesome-cdk)
 [![License: Apache2](https://img.shields.io/badge/license-Apache%202-lightgrey.svg)](http://www.apache.org/licenses/) [![cdk](https://img.shields.io/badge/aws_cdk-v2-orange.svg)](https://docs.aws.amazon.com/cdk/v2/guide/home.html)
 [![latest](https://img.shields.io/badge/latest-release-yellow.svg)](https://github.com/globaldatanet/aws-firewall-factory/releases)
@@ -6,7 +7,6 @@
 [![TypeScript](https://badges.frapsoft.com/typescript/love/typescript.png?v=101)](https://github.com/ellerbrock/typescript-badges/)
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=AWS%20FIREWALL%20FACTORY%20-%20Deploy%2C%20update%2C%20and%20stage%20your%20WAFs%20while%20managing%20them%20centrally%20via%20FMS&url=https://github.com/globaldatanet/aws-firewall-factory&hashtags=aws,security,waf)
 [![roadmap](https://img.shields.io/badge/public-roadmap-yellow.svg)](https://github.com/orgs/globaldatanet/projects/1)
-
 
 **[🚧 Feature request](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=feature-request%2C+enhancement&template=feature_request.md&title=)** | **[🐛 Bug Report](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=bug%2C+triage&template=bug_report.md&title=)**
 
