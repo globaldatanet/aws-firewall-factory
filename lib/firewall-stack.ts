@@ -16,7 +16,7 @@ import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import {WafCloudWatchDashboard} from "./constructs/cloudwatch";
 import * as path from "path";
 import * as cr from "aws-cdk-lib/custom-resources";
-
+import { v5 as uuidv5 } from "uuid";
 
 export interface ConfigStackProps extends cdk.StackProps {
   readonly config: Config;
@@ -25,6 +25,14 @@ export interface ConfigStackProps extends cdk.StackProps {
 
 export class FirewallStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ConfigStackProps) {
+
+    /**
+     * uuid v5 url namespace
+     * @see https://www.npmjs.com/package/uuid#uuidv5name-namespace-buffer-offset
+     */
+    
+    const uuidFirewallFactoryResourceIdentitfier = uuidv5(`${props.config.General.Prefix}-${props.config.WebAcl.Name}${props.config.General.Stage}${props.config.General.DeployHash ?? ""}`, uuidv5.URL);
+
     super(scope, id, props);
     const accountId = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
@@ -87,7 +95,9 @@ export class FirewallStack extends cdk.Stack {
       });
 
       new firehouse.CfnDeliveryStream(this, "S3DeliveryStream", {
-        deliveryStreamName: `aws-waf-logs-${props.config.General.Prefix}-kinesis-wafv2log-${props.config.WebAcl.Name}${props.config.General.Stage}${props.config.General.DeployHash? props.config.General.DeployHash : ""}`,
+        
+        
+        deliveryStreamName: `aws-waf-logs-${uuidFirewallFactoryResourceIdentitfier}`.slice(0,65),
         extendedS3DestinationConfiguration: {
           bucketArn: "arn:aws:s3:::" + props.config.General.S3LoggingBucketName,
           encryptionConfiguration: {
@@ -112,7 +122,6 @@ export class FirewallStack extends cdk.Stack {
     // IPSets
     const ipSets: cdk.aws_wafv2.CfnIPSet[] = [];
     if(props.config.WebAcl.IPSets) {
-      const ipSetsNames: string[] =[];
       for(const ipSet of props.config.WebAcl.IPSets) {
         const addresses: string[] = [];
         for(const address of ipSet.addresses) {
@@ -128,11 +137,26 @@ export class FirewallStack extends cdk.Stack {
           scope: props.config.WebAcl.Scope,
           tags: ipSet.tags ? ipSet.tags : undefined
         });
-        ipSetsNames.push(ipSet.name);
         ipSets.push(cfnipset);
       }
     }
     // --------------------------------------------------------------------
+
+    // ----------------------------------------------------------------
+    // RegexPatternSet
+    const regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]=[];
+    if(props.config.WebAcl.RegexPatternSets){
+      for(const regexPatternSet of props.config.WebAcl.RegexPatternSets) {
+        const cfnRegexPatternSet = new wafv2.CfnRegexPatternSet(this, regexPatternSet.name, {
+          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${regexPatternSet.name}`,
+          regularExpressionList: regexPatternSet.regularExpressionList,
+          scope: props.config.WebAcl.Scope,
+          tags: regexPatternSet.tags ?? undefined,
+          description: regexPatternSet.description ?? `Regex Pattern Set created by AWS Firewall Factory \n used in ${props.config.General.Prefix.toUpperCase()}-${props.config.WebAcl.Name}-${props.config.General.Stage}-Firewall${props.config.General.DeployHash ? "-"+props.config.General.DeployHash : ""}`
+        });
+        regexPatternSets.push(cfnRegexPatternSet);
+      }
+    }
 
     // --------------------------------------------------------------------
     // ManagedRuleGroupsVersion
@@ -182,16 +206,16 @@ export class FirewallStack extends cdk.Stack {
       console.log("ℹ️  No ManagedRuleGroups defined in PostProcess.");
     }
     if (props.config.WebAcl.PreProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRgs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.PreProcess.CustomResponseBodies, ipSets, props.config.General.DeployHash);
+      const customRgs = buildServiceDataCustomRgs(this, "Pre", props.runtimeProperties.PreProcess.Capacity, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PreProcess, props.config.General.Prefix, props.config.WebAcl.PreProcess.CustomRules, props.config.WebAcl.PreProcess.CustomResponseBodies, ipSets, regexPatternSets, props.config.General.DeployHash);
       preProcessRuleGroups.push(...customRgs);
     } else {
       console.log("\nℹ️  No Custom Rules defined in PreProcess.");
     }
     if (props.config.WebAcl.PostProcess.CustomRules) {
-      const customRgs = buildServiceDataCustomRgs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.PostProcess.CustomResponseBodies, ipSets, props.config.General.DeployHash);
+      const customRgs = buildServiceDataCustomRgs(this, "Post", props.runtimeProperties.PostProcess.Capacity, props.config.WebAcl.Name, props.config.WebAcl.Scope, props.config.General.Stage, props.runtimeProperties.PostProcess, props.config.General.Prefix, props.config.WebAcl.PostProcess.CustomRules, props.config.WebAcl.PostProcess.CustomResponseBodies, ipSets, regexPatternSets, props.config.General.DeployHash);
       postProcessRuleGroups.push(...customRgs);
     } else {
-      console.log("\nℹ️  No Custom Rules defined in PostProcess.");
+      console.log("\nℹ️  No Custom Rules defined in PostProcess."); 
     }
 
     const managedServiceData : ManagedServiceData = {
@@ -306,7 +330,7 @@ function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: Managed
   return cfnManagedRuleGroup;
 }
 
-function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capacity: number, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined, ipSets: cdk.aws_wafv2.CfnIPSet[],deployHash?: string) : ServiceDataRuleGroup[] {
+function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capacity: number, webaclName: string, webAclScope: string, stage: string, processRuntimeProps: ProcessProperties, prefix: string, ruleGroupSet: Rule[], customResponseBodies: CustomResponseBodies | undefined, ipSets: cdk.aws_wafv2.CfnIPSet[], regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[], deployHash?: string) : ServiceDataRuleGroup[] {
   const serviceDataRuleGroup : ServiceDataRuleGroup[] = [];
   let icon;
   if (type === "Pre") {
@@ -331,7 +355,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
         rulename = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
       }
       // transform ipSetReferenceStatements
-      const statement = transformRuleStatements(rule, prefix, stage, ipSets);
+      const statement = transformRuleStatements(rule, prefix, stage, ipSets,regexPatternSets);
 
       const cfnRuleProperty = {
         name: rulename,
@@ -443,21 +467,18 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
       value:
         processRuntimeProps.DeployedRuleGroupNames.toString(),
       description: type+"ProcessDeployedRuleGroupNames",
-      exportName: `${type}ProcessDeployedRuleGroupNames${deployHash ? "-"+deployHash : ""}`,
     });
 
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupCapacities", {
       value:
         processRuntimeProps.DeployedRuleGroupCapacities.toString(),
       description: type+"ProcessDeployedRuleGroupCapacities",
-      exportName: `${type}ProcessDeployedRuleGroupCapacities${deployHash ? "-"+deployHash : ""}`,
     });
 
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupIdentifier", {
       value:
         processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
       description: type+"ProcessDeployedRuleGroupIdentifier",
-      exportName: `${type}ProcessDeployedRuleGroupIdentifier${deployHash ? "-"+deployHash : ""}`,
     });
   } else {
     const threshold = 1500;
@@ -653,22 +674,19 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupNames", {
       value:
         processRuntimeProps.DeployedRuleGroupNames.toString(),
-      description: type+"ProcessDeployedRuleGroupNames",
-      exportName: `${type}ProcessDeployedRuleGroupNames${deployHash ? "-"+deployHash : ""}`,
+      description: type+"ProcessDeployedRuleGroupNames"
     });
 
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupCapacities", {
       value:
         processRuntimeProps.DeployedRuleGroupCapacities.toString(),
-      description: type+"ProcessDeployedRuleGroupCapacities",
-      exportName: `${type}ProcessDeployedRuleGroupCapacities${deployHash ? "-"+deployHash : ""}`,
+      description: type+"ProcessDeployedRuleGroupCapacities"
     });
 
     new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupIdentifier", {
       value:
         processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
-      description: type+"ProcessDeployedRuleGroupIdentifier",
-      exportName: `${type}ProcessDeployedRuleGroupIdentifier${deployHash ? "-"+deployHash : ""}`,
+      description: type+"ProcessDeployedRuleGroupIdentifier"
     });
   }
   return serviceDataRuleGroup;
@@ -692,17 +710,41 @@ function getActualIpReferenceStatementInStatement(ipSetReferenceStatement: wafv2
   return statement;
 }
 
-function transformRuleStatements(rule: Rule, prefix: string, stage: string, ipSets: cdk.aws_wafv2.CfnIPSet[]) {
-  const ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+function getActualRegexPatternSetReferenceStatementProperty(regexPatternSetStatement: wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty, prefix: string, stage: string, regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]) {
+  let actualRegexPAtternSetReferenceStatement: wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty;
+  if (regexPatternSetStatement.arn.startsWith("arn")) {
+    actualRegexPAtternSetReferenceStatement = regexPatternSetStatement;
+  } else {
+    const foundRegexPatternSet = regexPatternSets.find((regexPatternSet) => regexPatternSet.name === `${prefix}-${stage}-${regexPatternSetStatement.arn}`);
+    if (foundRegexPatternSet === undefined) throw new Error(`RegexPatternSet ${regexPatternSetStatement.arn} not found in stack`);
+    actualRegexPAtternSetReferenceStatement = {
+      arn: cdk.Fn.getAtt(foundRegexPatternSet.logicalId, "Arn").toString(),
+      fieldToMatch: regexPatternSetStatement.fieldToMatch,
+      textTransformations: regexPatternSetStatement.textTransformations
+    };
+  }
+  const statement : wafv2.CfnWebACL.StatementProperty = {
+    regexPatternSetReferenceStatement: actualRegexPAtternSetReferenceStatement
+  };
+  return statement;
+}
+
+function transformRuleStatements(rule: Rule, prefix: string, stage: string, ipSets?: cdk.aws_wafv2.CfnIPSet[], regexPatternSets?: cdk.aws_wafv2.CfnRegexPatternSet[]) {
+  let ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+  let regexPatternSetReferenceStatement = rule.statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
 
   const andStatement = rule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
 
   if (andStatement) {
     const statements = andStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
     for (let i=0; i<statements.length; i++) {
-      const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-      if (ipSetReferenceStatement) {
+      ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+      if (ipSetReferenceStatement && ipSets) {
         statements[i] = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+      }
+      regexPatternSetReferenceStatement = statements[i].regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+      if(regexPatternSetReferenceStatement && regexPatternSets) {
+        statements[i] = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
       }
     }
   }
@@ -712,16 +754,22 @@ function transformRuleStatements(rule: Rule, prefix: string, stage: string, ipSe
   if (orStatement) {
     const statements = orStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
     for (let i=0; i<statements.length; i++) {
-      const ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-      if (ipSetReferenceStatement) {
+      ipSetReferenceStatement = statements[i].ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+      if (ipSetReferenceStatement && ipSets) {
         statements[i] = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+      }
+      regexPatternSetReferenceStatement = statements[i].regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+      if(regexPatternSetReferenceStatement && regexPatternSets) {
+        statements[i] = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
       }
     }
   }
 
   let statement : wafv2.CfnWebACL.StatementProperty;
-  if (ipSetReferenceStatement) {
+  if (ipSetReferenceStatement && ipSets) {
     statement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+  } else if(regexPatternSetReferenceStatement && regexPatternSets) {
+    statement = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
   } else if (andStatement) {
     statement = { andStatement };
   } else if (orStatement) {

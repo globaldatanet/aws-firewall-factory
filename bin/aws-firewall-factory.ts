@@ -93,6 +93,13 @@ void (async () => {
         console.log("      ⚙️  [" + ipSet.ipAddressVersion + "] | 🌎 [" + config.WebAcl.Scope+ "]");
       }
     }
+    if(Array.isArray(config.WebAcl.RegexPatternSets) &&  config.WebAcl.RegexPatternSets.length > 0) {
+      console.log("\n𝍂 RegexPatternSets");
+      for(const regpatternset of config.WebAcl.RegexPatternSets) {
+        console.log("   ➕ " + regpatternset.name);
+        console.log("      ⚙️ 🌎 [" + config.WebAcl.Scope+ "]");
+      }
+    }
     const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
     if(wcuQuotaReached) {
       console.error("\u001B[31m","🚨 ERROR: Exit process due Quota Check for WCU 🚨 \n\n","\x1b[0m" + "\n\n");

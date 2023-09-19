@@ -1,7 +1,7 @@
 import { Config } from "../types/config";
 import util from "util";
 import { outputInfoBanner } from "./helpers";
-
+import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums";
 /**
  * The script will output a example WAF Skeleton Config to the terminal
  */
@@ -25,29 +25,26 @@ const skeletonConfig : Config = {
     PreProcess: {
       ManagedRuleGroups: [
         {
-          vendor: "AWS",
-          name: "AWSManagedRulesAmazonIpReputationList",
-          capacity: 25,
-          version: ""
+          vendor: ManagedRuleGroupVendor.AWS,
+          name: AwsManagedRules.AMAZON_IP_REPUTATION_LIST,
         },
         {
-          vendor: "AWS",
-          name: "AWSManagedRulesCommonRuleSet",
-          capacity: 700,
-          version: "",
+          vendor: ManagedRuleGroupVendor.AWS,
+          name: AwsManagedRules.COMMON_RULE_SET,
         }
       ]
     },
     PostProcess: {
 
     },
-    Scope: "REGIONAL",
-    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Scope: WebAclScope.REGIONAL,
+    Type: WebAclTypeEnum.ELASTICLOADBALANCINGV2_LOADBALANCER
   }
 };
 
 outputInfoBanner();
 console.log("ℹ️  Use the following snippet to create a skeleton config file for your Firewall. ℹ️\n");
+console.log("import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from \"../../lib/types/enums\";");
 console.log("import { Config } from \"../../lib/types/config\";\nexport const config: Config = {");
 console.log(util.inspect(skeletonConfig, false, null, true));
 console.log("};");
