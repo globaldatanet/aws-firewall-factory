@@ -15,6 +15,10 @@ vars:
   CDK_DEFAULT_ACCOUNT:
     sh: aws sts get-caller-identity |jq -r .
 tasks:
+  destroy:
+    desc: Destroy Stack
+    cmds:
+      - task: cdkdestroy
   deploy:
     desc: Deploy Stack
     cmds:
@@ -40,6 +44,18 @@ tasks:
     env:
       PROCESS_PARAMETERS: "{{.config}}"
       PREREQUISITE: "{{.prerequisite}}"
+  cdkdestroy:
+    desc: CDK Destroy
+    cmds:
+      - cdk destroy
+    vars:
+      ACCOUNT:
+        sh: aws sts get-caller-identity |jq -r .Account
+    env:
+      PROCESS_PARAMETERS: "{{.config}}"
+      PREREQUISITE: "{{.prerequisite}}"
+    silent: true
+    interactive: true
   cdkdeploy:
     desc: CDK Deploy
     cmds:

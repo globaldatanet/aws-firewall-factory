@@ -1,7 +1,27 @@
 # Change Log
 
 ## Released
+## 4.1.0
 
+### Added
+- This update presents a new feature that centralizes the management of RegexPatternSet. With this improvement, manual updates of regexpatternset across multiple AWS accounts are no longer necessary.
+  Users can now define the feature in code and replicate it for use by WAF rules wherever applicable.
+- Additionally, cdk destroy has been included in the taskfile.
+- Furthermore, we have modified several enums to enhance their ease of with previous versions: use while maintaining downward compatibility, such as
+  - WebAclScope
+  - AwsManagedRules
+  - ManagedRuleGroupVendor
+  - CustomResponseBodiesContentType
+  - WebAclTypeEnum
+- uuidFirewallFactoryResourceIdentitfier: Introducing a firewall identifier UUID that will be utilized for resource names in AWS.
+
+### Fixed
+- Capacity and version information for Managed Rule Groups are now optional. We calculate the capacity on the fly, so specifying capacity is unnecessary. If no version is provided, we will retrieve the latest version for the Managed Rule Group using the API.
+- DeliveryStreamName not checked - Erroneous if exceeding 64 character limit [source](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-kinesisfirehose-deliverystream.html#cfn-kinesisfirehose-deliverystream-deliverystreamname).
+- Fixed nonfunctional documentation links.
+
+### Removed
+- Export names from CloudFormation stack outputs, as we rely on the stack name and output names from the particular CloudFormation stack to obtain the necessary information.
 ## 4.0.0
 ### Added
 - A custom resource to retrieve the latest version of the ManagedRuleGroup and check if the specified version is valid.

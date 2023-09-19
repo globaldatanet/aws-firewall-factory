@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 import { aws_wafv2 as waf } from "aws-cdk-lib";
+import * as fwmEnums from "./enums";
 
 interface CustomRequestHandling {
   customRequestHandling?: {
@@ -59,10 +60,10 @@ type NameObject = {
   name: string
 }
 export interface ManagedRuleGroup {
-  vendor: string,
-  name: string,
-  version: string,
-  capacity: number,
+  vendor: fwmEnums.ManagedRuleGroupVendor | string | "AWS",
+  name: fwmEnums.AwsManagedRules | string,
+  version?: string,
+  capacity?: number,
   excludeRules?: NameObject[],
   overrideAction?: {
     type: "COUNT" | "NONE"

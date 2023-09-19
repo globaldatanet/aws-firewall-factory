@@ -4,20 +4,18 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import {
   CdkCustomResourceEvent,
-  CdkCustomResourceResponse,
-  Context,
+  CdkCustomResourceResponse
 } from "aws-lambda";
 import { getManagedRuleGroupVersion } from "./services/waf";
 import {ManagedRuleGroupVersionResponse} from "./types/index";
 
 export const handler = async (
-  event: CdkCustomResourceEvent,
-  context: Context,
+  event: CdkCustomResourceEvent
 ): Promise<CdkCustomResourceResponse> => {
   let ManagedVersionInfo: ManagedRuleGroupVersionResponse;
   let ParamVersion: string | undefined;
   let Latest: boolean | undefined;
-  console.log("Lambda is invoked with:" + JSON.stringify(event) +"-"+ JSON.stringify(context));
+  console.log("Lambda is invoked with:" + JSON.stringify(event));
   
   const response: CdkCustomResourceResponse = {
     StackId: event.StackId,

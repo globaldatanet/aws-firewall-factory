@@ -7,36 +7,40 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+    "plugin:@typescript-eslint/recommended"
   ],
-  "parserOptions": {
-    "project": true
-  },
   "rules": {
-    "semi": ["error", "always"],
-    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "semi": [2, "always"],
+    "eqeqeq": 2,
+    "indent": [2, 2, {"SwitchCase": 1}],
     "quotes": ["error", "double"],
-    "@typescript-eslint/naming-convention": [
-      "error",
-      {
-        "selector": ["variableLike", "method"],
-        "format": ["strictCamelCase"]
-      },
-      {
-        "selector": ["variable"],
-        "format": ["UPPER_CASE"],
-        "modifiers": ["const","global"],
-        "types": ["array", "boolean", "number", "string"]
-      },
-      {
-        "selector": ["class","interface","enum", "typeParameter", "typeAlias"],
-        "format": ["StrictPascalCase"]
-      },
-      {
-        "selector": ["enumMember"],
-        "format": ["UPPER_CASE"]
-      }
-    ]
+    "linebreak-style": "off",
+    "array-bracket-newline": "off",
+    "array-bracket-spacing": ["error", "never"],
+    "no-trailing-spaces": "off",
+    "padded-blocks": "off",
+    "arrow-body-style": "off",
+    "init-declarations": "off",
+    "comma-dangle": "off",
+    "keyword-spacing": [0, {"before": true, "after": true, "overrides": null}],
+    "prefer-template": "off",
+    "id-blacklist": "off",
+    "no-console": "off",
+    "no-sync": "off",
+    "complexity": "off",
+    "max-statements": "off",
+    "array-element-newline": "off",
+    "object-curly-spacing": "off",
+    "template-curly-spacing": "off",
+    "camelcase": "off",
+    "no-use-before-define": "off",
+    "id-length": "off",
+    "id-match": "off",
+    "max-len": "off",
+    "no-magic-numbers": "off",
+    "no-underscore-dangle": "off",
+    "no-process-env": "off",
+    "func-style": ["error", "declaration", { "allowArrowFunctions": true }],
+    "no-useless-escape": "off"
   }
 }

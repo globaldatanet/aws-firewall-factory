@@ -2,6 +2,7 @@
 import { Rule, ManagedRuleGroup } from "./fms";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { CfnTag } from "aws-cdk-lib";
+import * as fwmEnums from "./enums";
 
 export interface Config {
   readonly General: {
@@ -23,14 +24,15 @@ export interface Config {
     readonly Description?: string,
     readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
     readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
-    readonly Scope: "CLOUDFRONT" | "REGIONAL",
-    readonly Type: WebAclType | "ResourceTypeList",
-    readonly TypeList?: WebAclType[],
+    readonly Scope: fwmEnums.WebAclScope | "CLOUDFRONT" | "REGIONAL",
+    readonly Type: fwmEnums.WebAclTypeEnum | "ResourceTypeList" | WebAclType,
+    readonly TypeList?: fwmEnums.WebAclTypeEnum[] | WebAclType[],
     readonly ResourceTags?: Array<fms.CfnPolicy.ResourceTagProperty>,
     readonly ExcludeResourceTags?: boolean,
     readonly RemediationEnabled?: boolean,
     readonly ResourcesCleanUp?: boolean,
     readonly IPSets?: IPSet[],
+    readonly RegexPatternSets?: RegexPatternSet[];
     readonly PreProcess: RuleGroupSet,
     readonly PostProcess: RuleGroupSet,
   },
@@ -98,7 +100,7 @@ export type CustomResponseBodies = { [key:string]: {
     * @TJS-pattern [\s\S]*
   */
   Content: string,
-  ContentType: "APPLICATION_JSON" | "TEXT_HTML" | "TEXT_PLAIN",
+  ContentType: fwmEnums.CustomResponseBodiesContentType,
 }};
 
 export interface RuleGroupSet {
@@ -131,4 +133,16 @@ export interface IPSet {
   tags?: CfnTag[]
 }
 
+export interface RegexPatternSet {
+  /**
+    * @TJS-pattern ^[a-zA-Z0-9]+$
+  */
+  name: string, // This name will be used as a CloudFormation logical ID, so it can't have a already used name and must be alphanumeric
+  /*
+    * @TJS-pattern ^[\w+=:#@\/\-,\.][\w+=:#@\/\-,\.\s]+[\w+=:#@\/\-,\.]$
+  */
+  description?: string,
+  regularExpressionList: string[],
+  tags?: CfnTag[]
+}
 export const NONEVERSIONEDMANAGEDRULEGRPOUP = ["AWSManagedRulesBotControlRuleSet","AWSManagedRulesATPRuleSet","AWSManagedRulesACFPRuleSet","AWSManagedRulesAmazonIpReputationList","AWSManagedRulesAnonymousIpList"];

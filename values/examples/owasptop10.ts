@@ -1,4 +1,5 @@
 import { Config } from "../../lib/types/config";
+import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums";
 export const config: Config = {
   General: {
     DeployHash: "",
@@ -18,47 +19,35 @@ export const config: Config = {
     PreProcess: {
       ManagedRuleGroups: [
         {
-          vendor: "AWS",
-          name: "AWSManagedRulesAmazonIpReputationList",
-          version: "",
-          capacity: 25
+          vendor: ManagedRuleGroupVendor.AWS,
+          name: AwsManagedRules.AMAZON_IP_REPUTATION_LIST,
         },
         {
-          vendor: "AWS",
-          name: "AWSManagedRulesAnonymousIpList",
-          version: "",
-          capacity: 50
+          vendor: ManagedRuleGroupVendor.AWS,
+          name: AwsManagedRules.ANONYMOUS_IP_LIST,
         },
         {
-          vendor: "AWS",
-          name: "AWSManagedRulesBotControlRuleSet",
-          version: "",
-          capacity: 50
+          vendor: ManagedRuleGroupVendor.AWS,
+          name: AwsManagedRules.BOT_CONTROL_RULE_SET,
         },
         {
-          vendor: "AWS",
-          name: "AWSManagedRulesCommonRuleSet",
-          version: "",
-          capacity: 700
+          vendor: ManagedRuleGroupVendor.AWS,
+          name: AwsManagedRules.COMMON_RULE_SET,
         },
         {
-          vendor: "AWS",
-          name: "AWSManagedRulesKnownBadInputsRuleSet",
-          version: "",
-          capacity: 200
+          vendor: ManagedRuleGroupVendor.AWS,
+          name: AwsManagedRules.KNOWN_BAD_INPUTS_RULE_SET,
         },
         {
-          vendor: "AWS",
-          name: "AWSManagedRulesSQLiRuleSet",
-          version: "",
-          capacity: 200
+          vendor: ManagedRuleGroupVendor.AWS,
+          name: AwsManagedRules.SQLI_RULE_SET,
         }
       ]
     },
     PostProcess: {
     },
-    Scope: "REGIONAL",
-    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Scope: WebAclScope.REGIONAL,
+    Type: WebAclTypeEnum.ELASTICLOADBALANCINGV2_LOADBALANCER
   }
 
 };
