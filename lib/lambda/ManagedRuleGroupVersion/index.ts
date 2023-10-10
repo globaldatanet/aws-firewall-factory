@@ -10,11 +10,12 @@ import { getManagedRuleGroupVersion } from "./services/waf";
 import {ManagedRuleGroupVersionResponse} from "./types/index";
 
 export const handler = async (
-  event: CdkCustomResourceEvent
+  event: CdkCustomResourceEvent,
 ): Promise<CdkCustomResourceResponse> => {
   let ManagedVersionInfo: ManagedRuleGroupVersionResponse;
   let ParamVersion: string | undefined;
-  let Latest: boolean | undefined;
+  let Latest: boolean;
+  let enforceUpdate: boolean;
   console.log("Lambda is invoked with:" + JSON.stringify(event));
   
   const response: CdkCustomResourceResponse = {
@@ -32,12 +33,13 @@ export const handler = async (
   console.log(`🔎 Searching Managed Rule Version for: \n 🏬  ${event.ResourceProperties.VendorName} \n 🏷️  ${event.ResourceProperties.Name} \n 🌏  ${event.ResourceProperties.Scope}`);
   if (event.RequestType === "Update") {
     console.log("🔄 Update Event");
-    event.OldResourceProperties.Version === "" ? ParamVersion = undefined : ParamVersion = event.OldResourceProperties.Version;
+    event.OldResourceProperties.Version === "" || event.ResourceProperties.EnforceUpdate === "true" ? ParamVersion = undefined : ParamVersion = event.OldResourceProperties.Version;
   }
   try {
     event.ResourceProperties.ManagedRuleGroupVersion === "" ? ParamVersion = undefined : ParamVersion = event.ResourceProperties.ManagedRuleGroupVersion;
-    event.ResourceProperties.Latest === undefined ? Latest = undefined : Latest = event.ResourceProperties.Latest;
-    ManagedVersionInfo = await getManagedRuleGroupVersion(event.ResourceProperties.VendorName, event.ResourceProperties.Name, event.ResourceProperties.Scope, ParamVersion, Latest);
+    event.ResourceProperties.Latest === "true" ? Latest = true : Latest = false;
+    event.ResourceProperties.EnforceUpdate === "false" ? enforceUpdate = false : enforceUpdate = true;
+    ManagedVersionInfo = await getManagedRuleGroupVersion(event.ResourceProperties.VendorName, event.ResourceProperties.Name, event.ResourceProperties.Scope, ParamVersion, Latest, enforceUpdate);
     if(ManagedVersionInfo.State === "SUCCESS"){
       response.Status = "SUCCESS";
       response.Data = { Version: ManagedVersionInfo.Version, Result: ManagedVersionInfo.Description };

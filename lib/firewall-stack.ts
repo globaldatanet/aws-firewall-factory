@@ -271,7 +271,10 @@ const subVariables : SubVariables = {};
 function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string) : ServiceDataManagedRuleGroup[] {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
-
+    if(managedRuleGroup.overrideAction?.type === "COUNT"){
+      // eslint-disable-next-line quotes
+      console.log("\x1b[31m",`\n🚨 OverrideAction of ManagedRuleGroup ${managedRuleGroup.name} is set to COUNT, which simply tallies all rules within the group.\n   However, this practice may create a vulnerability in your firewall and is not recommended.`,"\x1b[0m");
+    }
     if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
       console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
       cfnManagedRuleGroup.push({
@@ -297,7 +300,8 @@ function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: Managed
           Name: managedRuleGroup.name,
           Scope: wafScope,
           ManagedRuleGroupVersion: managedRuleGroup.version,
-          Latest: managedRuleGroup.latestVersion ? managedRuleGroup.latestVersion : false
+          Latest: managedRuleGroup.latestVersion ? managedRuleGroup.latestVersion : false,
+          EnforceUpdate: managedRuleGroup.enforceUpdate ? Date.now() : false
         },
         serviceToken: managedRuleGroupVersionProvider.serviceToken,
       });
@@ -733,6 +737,21 @@ function transformRuleStatements(rule: Rule, prefix: string, stage: string, ipSe
   let ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
   let regexPatternSetReferenceStatement = rule.statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
 
+  const notStatement = rule.statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+  if(notStatement && (ipSets || regexPatternSets)) {
+    let statement = notStatement.statement as cdk.aws_wafv2.CfnWebACL.StatementProperty;
+    ipSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+    if (ipSetReferenceStatement && ipSets) {
+      statement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+    }
+    regexPatternSetReferenceStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+    if(regexPatternSetReferenceStatement && regexPatternSets) {
+      statement = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
+    }
+    const adjustedstatement = {notStatement: {statement}};
+    statement = adjustedstatement as cdk.aws_wafv2.CfnWebACL.StatementProperty;
+  }
+
   const andStatement = rule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
 
   if (andStatement) {
@@ -745,6 +764,20 @@ function transformRuleStatements(rule: Rule, prefix: string, stage: string, ipSe
       regexPatternSetReferenceStatement = statements[i].regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
       if(regexPatternSetReferenceStatement && regexPatternSets) {
         statements[i] = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
+      }
+      const notStatement = statements[i].notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+      if(notStatement && (ipSets || regexPatternSets)) {
+        let statement = notStatement.statement as cdk.aws_wafv2.CfnWebACL.StatementProperty;
+        ipSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+        if (ipSetReferenceStatement && ipSets) {
+          statement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+        }
+        regexPatternSetReferenceStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+        if(regexPatternSetReferenceStatement && regexPatternSets) {
+          statement = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
+        }
+        const adjustedstatement = {notStatement: {statement}};
+        statements[i] = adjustedstatement as cdk.aws_wafv2.CfnWebACL.StatementProperty;
       }
     }
   }
@@ -761,6 +794,20 @@ function transformRuleStatements(rule: Rule, prefix: string, stage: string, ipSe
       regexPatternSetReferenceStatement = statements[i].regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
       if(regexPatternSetReferenceStatement && regexPatternSets) {
         statements[i] = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
+      }
+      const notStatement = statements[i].notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+      if(notStatement && (ipSets || regexPatternSets)) {
+        let statement = notStatement.statement as cdk.aws_wafv2.CfnWebACL.StatementProperty;
+        ipSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+        if (ipSetReferenceStatement && ipSets) {
+          statement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+        }
+        regexPatternSetReferenceStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+        if(regexPatternSetReferenceStatement && regexPatternSets) {
+          statement = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
+        }
+        const adjustedstatement = {notStatement: {statement}};
+        statements[i] = adjustedstatement as cdk.aws_wafv2.CfnWebACL.StatementProperty;
       }
     }
   }

@@ -45,9 +45,9 @@ async function getManagedRuleGroupVersions(VendorName: string,Name: string,Scope
 }
 
 
-export async function getManagedRuleGroupVersion(VendorName: string,Name: string,Scope: string, ParamVersion?: string, Latest?: boolean): Promise<ManagedRuleGroupVersionResponse> {
+export async function getManagedRuleGroupVersion(VendorName: string,Name: string,Scope: string, ParamVersion?: string, Latest?: boolean, enforceUpdate?: boolean): Promise<ManagedRuleGroupVersionResponse> {
   const managerulegroupVersions = await getManagedRuleGroupVersions(VendorName,Name,Scope);
-  if(ParamVersion && managerulegroupVersions.Versions){
+  if(ParamVersion && managerulegroupVersions.Versions && !enforceUpdate){
     console.log("🧪 Version to check: " + ParamVersion);
     if(managerulegroupVersions.Versions.filter((MgnVersion) => MgnVersion.Name === ParamVersion)){
       console.log(`✅ Version found - ${ParamVersion} is valid`);
@@ -57,12 +57,15 @@ export async function getManagedRuleGroupVersion(VendorName: string,Name: string
       return {Version: ParamVersion, State: "FAILED", Description: "Specified Version not found"};
     }
   }
-  if(Latest && managerulegroupVersions.CurrentDefaultVersion){
-    console.log("✅ Latest version is: " + managerulegroupVersions.CurrentDefaultVersion);
-    return {Version: managerulegroupVersions.CurrentDefaultVersion, State: "SUCCESS", Description: "Version found"};
+  if(Latest){
+    const latestVersion = managerulegroupVersions.Versions.reduce((ver, curr) => {
+      return curr.LastUpdateTimestamp! > ver.LastUpdateTimestamp! ? curr : ver;
+    });
+    console.log("✅ Latest version is: " + latestVersion.Name);
+    return {Version: latestVersion.Name!, State: "SUCCESS", Description: "Version found"};
   }
   if(managerulegroupVersions.CurrentDefaultVersion){
-    console.log("✅ Latest version is: " + managerulegroupVersions.CurrentDefaultVersion);
+    console.log("✅ Current default version is: " + managerulegroupVersions.CurrentDefaultVersion);
     return {Version: managerulegroupVersions.CurrentDefaultVersion, State: "SUCCESS", Description: "Version found"};
   }
   if(managerulegroupVersions.Error){

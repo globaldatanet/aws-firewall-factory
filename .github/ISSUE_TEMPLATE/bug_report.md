@@ -7,13 +7,13 @@ assignees: ''
 
 ---
 
-**Describe the bug
+**Describe the bug**
 A clear and concise description of what the bug is.
 
-**How to reproduce it
+**How to reproduce it**
 Steps to reproduce the behaviour.
 
-**Expected behaviour
+**Expected behaviour**
 A clear and concise description of what you expect to happen.
 
 **Please fill in the following information about the solution:**.
@@ -25,5 +25,5 @@ A clear and concise description of what you expect to happen.
 **Screenshots**.
 If applicable, add screenshots to help explain your problem (please **do NOT include sensitive information**).
 
-**Additional context
+**Additional context**
 Add any other context to the issue here.
