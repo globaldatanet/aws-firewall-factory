@@ -44,7 +44,11 @@ export interface Prerequisites {
   readonly General: {
     readonly Prefix: string,
   },
-  readonly Logging: {
+  readonly Information?:{
+    SlackWebhook?: string,
+    TeamsWebhook?: string,
+  }
+  readonly Logging?: {
       readonly BucketProperties?: {
         readonly BucketName?: string,
         readonly KmsEncryptionKey: boolean,

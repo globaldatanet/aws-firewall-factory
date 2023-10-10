@@ -289,7 +289,7 @@ async function calculateCapacities(
         managedrule.version
       );
       managedrule.capacity = capacity;
-      managedcapacitieslog.push([managedrule.name, managedrule.capacity, managedrule.version ?? "unversioned", managedrule.enforceUpdate ?? "false"]);
+      managedcapacitieslog.push([managedrule.name, managedrule.capacity, managedrule.version !== "" ? managedrule.version : "[unversioned]", managedrule.enforceUpdate ?? "false"]);
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
       managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
@@ -312,7 +312,7 @@ async function calculateCapacities(
         config.WebAcl.Scope,
         managedrule.version
       );
-      managedcapacitieslog.push([managedrule.name, managedrule.capacity, managedrule.version ?? "unversioned", managedrule.enforceUpdate ?? "false"]);
+      managedcapacitieslog.push([managedrule.name, managedrule.capacity, managedrule.capacity, managedrule.version !== "" ? managedrule.version : "[unversioned]", managedrule.enforceUpdate ?? "false"]);
       runtimeProperties.ManagedRuleCapacity += capacity;
       runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
       managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";

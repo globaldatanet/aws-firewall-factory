@@ -71,6 +71,7 @@ export interface ManagedRuleGroup {
   ruleActionOverrides?: RuleActionOverrideProperty[],
   versionEnabled?: boolean
   latestVersion?: boolean
+  enforceUpdate?:boolean
 }
 export interface Rule {
   name: string,
