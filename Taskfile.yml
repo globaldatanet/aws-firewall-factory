@@ -73,7 +73,7 @@ tasks:
   creatediagram:
     desc: Create Diagram
     cmds:
-      - if [[ {{.CREATE_DIAGRAM}} = true ]] ; then echo 🤳🏻 $(cfn-dia draw.io -t cdk.out/"$(cat values/{{.config}}.json | jq -r '.General.Prefix')-WAF-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')".template.json --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< values/{{.config}}.json) --ci-mode --skip-synth); else echo ⏭   Skipping Diagram generation 🤳🏻 ; fi
+      - if [[ {{.CREATE_DIAGRAM}} = true ]] ; then echo 🤳🏻 $(cfn-dia draw.io -t cdk.out/"$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Prefix')-WAF-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.WebAcl.Name')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Stage')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.DeployHash')".template.json --output-file $(sed "s/values/diagrams/g;s/.json/.drawio/g" <<< values/{{.config}}.json) --ci-mode --skip-synth); else echo ⏭   Skipping Diagram generation 🤳🏻 ; fi
     silent: true
     env:
       PROCESS_PARAMETERS: values/{{.config}}.json
@@ -81,13 +81,16 @@ tasks:
     desc: Test of your waf using GoTestWAF
     cmds:
       - echo 🧪  Testing of your new 🔥 WAF using GoTestWAF
+      - mkdir -p ./waf-evaluation-report/$(date '+%Y-%m-%d')
       - |
-        items=$(cat values/{{.config}}.json | jq -r '.[] | .SecuredDomain[]?')
+        items=$(ts-node ./gotestwaf/gotestwaf.ts | jq -r '.[] | .SecuredDomain[]?')
         for item in ${items[@]}; do
-            echo "Using fqdn in 🖥 url : $item"
-            ./gotestwaf/gotestwaf --url https://$item --workers 50 --blockConnReset  --wafName="$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck --reportPath "./waf-evaluation-report/$(date '+%Y-%m-%d')" --reportName "$(cat values/{{.config}}.json | jq -r '.General.Prefix')-$(cat values/{{.config}}.json | jq -r '.WebAcl.Name')-$(cat values/{{.config}}.json | jq -r '.General.Stage')-$(cat values/{{.config}}.json | jq -r '.General.DeployHash')"
+            echo "Using fqdn in 🖥  url : $item"
+            ./gotestwaf/gotestwaf --url https://$item --workers 50 --blockConnReset  --wafName="$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Prefix')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.WebAcl.Name')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Stage')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck --reportPath "./waf-evaluation-report/$(date '+%Y-%m-%d')" --reportName "$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Prefix')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.WebAcl.Name')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Stage')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.DeployHash')"
         done
     silent: true
+    env:
+      PROCESS_PARAMETERS: "{{.config}}"
     preconditions:
       - sh: "[ '{{.WAF_TEST}}' != 'true' ]"
         msg: ⏭  Skipping WAF Testing 🧪

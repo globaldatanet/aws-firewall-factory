@@ -1,6 +1,27 @@
 # Change Log
 
 ## Released
+## 4.1.1
+### Added
+- Added Console output if ManagedRuleGroup OverrideAction is set to Count - This option is not commonly used. If any rule in the rule group results in a match, this override sets the resulting action from the rule group to Count.
+- Enums for all AWS ManagedRuleGroup Rules and Labels, this will help you to not create exclude Rules of Label Match Statements for none existing Rules or Labels. AWS CloudFormation even not trow any error right now if you try use not existing Labels or Rules.
+- Optional Lambda function to prerequisite Stack that sends notifications about changes in AWS managed rule groups, such as upcoming new versions and urgent security updates, to messaging platforms like Slack or Teams.
+### Fixed
+- RegexPatternSets and IPSets in NotStatements AWS Firewall Factory are ignored while WCU calculation
+- gotestwaf task was not customized for Typescript configuration files.
+- ManagedRuleGroupVersion lambda was always using the latest ManagedRulegroup version if no version was specified. Now the lambda function is using the [current Default version](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups-versioning.html).
+- Added Optional Parameter for ManagedRuleGroupVersion lambda, you can now set enforceUpdate to load the latest or the current Default version during WAF update.
+- Bump @aws-cdk-lib from 2.93.0 to 2.100.0
+- Bump @aws-cdk from 2.93.0 to 2.100.0
+- Bump @aws-sdk/client-cloudformation from 3.398.0 to 3.427.0
+- Bump @aws-sdk/client-cloudwatch from 3.398.0 to 3.427.0
+- Bump @aws-sdk/client-fms from 3.398.0 to 3.427.0
+- Bump @aws-sdk/client-pricing from 3.398.0 to 3.427.0
+- Bump @aws-sdk/client-service-quotas from 3.398.0 to 3.427.0
+- Bump @aws-sdk/client-shield from 3.398.0 to 3.427.0
+- Bump @aws-sdk/client-wafv2 from 3.398.0 to 3.427.0
+- Bump @typescript-eslint/eslint-plugin from 6.4.1 to 6.7.4
+
 ## 4.1.0
 
 ### Added
