@@ -1,6 +1,13 @@
 # Change Log
 
 ## Released
+
+## 4.1.2
+### Fixed
+- Separate NotStatements where not parsed correctly while deployment
+- Bump @typescript-eslint/eslint-plugin 6.7.4 from to 6.7.5
+- Bump @typescript-eslint/parser 6.0.0 from to 6.7.5
+
 ## 4.1.1
 ### Added
 - Added Console output if ManagedRuleGroup OverrideAction is set to Count - This option is not commonly used. If any rule in the rule group results in a match, this override sets the resulting action from the rule group to Count.

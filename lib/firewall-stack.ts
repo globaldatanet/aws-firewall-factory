@@ -11,7 +11,7 @@ import { aws_kinesisfirehose as firehouse } from "aws-cdk-lib";
 import { aws_iam as iam } from "aws-cdk-lib";
 import { aws_logs as logs } from "aws-cdk-lib";
 import { Config, CustomResponseBodies, NONEVERSIONEDMANAGEDRULEGRPOUP } from "./types/config";
-import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule } from "./types/fms";
+import { ManagedRuleGroup, ManagedServiceData, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule, NotStatementProperty } from "./types/fms";
 import { RuntimeProperties, ProcessProperties } from "./types/runtimeprops";
 import {WafCloudWatchDashboard} from "./constructs/cloudwatch";
 import * as path from "path";
@@ -592,7 +592,7 @@ function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", capac
           rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-"+deployHash : ""}`;
         }
 
-        const statement = transformRuleStatements(ruleGroupSet[statementindex],prefix, stage, ipSets);
+        const statement = transformRuleStatements(ruleGroupSet[statementindex],prefix, stage, ipSets, regexPatternSets);
         const cfnRuleProperty = {
           name: rulename,
           priority: ruleGroupSet[statementindex].priority,
@@ -737,19 +737,20 @@ function transformRuleStatements(rule: Rule, prefix: string, stage: string, ipSe
   let ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
   let regexPatternSetReferenceStatement = rule.statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
 
-  const notStatement = rule.statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
-  if(notStatement && (ipSets || regexPatternSets)) {
+  const notStatement = rule.statement.notStatement as NotStatementProperty | undefined;
+
+  if(notStatement) {
     let statement = notStatement.statement as cdk.aws_wafv2.CfnWebACL.StatementProperty;
-    ipSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-    if (ipSetReferenceStatement && ipSets) {
-      statement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, ipSets);
+    const notipSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+    if (notipSetReferenceStatement && ipSets) {
+      statement = getActualIpReferenceStatementInStatement(notipSetReferenceStatement, prefix, stage, ipSets);
     }
-    regexPatternSetReferenceStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
-    if(regexPatternSetReferenceStatement && regexPatternSets) {
-      statement = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
+    const notregexPatternSetReferenceStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+    if(notregexPatternSetReferenceStatement && regexPatternSets) {
+      statement = getActualRegexPatternSetReferenceStatementProperty(notregexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
     }
-    const adjustedstatement = {notStatement: {statement}};
-    statement = adjustedstatement as cdk.aws_wafv2.CfnWebACL.StatementProperty;
+    notStatement.statement = statement;
+    rule.statement.notStatement as wafv2.CfnWebACL.NotStatementProperty;
   }
 
   const andStatement = rule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
