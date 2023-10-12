@@ -120,3 +120,7 @@ interface ServiceDataAbstactRuleGroup {
   ruleGroupArn: string | null,
   ruleGroupType: string
 }
+
+export interface NotStatementProperty {
+  statement: waf.CfnWebACL.StatementProperty;
+}
