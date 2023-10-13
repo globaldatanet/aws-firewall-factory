@@ -23,17 +23,33 @@ on:
   
 jobs:
   deploy_production_main:
-    name: Test and deploy Firewalls
+    name: Test and deploy RegexPatternSets Firewall
     runs-on: ubuntu-latest
     steps:
       - name: 📦 Install Taskfile
         run: |
           npm install -g @go-task/cli
+      # Install node.js since we need npm to install cdk
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '18.x'
+      # Cache node modules for subsequent runs to reduce build times
+      - name: Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+      # Install cdk and typescript globally
+      - name: Install CDK and typescript globally
+        run: |
+          npm i -g aws-cdk typescript ts-node @types/node
+          npm link typescript
       - name: 📦 Install Packages
         run: |
-          ls
-          cd ..
-          ls
           npm install
       - name: ⬇️ Checkout
         uses: actions/checkout@v3
@@ -48,7 +64,11 @@ jobs:
           mask-aws-account-id: false
       - name: ✚ Deploy Firewall to AWS
         run: |
+          export CDK_DEFAULT_ACCOUNT=${{ env.ACCOUNT_ID }}
+          export CDK_DEFAULT_REGION=${{ env.AWS_REGION }}
           task deploy config=regexPatternSetsTests
       - name: 🗑️ Remove Firewall from AWS
         run: |
+          export CDK_DEFAULT_ACCOUNT=${{ env.ACCOUNT_ID }}
+          export CDK_DEFAULT_REGION=${{ env.AWS_REGION }}
           task destroy config=regexPatternSetsTests
