@@ -18,7 +18,9 @@ on:
       - closed
       - opened
       - reopened
-
+    branches:
+      - "**"
+  
 jobs:
   deploy_production_main:
     name: Test and deploy Firewalls

@@ -18,6 +18,8 @@ on:
       - closed
       - opened
       - reopened
+    branches:
+      - "**"
 
 jobs:
   deploy_production_main:
