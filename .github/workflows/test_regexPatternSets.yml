@@ -1,0 +1,50 @@
+
+
+env:
+  AWS_REGION: eu-central-1
+  AWS_ROLE: FirewallFactoryGithubPipelineRole
+  AWS_ACCOUNT: 859220371210
+
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    types:
+      - closed
+      - opened
+      - reopened
+
+jobs:
+  deploy_production_main:
+    name: Test and deploy Firewalls
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'main' && github.event_name == 'push'
+    steps:
+      - name: 📦 Install Taskfile
+        run: |
+          npm install -g @go-task/cli
+      - name: 📦 Install Packages
+        run: |
+          npm install
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v3
+      - name: 🔑 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        env:
+          ACCOUNT_ID: ${{ env.AWS_ACCOUNT }}
+        with:
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+          mask-aws-account-id: false
+      - name: ✚ Deploy Firewall to AWS
+        run: |
+          task deploy config=regexPatternSetsTests
+      - name: 🗑️ Remove Firewall from AWS
+        run: |
+          task destroy config=regexPatternSetsTests

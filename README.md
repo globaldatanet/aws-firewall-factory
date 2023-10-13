@@ -19,6 +19,7 @@
 - [🎬 Media](#-media)
     - [🔗 Useful Links](#-useful-links)
 - [🗺️ Architecture](#️-architecture)
+- [🧪 Tests](#-tests)
 - [🦸🏼‍♀️ Contributors](#️-contributors)
   - [👩‍💻 Contribute](#-contribute)
   - [👏 Supporters](#-supporters)
@@ -56,6 +57,16 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 ## 🗺️ Architecture
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
+
+## 🧪 Tests
+|  Test | Status  |
+|---|---|
+|  Linting | ![linting](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/linting.yml/badge.svg)  |
+|  WAF Deployment - Only Managed Rule Groups  | ![onlyManagedRuleGroups](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/test_onlymanagedrulegroups.yml/badge.svg)  |
+|  WAF Deployment - IpSets | ![IpSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/test_ipSets.yml/badge.svg)   |
+|  WAF Deployment - RegexPatternSets | ![regexPatternSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/test_regexPatternSets.yml/badge.svg)  |
+
+
 
 ## 🦸🏼‍♀️ Contributors
 
