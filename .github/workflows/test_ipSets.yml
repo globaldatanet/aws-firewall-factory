@@ -59,6 +59,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
           mask-aws-account-id: false
+        - name: 🚀 Set up QEMU
+          uses: docker/setup-qemu-action@v2
+        - name: 🫙 Set up Docker Buildx
+          uses: docker/setup-buildx-action@v2
       - name: 🔥 Deploy Firewall to AWS
         run: |
           export CDK_DEFAULT_ACCOUNT=${{ env.ACCOUNT_ID }}
