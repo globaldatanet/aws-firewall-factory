@@ -9,6 +9,8 @@ permissions:
   id-token: write
   contents: read
 
+concurrency: ci-${{ github.ref }}
+
 on:
   push:
     branches:
