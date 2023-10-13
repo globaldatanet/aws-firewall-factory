@@ -31,6 +31,9 @@ jobs:
           npm install -g @go-task/cli
       - name: 📦 Install Packages
         run: |
+          ls
+          cd ..
+          ls
           npm install
       - name: ⬇️ Checkout
         uses: actions/checkout@v3
