@@ -59,7 +59,7 @@ tasks:
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - cdk deploy --require-approval never {{.TAGS}} --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
+      - DOCKER_BUILDKIT=1 cdk deploy --require-approval never {{.TAGS}} --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
