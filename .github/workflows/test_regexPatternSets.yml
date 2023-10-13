@@ -25,7 +25,6 @@ jobs:
   deploy_production_main:
     name: Test and deploy Firewalls
     runs-on: ubuntu-latest
-    if: github.ref_name == 'main' && github.event_name == 'push'
     steps:
       - name: 📦 Install Taskfile
         run: |
