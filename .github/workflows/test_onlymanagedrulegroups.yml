@@ -28,16 +28,14 @@ jobs:
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v3
-      - name: 📦 Install Taskfile
+      - name: 📁 Install Taskfile
         run: |
           npm install -g @go-task/cli
-      # Install node.js since we need npm to install cdk
-      - name: Use Node.js
+      - name: ☊ Use Node.js
         uses: actions/setup-node@v1
         with:
           node-version: '18.x'
-      # Cache node modules for subsequent runs to reduce build times
-      - name: Cache Node.js modules
+      - name: 💾 Cache Node.js modules
         uses: actions/cache@v2
         with:
           path: ~/.npm
@@ -45,8 +43,7 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
-      # Install cdk and typescript globally
-      - name: Install CDK and typescript globally
+      - name: 🌐 Install CDK and typescript globally
         run: |
           npm i -g aws-cdk typescript ts-node @types/node
           npm link typescript
@@ -62,7 +59,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
           mask-aws-account-id: false
-      - name: ✚ Deploy Firewall to AWS
+      - name: 🔥 Deploy Firewall to AWS
         run: |
           export CDK_DEFAULT_ACCOUNT=${{ env.ACCOUNT_ID }}
           export CDK_DEFAULT_REGION=${{ env.AWS_REGION }}

@@ -173,7 +173,7 @@ export class FirewallStack extends cdk.Stack {
     managedRuleGroupVersionLambdaRole.addToPolicy(wafGetManagedRuleGroupVersion);
 
     const managedRuleGroupVersionLambda = new NodejsFunction.NodejsFunction(this, "managedRuleGroupVersionLambdaFunction", {
-      entry: path.join(__dirname, "../lib/lambda/ManagedRuleGRoupVersion/index.ts"),
+      entry: path.join(__dirname, "../lib/lambda/ManagedRuleGroupVersion/index.ts"),
       handler: "handler",
       timeout: cdk.Duration.seconds(30),
       architecture:lambda.Architecture.ARM_64,
