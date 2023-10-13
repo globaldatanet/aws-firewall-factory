@@ -65,8 +65,6 @@ jobs:
         uses: docker/setup-buildx-action@v2
       - name: 🔥 Deploy Firewall to AWS
         run: |
-          export CDK_DEFAULT_ACCOUNT=${{ env.ACCOUNT_ID }}
-          export CDK_DEFAULT_REGION=${{ env.AWS_REGION }}
           task deploy config=onlyManagedRuleGroupsTests
       - name: 🗑️ Remove Firewall from AWS
         run: |
