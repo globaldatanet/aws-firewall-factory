@@ -26,6 +26,8 @@ jobs:
     name: Test and deploy RegexPatternSets Firewall
     runs-on: ubuntu-latest
     steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v3
       - name: 📦 Install Taskfile
         run: |
           npm install -g @go-task/cli
@@ -51,8 +53,6 @@ jobs:
       - name: 📦 Install Packages
         run: |
           npm install
-      - name: ⬇️ Checkout
-        uses: actions/checkout@v3
       - name: 🔑 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         env:
