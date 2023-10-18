@@ -47,6 +47,7 @@ export interface Prerequisites {
   readonly Information?:{
     SlackWebhook?: string,
     TeamsWebhook?: string,
+    Ddos?: boolean,
   }
   readonly Logging?: {
       readonly BucketProperties?: {

@@ -3,6 +3,9 @@
 ## Released
 
 ## 4.1.2
+
+## Added
+- Optional Lambda function to prerequisite Stack that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams) - [AWS Shield Advanced]
 ### Fixed
 - Separate NotStatements where not parsed correctly while deployment
 - Bump @typescript-eslint/eslint-plugin 6.7.4 from to 6.7.5
