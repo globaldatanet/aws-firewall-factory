@@ -1,4 +1,4 @@
-name: Test Deploy Only Managed RuleGroups Firewall
+name: ManagedRuleGroups-Firewall
 
 
 env:

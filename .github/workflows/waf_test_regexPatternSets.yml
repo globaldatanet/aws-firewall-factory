@@ -1,4 +1,4 @@
-name: Test Deploy RegexPatternSets Firewall
+name: RegexPatternSets-Firewall
 
 
 env:
@@ -12,7 +12,7 @@ permissions:
 
 on:
   workflow_run:
-    workflows: ["Test Deploy IpSet Firewall"]
+    workflows: ["IpSet-Firewall"]
     types:
       - completed
   

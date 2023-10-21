@@ -1,4 +1,4 @@
-name: Test Deploy IpSet Firewall
+name: IpSet-Firewall
 
 env:
   AWS_REGION: eu-central-1
@@ -13,7 +13,7 @@ concurrency: ci-${{ github.ref }}
 
 on:
   workflow_run:
-    workflows: ["Test Deploy Only Managed RuleGroups Firewall"]
+    workflows: ["ManagedRuleGroups-Firewall"]
     types:
       - completed
 jobs:
