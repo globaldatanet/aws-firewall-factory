@@ -1,6 +1,5 @@
 name: RegexPatternSets-Firewall
 
-
 env:
   AWS_REGION: eu-central-1
   AWS_ROLE: FirewallFactoryGithubPipelineRole
@@ -12,7 +11,7 @@ permissions:
 
 on:
   workflow_run:
-    workflows: [IpSet-Firewall]
+    workflows: [ManagedRuleGroups-Firewall]
     types:
       - completed
 

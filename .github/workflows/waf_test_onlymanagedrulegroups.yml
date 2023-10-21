@@ -1,6 +1,5 @@
 name: ManagedRuleGroups-Firewall
 
-
 env:
   AWS_REGION: eu-central-1
   AWS_ROLE: FirewallFactoryGithubPipelineRole

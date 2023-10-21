@@ -8,7 +8,6 @@ on:
     branches:
       - master
       - linting
-  workflow_dispatch:
 
 jobs:
   nodejs-test:
