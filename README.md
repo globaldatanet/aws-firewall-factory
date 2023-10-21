@@ -10,7 +10,7 @@
 
 **[🚧 Feature request](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=feature-request%2C+enhancement&template=feature_request.md&title=)** | **[🐛 Bug Report](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=bug%2C+triage&template=bug_report.md&title=)**
 
-![aws-firewall-factory](https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?font=Bitter&forks=1&logo=https%3A%2F%2Fgithub.com%2Fglobaldatanet%2Faws-firewall-factory%2Fraw%2F4.1.3%2Fstatic%2Ficon%2Ffirewallfactory.svg&name=1&pattern=Solid&stargazers=1&theme=Dark)
+<img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?font=Bitter&forks=1&logo=https%3A%2F%2Fgithub.com%2Fglobaldatanet%2Faws-firewall-factory%2Fraw%2F4.1.3%2Fstatic%2Ficon%2Ffirewallfactory.svg&name=1&pattern=Solid&stargazers=1&theme=Dark" alt="aws-firewall-factory" width="640" height="320" />
 
 ## 𒋰 Table of contents
 
