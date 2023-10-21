@@ -9,11 +9,23 @@ permissions:
   id-token: write
   contents: read
 
+concurrency: ci-${{ github.ref }}
+
 on:
-  workflow_run:
-    workflows: [ManagedRuleGroups-Firewall]
-    types:
-      - completed
+  push:
+    branches:
+      - master
+    paths:
+      - 'bin/**/*'
+      - 'lib/**/*'
+      - 'package*.json'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'bin/**/*'
+      - 'lib/**/*'
+      - 'package*.json'
 
 jobs:
   deploy_production_main:
