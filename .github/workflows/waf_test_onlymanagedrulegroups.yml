@@ -14,14 +14,10 @@ concurrency: ci-${{ github.ref }}
 on:
   push:
     branches:
-      - "**"
+      - master
   pull_request:
-    types:
-      - closed
-      - opened
-      - reopened
     branches:
-      - "**"
+      - master
 
 jobs:
   deploy_production_main:

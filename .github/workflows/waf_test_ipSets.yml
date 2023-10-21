@@ -12,17 +12,10 @@ permissions:
 concurrency: ci-${{ github.ref }}
 
 on:
-  push:
-    branches:
-      - "**"
-  pull_request:
+  workflow_run:
+    workflows: ["waf_test_onlymanagedrulegroups"]
     types:
-      - closed
-      - opened
-      - reopened
-    branches:
-      - "**"
-
+      - completed
 jobs:
   deploy_production_main:
     name: Test and deploy IpSet Firewall

@@ -9,19 +9,11 @@ permissions:
   id-token: write
   contents: read
 
-concurrency: ci-${{ github.ref }}
-
 on:
-  push:
-    branches:
-      - "**"
-  pull_request:
+  workflow_run:
+    workflows: ["waf_test_ipSets"]
     types:
-      - closed
-      - opened
-      - reopened
-    branches:
-      - "**"
+      - completed
   
 jobs:
   deploy_production_main:
