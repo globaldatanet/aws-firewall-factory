@@ -12,10 +12,10 @@ permissions:
 
 on:
   workflow_run:
-    workflows: ["IpSet-Firewall"]
+    workflows: [IpSet-Firewall]
     types:
       - completed
-  
+
 jobs:
   deploy_production_main:
     name: Test and deploy RegexPatternSets Firewall

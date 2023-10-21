@@ -13,7 +13,7 @@ concurrency: ci-${{ github.ref }}
 
 on:
   workflow_run:
-    workflows: ["ManagedRuleGroups-Firewall"]
+    workflows: [ManagedRuleGroups-Firewall]
     types:
       - completed
 jobs:
