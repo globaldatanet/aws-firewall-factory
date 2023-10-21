@@ -15,10 +15,17 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'bin/**/*'
+      - 'lib/**/*'
+      - 'package*.json'
   pull_request:
     branches:
       - master
-
+    paths:
+      - 'bin/**/*'
+      - 'lib/**/*'
+      - 'package*.json'
 jobs:
   deploy_production_main:
     name: Test and deploy OnlyManagedRuleGroups Firewall
