@@ -6,6 +6,14 @@
 ## Added
 - Optional Lambda function to prerequisite Stack that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams) - [AWS Shield Advanced]
 - Automated test workflows of example firewalls, to ensure code quality and test coverage
+
+### Fixed
+- Bump @aws-sdk/client-cloudformation from 3.427.0 to 3.428.0
+- Bump @aws-sdk/client-shield from 3.427.0 to 3.428.0
+- Bump typescript from 4.9.5 to 5.2.2
+- Bump jest from 29.5.0 to 29.7.0
+- Bump eslint from 8.48.0 to 8.51.0
+
 ## 4.1.2
 
 ### Fixed
