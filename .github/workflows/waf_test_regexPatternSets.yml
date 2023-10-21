@@ -1,3 +1,4 @@
+name: Test Deploy RegexPatternSets Firewall
 
 
 env:
@@ -11,7 +12,7 @@ permissions:
 
 on:
   workflow_run:
-    workflows: ["waf_test_ipSets"]
+    workflows: ["Test Deploy IpSet Firewall"]
     types:
       - completed
   
