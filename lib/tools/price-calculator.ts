@@ -177,9 +177,9 @@ export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promis
   const requestscost = runtimeProps.Pricing.Request;
   const totalcost = fixedcost + (requestscost * 5) + (captchacost * 5);
   const shieldSubscriptionState = await getShieldSubscriptionState();
-  console.log("\n🛡️  Shield Advanced State: " + shieldSubscriptionState?.toLowerCase());
+  console.log("\n🛡️  Shield Advanced State: " + shieldSubscriptionState);
   console.log("\n💰 Cost: \n");
-  if(shieldSubscriptionState === "ACTIVE"){
+  if(shieldSubscriptionState && shieldSubscriptionState === "ACTIVE"){
     fixedcost = botcontrolfixedcost  + atpfixedcost + runtimeProps.Pricing.Dashboard;
   }
   console.log("   WAF Rules cost: " + fixedcost + " $ per month");
@@ -192,7 +192,7 @@ export async function isPriceCalculated(runtimeProps: RuntimeProperties): Promis
   (botcontrolfixedcost !== 0) ? console.log("     The deployed WAF includes BotControl rules this costs an extra fee of "+runtimeProps.Pricing.BotControl +" $ and " +runtimeProps.Pricing.BotControlRequest +"$ pro 1 mio requests (10 mio request Free Tier). \n     These costs are already included in the price calculation.") : "";
   (atpfixedcost !== 0) ? console.log("     The deployed WAF includes Account Takeover Prevention rules this costs an extra fee of "+runtimeProps.Pricing.AccountTakeoverPrevention+" $ and " + runtimeProps.Pricing.AccountTakeoverPreventionRequest +" $ per thousand login attempts analyzed (10,000 attempts analyzed Free Tier). \n     These costs are already included in the price calculation.") : "";
   (runtimeProps.Pricing.Dashboard !== 0) ? console.log("     The deployed WAF includes CloudWatch Dashboard and you have more than 3 Dashboards (Free tier), so you will need to pay " + runtimeProps.Pricing.Dashboard+ "$ for this CloudWatch Dashboard. \n     These costs are already included in the price calculation.") : "";
-  (shieldSubscriptionState === "Active") ? console.log("     AWS WAF WebACLs or Rules created by Firewall Manager - are Included in AWS Shield Advanced. More information at https://aws.amazon.com/firewall-manager/pricing/.") : "";
+  (shieldSubscriptionState === "ACTIVE") ? console.log("     AWS WAF WebACLs or Rules created by Firewall Manager - are Included in AWS Shield Advanced. More information at https://aws.amazon.com/firewall-manager/pricing/.") : "";
   console.log("\n\n");
   const pricecalculated = true;
   return pricecalculated;
