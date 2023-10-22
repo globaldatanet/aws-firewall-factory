@@ -52,37 +52,48 @@ export class PrerequisitesStack extends cdk.Stack {
         principal: new iam.ServicePrincipal("sns.amazonaws.com"),
         sourceArn: "arn:aws:sns:us-east-1:248400274283:aws-managed-waf-rule-notifications",
       });
-
-      if(props.prerequisites.Information.Ddos) {
-        const FmsNotification = new lambda.Function(this, "AWS-Firewall-Factory-FMS-Notifications", {
-          runtime: lambda.Runtime.PYTHON_3_11,
-          code: lambda.Code.fromAsset("./lib/lambda/FmsNotification"),
-          handler: "index.lambda_handler",
-          timeout: cdk.Duration.seconds(30),
-          environment: {
-            "Messenger": Messenger,
-            "WebhookUrl": WebhookUrl,
-          },
-          logRetention: logs.RetentionDays.ONE_WEEK,
-          description: "Lambda Function to send that notifications about potential DDoS activity for protected resources to messengers (Slack/Teams)",
-        });
-        const snsRoleName = `arn:aws:iam::${props.env?.account}:role/aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS`;
-        const FmsTopic = new sns.Topic(this, "FMS-Notifications-Topic");
-        FmsTopic.addToResourcePolicy(new iam.PolicyStatement({
-          actions: ["sns:Publish"],
-          principals: [iam.Role.fromRoleArn(this, "AWSServiceRoleForFMS",snsRoleName)],
-        }));
-        FmsNotification.addPermission("InvokeByFmsSnsTopic", {
-          action: "lambda:InvokeFunction",
-          principal: new iam.ServicePrincipal("sns.amazonaws.com"),
-          sourceArn: FmsTopic.topicArn,
-        });
-        new fms.CfnNotificationChannel(this, "AWS-Firewall-Factory-FMS-NotificationChannel", {
-          snsRoleName,
-          snsTopicArn: FmsTopic.topicArn,
-        });
-      }
     }
+    if(props.prerequisites.DdosNotifications) {
+      console.log("📢  Creating Lambda Function that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams)");
+      let Messenger:string = "";
+      let WebhookUrl:string = "";
+      if(props.prerequisites.DdosNotifications.SlackWebhook) {
+        Messenger="Slack";
+        WebhookUrl=props.prerequisites.DdosNotifications.SlackWebhook;
+      }
+      if(props.prerequisites.DdosNotifications.TeamsWebhook) {
+        Messenger="Teams";
+        WebhookUrl=props.prerequisites.DdosNotifications.TeamsWebhook;
+      }
+      const FmsNotification = new lambda.Function(this, "AWS-Firewall-Factory-FMS-Notifications", {
+        runtime: lambda.Runtime.PYTHON_3_11,
+        code: lambda.Code.fromAsset("./lib/lambda/FmsNotification"),
+        handler: "index.lambda_handler",
+        timeout: cdk.Duration.seconds(30),
+        environment: {
+          "Messenger": Messenger,
+          "WebhookUrl": WebhookUrl,
+        },
+        logRetention: logs.RetentionDays.ONE_WEEK,
+        description: "Lambda Function that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams)",
+      });
+      const snsRoleName = `arn:aws:iam::${props.env?.account}:role/aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS`;
+      const FmsTopic = new sns.Topic(this, "FMS-Notifications-Topic");
+      FmsTopic.addToResourcePolicy(new iam.PolicyStatement({
+        actions: ["sns:Publish"],
+        principals: [iam.Role.fromRoleArn(this, "AWSServiceRoleForFMS",snsRoleName)],
+      }));
+      FmsNotification.addPermission("InvokeByFmsSnsTopic", {
+        action: "lambda:InvokeFunction",
+        principal: new iam.ServicePrincipal("sns.amazonaws.com"),
+        sourceArn: FmsTopic.topicArn,
+      });
+      new fms.CfnNotificationChannel(this, "AWS-Firewall-Factory-FMS-NotificationChannel", {
+        snsRoleName,
+        snsTopicArn: FmsTopic.topicArn,
+      });
+    }
+    
 
     if(props.prerequisites.Logging) {
       if(props.prerequisites.Logging.FireHoseKey) {
