@@ -10,7 +10,7 @@
 
 **[🚧 Feature request](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=feature-request%2C+enhancement&template=feature_request.md&title=)** | **[🐛 Bug Report](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=bug%2C+triage&template=bug_report.md&title=)**
 
-<img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?description=1&font=Raleway&issues=1&logo=https://raw.githubusercontent.com/globaldatanet/aws-firewall-factory/master/static/icon/firewallfactory.svg&pattern=Solid&stargazers=1&theme=Dark" alt="AWSFirewallFactory" width="900" height="320"/>
+<img src="https://socialify.git.ci/globaldatanet/aws-firewall-factory/image?font=Bitter&forks=1&logo=https%3A%2F%2Fgithub.com%2Fglobaldatanet%2Faws-firewall-factory%2Fraw%2F4.1.3%2Fstatic%2Ficon%2Ffirewallfactory.svg&name=1&pattern=Solid&stargazers=1&theme=Dark" alt="aws-firewall-factory" width="640" height="320" />
 
 ## 𒋰 Table of contents
 
@@ -19,6 +19,7 @@
 - [🎬 Media](#-media)
     - [🔗 Useful Links](#-useful-links)
 - [🗺️ Architecture](#️-architecture)
+- [🧪 Tests](#-tests)
 - [🦸🏼‍♀️ Contributors](#️-contributors)
   - [👩‍💻 Contribute](#-contribute)
   - [👏 Supporters](#-supporters)
@@ -56,6 +57,17 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 ## 🗺️ Architecture
 
 ![Architecture](./static/AWSFIREWALLMANAGER.png "Architecture")
+
+## 🧪 Tests
+|  Test | Status  |
+|---|---|
+|  CodeQL | ![CodeQL](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)  |
+|  Linting | ![linting](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/linting.yml/badge.svg?branch=master)  |
+|  WAF Deployment - Only Managed Rule Groups  | ![onlyManagedRuleGroups](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_onlymanagedrulegroups.yml/badge.svg?branch=master)  |
+|  WAF Deployment - IpSets | ![IpSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_ipSets.yml/badge.svg?branch=master)   |
+|  WAF Deployment - RegexPatternSets | ![regexPatternSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_regexPatternSets.yml/badge.svg?branch=master)  |
+
+
 
 ## 🦸🏼‍♀️ Contributors
 
