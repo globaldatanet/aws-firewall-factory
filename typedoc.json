@@ -1,0 +1,13 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": ["lib/firewall-stack.ts","lib/prerequisites-stack.ts","lib/types/config.ts","lib/types/enums.ts", "lib/types/fms.ts", "node_modules/aws-cdk-lib/aws-fms",  "node_modules/aws-cdk-lib/aws-wafv2"],
+    "readme": "none",
+    "name": "AWS Firewall Factory Documentation",
+    "entryPointStrategy": "Expand",
+    "exclude": ["**/gotestwaf/**","**/lambda/**","**/bin/**","**/tools/**","**/values/**","**/constructs/**"],
+    "plugin": ["typedoc-plugin-extras"],
+    "favicon": "static/icon/aws_firewall_factory_favicon.ico",
+    "searchInComments": true,
+    "hideGenerator": true,
+    //"customCss": "static/custom.css",
+}

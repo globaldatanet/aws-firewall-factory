@@ -40,6 +40,7 @@
     "constructs": "10.2.25",
     "lodash": "4.17.21",
     "table": "^6.8.1",
+    "typedoc-plugin-extras": "^3.0.0",
     "uuid": "^9.0.1"
   }
 }

@@ -4,7 +4,7 @@
 import { aws_wafv2 as waf } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
 
-interface CustomRequestHandling {
+export interface CustomRequestHandling {
   customRequestHandling?: {
     insertHeaders: {
       /**
@@ -19,7 +19,7 @@ interface CustomRequestHandling {
   }
 }
 
-interface CustomResponse {
+export interface CustomResponse {
   customResponse?: {
     responseCode: number,
 
@@ -40,7 +40,7 @@ interface CustomResponse {
   }
 }
 
-interface Action  {
+export interface Action  {
   block?: CustomResponse,
   allow?: CustomRequestHandling,
   count?: CustomRequestHandling,
@@ -48,7 +48,7 @@ interface Action  {
   challenge?: CustomRequestHandling
 }
 
-interface RuleActionOverrideProperty {
+export interface RuleActionOverrideProperty {
   name: string,
   actionToUse: Action
 }
@@ -113,7 +113,7 @@ export interface ServiceDataRuleGroup extends ServiceDataAbstactRuleGroup {
   ruleGroupType: "RuleGroup"
 }
 
-interface ServiceDataAbstactRuleGroup {
+export interface ServiceDataAbstactRuleGroup {
   overrideAction: {
     type: "ALLOW" | "DENY" | "NONE" | "COUNT"
   },
