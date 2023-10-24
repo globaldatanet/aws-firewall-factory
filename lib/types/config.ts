@@ -99,7 +99,13 @@ export interface Prerequisites {
   }
   readonly Logging?: {
       readonly BucketProperties?: {
+        /**
+         * A name for the bucket. Allowed Pattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
+         */
         readonly BucketName?: string,
+        /**
+         * Define if a KMS Key for the bucket will be created.
+         */
         readonly KmsEncryptionKey: boolean,
         /**
         * Will add Object Lock (write-once-read-many (WORM)) to the S3 Bucket (Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely.)
@@ -110,9 +116,18 @@ export interface Prerequisites {
         }
 
       },
+      /**
+       * Define if a KMS Key for Kinesis FireHose will be created.
+       */
       readonly FireHoseKey?: {
+        /**
+         * Define if a Alias for the KMS Key
+         */
         readonly KeyAlias: string
       },
+      /**
+       * Defines access to a central security account. Please specify a account ID such as 123456789012.This is necessary if you want to use a different account for all your firewalls.
+       */
       readonly CrossAccountIdforPermissions?: string,
   }
 }
@@ -181,12 +196,16 @@ export interface RuleGroupSet {
 }
 
 /**
+  * The regex above matches both IPv4 and IPv6 in CIDR notation, e.g. 123.4.3.0/32
   * @TJS-pattern (?:^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}\/(3[0-2]|[12]?[0-9])$)|(?:^(?:(?:[a-fA-F\d]{1,4}:){7}(?:[a-fA-F\d]{1,4}|:)|(?:[a-fA-F\d]{1,4}:){6}(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|:[a-fA-F\d]{1,4}|:)|(?:[a-fA-F\d]{1,4}:){5}(?::(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,2}|:)|(?:[a-fA-F\d]{1,4}:){4}(?:(?::[a-fA-F\d]{1,4}){0,1}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,3}|:)|(?:[a-fA-F\d]{1,4}:){3}(?:(?::[a-fA-F\d]{1,4}){0,2}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,4}|:)|(?:[a-fA-F\d]{1,4}:){2}(?:(?::[a-fA-F\d]{1,4}){0,3}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,5}|:)|(?:[a-fA-F\d]{1,4}:){1}(?:(?::[a-fA-F\d]{1,4}){0,4}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,6}|:)|(?::(?:(?::[a-fA-F\d]{1,4}){0,5}:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)){3}|(?::[a-fA-F\d]{1,4}){1,7}|:)))(?:%[0-9a-zA-Z]{1,})?\/(12[0-8]|1[01][0-9]|[1-9]?[0-9])$)
 */
-type IPAddress = string; // The regex above matches both IPv4 and IPv6 in CIDR notation, e.g. 123.4.3.0/32
+export type IPAddress = string;
 
-interface IPAddressWithDescription {
+export interface IPAddressWithDescription {
   description: string,
+  /**
+    * Defines a Ip Address - IPv4 and IPv6 in CIDR notation, e.g. 123.4.3.0/32
+   */
   ip: IPAddress
 }
 
