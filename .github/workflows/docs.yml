@@ -38,4 +38,4 @@ jobs:
       - name: 🚀 Upload Documentation
         run: |
             aws s3 sync ./docs s3://${{env.S3_BUCKET}} --delete
-            aws cloudfront create-invalidation --distribution-id ${{env.DISTRIBUTION_ID}} --paths /*
+            aws cloudfront create-invalidation --distribution-id ${{env.DISTRIBUTION_ID}} --paths "/*"
