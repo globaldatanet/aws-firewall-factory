@@ -17,7 +17,7 @@ on:
       - 4.1.4
 jobs:
   deploy_production_main:
-    name: Test and deploy RegexPatternSets Firewall
+    name: Update Documentation
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout
