@@ -32,3 +32,25 @@ All releases are tested prior to release using automated test workflows of sampl
 |  WAF Deployment - IpSets | ![IpSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_ipSets.yml/badge.svg?branch=master)   |
 |  WAF Deployment - RegexPatternSets | ![regexPatternSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_regexPatternSets.yml/badge.svg?branch=master)  |
 
+## 🛡️ Deployment
+
+### ⚙️ Prerequisites
+1. [Organizations trusted access with Firewall Manager](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-fms.html)
+2. [Taskfile](https://taskfile.dev/)
+3. [AWS CDK](https://aws.amazon.com/cdk/)
+4. [cfn-dia](https://www.npmjs.com/package/@mhlabs/cfn-diagram?s=03)
+5. Invoke `npm i` to install dependencies
+6. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
+
+7. (Optional) If you want to use CloudWatch Dashboards - You need to enable your target accounts to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) to see how to do it.
+8. Assume AWS Profile `awsume PROFILENAME`
+9. (Optional) Enter `task generateprerequisitesconfig`
+10. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
+
+
+### 🏁 Deployment via Taskfile
+
+1. Create new ts file for you WAF and configure Rules in the Configuration (see [owasptopten.ts](https://github.com/globaldatanet/aws-firewall-factory/blob/master/values/examples/owasptop10.ts) to see structure) or use enter `task generate-waf-skeleton`
+2. Assume AWS Profile `awsume / assume PROFILENAME`
+3. (Optional) Enter `task generate-waf-skeleton`
+4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
