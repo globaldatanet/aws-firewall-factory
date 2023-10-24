@@ -82,7 +82,7 @@ export interface Prerequisites {
   readonly General: {
     readonly Prefix: string,
   },
-    /**
+  /**
     * Will add a Lambda function to the prerequisite stack that sends notifications when new versions and updates to a AWS ManagedRuleGroup appear in messengers (Slack/Teams).
   */
   readonly Information?:{

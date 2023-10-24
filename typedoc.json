@@ -9,5 +9,10 @@
     "favicon": "static/icon/aws_firewall_factory_favicon.ico",
     "searchInComments": true,
     "hideGenerator": true,
-    //"customCss": "static/custom.css",
+    "navigationLinks": {
+        "📦": "https://github.com/globaldatanet/aws-firewall-factory/releases",
+        "🔖": "https://globaldatanet.com/imprint",
+        "📅": "https://calendly.com/dakn/30min-1"
+    },
+    "customDescription": "Explore the comprehensive AWS Firewall Factory Documentation. Elevate your cloud security with our firewall management solution."
 }

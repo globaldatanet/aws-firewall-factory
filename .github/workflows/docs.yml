@@ -1,0 +1,41 @@
+name: Documentation
+
+env:
+    AWS_REGION: eu-central-1
+    AWS_ROLE: FirewallFactoryGithubPipelineRole
+    AWS_ACCOUNT: 376263449237
+    DISTRIBUTION_ID: E2T722RW2UKIMQ
+    S3_BUCKET: docs.aws-firewall-factory.com
+  permissions:
+    id-token: write
+    contents: read
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+    deploy_production_main:
+        name: Update Documentation
+        runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: 🔑 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        env:
+          ACCOUNT_ID: ${{ env.AWS_ACCOUNT }}
+        with:
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+          mask-aws-account-id: false
+      - name: 📦 Install dependencies
+        run: |
+            npm install
+      - name: 📄 Generate Documentation
+        run: |
+            npx typedoc --options typedoc.json
+      - name: 🚀 Upload Documentation
+        run: |
+            aws s3 sync ./docs s3://${{env.S3_BUCKET}} --delete
+            aws cloudfront create-invalidation --distribution-id ${{env.DISTRIBUTION_ID}} --paths /*
