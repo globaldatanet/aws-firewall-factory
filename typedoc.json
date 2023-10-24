@@ -1,7 +1,7 @@
 {
     "$schema": "https://typedoc.org/schema.json",
     "entryPoints": ["lib/firewall-stack.ts","lib/prerequisites-stack.ts","lib/types/config.ts","lib/types/enums.ts", "lib/types/fms.ts", "node_modules/aws-cdk-lib/aws-fms",  "node_modules/aws-cdk-lib/aws-wafv2", "node_modules/aws-cdk-lib/cloudformation", "node_modules/aws-cdk-lib/core/lib/cfn-tag.d.ts", "node_modules/aws-cdk-lib/core/lib/tag-manager.d.ts"],
-    "readme": "none",
+    "readme": "./static/README.md",
     "name": "AWS Firewall Factory Documentation",
     "entryPointStrategy": "Expand",
     "exclude": ["**/gotestwaf/**","**/lambda/**","**/bin/**","**/tools/**","**/values/**","**/constructs/**"],
