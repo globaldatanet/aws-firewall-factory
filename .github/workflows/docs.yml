@@ -6,7 +6,8 @@ env:
     AWS_ACCOUNT: 376263449237
     DISTRIBUTION_ID: E2T722RW2UKIMQ
     S3_BUCKET: docs.aws-firewall-factory.com
-  permissions:
+
+permissions:
     id-token: write
     contents: read
 on:
@@ -15,11 +16,12 @@ on:
       - master
       - 4.1.4
 jobs:
-    deploy_production_main:
-        name: Update Documentation
-        runs-on: ubuntu-latest
+  deploy_production_main:
+    name: Test and deploy RegexPatternSets Firewall
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v3
       - name: 🔑 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1.7.0
         env:
@@ -30,11 +32,9 @@ jobs:
           role-session-name: GitHubActionsSession
           mask-aws-account-id: false
       - name: 📦 Install dependencies
-        run: |
-            npm install
+        run: npm install
       - name: 📄 Generate Documentation
-        run: |
-            npx typedoc --options typedoc.json
+        run: npx typedoc --options typedoc.json
       - name: 🚀 Upload Documentation
         run: |
             aws s3 sync ./docs s3://${{env.S3_BUCKET}} --delete
