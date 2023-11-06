@@ -1,4 +1,6 @@
 
+[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) - [🔖 Imprint](https://globaldatanet.com/imprint) - [📅 Meeting](https://calendly.com/dakn/30min-1)
+
 ## ⁉️ .What is a Web Application Firewall?
 
 A crucial security component for **every** web app. It acts as a **protective barrier** between your application and potential threats. Offering a range of **practical functionalities** to mitigate known risks, emerging threats, harmful activities and many more.
