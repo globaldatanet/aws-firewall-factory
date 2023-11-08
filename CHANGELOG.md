@@ -2,8 +2,15 @@
 
 ## Released
 
+## 4.1.4
+### Added
+- Automation for  [Documentation](https://docs.aws-firewall-factory.com/) for the AWS Firewall Factory to assist you in utilizing our solution. The documentation will be updated regularly to provide you with the most current information.
+
+### Fixed
+- Console log error if only one Managed Rule Group was specified - the table output was not working for PostProcess.
+
 ## 4.1.3
-## Added
+### Added
 - Optional Lambda function to prerequisite Stack that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams) - [AWS Shield Advanced]
 - Automated test workflows of example firewalls, to ensure code quality and test coverage
 
