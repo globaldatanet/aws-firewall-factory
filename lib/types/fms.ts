@@ -4,7 +4,7 @@
 import { aws_wafv2 as waf } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
 
-interface CustomRequestHandling {
+export interface CustomRequestHandling {
   customRequestHandling?: {
     insertHeaders: {
       /**
@@ -19,7 +19,7 @@ interface CustomRequestHandling {
   }
 }
 
-interface CustomResponse {
+export interface CustomResponse {
   customResponse?: {
     responseCode: number,
 
@@ -40,7 +40,7 @@ interface CustomResponse {
   }
 }
 
-interface Action  {
+export interface Action  {
   block?: CustomResponse,
   allow?: CustomRequestHandling,
   count?: CustomRequestHandling,
@@ -48,7 +48,7 @@ interface Action  {
   challenge?: CustomRequestHandling
 }
 
-interface RuleActionOverrideProperty {
+export interface RuleActionOverrideProperty {
   name: string,
   actionToUse: Action
 }
@@ -63,6 +63,9 @@ export interface ManagedRuleGroup {
   vendor: fwmEnums.ManagedRuleGroupVendor | string | "AWS",
   name: fwmEnums.AwsManagedRules | string,
   version?: string,
+  /**
+    * Will be automatically set using the [Check Capacity API](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html).
+  */
   capacity?: number,
   excludeRules?: NameObject[],
   overrideAction?: {
@@ -70,6 +73,9 @@ export interface ManagedRuleGroup {
   },
   ruleActionOverrides?: RuleActionOverrideProperty[],
   versionEnabled?: boolean
+  /**
+    * Enforce the [current Default version](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups-versioning.html) of the managed rule group to be retrieved using a Lambda Function.
+  */
   latestVersion?: boolean
   enforceUpdate?:boolean
 }
@@ -80,6 +86,9 @@ export interface Rule {
   visibilityConfig: waf.CfnWebACL.VisibilityConfigProperty,
   captchaConfig?: waf.CfnWebACL.CaptchaConfigProperty,
   ruleLabels?: waf.CfnWebACL.LabelProperty[],
+  /**
+    * Each rule in a web ACL and each rule in a rule group must have a unique priority setting to ensure proper rule execution. [More information about processing order of rules and rule groups in a web ACL](https://docs.aws.amazon.com/waf/latest/developerguide/web-acl-processing-order.html)
+  */
   priority: number,
 }
 
@@ -113,7 +122,7 @@ export interface ServiceDataRuleGroup extends ServiceDataAbstactRuleGroup {
   ruleGroupType: "RuleGroup"
 }
 
-interface ServiceDataAbstactRuleGroup {
+export interface ServiceDataAbstactRuleGroup {
   overrideAction: {
     type: "ALLOW" | "DENY" | "NONE" | "COUNT"
   },

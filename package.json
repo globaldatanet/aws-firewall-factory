@@ -12,7 +12,7 @@
     "lint": "eslint --ext .ts ."
   },
   "devDependencies": {
-    "@types/node": "18.16.3",
+    "@types/node": "20.8.10",
     "@typescript-eslint/eslint-plugin": "6.7.5",
     "@typescript-eslint/parser": "6.7.5",
     "aws-cdk": "2.100.0",
@@ -30,16 +30,19 @@
     "@aws-sdk/client-service-quotas": "^3.427.0",
     "@aws-sdk/client-shield": "^3.428.0",
     "@aws-sdk/client-wafv2": "^3.427.0",
-    "@mhlabs/cfn-diagram": "^1.1.29",
+    "@babel/traverse": "^7.23.2",
+    "@mhlabs/cfn-diagram": "^1.1.38",
     "@types/aws-lambda": "^8.10.119",
     "@types/lodash": "4.14.178",
-    "@types/uuid": "^9.0.5",
+    "@types/uuid": "^9.0.7",
     "aws-cdk-lib": "2.100.0",
     "aws-lambda": "^1.0.7",
     "cfonts": "^3.2.0",
     "constructs": "10.2.25",
     "lodash": "4.17.21",
     "table": "^6.8.1",
+    "typedoc-plugin-extras": "^3.0.0",
+    "typedoc-plugin-keywords": "^1.5.0",
     "uuid": "^9.0.1"
   }
 }

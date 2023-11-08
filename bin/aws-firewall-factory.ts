@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { FirewallStack } from "../lib/firewall-stack";
+import { WafStack } from "../lib/web-application-firewall-stack";
 import { PrerequisitesStack } from "../lib/prerequisites-stack";
 import * as cdk from "aws-cdk-lib";
 import { wrongLoggingConfiguration } from "../lib/tools/config-validator";
@@ -109,7 +109,7 @@ void (async () => {
       console.error("\u001B[31m"," 🚨 ERROR: Amazon S3 bucket name is invalid 🚨 ", "\x1b[0m" +"\n     🪣 Amazon S3 bucket name must begin with \"aws-waf-logs-\" followed by at least one \n     of the following characters [a-z0-9_.-]\n\n","\x1b[0m" + "\n\n");
       process.exit(1);
     }
-    new FirewallStack(app, `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}`, {
+    new WafStack(app, `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}`, {
       config, runtimeProperties: runtimeProperties,
       env: {
         region: deploymentRegion,
