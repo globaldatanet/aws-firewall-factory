@@ -23,7 +23,7 @@ export interface ConfigStackProps extends cdk.StackProps {
   runtimeProperties: RuntimeProperties;
 }
 
-export class FirewallStack extends cdk.Stack {
+export class WafStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ConfigStackProps) {
 
     /**

@@ -4,7 +4,9 @@
 
 ## 4.1.4
 ### Added
-- Automation for  [Documentation](https://docs.aws-firewall-factory.com/) for the AWS Firewall Factory to assist you in utilizing our solution. The documentation will be updated regularly to provide you with the most current information.
+- Automation for  [Documentation](https://docs.aws-firewall-factory.com/) for the AWS Firewall Factory to assist you in utilizing our solution.
+The documentation will be updated regularly to provide you with the most current information. We also added more comments to functions and enums to provide more information to you.
+- First preperations to support for [Network Firewalls](https://github.com/globaldatanet/aws-firewall-factory/issues/219)
 
 ### Fixed
 - Console log error if only one Managed Rule Group was specified - the table output was not working for PostProcess.
