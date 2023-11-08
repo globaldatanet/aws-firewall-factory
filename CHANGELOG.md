@@ -10,6 +10,8 @@ The documentation will be updated regularly to provide you with the most current
 
 ### Fixed
 - Console log error if only one Managed Rule Group was specified - the table output was not working for PostProcess.
+- Bump @mhlabs/cfn-diagram from 1.1.29 to 1.1.38 -> thanks to @ljacobsson for the new release
+- Bump @babel/traverse to 7.23.2
 
 ## 4.1.3
 ### Added
