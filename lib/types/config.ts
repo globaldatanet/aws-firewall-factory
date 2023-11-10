@@ -27,7 +27,7 @@ export interface Config {
      */
     readonly CreateDashboard?: boolean,
   },
-  readonly WebAcl:{
+  readonly WebAcl?:{
     readonly Name: string,
     readonly Description?: string,
     readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
@@ -71,12 +71,44 @@ export interface Config {
      */
     readonly PostProcess: RuleGroupSet,
   },
+  readonly NetworkFirewall?:{
+    readonly Name: string,
+    readonly Description?: string,
+    readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
+    readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
+    readonly Type: fwmEnums.NetworkFirewallTypeEnum | NetworkFirewallType,
+    /**
+     * An array of ResourceTag objects, used to explicitly include resources in the policy scope or explicitly exclude them. If this isn't set, then tags aren't used to modify policy scope. See also ExcludeResourceTags.
+     */
+    readonly ResourceTags?: Array<fms.CfnPolicy.ResourceTagProperty>,
+    /**
+     * Used only when tags are specified in the ResourceTags property. If this property is True, resources with the specified tags are not in scope of the policy. If it's False, only resources with the specified tags are in scope of the policy.
+     */
+    readonly ExcludeResourceTags?: boolean,
+    /**
+     * Indicates if the policy should be automatically applied to new resources.
+     */
+    readonly RemediationEnabled?: boolean,
+    /**
+     * Indicates whether AWS Firewall Manager should automatically remove protections from resources that leave the policy scope and clean up resources that Firewall Manager is managing for accounts when those accounts leave policy scope. For example, Firewall Manager will disassociate a Firewall Manager managed web ACL from a protected customer resource when the customer resource leaves policy scope.
+     */
+    readonly ResourcesCleanUp?: boolean,
+    /**
+     * Contains one or more IP addresses or blocks of IP addresses specified in Classless Inter-Domain Routing (CIDR) notation. AWS WAF supports IPv4 address ranges: /8 and any range between /16 through /32. AWS WAF supports IPv6 address ranges: /24, /32, /48, /56, /64, and /128.
+     */
+  }
 }
 
 /**
  * The type of resource protected by or in scope of the policy. To apply this policy to multiple resource types, specify a resource type of ResourceTypeList and then specify the resource types in a ResourceTypeList.
  */
 export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::CloudFront::Distribution" | "AWS::ApiGatewayV2::Api" | "AWS::ApiGateway::Stage"
+
+/**
+ * The type of resource protected by or in scope of the policy.
+ */
+export type NetworkFirewallType= "AWS::EC2::VPC"
+
 // | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi" - waiting for support if you need a GraphQLApi Firewall just use an ApiGateway:Stage Firewall
 export interface Prerequisites {
   readonly General: {

@@ -182,61 +182,63 @@ export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string
  * @param config the config object from the values json
  */
 export async function setOutputsFromStack(deploymentRegion: string, runtimeprops: RuntimeProperties, config: Config): Promise<void>{
-  const stackName = `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}`;
-  const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
-  const params ={
-    StackName: stackName
-  };
-  const command = new cloudformation.DescribeStacksCommand(params);
-  try{
-    const responsestack = await cloudformationClient.send(command);
-    console.log("🫗  Get Outputs from existing CloudFormation Stack.\n");
-    if(responsestack.Stacks?.[0].StackName && responsestack.Stacks?.[0].Outputs !== undefined){
-      for(const output of responsestack.Stacks?.[0]?.Outputs ?? []){
-        if(output.OutputKey === "DeployedRuleGroupNames")
-        {
-          runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "DeployedRuleGroupIdentifier")
-        {
-          runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "DeployedRuleGroupCapacities")
-        {
-          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-          runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
-        }
-        if(output.OutputKey === "PreProcessDeployedRuleGroupNames")
-        {
-          runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "PreProcessDeployedRuleGroupIdentifier")
-        {
-          runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "PreProcessDeployedRuleGroupCapacities")
-        {
-          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-          runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
-        }
-        if(output.OutputKey === "PostProcessDeployedRuleGroupNames")
-        {
-          runtimeprops.PostProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "PostProcessDeployedRuleGroupIdentifier")
-        {
-          runtimeprops.PostProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "PostProcessDeployedRuleGroupCapacities")
-        {
-          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-          runtimeprops.PostProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
+  if(config.WebAcl){
+    const stackName = `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}`;
+    const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
+    const params ={
+      StackName: stackName
+    };
+    const command = new cloudformation.DescribeStacksCommand(params);
+    try{
+      const responsestack = await cloudformationClient.send(command);
+      console.log("🫗  Get Outputs from existing CloudFormation Stack.\n");
+      if(responsestack.Stacks?.[0].StackName && responsestack.Stacks?.[0].Outputs !== undefined){
+        for(const output of responsestack.Stacks?.[0]?.Outputs ?? []){
+          if(output.OutputKey === "DeployedRuleGroupNames")
+          {
+            runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+          }
+          else if(output.OutputKey === "DeployedRuleGroupIdentifier")
+          {
+            runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+          }
+          else if(output.OutputKey === "DeployedRuleGroupCapacities")
+          {
+            const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
+            runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
+          }
+          if(output.OutputKey === "PreProcessDeployedRuleGroupNames")
+          {
+            runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+          }
+          else if(output.OutputKey === "PreProcessDeployedRuleGroupIdentifier")
+          {
+            runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+          }
+          else if(output.OutputKey === "PreProcessDeployedRuleGroupCapacities")
+          {
+            const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
+            runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
+          }
+          if(output.OutputKey === "PostProcessDeployedRuleGroupNames")
+          {
+            runtimeprops.PostProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+          }
+          else if(output.OutputKey === "PostProcessDeployedRuleGroupIdentifier")
+          {
+            runtimeprops.PostProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
+          }
+          else if(output.OutputKey === "PostProcessDeployedRuleGroupCapacities")
+          {
+            const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
+            runtimeprops.PostProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
+          }
         }
       }
     }
-  }
-  catch (e){
-    console.log("🆕 Creating new CloudFormation Stack.\n");
+    catch (e){
+      console.log("🆕 Creating new CloudFormation Stack.\n");
+    }
   }
 }
 
@@ -252,74 +254,76 @@ async function calculateCapacities(
   runtimeProperties: RuntimeProperties
 ): Promise<void> {
   console.log("\n👀 Get CustomRule Capacity:");
-  if (!config.WebAcl.PreProcess.CustomRules) {
-    console.log(
-      "\n ⏭  Skip Rule Capacity Calculation for PreProcess Custom Rules."
-    );
-  } else {
-    console.log(" 🥇 PreProcess: ");
-    runtimeProperties.PreProcess.CustomRuleCount = config.WebAcl.PreProcess.CustomRules.length;
-    runtimeProperties.PreProcess.CustomCaptchaRuleCount = config.WebAcl.PreProcess.CustomRules.filter(rule => rule.action.captcha).length;
-    runtimeProperties.PreProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PreProcess.CustomRules, deploymentRegion, config.WebAcl.Scope)).reduce((a,b) => a+b, 0);
-  }
-  if (!config.WebAcl.PostProcess.CustomRules) {
-    console.log(
-      "\n ⏭  Skip Rule Capacity Calculation for PostProcess Custom Rules."
-    );
-  } else {
-    console.log("\n 🥈 PostProcess: ");
-    runtimeProperties.PostProcess.CustomRuleCount = config.WebAcl.PostProcess.CustomRules.length;
-    runtimeProperties.PostProcess.CustomCaptchaRuleCount = config.WebAcl.PostProcess.CustomRules.filter(rule => rule.action.captcha).length;
-    runtimeProperties.PostProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PostProcess.CustomRules, deploymentRegion, config.WebAcl.Scope)).reduce((a,b) => a+b, 0);
-  }
-  console.log("\n👀 Get ManagedRule Capacity:\n");
-  if (!config.WebAcl.PreProcess.ManagedRuleGroups || config.WebAcl.PreProcess.ManagedRuleGroups?.length === 0) {
-    console.log("\n ℹ️  No ManagedRuleGroups defined in PreProcess.");
-  } else {
-    console.log(" 🥇 PreProcess: ");
-    const managedcapacitieslog = [];
-    managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
-    for (const managedrule of config.WebAcl.PreProcess.ManagedRuleGroups) {
-      managedrule.version ? managedrule.version : managedrule.version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
-      const capacity = await getManagedRuleCapacity(
-        deploymentRegion,
-        managedrule.vendor,
-        managedrule.name,
-        config.WebAcl.Scope,
-        managedrule.version
+  if(config.WebAcl){
+    if (!config.WebAcl.PreProcess.CustomRules) {
+      console.log(
+        "\n ⏭  Skip Rule Capacity Calculation for PreProcess Custom Rules."
       );
-      managedrule.capacity = capacity;
-      managedcapacitieslog.push([managedrule.name, capacity, managedrule.version !== "" ? managedrule.version : "[unversioned]", managedrule.enforceUpdate ?? "false"]);
-      runtimeProperties.ManagedRuleCapacity += capacity;
-      runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
-      managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
+    } else {
+      console.log(" 🥇 PreProcess: ");
+      runtimeProperties.PreProcess.CustomRuleCount = config.WebAcl.PreProcess.CustomRules.length;
+      runtimeProperties.PreProcess.CustomCaptchaRuleCount = config.WebAcl.PreProcess.CustomRules.filter(rule => rule.action.captcha).length;
+      runtimeProperties.PreProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PreProcess.CustomRules, deploymentRegion, config.WebAcl.Scope)).reduce((a,b) => a+b, 0);
     }
-    console.log(table(managedcapacitieslog));
-  }
-  if (!config.WebAcl.PostProcess.ManagedRuleGroups  || config.WebAcl.PostProcess.ManagedRuleGroups?.length === 0) {
-    console.log("\n ℹ️  No ManagedRuleGroups defined in PostProcess.");
-  } else {
-    console.log("\n 🥈 PostProcess: ");
-    const managedcapacitieslog = [];
-    managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
-    for (const managedrule of config.WebAcl.PostProcess.ManagedRuleGroups) {
-      managedrule.version ? managedrule.version : managedrule.version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
-      const capacity = await getManagedRuleCapacity(
-        deploymentRegion,
-        managedrule.vendor,
-        managedrule.name,
-        config.WebAcl.Scope,
-        managedrule.version
+    if (!config.WebAcl.PostProcess.CustomRules) {
+      console.log(
+        "\n ⏭  Skip Rule Capacity Calculation for PostProcess Custom Rules."
       );
-      managedrule.capacity = capacity;
-      managedcapacitieslog.push([managedrule.name, managedrule.capacity, managedrule.version !== "" ? managedrule.version : "[unversioned]", managedrule.enforceUpdate ?? "false"]);
-      runtimeProperties.ManagedRuleCapacity += capacity;
-      runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
-      managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
+    } else {
+      console.log("\n 🥈 PostProcess: ");
+      runtimeProperties.PostProcess.CustomRuleCount = config.WebAcl.PostProcess.CustomRules.length;
+      runtimeProperties.PostProcess.CustomCaptchaRuleCount = config.WebAcl.PostProcess.CustomRules.filter(rule => rule.action.captcha).length;
+      runtimeProperties.PostProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PostProcess.CustomRules, deploymentRegion, config.WebAcl.Scope)).reduce((a,b) => a+b, 0);
     }
-    console.log(table(managedcapacitieslog));
+    console.log("\n👀 Get ManagedRule Capacity:\n");
+    if (!config.WebAcl.PreProcess.ManagedRuleGroups || config.WebAcl.PreProcess.ManagedRuleGroups?.length === 0) {
+      console.log("\n ℹ️  No ManagedRuleGroups defined in PreProcess.");
+    } else {
+      console.log(" 🥇 PreProcess: ");
+      const managedcapacitieslog = [];
+      managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
+      for (const managedrule of config.WebAcl.PreProcess.ManagedRuleGroups) {
+        managedrule.version ? managedrule.version : managedrule.version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
+        const capacity = await getManagedRuleCapacity(
+          deploymentRegion,
+          managedrule.vendor,
+          managedrule.name,
+          config.WebAcl.Scope,
+          managedrule.version
+        );
+        managedrule.capacity = capacity;
+        managedcapacitieslog.push([managedrule.name, capacity, managedrule.version !== "" ? managedrule.version : "[unversioned]", managedrule.enforceUpdate ?? "false"]);
+        runtimeProperties.ManagedRuleCapacity += capacity;
+        runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
+        managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
+        managedrule.name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
+      }
+      console.log(table(managedcapacitieslog));
+    }
+    if (!config.WebAcl.PostProcess.ManagedRuleGroups  || config.WebAcl.PostProcess.ManagedRuleGroups?.length === 0) {
+      console.log("\n ℹ️  No ManagedRuleGroups defined in PostProcess.");
+    } else {
+      console.log("\n 🥈 PostProcess: ");
+      const managedcapacitieslog = [];
+      managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
+      for (const managedrule of config.WebAcl.PostProcess.ManagedRuleGroups) {
+        managedrule.version ? managedrule.version : managedrule.version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
+        const capacity = await getManagedRuleCapacity(
+          deploymentRegion,
+          managedrule.vendor,
+          managedrule.name,
+          config.WebAcl.Scope,
+          managedrule.version
+        );
+        managedrule.capacity = capacity;
+        managedcapacitieslog.push([managedrule.name, managedrule.capacity, managedrule.version !== "" ? managedrule.version : "[unversioned]", managedrule.enforceUpdate ?? "false"]);
+        runtimeProperties.ManagedRuleCapacity += capacity;
+        runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
+        managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
+        managedrule.name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
+      }
+      console.log(table(managedcapacitieslog));
+    }
   }
 }
 
@@ -713,14 +717,16 @@ export const outputInfoBanner = (config?:Config) => {
       console.log("\x1b[32m",`                      ${process.env.AWS_REGION}`,"\x1b[0m \n\n");
     }
     else{
-      if(config.WebAcl.Scope === "CLOUDFRONT"){
-        deploymentRegion = "us-east-1";
+      if(config.WebAcl){
+        if(config.WebAcl.Scope === "CLOUDFRONT"){
+          deploymentRegion = "us-east-1";
+        }
+        else{
+          deploymentRegion = process.env.REGION || "eu-central-1";
+        }
+        console.log("🌎 CDK deployment region:");
+        console.log("\x1b[32m",`                      ${deploymentRegion}`,"\x1b[0m \n");
       }
-      else{
-        deploymentRegion = process.env.REGION || "eu-central-1";
-      }
-      console.log("🌎 CDK deployment region:");
-      console.log("\x1b[32m",`                      ${deploymentRegion}`,"\x1b[0m \n");
     }
   }
   return deploymentRegion;

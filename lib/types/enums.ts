@@ -737,7 +737,7 @@ export enum CustomResponseBodiesContentType {
 }
 
 /**
- * enum for supporte webacl types
+ * enum for supported webacl types
  * following types are waiting for support if you need a GraphQLApi Firewall just use an ApiGateway:Stage Firewall
  *  - "AWS::Cognito::UserPool"
  *  - "AWS::AppSync::GraphQLApi"
@@ -749,4 +749,11 @@ export enum WebAclTypeEnum {
   APIGATEWAY_STAGE = "AWS::ApiGateway::Stage",
   COGNITO_USERPOOL = "AWS::Cognito::UserPool",
   APPSYNC_GRAPHQLAPI  = "AWS::AppSync::GraphQLApi"
+}
+
+/**
+ * enum for supported networkfirewall types
+ */
+export enum NetworkFirewallTypeEnum {
+  VPC = "AWS::EC2::VPC",
 }
