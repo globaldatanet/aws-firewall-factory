@@ -32,7 +32,7 @@
     "@aws-sdk/client-wafv2": "^3.427.0",
     "@babel/traverse": "^7.23.2",
     "@mhlabs/cfn-diagram": "^1.1.38",
-    "@types/aws-lambda": "^8.10.119",
+    "@types/aws-lambda": "^8.10.126",
     "@types/lodash": "4.14.178",
     "@types/uuid": "^9.0.7",
     "aws-cdk-lib": "2.100.0",
