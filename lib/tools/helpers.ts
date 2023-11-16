@@ -334,6 +334,7 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
     const ipSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
     const regexPatternSetReferenceStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
     const notStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+    const orStatement = statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
     if(ipSetReferenceStatement && !ipSetReferenceStatement.arn.startsWith("arn:aws:")) found = false;
     if(regexPatternSetReferenceStatement && !regexPatternSetReferenceStatement.arn.startsWith("arn:aws:")) found = false;
     if(notStatement) {
@@ -342,6 +343,15 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
       const notregexPatternSetReferenceStatement = notStatementProp.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
       if(notipSetReferenceStatement && !notipSetReferenceStatement.arn.startsWith("arn:aws:")) found = false;
       if(notregexPatternSetReferenceStatement && !notregexPatternSetReferenceStatement.arn.startsWith("arn:aws:")) found = false;
+    }
+    if(orStatement){
+      const orStatementProp = orStatement.statements as wafv2.CfnWebACL.StatementProperty[];
+      for(const statement of orStatementProp){
+        const orStatementPropIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+        const orStatementPropRegexPatternSetReferenceStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+        if(orStatementPropIpSetReferenceStatement && !orStatementPropIpSetReferenceStatement.arn.startsWith("arn:aws:")) found = false;
+        if(orStatementPropRegexPatternSetReferenceStatement && !orStatementPropRegexPatternSetReferenceStatement.arn.startsWith("arn:aws:")) found = false;
+      }
     }
     return found;
   }
@@ -413,15 +423,51 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
             capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
           }
         }
+        const orStatementStatement = statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
+        if(orStatementStatement && orStatementStatement.statements) {
+          const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+          if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+            capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
+          }
+          const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+          if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+            capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+          }
+          const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+          if(notStatementStatement && notStatementStatement.statement) {
+            const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
+            const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+            if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+              capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement));
+            }
+            const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+            if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+              capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+            }
+          }
+        }
 
       }
       const filteredAndStatements = {
         statements: (andStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement =>
           filterStatements(statement))};
+      let IsOrStatement: boolean = false;
       if (filteredAndStatements && filteredAndStatements.statements && filteredAndStatements.statements.length > 0) {
-        const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredAndStatements, false);
-        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
-        capacities.push(capacity);
+        for(const statement of filteredAndStatements.statements){
+          IsOrStatement = false;
+          const orStatementStatement = statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
+          if(orStatementStatement && orStatementStatement.statements) {
+            const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, orStatementStatement, true);
+            const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+            capacities.push(capacity);
+            IsOrStatement = true;
+          }
+        }
+        if(!IsOrStatement){
+          const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredAndStatements, false);
+          const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+          capacities.push(capacity);
+        }
       }
     }
     else if(orStatement && orStatement.statements) {
@@ -452,9 +498,21 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           filterStatements(statement))
       };
       if (filteredOrStatements && filteredOrStatements.statements && filteredOrStatements.statements.length > 0) {
-        const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredOrStatements, false);
-        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
-        capacities.push(capacity);
+        let IsAndStatement: boolean = false;
+        for(const statement of filteredOrStatements.statements){
+          const andStatementStatement = statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
+          if(andStatementStatement && andStatementStatement.statements) {
+            const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, andStatementStatement, false);
+            const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+            capacities.push(capacity);
+            IsAndStatement = true;
+          }
+        }
+        if(!IsAndStatement){
+          const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredOrStatements, true);
+          const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+          capacities.push(capacity);
+        }
       }
     }
     else {
