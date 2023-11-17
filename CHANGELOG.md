@@ -2,6 +2,13 @@
 
 ## Released
 
+## 4.1.5
+### Fixed
+- Addressed issue with missing WCU Calculation OR statement within AND statement. - [Issues232](https://github.com/globaldatanet/aws-firewall-factory/issues/232)
+- Addressed issue with missing WCU Calculation AND statement within OR statement.
+- Bump @typescript-eslint/eslint-plugin from 6.7.5 to 6.10.0
+- Bump eslint from 8.51.0 to 8.53.0
+
 ## 4.1.4
 ### Added
 - Automation for  [Documentation](https://docs.aws-firewall-factory.com/) for the AWS Firewall Factory to assist you in utilizing our solution.

@@ -822,6 +822,8 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
       let NotStatement = undefined;
       let RegexMatchStatement = undefined;
       let RateBasedStatement = undefined;
+      let OrStatement = undefined;
+      let AndStatement = undefined;
       switch(Object.keys(currentstatement)[0]){
         case "byteMatchStatement":
           ByteMatchStatement = transformByteMatchStatement(currentstatement.byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
@@ -866,6 +868,14 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
         case "rateBasedStatement":
           RateBasedStatement = tranformRateBasedStatement(currentstatement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
           Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement;
+          break;
+        case "orStatement":
+          OrStatement = transformConcatenatedStatement(currentstatement.orStatement as wafv2.CfnWebACL.OrStatementProperty, false);
+          Statement.OrStatement = OrStatement as OrStatement;
+          break;
+        case "andStatement":
+          AndStatement = transformConcatenatedStatement(currentstatement.andStatement as wafv2.CfnWebACL.AndStatementProperty, true);
+          Statement.AndStatement = AndStatement as AndStatement;
           break;
         default:
           break;
