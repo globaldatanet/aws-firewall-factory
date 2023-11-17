@@ -451,23 +451,10 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
       const filteredAndStatements = {
         statements: (andStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement =>
           filterStatements(statement))};
-      let IsOrStatement: boolean = false;
       if (filteredAndStatements && filteredAndStatements.statements && filteredAndStatements.statements.length > 0) {
-        for(const statement of filteredAndStatements.statements){
-          IsOrStatement = false;
-          const orStatementStatement = statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
-          if(orStatementStatement && orStatementStatement.statements) {
-            const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, orStatementStatement, true);
-            const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
-            capacities.push(capacity);
-            IsOrStatement = true;
-          }
-        }
-        if(!IsOrStatement){
-          const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredAndStatements, false);
-          const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
-          capacities.push(capacity);
-        }
+        const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredAndStatements, false);
+        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+        capacities.push(capacity);
       }
     }
     else if(orStatement && orStatement.statements) {
@@ -498,21 +485,9 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           filterStatements(statement))
       };
       if (filteredOrStatements && filteredOrStatements.statements && filteredOrStatements.statements.length > 0) {
-        let IsAndStatement: boolean = false;
-        for(const statement of filteredOrStatements.statements){
-          const andStatementStatement = statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
-          if(andStatementStatement && andStatementStatement.statements) {
-            const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, andStatementStatement, false);
-            const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
-            capacities.push(capacity);
-            IsAndStatement = true;
-          }
-        }
-        if(!IsAndStatement){
-          const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredOrStatements, true);
-          const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
-          capacities.push(capacity);
-        }
+        const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredOrStatements, true);
+        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+        capacities.push(capacity);
       }
     }
     else {
