@@ -15,6 +15,7 @@ on:
     branches:
       - master
       - 4.1.4
+      - bugfix
 jobs:
   deploy_production_main:
     name: Update Documentation
