@@ -32,6 +32,10 @@ export interface Config {
     readonly Description?: string,
     readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
     readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
+    /**
+     * Replace web ACLs that are currently associated with in-scope resources with the web ACLs created by this policy - Default is False
+     */
+    readonly OverrideCustomerWebACLAssociation?: boolean,
     readonly Scope: fwmEnums.WebAclScope | "CLOUDFRONT" | "REGIONAL",
     /**
      * The type of resource protected by or in scope of the policy. To apply this policy to multiple resource types, specify a resource type of ResourceTypeList and then specify the resource types in a ResourceTypeList.

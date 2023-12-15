@@ -3,6 +3,7 @@
 
 import { aws_wafv2 as waf } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
+import { InspectionLevel } from "@aws-sdk/client-wafv2";
 
 export interface CustomRequestHandling {
   customRequestHandling?: {
@@ -74,6 +75,18 @@ export interface ManagedRuleGroup {
   ruleActionOverrides?: RuleActionOverrideProperty[],
   versionEnabled?: boolean
   /**
+   * Details for your use of the Bot Control managed rule group, AWSManagedRulesBotControlRuleSet . See also: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesbotcontrolruleset.html
+   */
+  awsManagedRulesBotControlRuleSetProperty?: { inspectionLevel: "COMMON" | "TARGETED", enableMachineLearning: boolean},
+  /**
+   * Details for your use of the account creation fraud prevention managed rule group, AWSManagedRulesACFPRuleSet. See also: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesacfpruleset.html
+   */
+  awsManagedRulesACFPRuleSetProperty?: waf.CfnWebACL.AWSManagedRulesACFPRuleSetProperty,
+  /**
+   * Details for your use of the account takeover prevention managed rule group, AWSManagedRulesATPRuleSet. See also: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesatpruleset.html
+   */
+  awsManagedRulesATPRuleSetProperty?: waf.CfnWebACL.AWSManagedRulesATPRuleSetProperty,
+  /**
     * Enforce the [current Default version](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups-versioning.html) of the managed rule group to be retrieved using a Lambda Function.
   */
   latestVersion?: boolean
@@ -116,6 +129,9 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
   excludeRules: any,
   ruleGroupType: "ManagedRuleGroup",
   ruleActionOverrides: RuleActionOverrideProperty[] | undefined,
+  awsManagedRulesBotControlRuleSetProperty?: waf.CfnWebACL.AWSManagedRulesBotControlRuleSetProperty,
+  awsManagedRulesACFPRuleSetProperty?: waf.CfnWebACL.AWSManagedRulesACFPRuleSetProperty,
+  awsManagedRulesATPRuleSetProperty?: waf.CfnWebACL.AWSManagedRulesATPRuleSetProperty,
 }
 
 export interface ServiceDataRuleGroup extends ServiceDataAbstactRuleGroup {
