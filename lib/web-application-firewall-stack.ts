@@ -223,7 +223,7 @@ export class WafStack extends cdk.Stack {
       defaultAction: { type: "ALLOW" },
       preProcessRuleGroups: preProcessRuleGroups,
       postProcessRuleGroups: postProcessRuleGroups,
-      overrideCustomerWebACLAssociation: true,
+      overrideCustomerWebACLAssociation: props.config.WebAcl.OverrideCustomerWebACLAssociation ? props.config.WebAcl.OverrideCustomerWebACLAssociation : false,
       loggingConfiguration: {
         logDestinationConfigs: [loggingConfiguration || ""],
       },
@@ -289,6 +289,9 @@ function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: Managed
         excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : [],
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?  managedRuleGroup.ruleActionOverrides : undefined,
+        awsManagedRulesBotControlRuleSetProperty: managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ? managedRuleGroup.awsManagedRulesBotControlRuleSetProperty : undefined,
+        awsManagedRulesACFPRuleSetProperty: managedRuleGroup.awsManagedRulesACFPRuleSetProperty ? managedRuleGroup.awsManagedRulesACFPRuleSetProperty : undefined,
+        awsManagedRulesATPRuleSetProperty: managedRuleGroup.awsManagedRulesATPRuleSetProperty ? managedRuleGroup.awsManagedRulesATPRuleSetProperty : undefined,
       });
       MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendor +"]");
       continue;

@@ -2,6 +2,17 @@
 
 ## Released
 
+## 4.1.6
+### Fixed
+- Fixed Region addression in CloudWatch expressions for Dashboard
+- Bump @types/aws-lambda from 8.10.124 to 8.10.130
+- Bump @typescript-eslint/eslint-plugin from 6.10.0 to 6.13.2
+### Added
+- Add Optional setting to Config OverrideCustomerWebACLAssociation - Decide if FMS should replace web ACLs that are currently associated with in-scope resources with the web ACLs created by this policy - Default is False
+- Add Optional setting to Config awsManagedRulesBotControlRuleSetProperty - Details for your use of the Bot Control managed rule group, AWSManagedRulesBotControlRuleSet . See also: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesbotcontrolruleset.html
+- Add Optional setting to Config awsManagedRulesACFPRuleSetProperty - Details for your use of the account creation fraud prevention managed rule group, AWSManagedRulesACFPRuleSet. See also: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesacfpruleset.html
+- Add Optional setting to Config awsManagedRulesATPRuleSetProperty - Details for your use of the account takeover prevention managed rule group, AWSManagedRulesATPRuleSet. See also: http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesatpruleset.html
+
 ## 4.1.5
 ### Fixed
 - Addressed issue with missing WCU Calculation OR statement within AND statement. - [Issues232](https://github.com/globaldatanet/aws-firewall-factory/issues/232)

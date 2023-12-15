@@ -82,7 +82,7 @@ config.General.DeployHash;
       cwdashboard.addWidgets(firstrow);
       for(const account of config.WebAcl.IncludeMap.account){
         // eslint-disable-next-line no-useless-escape
-        const countexpression = "SEARCH('{AWS\/WAFV2,\REGION,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\CountedRequests\"', '\Sum', 300)";
+        const countexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\CountedRequests\"', '\Sum', 300)";
 
         const countedRequests = new cloudwatch.GraphWidget({
           title: "🔢 Counted Requests in " + account,
@@ -99,7 +99,7 @@ config.General.DeployHash;
             color: "#9dbcd4"
           }));
         // eslint-disable-next-line no-useless-escape
-        const blockedexpression = "SEARCH('{AWS\/WAFV2,\REGION,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
+        const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
         const blockedRequests = new cloudwatch.GraphWidget({
           title: "❌ Blocked Requests in " + account,
           width: 8,
@@ -115,7 +115,7 @@ config.General.DeployHash;
             color: "#ff0000"
           }));
         // eslint-disable-next-line no-useless-escape  
-        const allowedexpression = "SEARCH('{AWS\/WAFV2,\REGION,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\AllowedRequests\"', '\Sum', 300)";
+        const allowedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\AllowedRequests\"', '\Sum', 300)";
         const allowedRequests = new cloudwatch.GraphWidget({
           title: "✅ Allowed Requests in " + account,
           width: 8,
@@ -131,15 +131,15 @@ config.General.DeployHash;
             color: "#00FF00"
           }));
         // eslint-disable-next-line no-useless-escape
-        const sinlevaluecountedrequestsexpression = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\REGION} \WebACL="+webaclNamewithPrefix+" \MetricName=\"CountedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+        const sinlevaluecountedrequestsexpression = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"CountedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
         // eslint-disable-next-line no-useless-escape
-        const expression1 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\REGION} \WebACL="+webaclNamewithPrefix+" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+        const expression1 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
         // eslint-disable-next-line no-useless-escape
-        const expression2 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\REGION} \WebACL="+webaclNamewithPrefix+" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+        const expression2 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
         // eslint-disable-next-line no-useless-escape
-        const expression3 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\REGION} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+        const expression3 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
         // eslint-disable-next-line no-useless-escape
-        const expression4 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\REGION} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
+        const expression4 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
         const expression5 = "SUM([e3,e4])";
         const expression6 = "SUM([e1,e2,-e3,-e4])";
 
