@@ -3,7 +3,6 @@
 
 import { aws_wafv2 as waf } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
-import { InspectionLevel } from "@aws-sdk/client-wafv2";
 
 export interface CustomRequestHandling {
   customRequestHandling?: {
