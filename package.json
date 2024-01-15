@@ -28,7 +28,7 @@
     "@aws-sdk/client-fms": "^3.427.0",
     "@aws-sdk/client-pricing": "^3.427.0",
     "@aws-sdk/client-service-quotas": "^3.427.0",
-    "@aws-sdk/client-shield": "^3.428.0",
+    "@aws-sdk/client-shield": "^3.490.0",
     "@aws-sdk/client-wafv2": "^3.427.0",
     "@babel/traverse": "^7.23.2",
     "@mhlabs/cfn-diagram": "^1.1.38",
