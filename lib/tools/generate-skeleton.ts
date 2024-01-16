@@ -1,6 +1,6 @@
 import { Config } from "../types/config";
 import util from "util";
-import { outputInfoBanner } from "./helpers";
+import { afwfHelper } from "./helpers";
 import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums";
 /**
  * The script will output a example WAF Skeleton Config to the terminal
@@ -42,7 +42,7 @@ const skeletonConfig : Config = {
   }
 };
 
-outputInfoBanner();
+afwfHelper.outputInfoBanner();
 console.log("ℹ️  Use the following snippet to create a skeleton config file for your Firewall. ℹ️\n");
 console.log("import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from \"../../lib/types/enums\";");
 console.log("import { Config } from \"../../lib/types/config\";\nexport const config: Config = {");

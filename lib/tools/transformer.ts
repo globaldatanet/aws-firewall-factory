@@ -6,8 +6,8 @@
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchStatement, SqliMatchStatement, RegexPatternSetReferenceStatement, Statement,
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
-  ByteMatchStatement, GeoMatchStatement } from "@aws-sdk/client-wafv2";
-import {convertStringToUint8Array} from "./helpers";
+  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body } from "@aws-sdk/client-wafv2";
+import {convertStringToUint8Array} from "./helpers/web-application-firewall";
 
 /**
  * The function will map a CDK ByteMatchStatement Property to a SDK ByteMatchStatement Property
@@ -20,98 +20,7 @@ export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatch
   if (bmst) {
     let FieldToMatch = undefined;
     if (bmst.fieldToMatch) {
-      const ftm = bmst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty;
-      let Body = undefined;
-      if (ftm.body) {
-        const ftmBody = ftm.body as wafv2.CfnWebACL.BodyProperty;
-        Body = {
-          OversizeHandling: ftmBody.oversizeHandling ? ftmBody.oversizeHandling as string : undefined,
-        };
-      }
-      let SingleHeader = undefined;
-      if(ftm.singleHeader){
-        SingleHeader = {
-          Name: ftm.singleHeader.name,
-        };
-      }
-      let SingleQueryArgument = undefined;
-      if(ftm.singleQueryArgument){
-        SingleQueryArgument ={
-          Name: ftm.singleQueryArgument.name,
-        };
-      }
-      let UriPath = undefined;
-      if(ftm.uriPath){
-        UriPath ={
-          Path: ftm.uriPath.path,
-        };
-      }
-      let JsonBody = undefined;
-      if (ftm.jsonBody) {
-        const ftmJsonBody = ftm.jsonBody as wafv2.CfnWebACL.JsonBodyProperty;
-        let IncludedPaths = undefined;
-        let MatchPattern = undefined;
-        if(ftmJsonBody.matchPattern){
-          const mp = ftmJsonBody.matchPattern as wafv2.CfnWebACL.JsonMatchPatternProperty;
-          IncludedPaths = mp.includedPaths as string[];
-          MatchPattern = {
-            IncludedPaths,
-            All: mp.all,
-          };
-        }
-        JsonBody = {
-          OversizeHandling: ftmJsonBody.oversizeHandling ? ftmJsonBody.oversizeHandling as string : undefined,
-          MatchPattern,
-        };
-      }
-      let Cookies = undefined;
-      if(ftm.cookies){
-        const fmtCookies = ftm.cookies as wafv2.CfnWebACL.CookiesProperty;
-        let MatchPattern = undefined;
-        if(fmtCookies.matchPattern){
-          const cmp = fmtCookies.matchPattern as wafv2.CfnWebACL.CookieMatchPatternProperty;
-          MatchPattern = {
-            IncludedCookies: cmp.includedCookies as string[],
-            ExcludedCookies: cmp.excludedCookies as string[],
-            All: cmp.all,
-          };
-        }
-        Cookies = {
-          MatchPattern,
-          MatchScope: fmtCookies.matchScope,
-          OversizeHandling: fmtCookies.oversizeHandling as string,
-        };
-      }
-      let Headers = undefined;
-      if(ftm.headers){
-        const fmtHeaders = ftm.headers as wafv2.CfnWebACL.HeadersProperty;
-        let MatchPattern = undefined;
-        if(fmtHeaders.matchPattern){
-          const hmp = fmtHeaders.matchPattern as wafv2.CfnWebACL.HeaderMatchPatternProperty;
-          MatchPattern = {
-            IncludedHeaders: hmp.includedHeaders as string[],
-            ExcludedHeaders: hmp.excludedHeaders as string[],
-            All: hmp.all,
-          };
-        }
-        Headers = {
-          MatchPattern,
-          MatchScope: fmtHeaders.matchScope,
-          OversizeHandling: fmtHeaders.oversizeHandling as string,
-        };
-      }
-      FieldToMatch = {
-        AllQueryArguments: ftm.allQueryArguments,
-        Body,
-        SingleHeader,
-        UriPath,
-        SingleQueryArgument,
-        Method: ftm.method,
-        QueryString: ftm.queryString,
-        JsonBody,
-        Cookies,
-        Headers
-      };
+      FieldToMatch = transformfieldToMatch(bmst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
     let TextTransformations = undefined;
     if (bmst.textTransformations) {
@@ -124,7 +33,7 @@ export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatch
       });
     }
     ByteMatchStatement = {
-      PositionalConstraint: bmst.positionalConstraint ? bmst.positionalConstraint : undefined,
+      PositionalConstraint: bmst.positionalConstraint,
       SearchString: bmst.searchString ? convertStringToUint8Array(bmst.searchString) : undefined,
       TextTransformations,
       FieldToMatch
@@ -144,98 +53,7 @@ export function transformRegexMatchStatement(statement: wafv2.CfnWebACL.RegexMat
   if (rest) {
     let FieldToMatch = undefined;
     if (rest.fieldToMatch) {
-      const ftm = rest.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty;
-      let Body = undefined;
-      if (ftm.body) {
-        const ftmBody = ftm.body as wafv2.CfnWebACL.BodyProperty;
-        Body = {
-          OversizeHandling: ftmBody.oversizeHandling ? ftmBody.oversizeHandling as string : undefined,
-        };
-      }
-      let SingleHeader = undefined;
-      if(ftm.singleHeader){
-        SingleHeader = {
-          Name: ftm.singleHeader.name,
-        };
-      }
-      let SingleQueryArgument = undefined;
-      if(ftm.singleQueryArgument){
-        SingleQueryArgument ={
-          Name: ftm.singleQueryArgument.name,
-        };
-      }
-      let UriPath = undefined;
-      if(ftm.uriPath){
-        UriPath ={
-          Path: ftm.uriPath.path,
-        };
-      }
-      let JsonBody = undefined;
-      if (ftm.jsonBody) {
-        const ftmJsonBody = ftm.jsonBody as wafv2.CfnWebACL.JsonBodyProperty;
-        let IncludedPaths = undefined;
-        let MatchPattern = undefined;
-        if(ftmJsonBody.matchPattern){
-          const mp = ftmJsonBody.matchPattern as wafv2.CfnWebACL.JsonMatchPatternProperty;
-          IncludedPaths = mp.includedPaths as string[];
-          MatchPattern = {
-            IncludedPaths,
-            All: mp.all,
-          };
-        }
-        JsonBody = {
-          OversizeHandling: ftmJsonBody.oversizeHandling ? ftmJsonBody.oversizeHandling as string : undefined,
-          MatchPattern,
-        };
-      }
-      let Cookies = undefined;
-      if(ftm.cookies){
-        const fmtCookies = ftm.cookies as wafv2.CfnWebACL.CookiesProperty;
-        let MatchPattern = undefined;
-        if(fmtCookies.matchPattern){
-          const cmp = fmtCookies.matchPattern as wafv2.CfnWebACL.CookieMatchPatternProperty;
-          MatchPattern = {
-            IncludedCookies: cmp.includedCookies as string[],
-            ExcludedCookies: cmp.excludedCookies as string[],
-            All: cmp.all,
-          };
-        }
-        Cookies = {
-          MatchPattern,
-          MatchScope: fmtCookies.matchScope,
-          OversizeHandling: fmtCookies.oversizeHandling as string,
-        };
-      }
-      let Headers = undefined;
-      if(ftm.headers){
-        const fmtHeaders = ftm.headers as wafv2.CfnWebACL.HeadersProperty;
-        let MatchPattern = undefined;
-        if(fmtHeaders.matchPattern){
-          const hmp = fmtHeaders.matchPattern as wafv2.CfnWebACL.HeaderMatchPatternProperty;
-          MatchPattern = {
-            IncludedHeaders: hmp.includedHeaders as string[],
-            ExcludedHeaders: hmp.excludedHeaders as string[],
-            All: hmp.all,
-          };
-        }
-        Headers = {
-          MatchPattern,
-          MatchScope: fmtHeaders.matchScope,
-          OversizeHandling: fmtHeaders.oversizeHandling as string,
-        };
-      }
-      FieldToMatch = {
-        AllQueryArguments: ftm.allQueryArguments,
-        Body,
-        SingleHeader,
-        UriPath,
-        SingleQueryArgument,
-        Method: ftm.method,
-        QueryString: ftm.queryString,
-        JsonBody,
-        Cookies,
-        Headers
-      };
+      FieldToMatch = transformfieldToMatch(rest.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
     let TextTransformations = undefined;
     if (rest.textTransformations) {
@@ -292,99 +110,7 @@ export function transformSizeConstraintStatement(statement: wafv2.CfnWebACL.Size
   if (szst) {
     let FieldToMatch = undefined;
     if (szst.fieldToMatch) {
-      const ftm = szst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty;
-      let Body = undefined;
-      if (ftm.body) {
-        const ftmBody = ftm.body as wafv2.CfnWebACL.BodyProperty;
-        Body = {
-          OversizeHandling: ftmBody.oversizeHandling ? ftmBody.oversizeHandling as string : undefined,
-        };
-      }
-      let SingleHeader = undefined;
-      if(ftm.singleHeader){
-        SingleHeader = {
-          Name: ftm.singleHeader.name,
-        };
-      }
-      let SingleQueryArgument = undefined;
-      if(ftm.singleQueryArgument){
-        SingleQueryArgument ={
-          Name: ftm.singleQueryArgument.name,
-        };
-      }
-      let UriPath = undefined;
-      if(ftm.uriPath){
-        UriPath ={
-          Path: ftm.uriPath.path,
-        };
-      }
-      let JsonBody = undefined;
-      if (ftm.jsonBody) {
-        const ftmJsonBody = ftm.jsonBody as wafv2.CfnWebACL.JsonBodyProperty;
-        let IncludedPaths = undefined;
-        let MatchPattern = undefined;
-        if(ftmJsonBody.matchPattern){
-          const mp = ftmJsonBody.matchPattern as wafv2.CfnWebACL.JsonMatchPatternProperty;
-          IncludedPaths = mp.includedPaths as string[];
-          MatchPattern = {
-            IncludedPaths,
-            All: mp.all,
-          };
-        }
-        JsonBody = {
-          OversizeHandling: ftmJsonBody.oversizeHandling ? ftmJsonBody.oversizeHandling as string : undefined,
-          MatchPattern,
-        };
-      }
-      let Cookies = undefined;
-      if(ftm.cookies){
-        const fmtCookies = ftm.cookies as wafv2.CfnWebACL.CookiesProperty;
-        let MatchPattern = undefined;
-        if(fmtCookies.matchPattern){
-          const cmp = fmtCookies.matchPattern as wafv2.CfnWebACL.CookieMatchPatternProperty;
-          MatchPattern = {
-            IncludedCookies: cmp.includedCookies as string[],
-            ExcludedCookies: cmp.excludedCookies as string[],
-            All: cmp.all,
-          };
-        }
-        Cookies = {
-          MatchPattern,
-          MatchScope: fmtCookies.matchScope,
-          OversizeHandling: fmtCookies.oversizeHandling as string,
-        };
-      }
-      let Headers = undefined;
-      if(ftm.headers){
-        const fmtHeaders = ftm.headers as wafv2.CfnWebACL.HeadersProperty;
-        let MatchPattern = undefined;
-        if(fmtHeaders.matchPattern){
-          const hmp = fmtHeaders.matchPattern as wafv2.CfnWebACL.HeaderMatchPatternProperty;
-          MatchPattern = {
-            IncludedHeaders: hmp.includedHeaders as string[],
-            ExcludedHeaders: hmp.excludedHeaders as string[],
-            All: hmp.all,
-          };
-        }
-        Headers = {
-          MatchPattern,
-          MatchScope: fmtHeaders.matchScope,
-          OversizeHandling: fmtHeaders.oversizeHandling as string,
-        };
-      }
-
-      FieldToMatch = {
-        AllQueryArguments: ftm.allQueryArguments,
-        Body,
-        SingleHeader,
-        UriPath,
-        SingleQueryArgument,
-        Method: ftm.method,
-        QueryString: ftm.queryString,
-        JsonBody,
-        Cookies,
-        Headers
-      };
+      FieldToMatch = transformfieldToMatch(szst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
     let TextTransformations = undefined;
     if (szst.textTransformations) {
@@ -443,98 +169,7 @@ export function transformRegexPatternSetReferenceStatement(statement: wafv2.CfnW
   if (regpst) {
     let FieldToMatch = undefined;
     if (regpst.fieldToMatch) {
-      const ftm = regpst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty;
-      let Body = undefined;
-      if (ftm.body) {
-        const ftmBody = ftm.body as wafv2.CfnWebACL.BodyProperty;
-        Body = {
-          OversizeHandling: ftmBody.oversizeHandling ? ftmBody.oversizeHandling as string : undefined,
-        };
-      }
-      let SingleHeader = undefined;
-      if(ftm.singleHeader){
-        SingleHeader = {
-          Name: ftm.singleHeader.name,
-        };
-      }
-      let SingleQueryArgument = undefined;
-      if(ftm.singleQueryArgument){
-        SingleQueryArgument ={
-          Name: ftm.singleQueryArgument.name,
-        };
-      }
-      let UriPath = undefined;
-      if(ftm.uriPath){
-        UriPath ={
-          Path: ftm.uriPath.path,
-        };
-      }
-      let JsonBody = undefined;
-      if (ftm.jsonBody) {
-        const ftmJsonBody = ftm.jsonBody as wafv2.CfnWebACL.JsonBodyProperty;
-        let IncludedPaths = undefined;
-        let MatchPattern = undefined;
-        if(ftmJsonBody.matchPattern){
-          const mp = ftmJsonBody.matchPattern as wafv2.CfnWebACL.JsonMatchPatternProperty;
-          IncludedPaths = mp.includedPaths as string[];
-          MatchPattern = {
-            IncludedPaths,
-            All: mp.all,
-          };
-        }
-        JsonBody = {
-          OversizeHandling: ftmJsonBody.oversizeHandling ? ftmJsonBody.oversizeHandling as string : undefined,
-          MatchPattern,
-        };
-      }
-      let Cookies = undefined;
-      if(ftm.cookies){
-        const fmtCookies = ftm.cookies as wafv2.CfnWebACL.CookiesProperty;
-        let MatchPattern = undefined;
-        if(fmtCookies.matchPattern){
-          const cmp = fmtCookies.matchPattern as wafv2.CfnWebACL.CookieMatchPatternProperty;
-          MatchPattern = {
-            IncludedCookies: cmp.includedCookies as string[],
-            ExcludedCookies: cmp.excludedCookies as string[],
-            All: cmp.all,
-          };
-        }
-        Cookies = {
-          MatchPattern,
-          MatchScope: fmtCookies.matchScope,
-          OversizeHandling: fmtCookies.oversizeHandling as string,
-        };
-      }
-      let Headers = undefined;
-      if(ftm.headers){
-        const fmtHeaders = ftm.headers as wafv2.CfnWebACL.HeadersProperty;
-        let MatchPattern = undefined;
-        if(fmtHeaders.matchPattern){
-          const hmp = fmtHeaders.matchPattern as wafv2.CfnWebACL.HeaderMatchPatternProperty;
-          MatchPattern = {
-            IncludedHeaders: hmp.includedHeaders as string[],
-            ExcludedHeaders: hmp.excludedHeaders as string[],
-            All: hmp.all,
-          };
-        }
-        Headers = {
-          MatchPattern,
-          MatchScope: fmtHeaders.matchScope,
-          OversizeHandling: fmtHeaders.oversizeHandling as string,
-        };
-      }
-      FieldToMatch = {
-        AllQueryArguments: ftm.allQueryArguments,
-        Body,
-        SingleHeader,
-        UriPath,
-        SingleQueryArgument,
-        Method: ftm.method,
-        QueryString: ftm.queryString,
-        JsonBody,
-        Cookies,
-        Headers
-      };
+      FieldToMatch = transformfieldToMatch(regpst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
     let TextTransformations = undefined;
     if (regpst.textTransformations) {
@@ -566,98 +201,7 @@ export function transformSqliMatchStatement(statement: wafv2.CfnWebACL.SqliMatch
   if (sqlst) {
     let FieldToMatch = undefined;
     if (sqlst.fieldToMatch) {
-      const ftm = sqlst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty;
-      let Body = undefined;
-      if (ftm.body) {
-        const ftmBody = ftm.body as wafv2.CfnWebACL.BodyProperty;
-        Body = {
-          OversizeHandling: ftmBody.oversizeHandling ? ftmBody.oversizeHandling as string : undefined,
-        };
-      }
-      let SingleHeader = undefined;
-      if(ftm.singleHeader){
-        SingleHeader = {
-          Name: ftm.singleHeader.name,
-        };
-      }
-      let SingleQueryArgument = undefined;
-      if(ftm.singleQueryArgument){
-        SingleQueryArgument ={
-          Name: ftm.singleQueryArgument.name,
-        };
-      }
-      let UriPath = undefined;
-      if(ftm.uriPath){
-        UriPath ={
-          Path: ftm.uriPath.path,
-        };
-      }
-      let JsonBody = undefined;
-      if (ftm.jsonBody) {
-        const ftmJsonBody = ftm.jsonBody as wafv2.CfnWebACL.JsonBodyProperty;
-        let IncludedPaths = undefined;
-        let MatchPattern = undefined;
-        if(ftmJsonBody.matchPattern){
-          const mp = ftmJsonBody.matchPattern as wafv2.CfnWebACL.JsonMatchPatternProperty;
-          IncludedPaths = mp.includedPaths as string[];
-          MatchPattern = {
-            IncludedPaths,
-            All: mp.all,
-          };
-        }
-        JsonBody = {
-          OversizeHandling: ftmJsonBody.oversizeHandling ? ftmJsonBody.oversizeHandling as string : undefined,
-          MatchPattern,
-        };
-      }
-      let Cookies = undefined;
-      if(ftm.cookies){
-        const fmtCookies = ftm.cookies as wafv2.CfnWebACL.CookiesProperty;
-        let MatchPattern = undefined;
-        if(fmtCookies.matchPattern){
-          const cmp = fmtCookies.matchPattern as wafv2.CfnWebACL.CookieMatchPatternProperty;
-          MatchPattern = {
-            IncludedCookies: cmp.includedCookies as string[],
-            ExcludedCookies: cmp.excludedCookies as string[],
-            All: cmp.all,
-          };
-        }
-        Cookies = {
-          MatchPattern,
-          MatchScope: fmtCookies.matchScope,
-          OversizeHandling: fmtCookies.oversizeHandling as string,
-        };
-      }
-      let Headers = undefined;
-      if(ftm.headers){
-        const fmtHeaders = ftm.headers as wafv2.CfnWebACL.HeadersProperty;
-        let MatchPattern = undefined;
-        if(fmtHeaders.matchPattern){
-          const hmp = fmtHeaders.matchPattern as wafv2.CfnWebACL.HeaderMatchPatternProperty;
-          MatchPattern = {
-            IncludedHeaders: hmp.includedHeaders as string[],
-            ExcludedHeaders: hmp.excludedHeaders as string[],
-            All: hmp.all,
-          };
-        }
-        Headers = {
-          MatchPattern,
-          MatchScope: fmtHeaders.matchScope,
-          OversizeHandling: fmtHeaders.oversizeHandling as string,
-        };
-      }
-      FieldToMatch = {
-        AllQueryArguments: ftm.allQueryArguments,
-        Body,
-        SingleHeader,
-        UriPath,
-        SingleQueryArgument,
-        Method: ftm.method,
-        QueryString: ftm.queryString,
-        JsonBody,
-        Cookies,
-        Headers
-      };
+      FieldToMatch = transformfieldToMatch(sqlst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
     let TextTransformations = undefined;
     if (sqlst.textTransformations) {
@@ -689,98 +233,7 @@ export function transformXssMatchStatement(statement: wafv2.CfnWebACL.XssMatchSt
   if (xsst) {
     let FieldToMatch = undefined;
     if (xsst.fieldToMatch) {
-      const ftm = xsst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty;
-      let Body = undefined;
-      if (ftm.body) {
-        const ftmBody = ftm.body as wafv2.CfnWebACL.BodyProperty;
-        Body = {
-          OversizeHandling: ftmBody.oversizeHandling ? ftmBody.oversizeHandling as string : undefined,
-        };
-      }
-      let SingleHeader = undefined;
-      if(ftm.singleHeader){
-        SingleHeader = {
-          Name: ftm.singleHeader.name,
-        };
-      }
-      let SingleQueryArgument = undefined;
-      if(ftm.singleQueryArgument){
-        SingleQueryArgument ={
-          Name: ftm.singleQueryArgument.name,
-        };
-      }
-      let UriPath = undefined;
-      if(ftm.uriPath){
-        UriPath ={
-          Path: ftm.uriPath.path,
-        };
-      }
-      let JsonBody = undefined;
-      if (ftm.jsonBody) {
-        const ftmJsonBody = ftm.jsonBody as wafv2.CfnWebACL.JsonBodyProperty;
-        let IncludedPaths = undefined;
-        let MatchPattern = undefined;
-        if(ftmJsonBody.matchPattern){
-          const mp = ftmJsonBody.matchPattern as wafv2.CfnWebACL.JsonMatchPatternProperty;
-          IncludedPaths = mp.includedPaths as string[];
-          MatchPattern = {
-            IncludedPaths,
-            All: mp.all,
-          };
-        }
-        JsonBody = {
-          OversizeHandling: ftmJsonBody.oversizeHandling ? ftmJsonBody.oversizeHandling as string : undefined,
-          MatchPattern,
-        };
-      }
-      let Cookies = undefined;
-      if(ftm.cookies){
-        const fmtCookies = ftm.cookies as wafv2.CfnWebACL.CookiesProperty;
-        let MatchPattern = undefined;
-        if(fmtCookies.matchPattern){
-          const cmp = fmtCookies.matchPattern as wafv2.CfnWebACL.CookieMatchPatternProperty;
-          MatchPattern = {
-            IncludedCookies: cmp.includedCookies as string[],
-            ExcludedCookies: cmp.excludedCookies as string[],
-            All: cmp.all,
-          };
-        }
-        Cookies = {
-          MatchPattern,
-          MatchScope: fmtCookies.matchScope,
-          OversizeHandling: fmtCookies.oversizeHandling as string,
-        };
-      }
-      let Headers = undefined;
-      if(ftm.headers){
-        const fmtHeaders = ftm.headers as wafv2.CfnWebACL.HeadersProperty;
-        let MatchPattern = undefined;
-        if(fmtHeaders.matchPattern){
-          const hmp = fmtHeaders.matchPattern as wafv2.CfnWebACL.HeaderMatchPatternProperty;
-          MatchPattern = {
-            IncludedHeaders: hmp.includedHeaders as string[],
-            ExcludedHeaders: hmp.excludedHeaders as string[],
-            All: hmp.all,
-          };
-        }
-        Headers = {
-          MatchPattern,
-          MatchScope: fmtHeaders.matchScope,
-          OversizeHandling: fmtHeaders.oversizeHandling as string,
-        };
-      }
-      FieldToMatch = {
-        AllQueryArguments: ftm.allQueryArguments,
-        Body,
-        SingleHeader,
-        UriPath,
-        SingleQueryArgument,
-        Method: ftm.method,
-        QueryString: ftm.queryString,
-        JsonBody,
-        Cookies,
-        Headers
-      };
+      FieldToMatch = transformfieldToMatch(xsst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
     let TextTransformations = undefined;
     if (xsst.textTransformations) {
@@ -827,55 +280,55 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
       switch(Object.keys(currentstatement)[0]){
         case "byteMatchStatement":
           ByteMatchStatement = transformByteMatchStatement(currentstatement.byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
-          Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement;
+          Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "geoMatchStatement":
           GeoMatchStatement = transformGeoMatchStatement(currentstatement.geoMatchStatement as wafv2.CfnWebACL.GeoMatchStatementProperty);
-          Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement;
+          Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "ipSetReferenceStatement":
           IPSetReferenceStatement = transformIPSetReferenceStatement(currentstatement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty);
-          Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement;
+          Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "regexPatternSetReferenceStatement":
           RegexPatternSetReferenceStatement = transformRegexPatternSetReferenceStatement(currentstatement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty);
-          Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement;
+          Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "sizeConstraintStatement":
           SizeConstraintStatement = transformSizeConstraintStatement(currentstatement.sizeConstraintStatement as wafv2.CfnWebACL.SizeConstraintStatementProperty);
-          Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement;
+          Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "sqliMatchStatement":
           SqliMatchStatement = transformSqliMatchStatement(currentstatement.sqliMatchStatement as wafv2.CfnWebACL.SqliMatchStatementProperty);
-          Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement;
+          Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "xssMatchStatement":
           XssMatchStatement = transformXssMatchStatement(currentstatement.xssMatchStatement as wafv2.CfnWebACL.XssMatchStatementProperty);
-          Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement;
+          Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "labelMatchStatement":
           LabelMatchStatement = transformLabelMatchStatement(currentstatement.labelMatchStatement as wafv2.CfnWebACL.LabelMatchStatementProperty);
-          Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement;
+          Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case  "notStatement":
           NotStatement = tranformNotStatement(currentstatement.notStatement as wafv2.CfnWebACL.NotStatementProperty);
-          Statement.NotStatement = NotStatement as NotStatement;
+          Statement.NotStatement = NotStatement as NotStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "regexMatchStatement":
           RegexMatchStatement = transformRegexMatchStatement(currentstatement.regexMatchStatement as wafv2.CfnWebACL.RegexMatchStatementProperty);
-          Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement;
+          Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "rateBasedStatement":
           RateBasedStatement = tranformRateBasedStatement(currentstatement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
-          Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement;
+          Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "orStatement":
           OrStatement = transformConcatenatedStatement(currentstatement.orStatement as wafv2.CfnWebACL.OrStatementProperty, false);
-          Statement.OrStatement = OrStatement as OrStatement;
+          Statement.OrStatement = OrStatement as OrStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "andStatement":
           AndStatement = transformConcatenatedStatement(currentstatement.andStatement as wafv2.CfnWebACL.AndStatementProperty, true);
-          Statement.AndStatement = AndStatement as AndStatement;
+          Statement.AndStatement = AndStatement as AndStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         default:
           break;
@@ -884,10 +337,10 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
     }
     ConcatenatedStatement = {Statements};
     if(isandStatement){
-      return ConcatenatedStatement as AndStatement;
+      return ConcatenatedStatement as AndStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
     }
     else{
-      return ConcatenatedStatement as OrStatement;
+      return ConcatenatedStatement as OrStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
     }
   }
   else{
@@ -935,43 +388,43 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
     switch(Object.keys(nst.statement)[0]){
       case "byteMatchStatement":
         ByteMatchStatement = transformByteMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
-        Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement;
+        Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "geoMatchStatement":
         GeoMatchStatement = transformGeoMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).geoMatchStatement as wafv2.CfnWebACL.GeoMatchStatementProperty);
-        Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement;
+        Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "ipSetReferenceStatement":
         IPSetReferenceStatement = transformIPSetReferenceStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty);
-        Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement;
+        Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "regexPatternSetReferenceStatement":
         RegexPatternSetReferenceStatement = transformRegexPatternSetReferenceStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty);
-        Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement;
+        Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "sizeConstraintStatement":
         SizeConstraintStatement = transformSizeConstraintStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).sizeConstraintStatement as wafv2.CfnWebACL.SizeConstraintStatementProperty);
-        Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement;
+        Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "sqliMatchStatement":
         SqliMatchStatement = transformSqliMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).sqliMatchStatement as wafv2.CfnWebACL.SqliMatchStatementProperty);
-        Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement;
+        Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "xssMatchStatement":
         XssMatchStatement = transformXssMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).xssMatchStatement as wafv2.CfnWebACL.XssMatchStatementProperty);
-        Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement;
+        Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "labelMatchStatement":
         LabelMatchStatement = transformLabelMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).labelMatchStatement as wafv2.CfnWebACL.LabelMatchStatementProperty);
-        Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement;
+        Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "regexMatchStatement":
         RegexMatchStatement = transformRegexMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).regexMatchStatement as wafv2.CfnWebACL.RegexMatchStatementProperty);
-        Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement;
+        Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "rateBasedStatement":
         RateBasedStatement = tranformRateBasedStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
-        Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement;
+        Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       default:
         break;
@@ -1003,39 +456,39 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
     switch(Object.keys(rbst.scopeDownStatement)[0]){
       case "byteMatchStatement":
         ByteMatchStatement = transformByteMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
-        Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement;
+        Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "geoMatchStatement":
         GeoMatchStatement = transformGeoMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).geoMatchStatement as wafv2.CfnWebACL.GeoMatchStatementProperty);
-        Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement;
+        Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "ipSetReferenceStatement":
         IPSetReferenceStatement = transformIPSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty);
-        Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement;
-        break;
+        Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+        break; 
       case "regexPatternSetReferenceStatement":
         RegexPatternSetReferenceStatement = transformRegexPatternSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty);
-        Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement;
+        Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "sizeConstraintStatement":
         SizeConstraintStatement = transformSizeConstraintStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).sizeConstraintStatement as wafv2.CfnWebACL.SizeConstraintStatementProperty);
-        Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement;
+        Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "sqliMatchStatement":
         SqliMatchStatement = transformSqliMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).sqliMatchStatement as wafv2.CfnWebACL.SqliMatchStatementProperty);
-        Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement;
+        Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "xssMatchStatement":
         XssMatchStatement = transformXssMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).xssMatchStatement as wafv2.CfnWebACL.XssMatchStatementProperty);
-        Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement;
+        Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "labelMatchStatement":
         LabelMatchStatement = transformLabelMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).labelMatchStatement as wafv2.CfnWebACL.LabelMatchStatementProperty);
-        Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement;
+        Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "regexMatchStatement":
         RegexMatchStatement = transformRegexMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexMatchStatement as wafv2.CfnWebACL.RegexMatchStatementProperty);
-        Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement;
+        Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       default:
         break;
@@ -1087,7 +540,9 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
           },
         };
       }
-      Captcha = {};
+      else{
+        Captcha = {};
+      }
     }
     let Allow = undefined;
     if (action.allow) {
@@ -1108,8 +563,9 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
             InsertHeaders,
           },
         };
+      }else{
+        Allow = {};
       }
-      Allow = {};
     }
 
     let Block = undefined;
@@ -1132,12 +588,13 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
           CustomResponseBodyKey: cr.customResponseBodyKey,
           ResponseHeaders: CustomResponseHeaders,
         };
+        Block = {
+          CustomResponse,
+        };
+      }else{
+        Block = {};
       }
-      Block = {
-        CustomResponse,
-      };
     }
-  
     let Count = undefined;
     if (action.count) {
       const ct = action.count as wafv2.CfnWebACL.CountActionProperty;
@@ -1157,8 +614,9 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
             InsertHeaders,
           },
         };
+      }else{
+        Count = {};
       }
-      Count = {};
     }
 
     let Challenge = undefined;
@@ -1181,7 +639,9 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
           },
         };
       }
-      Challenge = {};
+      else{
+        Challenge = {};
+      }
     }
     Action = {
       Allow,
@@ -1335,4 +795,117 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
     RuleLabels
   };
   return rule;
+}
+
+/**
+ * The function will map a CDK FieldToMatch Property to a SDK FieldToMatch Property
+ * @param fieldToMatch object of a CDK FieldToMatch Property
+ * @returns FieldToMatch
+ */
+export function transformfieldToMatch(fieldToMatch: wafv2.CfnWebACL.FieldToMatchProperty): FieldToMatch {
+  let Body: Body | undefined = undefined;
+  if (fieldToMatch.body) {
+    const ftmBody = fieldToMatch.body as wafv2.CfnWebACL.BodyProperty;
+    Body = {
+      OversizeHandling: ftmBody.oversizeHandling as OversizeHandling,
+    };
+  }
+  let SingleHeader = undefined;
+  if(fieldToMatch.singleHeader){
+    SingleHeader = {
+      Name: fieldToMatch.singleHeader.name,
+    };
+  }
+  let SingleQueryArgument = undefined;
+  if(fieldToMatch.singleQueryArgument){
+    SingleQueryArgument ={
+      Name: fieldToMatch.singleQueryArgument.name,
+    };
+  }
+  let UriPath = undefined;
+  if(fieldToMatch.uriPath){
+    UriPath ={
+      Path: fieldToMatch.uriPath.path,
+    };
+  }
+  let JsonBody: JsonBody | undefined = undefined;
+  if (fieldToMatch.jsonBody) {
+    const ftmJsonBody = fieldToMatch.jsonBody as wafv2.CfnWebACL.JsonBodyProperty;
+    let IncludedPaths = undefined;
+    let MatchPattern = undefined;
+    if(ftmJsonBody.matchPattern){
+      const mp = ftmJsonBody.matchPattern as wafv2.CfnWebACL.JsonMatchPatternProperty;
+      IncludedPaths = mp.includedPaths as string[];
+      MatchPattern = {
+        IncludedPaths,
+        All: mp.all,
+      };
+    }
+    let MatchScope = undefined;
+    if(ftmJsonBody.matchScope){
+      const ms = ftmJsonBody.matchScope as JsonMatchScope;
+      MatchScope = ms;
+    }
+    JsonBody = {
+      OversizeHandling: ftmJsonBody.oversizeHandling as OversizeHandling,
+      MatchPattern,
+      MatchScope,
+    };
+  }
+  let Cookies: Cookies | undefined = undefined;
+  if(fieldToMatch.cookies){
+    const ftmCookies = fieldToMatch.cookies as wafv2.CfnWebACL.CookiesProperty;
+    let MatchPattern = undefined;
+    if(ftmCookies.matchPattern){
+      const cmp = ftmCookies.matchPattern as wafv2.CfnWebACL.CookieMatchPatternProperty;
+      MatchPattern = {
+        IncludedCookies: cmp.includedCookies as string[],
+        ExcludedCookies: cmp.excludedCookies as string[],
+        All: cmp.all,
+      };
+    }
+    Cookies = {
+      MatchPattern,
+      MatchScope: ftmCookies.matchScope as MapMatchScope,
+      OversizeHandling: ftmCookies.oversizeHandling as OversizeHandling,
+    };
+  }
+  let Headers: Headers | undefined = undefined;
+  if(fieldToMatch.headers){
+    const fmtHeaders = fieldToMatch.headers as wafv2.CfnWebACL.HeadersProperty;
+    let MatchPattern = undefined;
+    if(fmtHeaders.matchPattern){
+      const hmp = fmtHeaders.matchPattern as wafv2.CfnWebACL.HeaderMatchPatternProperty;
+      MatchPattern = {
+        IncludedHeaders: hmp.includedHeaders as string[],
+        ExcludedHeaders: hmp.excludedHeaders as string[],
+        All: hmp.all,
+      };
+    }
+    Headers = {
+      MatchPattern,
+      MatchScope: fmtHeaders.matchScope as MapMatchScope,
+      OversizeHandling: fmtHeaders.oversizeHandling as OversizeHandling,
+    };
+  }
+  let AllQueryArguments = undefined;
+  if(fieldToMatch.allQueryArguments){
+    AllQueryArguments = {
+      OversizeHandling: fieldToMatch.allQueryArguments.oversizeHandling,
+    };
+  }
+
+  const FieldToMatch: FieldToMatch  = {
+    AllQueryArguments,
+    Body,
+    SingleHeader,
+    UriPath,
+    SingleQueryArgument,
+    Method: fieldToMatch.method,
+    QueryString: fieldToMatch.queryString,
+    JsonBody,
+    Cookies,
+    Headers
+  };
+  return FieldToMatch;
 }

@@ -2,6 +2,32 @@
 
 ## Released
 
+## 4.2.0
+### Fixed
+- Output of the correct ManagedRuleGroup version if the stack has already been deployed, no version has been specifically set or Enforce Update has been set
+- Restructuring helpers to facilitate smoother integration with the code, particularly for all contributors. Helpers are now seperated into different files and directories grouped by aws service / usage.
+- Fixed Codesmells which where found by SonarQube
+- VersionEnabled behavior fixed for ManageRuleGroups
+- Python Lambda translated into typescript
+- Code was improved by removing Code duplications and enriched by more comments and descriptions.
+- Bump @aws-sdk/client-service-quotas from 3.427.0 to 3.490.0
+- Bump @aws-sdk/client-pricing from 3.427.0 to 3.490.0
+- Bump @aws-sdk/client-shield from 3.433.0 to 3.490.0
+- Bump @aws-sdk/client-cloudformation from 3.428.0 to 3.490.0
+- Bump @aws-sdk/client-cloudwatch from 3.427. to 3.490.0
+- Bump @aws-sdk/client-fms from 3.427.to 3.490.0
+- Bump @aws-sdk/client-wafv2 from 3.427.0 to 3.490.0
+- Bump @types/node 20.8.10 from to 20.11.4
+- Bump @typescript-eslint/parser from 6.7.5 to 6.19.0
+- Bump @typescript-eslint/eslint-plugin from 6.13.2 to 6.19.0
+- Bump aws-cdk-lib from 2.100.0 to 2.121.1
+- Bump eslint  from 8.53.0 to 8.56.0
+- Bump ts-node from 10.9.1 to 10.9.2
+- Bump typescript from 5.2.2 to 5.3.3
+- Bump @types/lodash from 4.14.178 to 4.14.202
+- Bump constructs from 10.2.25 to 10.3.0
+- Bump typedoc-plugin-keywords from 1.5.0 to 1.6.0
+
 ## 4.1.6
 ### Fixed
 - Fixed Region addression in CloudWatch expressions for Dashboard

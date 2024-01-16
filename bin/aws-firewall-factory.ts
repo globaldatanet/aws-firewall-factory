@@ -1,11 +1,9 @@
 #!/usr/bin/env node
-import { WafStack } from "../lib/web-application-firewall-stack";
-import { PrerequisitesStack } from "../lib/prerequisites-stack";
+import { WafStack } from "../lib/_web-application-firewall-stack";
+import { PrerequisitesStack } from "../lib/_prerequisites-stack";
 import * as cdk from "aws-cdk-lib";
-import { wrongLoggingConfiguration } from "../lib/tools/config-validator";
 import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
-import { isPolicyQuotaReached, isWcuQuotaReached, setOutputsFromStack, initRuntimeProperties, outputInfoBanner } from "../lib/tools/helpers";
-import {isPriceCalculated, getCurrentPrices} from "../lib/tools/price-calculator";
+import { wafHelper, afwfHelper, pricingHelper, cloudformationHelper } from "../lib/tools/helpers";
 import * as values from "../values";
 
 /**
@@ -27,11 +25,11 @@ void (async () => {
   if(process.env.PREREQUISITE === "true") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
     const prerequisites: Prerequisites = values.prereq[CONFIG_OBJECT_NAME];
-    outputInfoBanner();
+    afwfHelper.outputInfoBanner();
 
     console.log("ℹ️   Deploying Prerequisites Stack.");
     const app = new cdk.App();
-    new PrerequisitesStack(app, prerequisites.General.Prefix.toUpperCase() + "-AWS-FIREWALL-FACTORY-PREQUISITES", {
+    new PrerequisitesStack(app, prerequisites.General.Prefix.toUpperCase() + "-AWS-FIREWALL-FACTORY-PREQUISITES", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
       prerequisites,
       env: {
         region: process.env.AWS_REGION,
@@ -46,18 +44,18 @@ void (async () => {
   else {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const config: Config = values.configs[CONFIG_OBJECT_NAME];
-    const deploymentRegion= outputInfoBanner(config);
-    const runtimeProperties = initRuntimeProperties();
+    const deploymentRegion= afwfHelper.outputInfoBanner(config);
+    const runtimeProperties = afwfHelper.initRuntimeProperties();
     if (process.env.SKIP_QUOTA_CHECK === "true") {
       console.log("❗️ SKIPPING Quota Check for Policies.❗️\n\n");
     } else {
-      const policyQuotaReached = await isPolicyQuotaReached(deploymentRegion);
+      const policyQuotaReached = await wafHelper.isPolicyQuotaReached(deploymentRegion);
       if (policyQuotaReached) {
         console.error("\u001B[31m","🚨 ERROR: Exit process due Quota Check for Policies 🚨 \n\n","\x1b[0m" + "\n\n");
         process.exit(1);
       }
     }
-    await setOutputsFromStack(deploymentRegion, runtimeProperties, config);
+    await cloudformationHelper.setOutputsFromStack(deploymentRegion, runtimeProperties, config);
     if(config.General.DeployHash){
       console.log("#️⃣  Deployment Hash for this WAF: "+  config.General.DeployHash);
       console.log("   ⚠️   Legacy functionality ⌛️\n\n");
@@ -100,16 +98,16 @@ void (async () => {
         console.log("      ⚙️ 🌎 [" + config.WebAcl.Scope+ "]");
       }
     }
-    const wcuQuotaReached = await isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
+    const wcuQuotaReached = await wafHelper.isWcuQuotaReached(deploymentRegion, runtimeProperties, config);
     if(wcuQuotaReached) {
       console.error("\u001B[31m","🚨 ERROR: Exit process due Quota Check for WCU 🚨 \n\n","\x1b[0m" + "\n\n");
       process.exit(1);
     }
-    if(wrongLoggingConfiguration(config)){
+    if(afwfHelper.wrongLoggingConfiguration(config)){
       console.error("\u001B[31m"," 🚨 ERROR: Amazon S3 bucket name is invalid 🚨 ", "\x1b[0m" +"\n     🪣 Amazon S3 bucket name must begin with \"aws-waf-logs-\" followed by at least one \n     of the following characters [a-z0-9_.-]\n\n","\x1b[0m" + "\n\n");
       process.exit(1);
     }
-    new WafStack(app, `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}`, {
+    new WafStack(app, `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}`, { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
       config, runtimeProperties: runtimeProperties,
       env: {
         region: deploymentRegion,
@@ -117,7 +115,6 @@ void (async () => {
       },
     });
 
-    await getCurrentPrices(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
-    await isPriceCalculated(runtimeProperties);
+    await pricingHelper.isWafPriceCalculated(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
   }
 })();

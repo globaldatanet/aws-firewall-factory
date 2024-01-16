@@ -10,54 +10,56 @@ import { getManagedRuleGroupVersion } from "./services/waf";
 import {ManagedRuleGroupVersionResponse} from "./types/index";
 
 export const handler = async (
-  event: CdkCustomResourceEvent,
+  Event: CdkCustomResourceEvent,
 ): Promise<CdkCustomResourceResponse> => {
   let ManagedVersionInfo: ManagedRuleGroupVersionResponse;
   let ParamVersion: string | undefined;
   let Latest: boolean;
   let enforceUpdate: boolean;
-  console.log("Lambda is invoked with:" + JSON.stringify(event));
+  console.log("Lambda is invoked with:" + JSON.stringify(Event));
   
-  const response: CdkCustomResourceResponse = {
-    StackId: event.StackId,
-    RequestId: event.RequestId,
-    LogicalResourceId: event.LogicalResourceId,
-    PhysicalResourceId: `${event.ResourceProperties.Name}-version`,
+  const Response: CdkCustomResourceResponse = {
+    StackId: Event.StackId,
+    RequestId: Event.RequestId,
+    LogicalResourceId: Event.LogicalResourceId,
+    PhysicalResourceId: `${Event.ResourceProperties.Name}-version`,
   };
 
-  if (event.RequestType === "Delete") {
-    response.Status = "SUCCESS";
-    response.Data = { Result: "Delete Event" };
-    return response;
+  if (Event.RequestType === "Delete") {
+    Response.Status = "SUCCESS";
+    Response.Data = { Result: "Delete Event" };
+    return Response;
   }
-  console.log(`🔎 Searching Managed Rule Version for: \n 🏬  ${event.ResourceProperties.VendorName} \n 🏷️  ${event.ResourceProperties.Name} \n 🌏  ${event.ResourceProperties.Scope}`);
-  if (event.RequestType === "Update") {
+  console.log(`🔎 Searching Managed Rule Version for: \n 🏬  ${Event.ResourceProperties.VendorName} \n 🏷️  ${Event.ResourceProperties.Name} \n 🌏  ${Event.ResourceProperties.Scope}`);
+  if (Event.RequestType === "Update") {
     console.log("🔄 Update Event");
-    event.OldResourceProperties.Version === "" || event.ResourceProperties.EnforceUpdate === "true" ? ParamVersion = undefined : ParamVersion = event.OldResourceProperties.Version;
+    if(Event.OldResourceProperties.Version !== "" || Event.ResourceProperties.EnforceUpdate !== "false" || Event.ResourceProperties.ManagedRuleGroupVersion !== ""){ParamVersion = Event.OldResourceProperties.Version;}
   }
   try {
-    event.ResourceProperties.ManagedRuleGroupVersion === "" ? ParamVersion = undefined : ParamVersion = event.ResourceProperties.ManagedRuleGroupVersion;
-    event.ResourceProperties.Latest === "true" ? Latest = true : Latest = false;
-    event.ResourceProperties.EnforceUpdate === "false" ? enforceUpdate = false : enforceUpdate = true;
-    ManagedVersionInfo = await getManagedRuleGroupVersion(event.ResourceProperties.VendorName, event.ResourceProperties.Name, event.ResourceProperties.Scope, ParamVersion, Latest, enforceUpdate);
+    if(Event.ResourceProperties.ManagedRuleGroupVersion !== ""){
+      ParamVersion = Event.ResourceProperties.ManagedRuleGroupVersion;
+    }
+    Latest = Event.ResourceProperties.Latest === "true" ? true : false;
+    enforceUpdate = Event.ResourceProperties.EnforceUpdate === "false" ? true : false;
+    ManagedVersionInfo = await getManagedRuleGroupVersion(Event.ResourceProperties.VendorName, Event.ResourceProperties.Name, Event.ResourceProperties.Scope, ParamVersion, Latest, enforceUpdate);
     if(ManagedVersionInfo.State === "SUCCESS"){
-      response.Status = "SUCCESS";
-      response.Data = { Version: ManagedVersionInfo.Version, Result: ManagedVersionInfo.Description };
-      return response;
+      Response.Status = "SUCCESS";
+      Response.Data = { Version: ManagedVersionInfo.Version, Result: ManagedVersionInfo.Description };
+      return Response;
     }
     else{
-      response.Status = "FAILED";
-      response.Data = { Result: ManagedVersionInfo.Description };
-      return response;
+      Response.Status = "FAILED";
+      Response.Data = { Result: ManagedVersionInfo.Description };
+      return Response;
     }
   }
   catch (error) {
     console.log(`❌ Error: ${error}`);
     if (error instanceof Error) {
-      response.Reason = error.message;
+      Response.Reason = error.message;
     }
-    response.Status = "FAILED";
-    response.Data = { Result: error };
-    return response;
+    Response.Status = "FAILED";
+    Response.Data = { Result: error };
+    return Response;
   }
 };
