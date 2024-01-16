@@ -148,3 +148,7 @@ export interface ServiceDataAbstactRuleGroup {
 export interface NotStatementProperty {
   statement: waf.CfnWebACL.StatementProperty;
 }
+
+export interface SubVariables {
+  [key: string]: string;
+}

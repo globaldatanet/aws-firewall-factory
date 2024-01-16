@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Rule, ManagedRuleGroup } from "./fms";
-import { aws_fms as fms } from "aws-cdk-lib";
-import { CfnTag } from "aws-cdk-lib";
+import { aws_fms as fms, CfnTag } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
 
 /**
@@ -9,13 +8,25 @@ import * as fwmEnums from "./enums";
  */
 export interface Config {
   readonly General: {
+    /**
+     * Defines a Prefix which will be added to all resources.
+     */
     readonly Prefix: string,
+    /**
+     * Defines a Stage which will be added to all resources.
+     */
     readonly Stage: string,
     /**
      * Defines the selected logging option for the WAF.
      */
     readonly LoggingConfiguration: "S3" | "Firehose"
+    /**
+     * Define KMS Key to be used for Kinesis Firehose.
+     */
     readonly FireHoseKeyArn?: string,
+    /**
+     * Define Name of the S3 Bucket where the Firewall logs will be stored.
+     */
     readonly S3LoggingBucketName: string,
     readonly DeployHash?: string,
     /**
@@ -28,19 +39,76 @@ export interface Config {
     readonly CreateDashboard?: boolean,
   },
   readonly WebAcl:{
+    /**
+     * Defines Name of your web application firewall.
+     */
     readonly Name: string,
+    /**
+     * Defines Description of your web application firewall.
+     */
     readonly Description?: string,
+    /**
+     * Specifies the AWS account IDs and AWS Organizations organizational units (OUs) to include from the policy.
+     *
+     * Specifying an OU is the equivalent of specifying all accounts in the OU and in any of its child OUs, including any child OUs and accounts that are added at a later time.
+     *
+     * This is used for the policy's `IncludeMap`.
+     *
+     * You can specify account IDs, OUs, or a combination:
+     *
+     * - Specify account IDs by setting the key to `ACCOUNT` . For example, the following is a valid map: `{“ACCOUNT” : [“accountID1”, “accountID2”]}` .
+     * - Specify OUs by setting the key to `ORGUNIT` . For example, the following is a valid map: `{“ORGUNIT” : [“ouid111”, “ouid112”]}` .
+     * - Specify accounts and OUs together in a single map, separated with a comma. For example, the following is a valid map: `{“ACCOUNT” : [“accountID1”, “accountID2”], “ORGUNIT” : [“ouid111”, “ouid112”]}` .
+     *
+     * @struct
+     * @stability external
+     * @see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-fms-policy-iemap.html
+     */
     readonly IncludeMap:  fms.CfnPolicy.IEMapProperty,
+    /**
+     * Specifies the AWS account IDs and AWS Organizations organizational units (OUs) to exclude from the policy.
+     *
+     * Specifying an OU is the equivalent of specifying all accounts in the OU and in any of its child OUs, including any child OUs and accounts that are added at a later time.
+     *
+     * This is used for the policy's `ExcludeMap`.
+     *
+     * You can specify account IDs, OUs, or a combination:
+     *
+     * - Specify account IDs by setting the key to `ACCOUNT` . For example, the following is a valid map: `{“ACCOUNT” : [“accountID1”, “accountID2”]}` .
+     * - Specify OUs by setting the key to `ORGUNIT` . For example, the following is a valid map: `{“ORGUNIT” : [“ouid111”, “ouid112”]}` .
+     * - Specify accounts and OUs together in a single map, separated with a comma. For example, the following is a valid map: `{“ACCOUNT” : [“accountID1”, “accountID2”], “ORGUNIT” : [“ouid111”, “ouid112”]}` .
+     *
+     * @struct
+     * @stability external
+     * @see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-fms-policy-iemap.html
+     */
     readonly ExcludeMap?: fms.CfnPolicy.IEMapProperty,
     /**
      * Replace web ACLs that are currently associated with in-scope resources with the web ACLs created by this policy - Default is False
      */
     readonly OverrideCustomerWebACLAssociation?: boolean,
+    /**
+     * Specifies whether this is for an Amazon CloudFront distribution or for a regional application.
+     * A regional application can be
+     * - an Application Load Balancer (ALB),
+     * - an Amazon API Gateway REST API,
+     * - an AWS AppSync GraphQL API,
+     * - an Amazon Cognito user pool,
+     * - an AWS App Runner service,
+     * - or an AWS Verified Access instance.
+     *
+     * Valid Values are CLOUDFRONT and REGIONAL.
+     *
+     * @see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafv2-webacl.html
+     */
     readonly Scope: fwmEnums.WebAclScope | "CLOUDFRONT" | "REGIONAL",
     /**
      * The type of resource protected by or in scope of the policy. To apply this policy to multiple resource types, specify a resource type of ResourceTypeList and then specify the resource types in a ResourceTypeList.
      */
     readonly Type: fwmEnums.WebAclTypeEnum | "ResourceTypeList" | WebAclType,
+    /**
+     * enum for supportd webacl types
+     */
     readonly TypeList?: fwmEnums.WebAclTypeEnum[] | WebAclType[],
     /**
      * An array of ResourceTag objects, used to explicitly include resources in the policy scope or explicitly exclude them. If this isn't set, then tags aren't used to modify policy scope. See also ExcludeResourceTags.
@@ -84,6 +152,9 @@ export type WebAclType= "AWS::ElasticLoadBalancingV2::LoadBalancer" | "AWS::Clou
 // | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi" - waiting for support if you need a GraphQLApi Firewall just use an ApiGateway:Stage Firewall
 export interface Prerequisites {
   readonly General: {
+    /**
+     * Defines a Prefix which will be added to all resources.
+     */
     readonly Prefix: string,
   },
   /**
@@ -187,6 +258,13 @@ export type CustomResponseBodies = { [key:string]: {
     * @TJS-pattern [\s\S]*
   */
   Content: string,
+  /**
+   * AWS WAF Content Type
+   *
+   * The type of content in the payload that you are defining in the Content string.
+   *
+   * @see https://docs.aws.amazon.com/waf/latest/APIReference/API_CustomResponseBody.html
+   */
   ContentType: fwmEnums.CustomResponseBodiesContentType,
 }};
 
@@ -225,8 +303,18 @@ export interface IPSet {
     * @TJS-pattern ^[\w+=:#@\/\-,\.][\w+=:#@\/\-,\.\s]+[\w+=:#@\/\-,\.]$
   */
   description?: string,
+  /**
+    * Defines an Array of Ip Address - IPv4 and IPv6 in CIDR notation, e.g. 123.4.3.0/32 or IpAddress with Description
+   */
   addresses: Array<IPAddressWithDescription | IPAddress>,
+  /**
+   * Defines the IP address version of the set. Valid Values are IPV4 and IPV6.
+   */
   ipAddressVersion: "IPV4" | "IPV6",
+  /**
+   * Defines Array of Tags to be added to the IPSet
+   * More info: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html
+   */
   tags?: CfnTag[]
 }
 
@@ -242,7 +330,14 @@ export interface RegexPatternSet {
     * @TJS-pattern ^[\w+=:#@\/\-,\.][\w+=:#@\/\-,\.\s]+[\w+=:#@\/\-,\.]$
   */
   description?: string,
+  /**
+    * Defines an Array of Regular Expressions
+   */
   regularExpressionList: string[],
+  /**
+   * Defines Array of Tags to be added to the RegexPatternSet
+   * More info: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-resource-tags.html
+   */
   tags?: CfnTag[]
 }
 

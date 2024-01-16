@@ -1,26 +1,15 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput, ListAvailableManagedRuleGroupVersionsCommand, Rule as SdkRule, ListAvailableManagedRuleGroupVersionsCommandInput} from "@aws-sdk/client-wafv2";
-import * as quota from "@aws-sdk/client-service-quotas";
-import * as cloudformation from "@aws-sdk/client-cloudformation";
-import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
-import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
-import * as lodash from "lodash";
-import { RuntimeProperties } from "../types/runtimeprops";
-import { Config } from "../types/config";
-import { Rule as FmsRule } from "../types/fms";
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
-import cfonts = require("cfonts");
-import * as packageJsonObject from "../../package.json";
-import {transformCdkRuletoSdkRule} from "./transformer";
 import { table } from "table";
-
+import * as quota from "@aws-sdk/client-service-quotas";
+import { Scope, WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput,DescribeManagedRuleGroupCommandOutput, Rule as SdkRule} from "@aws-sdk/client-wafv2";
+import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
+import { RuntimeProperties, ProcessProperties } from "../../../types/runtimeprops";
+import { Config } from "../../../types/config";
+import { cloudformationHelper } from "../../helpers";
+import * as lodash from "lodash";
+import {transformCdkRuletoSdkRule} from "../../transformer";
+import { Rule as FmsRule, ManagedRuleGroup } from "../../../types/fms";
+import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
+import {getcurrentManagedRuleGroupVersion} from "./rulegroups";
 
 /**
  * Service Quota Code for Firewall Manager Total WAF WCU in account & region
@@ -55,11 +44,17 @@ async function getPolicyCount(deploymentRegion: string): Promise<number> {
  */
 async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: SdkRule[]): Promise<number> {
   const client = new WAFV2Client({ region: deploymentRegion });
+  if(scope === "CLOUDFRONT"){
+    scope = Scope.CLOUDFRONT;
+  }else{
+    scope = Scope.REGIONAL;
+  }
   const input: CheckCapacityCommandInput = {
     Scope: scope,
     Rules: rules,
   };
   const command = new CheckCapacityCommand(input);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const response : any = await client.send(command);
   return response.Capacity || 0;
 }
@@ -70,49 +65,40 @@ async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONA
  * @param quotaCode AWS Quota Code for the FMS Service Quota
  * @returns returns the specified quota of the FMS Service
  */
-async function getFmsQuota(deploymentRegion: string, quotaCode: string): Promise<number>{
-  let currentQuota = 0;
-  const quoataClient = new quota.ServiceQuotasClient({ region: deploymentRegion });
-  const input: quota.GetAWSDefaultServiceQuotaCommandInput = {
+async function getFmsQuota(deploymentRegion: string, quotaCode: string): Promise<number> {
+  const quotaClient = new quota.ServiceQuotasClient({ region: deploymentRegion });
+
+  const defaultQuotaInput: quota.GetAWSDefaultServiceQuotaCommandInput = {
     QuotaCode: quotaCode,
-    ServiceCode: "fms"
+    ServiceCode: "fms",
   };
-  const command = new quota.GetAWSDefaultServiceQuotaCommand(input);
-  const responsequoata = await quoataClient.send(command);
-  if(responsequoata.Quota?.Adjustable === true){
-    const input: quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommandInput = {
+  const defaultQuotaCommand = new quota.GetAWSDefaultServiceQuotaCommand(defaultQuotaInput);
+  const defaultQuotaResponse = await quotaClient.send(defaultQuotaCommand);
+
+  if (defaultQuotaResponse.Quota?.Adjustable === true) {
+    const requestedQuotaInput: quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommandInput = {
       QuotaCode: quotaCode,
-      ServiceCode: "fms"
+      ServiceCode: "fms",
     };
-    const command = new quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommand(input);
-    const newquota = await quoataClient.send(command);
-    if(newquota.RequestedQuotas?.length !== 0){
-      if(newquota.RequestedQuotas?.length || 0 === 0){
-        const sortquota = lodash.sortBy(newquota.RequestedQuotas,["Created"]);
-        if(sortquota?.length === 1){
-          if(sortquota?.[0].Status !== "APPROVED"){
-            console.log("ℹ️  There is an open Quota request for " + quotaCode + " but it is still not approved using DEFAULT Quota.");
-            currentQuota = responsequoata.Quota?.Value || 0;
-            return currentQuota;
-          }
-          if(sortquota?.[0].Status === "APPROVED"){
-            currentQuota = sortquota?.[0].DesiredValue  || 0;
-            return currentQuota;
-          }
+    const requestedQuotaCommand = new quota.ListRequestedServiceQuotaChangeHistoryByQuotaCommand(requestedQuotaInput);
+    const requestedQuotaResponse = await quotaClient.send(requestedQuotaCommand);
+
+    if (requestedQuotaResponse.RequestedQuotas?.length !== 0) {
+      const sortedQuotas = lodash.sortBy(requestedQuotaResponse.RequestedQuotas, ["Created"]);
+
+      if (sortedQuotas?.length === 1) {
+        if (sortedQuotas?.[0].Status !== "APPROVED") {
+          console.log(`ℹ️  There is an open Quota request for ${quotaCode} but it is still not approved using DEFAULT Quota.`);
+        } else {
+          return sortedQuotas?.[0].DesiredValue || 0;
         }
       }
-      else{
-        currentQuota = responsequoata.Quota?.Value || 0;
-        return currentQuota;
-      }
     }
-    else{
-      currentQuota = responsequoata.Quota?.Value || 0;
-      return currentQuota;
-    }
+
+    return defaultQuotaResponse.Quota?.Value || 0;
   }
-  currentQuota = responsequoata.Quota?.Value || 0;
-  return currentQuota;
+
+  return defaultQuotaResponse.Quota?.Value || 0;
 }
 
 /**
@@ -124,16 +110,21 @@ async function getFmsQuota(deploymentRegion: string, quotaCode: string): Promise
  * @param version version of the Managed Rule Group
  * @returns returns the capacity of the Managed Rule Group
  */
-async function getManagedRuleCapacity(deploymentRegion: string, vendor: string, rgName: string, scope: string, version: string): Promise<number>{
+async function getManagedRuleCapacity(deploymentRegion: string, vendor: string, rgName: string, scope: "REGIONAL" | "CLOUDFRONT", version: string | undefined): Promise<number>{
   const client = new WAFV2Client({ region: deploymentRegion });
-  if(version === ""){
+  if(scope === "CLOUDFRONT"){
+    scope = Scope.CLOUDFRONT;
+  } else{
+    scope = Scope.REGIONAL;
+  }
+  if(version === undefined){
     const input: DescribeManagedRuleGroupCommandInput = {
       VendorName: vendor,
       Name: rgName,
       Scope: scope
     };
     const command = new DescribeManagedRuleGroupCommand(input);
-    const response: any = await client.send(command);
+    const response: DescribeManagedRuleGroupCommandOutput = await client.send(command);
     return response.Capacity || 0;
   }
   else{
@@ -144,101 +135,11 @@ async function getManagedRuleCapacity(deploymentRegion: string, vendor: string, 
       VersionName: version
     };
     const command = new DescribeManagedRuleGroupCommand(input);
-    const response : any = await client.send(command);
+    const response: DescribeManagedRuleGroupCommandOutput = await client.send(command);
     return response.Capacity || 0;
   }
 }
 
-
-/**
- *
- * @param deploymentRegion AWS region, e.g. eu-central-1
- * @param vendor vendor of the Managed Rule Group
- * @param rgName vame of the Managed Rule Group
- * @param scope whether scope is REGIONAL or CLOUDFRONT
- * @returns returns the CurrentDefaultVersion of the Managed Rule Group
- */
-export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string, vendor: string, rgName: string, scope: string): Promise<string>{
-  const client = new WAFV2Client({ region: deploymentRegion});
-  const input: ListAvailableManagedRuleGroupVersionsCommandInput = {
-    VendorName: vendor,
-    Name: rgName,
-    Scope: scope,
-    Limit: 5,
-  };
-  const command = new ListAvailableManagedRuleGroupVersionsCommand(input);
-  const response: any = await client.send(command);
-  if(response.Versions.length > 0){
-    return response.Versions[0].Name;
-  }
-  else{
-    return "";
-  }
-}
-/**
- * Writes outputs from an existing stack into the specified runtime props
- * @param deploymentRegion AWS region, e.g. eu-central-1
- * @param runtimeprops runtime properties, where to write stack outputs into
- * @param config the config object from the values json
- */
-export async function setOutputsFromStack(deploymentRegion: string, runtimeprops: RuntimeProperties, config: Config): Promise<void>{
-  const stackName = `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}`;
-  const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
-  const params ={
-    StackName: stackName
-  };
-  const command = new cloudformation.DescribeStacksCommand(params);
-  try{
-    const responsestack = await cloudformationClient.send(command);
-    console.log("🫗  Get Outputs from existing CloudFormation Stack.\n");
-    if(responsestack.Stacks?.[0].StackName && responsestack.Stacks?.[0].Outputs !== undefined){
-      for(const output of responsestack.Stacks?.[0]?.Outputs ?? []){
-        if(output.OutputKey === "DeployedRuleGroupNames")
-        {
-          runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "DeployedRuleGroupIdentifier")
-        {
-          runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "DeployedRuleGroupCapacities")
-        {
-          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-          runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
-        }
-        if(output.OutputKey === "PreProcessDeployedRuleGroupNames")
-        {
-          runtimeprops.PreProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "PreProcessDeployedRuleGroupIdentifier")
-        {
-          runtimeprops.PreProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "PreProcessDeployedRuleGroupCapacities")
-        {
-          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-          runtimeprops.PreProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
-        }
-        if(output.OutputKey === "PostProcessDeployedRuleGroupNames")
-        {
-          runtimeprops.PostProcess.DeployedRuleGroupNames = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "PostProcessDeployedRuleGroupIdentifier")
-        {
-          runtimeprops.PostProcess.DeployedRuleGroupIdentifier = output.OutputValue?.split(",",output.OutputValue?.length) || [];
-        }
-        else if(output.OutputKey === "PostProcessDeployedRuleGroupCapacities")
-        {
-          const arrayOfNumbers = output.OutputValue?.split(",",output.OutputValue?.length).map(Number)  || [];
-          runtimeprops.PostProcess.DeployedRuleGroupCapacities = arrayOfNumbers;
-        }
-      }
-    }
-  }
-  catch (e){
-    console.log("🆕 Creating new CloudFormation Stack.\n");
-  }
-}
 
 /**
  * calculate the capacities for managed and custom rules and apply them to runtime properties
@@ -277,57 +178,76 @@ async function calculateCapacities(
     console.log("\n ℹ️  No ManagedRuleGroups defined in PreProcess.");
   } else {
     console.log(" 🥇 PreProcess: ");
-    const managedcapacitieslog = [];
-    managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
-    for (const managedrule of config.WebAcl.PreProcess.ManagedRuleGroups) {
-      managedrule.version ? managedrule.version : managedrule.version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
-      const capacity = await getManagedRuleCapacity(
-        deploymentRegion,
-        managedrule.vendor,
-        managedrule.name,
-        config.WebAcl.Scope,
-        managedrule.version
-      );
-      managedrule.capacity = capacity;
-      managedcapacitieslog.push([managedrule.name, capacity, managedrule.version !== "" ? managedrule.version : "[unversioned]", managedrule.enforceUpdate ?? "false"]);
-      runtimeProperties.ManagedRuleCapacity += capacity;
-      runtimeProperties.PreProcess.ManagedRuleGroupCount += 1;
-      managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PreProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PreProcess.ManagedRuleATPCount += 1 : "";
-    }
-    console.log(table(managedcapacitieslog));
+    await calculateManagedRuleGroupCapacities("Pre",deploymentRegion, config, runtimeProperties);
   }
   if (!config.WebAcl.PostProcess.ManagedRuleGroups  || config.WebAcl.PostProcess.ManagedRuleGroups?.length === 0) {
     console.log("\n ℹ️  No ManagedRuleGroups defined in PostProcess.");
   } else {
     console.log("\n 🥈 PostProcess: ");
-    const managedcapacitieslog = [];
-    managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
-    for (const managedrule of config.WebAcl.PostProcess.ManagedRuleGroups) {
-      managedrule.version ? managedrule.version : managedrule.version = await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
-      const capacity = await getManagedRuleCapacity(
-        deploymentRegion,
-        managedrule.vendor,
-        managedrule.name,
-        config.WebAcl.Scope,
-        managedrule.version
-      );
-      managedrule.capacity = capacity;
-      managedcapacitieslog.push([managedrule.name, managedrule.capacity, managedrule.version !== "" ? managedrule.version : "[unversioned]", managedrule.enforceUpdate ?? "false"]);
-      runtimeProperties.ManagedRuleCapacity += capacity;
-      runtimeProperties.PostProcess.ManagedRuleGroupCount += 1;
-      managedrule.name === "AWSManagedRulesBotControlRuleSet" ? runtimeProperties.PostProcess.ManagedRuleBotControlCount +=1 : "";
-      managedrule.name === "AWSManagedRulesATPRuleSet" ? runtimeProperties.PostProcess.ManagedRuleATPCount += 1 : "";
-    }
-    console.log(table(managedcapacitieslog));
+    await calculateManagedRuleGroupCapacities("Post",deploymentRegion, config, runtimeProperties);
   }
 }
 
 /**
- * Filters for AWS Firewall Factory managed IPSets and RegexPatternSets
- * @param statement the statement to check
- * @returns found
+ * Calculate Managed Rule Group Capacities
+ * @param type "Pre" | "Post"
+ * @param deploymentRegion string
+ * @param config Config
+ * @param runtimeProperties RuntimeProperties
  */
+async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deploymentRegion:string, config: Config, runtimeProperties: RuntimeProperties): Promise<void> {
+  let managedrules: ManagedRuleGroup[] = [];
+  let processProperties: ProcessProperties;
+  switch(type){
+    case "Pre":
+      managedrules = config.WebAcl.PreProcess.ManagedRuleGroups ?? [];
+      processProperties = runtimeProperties.PreProcess;
+      break;
+    case "Post":
+      managedrules = config.WebAcl.PostProcess.ManagedRuleGroups ?? [];
+      processProperties = runtimeProperties.PostProcess;
+      break;
+  }
+  const managedcapacitieslog = [];
+  managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
+  for (const managedrule of managedrules) {
+    const enforceUpdate = managedrule.enforceUpdate ?? false;
+    if(!enforceUpdate && managedrule.version === undefined) {
+      const version = await cloudformationHelper.getManagedRuleGroupVersionFromStack(deploymentRegion, config, managedrule.name);
+      if(version){
+        managedrule.version = version;
+      }
+    }
+    const ruleversion = managedrule.version ?? await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
+    const capacity = await getManagedRuleCapacity(
+      deploymentRegion,
+      managedrule.vendor,
+      managedrule.name,
+      config.WebAcl.Scope,
+      ruleversion
+    );
+    managedrule.capacity = capacity;
+    managedcapacitieslog.push([managedrule.name, capacity, ruleversion ?? "[unversioned]", enforceUpdate]);
+    runtimeProperties.ManagedRuleCapacity += capacity;
+    processProperties.ManagedRuleGroupCount += 1;
+    switch(managedrule.name){
+      case "AWSManagedRulesBotControlRuleSet": {
+        processProperties.ManagedRuleBotControlCount +=1;
+        break;
+      }
+      case "AWSManagedRulesATPRuleSet": {
+        processProperties.ManagedRuleATPCount += 1;
+        break;
+      }
+    }
+  }
+  console.log(table(managedcapacitieslog));
+}
+/**
+   * Filter for instructions IPSets and RegexPatternSets managed by the AWS Firewall Factory to insert the corresponding reference into the statement
+   * @param statement the statement to check
+   * @returns found
+   */
 function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
   {
     let found = true;
@@ -357,12 +277,12 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
   }
 }
 /**
- *
- * @param customRules PreProcess Custom Rules or PostProcess Custom Rules
- * @param deploymentRegion the AWS region, e.g. eu-central-1
- * @param scope the scope of the WebACL, e.g. REGIONAL or CLOUDFRONT
- * @returns an array with the capacities of the supplied custom rules
- */
+   *
+   * @param customRules PreProcess Custom Rules or PostProcess Custom Rules
+   * @param deploymentRegion the AWS region, e.g. eu-central-1
+   * @param scope the scope of the WebACL, e.g. REGIONAL or CLOUDFRONT
+   * @returns an array with the capacities of the supplied custom rules
+   */
 async function calculateCustomRulesCapacities(customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT") {
   const capacities = [];
   const capacitieslog = [];
@@ -446,7 +366,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
             }
           }
         }
-
+  
       }
       const filteredAndStatements = {
         statements: (andStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement =>
@@ -501,10 +421,10 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
 }
 
 /**
- * Implementation of the calculation of the capacity for IPSet statements according to https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
- * @param ipSetReferenceStatement the IPSetReferenceStatement
- * @returns the capacity of the IPSet statement
- */
+   * Implementation of the calculation of the capacity for IPSet statements according to https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
+   * @param ipSetReferenceStatement the IPSetReferenceStatement
+   * @returns the capacity of the IPSet statement
+   */
 function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty) {
   let ipSetRuleCapacity = 1;
   const ipSetForwardedIpConfig = ipSetReferenceStatement.ipSetForwardedIpConfig as wafv2.CfnWebACL.IPSetForwardedIPConfigurationProperty | undefined;
@@ -512,6 +432,13 @@ function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebA
   return ipSetRuleCapacity;
 }
 
+/**
+ * Calculate Custom Rule Statements Capacity
+ * @param customRule FmsRule
+ * @param deploymentRegion string
+ * @param scope "REGIONAL" | "CLOUDFRONT"
+ * @returns 
+ */
 async function calculateCustomRuleStatementsCapacity(customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT") {
   const ruleCalculatedCapacityJson = [];
   const rule = transformCdkRuletoSdkRule(customRule);
@@ -524,18 +451,20 @@ async function calculateCustomRuleStatementsCapacity(customRule: FmsRule, deploy
   return capacity;
 }
 
-
 /**
- * Implementation of the calculation of the capacity for regexPatternSets according to https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-regex-pattern-set-match.html
- * @param regexPatternSets the regexPatternSetsStatements
- * @returns the capacity of the regexPatternSets statement
- */
+   * Implementation of the calculation of the capacity for regexPatternSets according to https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-regex-pattern-set-match.html
+   * @param regexPatternSets the regexPatternSetsStatements
+   * @returns the capacity of the regexPatternSets statement
+   */
 function regexPatternSetsStatementsCapacity(regexPatternSetsStatement: wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty) {
   let regexRuleCapacity = 0;
   const regexRulebaseCost = 25;
   const regexPatterSetsFieldToMatch = regexPatternSetsStatement.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty | undefined;
-  if(regexPatterSetsFieldToMatch && regexPatterSetsFieldToMatch.allQueryArguments) regexRuleCapacity += 10;
-  if(regexPatterSetsFieldToMatch && regexPatterSetsFieldToMatch.jsonBody) regexRuleCapacity += (regexRulebaseCost*2); regexRuleCapacity += regexRulebaseCost;
+  if(regexPatterSetsFieldToMatch && regexPatterSetsFieldToMatch.allQueryArguments){
+    regexRuleCapacity += 10;
+  }
+  if(regexPatterSetsFieldToMatch && regexPatterSetsFieldToMatch.jsonBody) regexRuleCapacity += (regexRulebaseCost*2);
+  regexRuleCapacity += regexRulebaseCost;
   const regexPattermSetsTextTransformation = regexPatternSetsStatement.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[] | undefined;
   if(regexPattermSetsTextTransformation) {
     for(const textTransformation of regexPattermSetsTextTransformation){
@@ -547,8 +476,13 @@ function regexPatternSetsStatementsCapacity(regexPatternSetsStatement: wafv2.Cfn
   return regexRuleCapacity;
 }
 
-
-
+/**
+ * Buld Custom Rule without reference statements
+ * @param customRule FmsRule
+ * @param concatenatedStatement wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty
+ * @param isOrStatement boolean
+ * @returns 
+ */
 function buildCustomRuleWithoutReferenceStatements(customRule: FmsRule, concatenatedStatement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isOrStatement: boolean) {
   const statements = concatenatedStatement.statements as wafv2.CfnWebACL.StatementProperty[];
   let statement;
@@ -576,10 +510,10 @@ function buildCustomRuleWithoutReferenceStatements(customRule: FmsRule, concaten
 }
 
 /**
- * The functiion calculates the current security policy count in the account & region and checks if exceeds the current quota
- * @param deploymentRegion AWS region, e.g. eu-central-1
- * @returns whether policy limit is reached
- */
+   * The functiion calculates the current security policy count in the account & region and checks if exceeds the current quota
+   * @param deploymentRegion AWS region, e.g. eu-central-1
+   * @returns whether policy limit is reached
+   */
 export async function isPolicyQuotaReached(deploymentRegion: string): Promise<boolean> {
   const policyCount = await getPolicyCount(deploymentRegion);
   const fmsPolicyQuota = await getFmsQuota(deploymentRegion, POLICY_QUOTA_CODE);
@@ -587,22 +521,22 @@ export async function isPolicyQuotaReached(deploymentRegion: string): Promise<bo
   if (policyLimitReached) {
     console.log(
       "\n🚨 You are about to exceed the limit for Policies per region.\n Region Quota: " +
-        fmsPolicyQuota +
-        "\n Deployed Policies: " +
-        policyCount +
-        "\n ﹗ Stopping deployment ﹗"
+          fmsPolicyQuota +
+          "\n Deployed Policies: " +
+          policyCount +
+          "\n ﹗ Stopping deployment ﹗"
     );
   }
   return policyLimitReached;
 }
 
 /**
- * The function checks if the total WCU of all configured rules exceeds the WCU quota in account & region
- * @param deploymentRegion AWS region, e.g. eu-central-1
- * @param runtimeProps runtime properties object, where to store capacities
- * @param config configuration object of the values.json
- * @returns whether WCU limit is reached
- */
+   * The function checks if the total WCU of all configured rules exceeds the WCU quota in account & region
+   * @param deploymentRegion AWS region, e.g. eu-central-1
+   * @param runtimeProps runtime properties object, where to store capacities
+   * @param config configuration object of the values.json
+   * @returns whether WCU limit is reached
+   */
 export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: RuntimeProperties, config: Config): Promise<boolean> {
   await calculateCapacities(config, deploymentRegion, runtimeProps);
   const customCapacity = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity;
@@ -621,140 +555,3 @@ export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: 
   }
   return wcuLimitReached;
 }
-
-/**
- * initialize a runtime properties object
- * @returns the runtime properties object
- */
-export function initRuntimeProperties() : RuntimeProperties {
-  return {
-    ManagedRuleCapacity: 0,
-    PostProcess: {
-      Capacity: 0,
-      DeployedRuleGroupCapacities: [],
-      DeployedRuleGroupIdentifier: [],
-      DeployedRuleGroupNames: [],
-      RuleCapacities: [],
-      ManagedRuleGroupCount: 0,
-      ManagedRuleBotControlCount: 0,
-      ManagedRuleATPCount: 0,
-      CustomRuleCount: 0,
-      CustomRuleGroupCount: 0,
-      CustomCaptchaRuleCount: 0
-    },
-    PreProcess: {
-      Capacity: 0,
-      DeployedRuleGroupCapacities: [],
-      DeployedRuleGroupIdentifier: [],
-      DeployedRuleGroupNames: [],
-      RuleCapacities: [],
-      ManagedRuleGroupCount: 0,
-      ManagedRuleBotControlCount: 0,
-      ManagedRuleATPCount: 0,
-      CustomRuleCount: 0,
-      CustomRuleGroupCount: 0,
-      CustomCaptchaRuleCount: 0
-    },
-    Pricing: {
-      Policy: 0,
-      Rule: 0,
-      WebACL: 0,
-      Request: 0,
-      BotControl: 0,
-      BotControlRequest: 0,
-      Captcha: 0,
-      AccountTakeoverPrevention: 0,
-      AccountTakeoverPreventionRequest: 0,
-      Dashboard: 0
-    }
-  };
-}
-
-/**
- * The function converts the value of all properties with supplied name into a Uint8Array
- * @param rulesObject Rules Object or Array of Rules Object
- * @param propertyName name of the properties which have to be converted
- * @returns converted Rules
- */
-export function convertPropValuesToUint8Array(rulesObject: any, propertyName: string): any {
-  const convertedObject: any = {};
-  let value: any;
-  if (rulesObject instanceof Array) {
-    return rulesObject.map(function (value) {
-      if (typeof value === "object") {
-        value = convertPropValuesToUint8Array(value, propertyName);
-      }
-      return value;
-    });
-  } else {
-    for (const origKey in rulesObject) {
-      if (Object.prototype.hasOwnProperty.call(rulesObject,origKey)) {
-        value = rulesObject[origKey];
-        if (value instanceof Array || (value !== null && value.constructor === Object)) {
-          value = convertPropValuesToUint8Array(value, propertyName);
-        }
-        if (origKey === propertyName) {
-          value = convertStringToUint8Array(rulesObject[origKey]);
-        }
-        convertedObject[origKey] = value;
-      }
-    }
-  }
-  return convertedObject;
-}
-
-/**
- * The function returns Uint8 representation of a string
- * @param stringToConvert string which has to be converted to Uint8Array
- * @returns the desired Uint8Array representation of the string
- */
-export function convertStringToUint8Array(stringToConvert: string): Uint8Array {
-  const buf = new ArrayBuffer(stringToConvert.length * 2); // 2 bytes for each char
-  const bufView = new Uint8Array(buf);
-  for (let i = 0, strLen = stringToConvert.length; i < strLen; i++) {
-    bufView[i] = stringToConvert.charCodeAt(i);
-  }
-  return bufView;
-}
-
-
-/**
- * Version of the AWS Firewall Factory - extracted from package.json
- */
-const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
-
-
-/**
- * The function will display info banner and returns deploymentRegion for WAF Stack
- * @param config configuration object of the values.json
- * @return deploymentRegion AWS region, e.g. eu-central-1
- */
-export const outputInfoBanner = (config?:Config) => {
-  /**
-   * the region into which the stack is deployed
-   */
-  let deploymentRegion = "";
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  cfonts.say("AWS FIREWALL FACTORY", {font: "block",align: "center",colors: ["#00ecbd"],background: "transparent",letterSpacing: 0,lineHeight: 0,space: true,maxLength: "13",gradient: false,independentGradient: false,transitionGradient: false,env: "node",width:"80%"});
-  console.log("\n © by globaldatanet");
-  console.log("\n🏷  Version: ","\x1B[1m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-  if(config){
-    console.log("\n👤 AWS FMS Administrator Account: ");
-    console.log("\x1b[33m",`                        ${process.env.CDK_DEFAULT_ACCOUNT}`,"\x1b[0m");
-    if(process.env.PREREQUISITE === "true"){
-      console.log("🌎 Deployment region:");
-      console.log("\x1b[32m",`                      ${process.env.AWS_REGION}`,"\x1b[0m \n\n");
-    }
-    else{
-      if(config.WebAcl.Scope === "CLOUDFRONT"){
-        deploymentRegion = "us-east-1";
-      }
-      else{
-        deploymentRegion = process.env.REGION || "eu-central-1";
-      }
-      console.log("🌎 CDK deployment region:");
-      console.log("\x1b[32m",`                      ${deploymentRegion}`,"\x1b[0m \n");
-    }
-  }
-  return deploymentRegion;
-};

@@ -1,11 +1,11 @@
 {
     "$schema": "https://typedoc.org/schema.json",
-    "entryPoints": ["lib/web-application-firewall-stack.ts","lib/prerequisites-stack.ts","lib/types/config.ts","lib/types/enums.ts", "lib/types/fms.ts", "node_modules/aws-cdk-lib/aws-fms",  "node_modules/aws-cdk-lib/aws-wafv2", "node_modules/aws-cdk-lib/cloudformation", "node_modules/aws-cdk-lib/core/lib/cfn-tag.d.ts", "node_modules/aws-cdk-lib/core/lib/tag-manager.d.ts"],
+    "entryPoints": ["lib/_web-application-firewall-stack.ts","lib/_prerequisites-stack.ts","lib/types/config.ts", "lib/types/enums.ts", "lib/types/fms.ts", "node_modules/aws-cdk-lib/aws-fms",  "node_modules/aws-cdk-lib/aws-wafv2", "node_modules/aws-cdk-lib/core/lib/cfn-tag.d.ts", "node_modules/aws-cdk-lib/core/lib/tag-manager.d.ts","lib/tools/helpers"],
     "readme": "./static/docs/README.md",
     "customCss": "./static/docs/custom.css",
     "name": "AWS Firewall Factory Documentation",
     "entryPointStrategy": "Expand",
-    "exclude": ["**/gotestwaf/**","**/lambda/**","**/bin/**","**/tools/**","**/values/**","**/constructs/**"],
+    "exclude": ["**/gotestwaf/**","**/bin/**","**/values/**","**/lambda/**","**/constructs/**","**/adaptivecards/**"],
     "plugin": ["typedoc-plugin-extras", "typedoc-plugin-keywords"],
     "keywords": ["aws", "firewall", "waf", "fms", "factory", "globaldatanet", "cdk"],
     "favicon": "static/icon/aws_firewall_factory_favicon.ico",
