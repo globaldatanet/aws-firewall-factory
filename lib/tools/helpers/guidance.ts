@@ -23,6 +23,9 @@ export function getGuidance(context: string, source?: string) {
     case "noBotControlRuleSetProperty":
       console.log("\x1b[31m","\n🚨 No BotControlRuleSetProperty is used in your ManagedRulesBotControlRuleSet - This setting will help you to specify the inspection level.\n More about BotControlRuleSetProperty: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesbotcontrolruleset.html.\n\n","\x1b[0m");
       break;
+    case "noRuleLabels":
+      console.log("\x1b[31m",`\n🚨 No RuleLabels are used in CustomRule ${source} - Rule Labels help you to mitigate False/Positives.\n More about RuleLabels: https://docs.aws.amazon.com/waf/latest/developerguide/waf-labels.html.\n\n`,"\x1b[0m");
+      break;
     default:
       break;
   }

@@ -176,6 +176,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         } else {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
           const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
+          guidanceHelper.getGuidance("noRuleLabels", rulename);
           cfnRuleProperties = cfnRulePropertii as wafv2.CfnWebACL.RuleProperty;
         }
         rules.push(cfnRuleProperties);
@@ -416,6 +417,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
               .ruleLabels
           ) {
             cfnRuleProperti = cfnRuleProperty;
+            guidanceHelper.getGuidance("noRuleLabels", rulename);
           } else {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
