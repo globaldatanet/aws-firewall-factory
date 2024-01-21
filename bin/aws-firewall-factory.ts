@@ -58,7 +58,7 @@ void (async () => {
     await cloudformationHelper.setOutputsFromStack(deploymentRegion, runtimeProperties, config);
     if(config.General.DeployHash){
       console.log("#️⃣  Deployment Hash for this WAF: "+  config.General.DeployHash);
-      guidanceHelper.getGuidance("deploymentHash");
+      guidanceHelper.getGuidance("deploymentHash", runtimeProperties);
     }
 
     console.log(`🔥 Deploy FMS Policy: ${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}\n ⦂ Type:
@@ -116,5 +116,6 @@ void (async () => {
     });
 
     await pricingHelper.isWafPriceCalculated(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
+    await guidanceHelper.outputGuidance(runtimeProperties);
   }
 })();

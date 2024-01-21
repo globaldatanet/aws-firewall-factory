@@ -161,7 +161,7 @@ async function calculateCapacities(
     console.log(" 🥇 PreProcess: ");
     runtimeProperties.PreProcess.CustomRuleCount = config.WebAcl.PreProcess.CustomRules.length;
     runtimeProperties.PreProcess.CustomCaptchaRuleCount = config.WebAcl.PreProcess.CustomRules.filter(rule => rule.action.captcha).length;
-    runtimeProperties.PreProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PreProcess.CustomRules, deploymentRegion, config.WebAcl.Scope)).reduce((a,b) => a+b, 0);
+    runtimeProperties.PreProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PreProcess.CustomRules, deploymentRegion, config.WebAcl.Scope, runtimeProperties)).reduce((a,b) => a+b, 0);
   }
   if (!config.WebAcl.PostProcess.CustomRules) {
     console.log(
@@ -171,7 +171,7 @@ async function calculateCapacities(
     console.log("\n 🥈 PostProcess: ");
     runtimeProperties.PostProcess.CustomRuleCount = config.WebAcl.PostProcess.CustomRules.length;
     runtimeProperties.PostProcess.CustomCaptchaRuleCount = config.WebAcl.PostProcess.CustomRules.filter(rule => rule.action.captcha).length;
-    runtimeProperties.PostProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PostProcess.CustomRules, deploymentRegion, config.WebAcl.Scope)).reduce((a,b) => a+b, 0);
+    runtimeProperties.PostProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PostProcess.CustomRules, deploymentRegion, config.WebAcl.Scope, runtimeProperties)).reduce((a,b) => a+b, 0);
   }
   console.log("\n👀 Get ManagedRule Capacity:\n");
   if (!config.WebAcl.PreProcess.ManagedRuleGroups || config.WebAcl.PreProcess.ManagedRuleGroups?.length === 0) {
@@ -208,7 +208,7 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
       processProperties = runtimeProperties.PostProcess;
       break;
   }
-  config.WebAcl.PreProcess.ManagedRuleGroups !== undefined && config.WebAcl.PostProcess.ManagedRuleGroups !== undefined ? guidanceHelper.getGuidance("noManageRuleGroups") : null;
+  config.WebAcl.PreProcess.ManagedRuleGroups !== undefined && config.WebAcl.PostProcess.ManagedRuleGroups !== undefined ? guidanceHelper.getGuidance("noManageRuleGroups", runtimeProperties) : null;
   const managedcapacitieslog = [];
   managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
   for (const managedrule of managedrules) {
@@ -288,7 +288,7 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
    * @param scope the scope of the WebACL, e.g. REGIONAL or CLOUDFRONT
    * @returns an array with the capacities of the supplied custom rules
    */
-async function calculateCustomRulesCapacities(customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT") {
+async function calculateCustomRulesCapacities(customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
   const capacities = [];
   const capacitieslog = [];
   capacitieslog.push(["🔺 Priority", "➕ RuleName", "Capacity"]);
@@ -323,7 +323,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         capacities.push(regexPatternSetsStatementsCapacity(notregexPatternSetReferenceStatement));
       }
       else{
-        capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope));
+        capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope, runtimeProperties));
       }
     }
     else if(andStatement && andStatement.statements) {
@@ -378,7 +378,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           filterStatements(statement))};
       if (filteredAndStatements && filteredAndStatements.statements && filteredAndStatements.statements.length > 0) {
         const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredAndStatements, false);
-        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope, runtimeProperties);
         capacities.push(capacity);
       }
     }
@@ -411,12 +411,12 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
       };
       if (filteredOrStatements && filteredOrStatements.statements && filteredOrStatements.statements.length > 0) {
         const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredOrStatements, true);
-        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope);
+        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope, runtimeProperties);
         capacities.push(capacity);
       }
     }
     else {
-      capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope));
+      capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope, runtimeProperties));
     }
     capacitieslog.push([customRule.priority, customRule.name,capacities[capacities.length-1]]);
   }
@@ -444,9 +444,9 @@ function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebA
  * @param scope "REGIONAL" | "CLOUDFRONT"
  * @returns 
  */
-async function calculateCustomRuleStatementsCapacity(customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT") {
+async function calculateCustomRuleStatementsCapacity(customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
   const ruleCalculatedCapacityJson = [];
-  const rule = transformCdkRuletoSdkRule(customRule);
+  const rule = transformCdkRuletoSdkRule(customRule, runtimeProperties);
   ruleCalculatedCapacityJson.push(rule);
   const capacity = await getTotalCapacityOfRules(
     deploymentRegion,
@@ -559,7 +559,7 @@ export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: 
     console.log(" 🧮 Calculated Custom Rule Capacity is: [" + customCapacity + "] (🥇[" + runtimeProps.PreProcess.Capacity + "] + 🥈[" + runtimeProps.PostProcess.Capacity + "]) \n ➕ ManagedRulesCapacity: ["+ runtimeProps.ManagedRuleCapacity +"] \n ＝ Total Waf Capacity: " + totalWcu.toString() + "\n");
   }
   if(runtimeProps.PostProcess.IpReputationListCount === 0 && runtimeProps.PreProcess.IpReputationListCount === 0){
-    guidanceHelper.getGuidance("noIpReputationList");
+    guidanceHelper.getGuidance("noIpReputationList", runtimeProps);
   }
   return wcuLimitReached;
 }

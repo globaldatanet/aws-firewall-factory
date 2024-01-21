@@ -51,6 +51,7 @@ export const outputInfoBanner = (config?:Config) => {
  */
 export function initRuntimeProperties() : RuntimeProperties {
   return {
+    Guidance: [],
     ManagedRuleCapacity: 0,
     PostProcess: {
       Capacity: 0,

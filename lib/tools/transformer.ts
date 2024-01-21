@@ -8,13 +8,14 @@ import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchS
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
   ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body } from "@aws-sdk/client-wafv2";
 import { wafHelper, guidanceHelper} from "./helpers";
+import { RuntimeProperties } from "../types/runtimeprops";
 
 /**
  * The function will map a CDK ByteMatchStatement Property to a SDK ByteMatchStatement Property
  * @param statement object of a CDK ByteMatchStatement Property
  * @return configuration object of a SDK ByteMatchStatement Property
  */
-export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatchStatementProperty): ByteMatchStatement {
+export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties: RuntimeProperties): ByteMatchStatement {
   const bmst = statement as wafv2.CfnWebACL.ByteMatchStatementProperty | undefined;
   let ByteMatchStatement = undefined;
   if (bmst) {
@@ -33,7 +34,7 @@ export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatch
       });
     }
     if(bmst.positionalConstraint === "CONTAINS" || bmst.positionalConstraint === "CONTAINS_WORD" || bmst.positionalConstraint === "STARTS_WITH" || bmst.positionalConstraint === "ENDS_WITH"){
-      guidanceHelper.getGuidance("byteMatchStatementPositionalConstraint", bmst.positionalConstraint);
+      guidanceHelper.getGuidance("byteMatchStatementPositionalConstraint", runtimeProperties, bmst.positionalConstraint);
     }
     ByteMatchStatement = {
       PositionalConstraint: bmst.positionalConstraint,
@@ -261,7 +262,7 @@ export function transformXssMatchStatement(statement: wafv2.CfnWebACL.XssMatchSt
  * @param statement object of a CDK And/OrStatement Property  Property
  * @return configuration object of a SDK And/OrStatement Property  Property
  */
-export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isandStatement:boolean): AndStatement | OrStatement | undefined {
+export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isandStatement:boolean, runtimeProperties: RuntimeProperties): AndStatement | OrStatement | undefined {
   const Statements = [];
   let ConcatenatedStatement = undefined;
   if(statement.statements && Array.isArray(statement.statements)){
@@ -282,7 +283,7 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
       let AndStatement = undefined;
       switch(Object.keys(currentstatement)[0]){
         case "byteMatchStatement":
-          ByteMatchStatement = transformByteMatchStatement(currentstatement.byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
+          ByteMatchStatement = transformByteMatchStatement(currentstatement.byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
           Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "geoMatchStatement":
@@ -314,7 +315,7 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
           Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case  "notStatement":
-          NotStatement = tranformNotStatement(currentstatement.notStatement as wafv2.CfnWebACL.NotStatementProperty);
+          NotStatement = tranformNotStatement(currentstatement.notStatement as wafv2.CfnWebACL.NotStatementProperty, runtimeProperties);
           Statement.NotStatement = NotStatement as NotStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "regexMatchStatement":
@@ -322,16 +323,16 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
           Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "rateBasedStatement":
-          guidanceHelper.getGuidance("nestedRateStatement", "And/OrStatement");
-          RateBasedStatement = tranformRateBasedStatement(currentstatement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
+          guidanceHelper.getGuidance("nestedRateStatement", runtimeProperties, "And/OrStatement");
+          RateBasedStatement = tranformRateBasedStatement(currentstatement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties);
           Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "orStatement":
-          OrStatement = transformConcatenatedStatement(currentstatement.orStatement as wafv2.CfnWebACL.OrStatementProperty, false);
+          OrStatement = transformConcatenatedStatement(currentstatement.orStatement as wafv2.CfnWebACL.OrStatementProperty, false, runtimeProperties);
           Statement.OrStatement = OrStatement as OrStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "andStatement":
-          AndStatement = transformConcatenatedStatement(currentstatement.andStatement as wafv2.CfnWebACL.AndStatementProperty, true);
+          AndStatement = transformConcatenatedStatement(currentstatement.andStatement as wafv2.CfnWebACL.AndStatementProperty, true, runtimeProperties);
           Statement.AndStatement = AndStatement as AndStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         default:
@@ -374,7 +375,7 @@ export function transformLabelMatchStatement(statement: wafv2.CfnWebACL.LabelMat
  * @param statement object of a CDK NotStatement Property
  * @return configuration object of a SDK NotStatement Property
  */
-export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProperty): NotStatement {
+export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProperty, runtimeProperties: RuntimeProperties): NotStatement {
   const nst = statement as wafv2.CfnWebACL.NotStatementProperty | undefined;
   let NotStatement = undefined;
   if (nst && nst.statement) {
@@ -391,7 +392,7 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
     let RateBasedStatement = undefined;
     switch(Object.keys(nst.statement)[0]){
       case "byteMatchStatement":
-        ByteMatchStatement = transformByteMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
+        ByteMatchStatement = transformByteMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
         Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "geoMatchStatement":
@@ -427,8 +428,8 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
         Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "rateBasedStatement":
-        guidanceHelper.getGuidance("nestedRateStatement", "NotStatement");
-        RateBasedStatement = tranformRateBasedStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
+        guidanceHelper.getGuidance("nestedRateStatement", runtimeProperties, "NotStatement");
+        RateBasedStatement = tranformRateBasedStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties);
         Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       default:
@@ -444,7 +445,7 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
  * @param statement object of a CDK RateBasedStatement Property
  * @return configuration object of a SDK RateBasedStatement Property
  */
-export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty): RateBasedStatement {
+export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties: RuntimeProperties): RateBasedStatement {
   const rbst = statement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
   let RateBasedStatement = undefined;
   if (rbst && rbst.scopeDownStatement) {
@@ -460,7 +461,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
     let RegexMatchStatement = undefined;
     switch(Object.keys(rbst.scopeDownStatement)[0]){
       case "byteMatchStatement":
-        ByteMatchStatement = transformByteMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
+        ByteMatchStatement = transformByteMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
         Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "geoMatchStatement":
@@ -521,7 +522,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
  * @param cdkRule configuration object of a CDK Rule Property
  * @return configuration object of a SDK Rule Property
  */
-export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty): Rule {
+export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty, runtimeProperties: RuntimeProperties): Rule {
   const action = (cdkRule.action as wafv2.CfnWebACL.RuleActionProperty) as wafv2.CfnWebACL.RuleActionProperty | undefined;
   let Action = undefined;
   if (action) {
@@ -733,7 +734,7 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
 
   switch(Object.keys(cdkRule.statement)[0]){
     case "byteMatchStatement":
-      ByteMatchStatement = transformByteMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
+      ByteMatchStatement = transformByteMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
       break;
     case "geoMatchStatement":
       GeoMatchStatement = transformGeoMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).geoMatchStatement as wafv2.CfnWebACL.GeoMatchStatementProperty);
@@ -754,22 +755,22 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
       XssMatchStatement = transformXssMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).xssMatchStatement as wafv2.CfnWebACL.XssMatchStatementProperty);
       break;
     case "andStatement":
-      AndStatement = transformConcatenatedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).andStatement as wafv2.CfnWebACL.AndStatementProperty, true);
+      AndStatement = transformConcatenatedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).andStatement as wafv2.CfnWebACL.AndStatementProperty, true, runtimeProperties);
       break;
     case "orStatement":
-      OrStatement = transformConcatenatedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).orStatement as wafv2.CfnWebACL.OrStatementProperty, false);
+      OrStatement = transformConcatenatedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).orStatement as wafv2.CfnWebACL.OrStatementProperty, false, runtimeProperties);
       break;
     case "labelMatchStatement":
       LabelMatchStatement = transformLabelMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).labelMatchStatement as wafv2.CfnWebACL.LabelMatchStatementProperty);
       break;
     case  "notStatement":
-      NotStatement = tranformNotStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).notStatement as wafv2.CfnWebACL.NotStatementProperty);
+      NotStatement = tranformNotStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).notStatement as wafv2.CfnWebACL.NotStatementProperty, runtimeProperties);
       break;
     case "regexMatchStatement":
       RegexMatchStatement = transformRegexMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).regexMatchStatement as wafv2.CfnWebACL.RegexMatchStatementProperty);
       break;
     case "rateBasedStatement":
-      RateBasedStatement = tranformRateBasedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
+      RateBasedStatement = tranformRateBasedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties);
       break;
     default:
       break;

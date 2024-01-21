@@ -1,4 +1,5 @@
 export interface RuntimeProperties {
+    Guidance: string[],
     PreProcess: ProcessProperties,
     PostProcess: ProcessProperties,
     ManagedRuleCapacity: number,

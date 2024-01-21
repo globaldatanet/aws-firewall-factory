@@ -22,15 +22,15 @@ const subVariables : SubVariables = {};
    * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
    * @returns adjustedRule
    */
-export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string): { ServiceData: ServiceDataManagedRuleGroup[], ManagedRuleGroupInfo: string[], SubVariables: SubVariables } {
+export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string, runtimeProps: RuntimeProperties): { ServiceData: ServiceDataManagedRuleGroup[], ManagedRuleGroupInfo: string[], SubVariables: SubVariables } {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
     if(managedRuleGroup.overrideAction?.type === "COUNT"){
       // eslint-disable-next-line quotes
-      guidanceHelper.getGuidance("overrideActionManagedRuleGroup", managedRuleGroup.name);
+      guidanceHelper.getGuidance("overrideActionManagedRuleGroup", runtimeProps, managedRuleGroup.name);
     }
     if(managedRuleGroup.name === "AWSManagedRulesBotControlRuleSet"){
-      managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ? guidanceHelper.getGuidance("noBotControlRuleSetProperty") : undefined;
+      managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ? undefined : guidanceHelper.getGuidance("noBotControlRuleSetProperty",runtimeProps);
     }
     if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
       console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
@@ -176,7 +176,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         } else {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
           const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
-          guidanceHelper.getGuidance("noRuleLabels", rulename);
+          guidanceHelper.getGuidance("noRuleLabels", runtimeProps, rulename);
           cfnRuleProperties = cfnRulePropertii as wafv2.CfnWebACL.RuleProperty;
         }
         rules.push(cfnRuleProperties);
@@ -417,7 +417,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
               .ruleLabels
           ) {
             cfnRuleProperti = cfnRuleProperty;
-            guidanceHelper.getGuidance("noRuleLabels", rulename);
+            guidanceHelper.getGuidance("noRuleLabels", runtimeProps, rulename);
           } else {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
