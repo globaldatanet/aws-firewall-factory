@@ -3,8 +3,7 @@
 ## Released
 ## 4.2.1
 ### Added
-- Guidance Helper - this Helper will help you to get guidance on implementing Best Practices for AWS Firewalls.
-
+- Guidance Helper v1: This Helper is designed to provide comprehensive assistance in implementing Best Practices for AWS Firewalls. Additionally, it addresses [Issue279](https://github.com/globaldatanet/aws-firewall-factory/issues/279), ensuring a more robust and effective implementation.
 ## 4.2.0
 ### Fixed
 - Output of the correct ManagedRuleGroup version if the stack has already been deployed, no version has been specifically set or Enforce Update has been set
