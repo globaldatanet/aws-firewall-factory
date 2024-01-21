@@ -26,6 +26,7 @@ export interface ProcessProperties {
     ManagedRuleGroupCount: number,
     ManagedRuleBotControlCount: number,
     ManagedRuleATPCount: number,
+    AWSManagedRulesAmazonIpReputationListCount: number,
     CustomRuleCount: number,
     CustomRuleGroupCount: number,
     CustomCaptchaRuleCount: number

@@ -26,6 +26,9 @@ export function getGuidance(context: string, source?: string) {
     case "noRuleLabels":
       console.log("\x1b[31m",`\n🚨 No RuleLabels are used in CustomRule ${source} - Rule Labels help you to mitigate False/Positives.\n More about RuleLabels: https://docs.aws.amazon.com/waf/latest/developerguide/waf-labels.html.\n\n`,"\x1b[0m");
       break;
+    case "noAWSManagedIPDDoSList":
+      console.log("\x1b[31m","\n🚨 No AWSManagedRulesAmazonIpReputationList is used in your Firewall - These Rules identify and block IPs acting as bots, conducting reconnaissance on AWS resources, or involved in DDoS activities. AWSManagedIPDDoSList rule has effectively blocked over 90% of malicious request floods.\n\n","\x1b[0m");
+      break;
     default:
       break;
   }

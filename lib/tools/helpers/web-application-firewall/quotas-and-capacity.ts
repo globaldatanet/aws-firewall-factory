@@ -240,6 +240,10 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
         processProperties.ManagedRuleATPCount += 1;
         break;
       }
+      case "AWSManagedRulesAmazonIpReputationList": {
+        processProperties.ManagedRuleATPCount += 1;
+        break;
+      }
     }
   }
   console.log(table(managedcapacitieslog));
@@ -553,6 +557,9 @@ export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: 
     console.log("\n🔎 Capacity Check result: 🟢 \n");
     console.log(" 💡 Account WAF-WCU Quota: " +Number(quoteWcu).toString());
     console.log(" 🧮 Calculated Custom Rule Capacity is: [" + customCapacity + "] (🥇[" + runtimeProps.PreProcess.Capacity + "] + 🥈[" + runtimeProps.PostProcess.Capacity + "]) \n ➕ ManagedRulesCapacity: ["+ runtimeProps.ManagedRuleCapacity +"] \n ＝ Total Waf Capacity: " + totalWcu.toString() + "\n");
+  }
+  if(runtimeProps.PostProcess.IpReputationListCount === 0 && runtimeProps.PreProcess.IpReputationListCount === 0){
+    guidanceHelper.getGuidance("noIpReputationList");
   }
   return wcuLimitReached;
 }
