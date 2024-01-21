@@ -52,14 +52,14 @@ export function outputGuidance(runtimeProperties: RuntimeProperties) {
     });
   }
   if(runtimeProperties.Guidance.nestedRateStatementCount !== 0){
-    console.log("\x1b[31m",`\n   🚨  Found Nested RateBasedStatement in ${runtimeProperties.Guidance.nestedRateStatementCount} - You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. You can define a RateBasedStatement inside a web ACL and inside a rule group.`,"\x1b[0m");
+    console.log("\x1b[31m",`\n   🚨  Found ${runtimeProperties.Guidance.nestedRateStatementCount} Nested RateBasedStatement  - You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. You can define a RateBasedStatement inside a web ACL and inside a rule group.`,"\x1b[0m");
     console.log("      Statement Names:");
     runtimeProperties.Guidance.nestedRateStatementInfo.forEach(element => {
       console.log("        "+element);
     });
   }
   if(runtimeProperties.Guidance.overrideActionManagedRuleGroupCount !== 0){
-    console.log("\x1b[31m",`\n   🚨  Found OverrideAction of ManagedRuleGroup ${runtimeProperties.Guidance.overrideActionManagedRuleGroupCount} - OverrideAction of ManagedRuleGroup is set to COUNT, which simply tallies all rules within the group. However, this practice may create a vulnerability in your firewall and is not recommended.`,"\x1b[0m");
+    console.log("\x1b[31m",`\n   🚨  Found OverrideAction in ManagedRuleGroup - OverrideAction of ${runtimeProperties.Guidance.overrideActionManagedRuleGroupCount} ManagedRuleGroup is set to COUNT, which simply tallies all rules within the group. However, this practice may create a vulnerability in your firewall and is not recommended.`,"\x1b[0m");
     console.log("      ManagedRuleGroup Names:");
     runtimeProperties.Guidance.overrideActionManagedRuleGroupInfo.forEach(element => {
       console.log("        "+element);
