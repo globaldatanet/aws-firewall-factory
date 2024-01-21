@@ -29,6 +29,9 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
       // eslint-disable-next-line quotes
       guidanceHelper.getGuidance("overrideActionManagedRuleGroup", managedRuleGroup.name);
     }
+    if(managedRuleGroup.name === "AWSManagedRulesBotControlRuleSet"){
+      managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ? guidanceHelper.getGuidance("noBotControlRuleSetProperty") : undefined;
+    }
     if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
       console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
       cfnManagedRuleGroup.push({
@@ -43,7 +46,7 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
         excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : [],
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?? undefined,
-        awsManagedRulesBotControlRuleSetProperty: managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ? managedRuleGroup.awsManagedRulesBotControlRuleSetProperty : undefined,
+        awsManagedRulesBotControlRuleSetProperty: managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ?? undefined,
         awsManagedRulesACFPRuleSetProperty: managedRuleGroup.awsManagedRulesACFPRuleSetProperty ?? undefined,
         awsManagedRulesATPRuleSetProperty: managedRuleGroup.awsManagedRulesATPRuleSetProperty ?? undefined,
       });

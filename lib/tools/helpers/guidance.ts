@@ -20,6 +20,9 @@ export function getGuidance(context: string, source?: string) {
     case "byteMatchStatementPositionalConstraint":
       console.log("\x1b[31m",`\n🚨 Found PositionalConstraint "${source}" in ByteMatchStatement - It is cheaper from WCU perspektive to use a RegexMatchStatement in this Case.\n\n`,"\x1b[0m");
       break;
+    case "noBotControlRuleSetProperty":
+      console.log("\x1b[31m","\n🚨 No BotControlRuleSetProperty is used in your ManagedRulesBotControlRuleSet - This setting will help you to specify the inspection level.\n More about BotControlRuleSetProperty: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesbotcontrolruleset.html.\n\n","\x1b[0m");
+      break;
     default:
       break;
   }
