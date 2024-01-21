@@ -7,7 +7,7 @@ import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchStatement, SqliMatchStatement, RegexPatternSetReferenceStatement, Statement,
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
   ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body } from "@aws-sdk/client-wafv2";
-import {convertStringToUint8Array} from "./helpers/web-application-firewall";
+import { wafHelper, guidanceHelper} from "./helpers";
 
 /**
  * The function will map a CDK ByteMatchStatement Property to a SDK ByteMatchStatement Property
@@ -32,9 +32,12 @@ export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatch
         });
       });
     }
+    if(bmst.positionalConstraint === "CONTAINS" || bmst.positionalConstraint === "CONTAINS_WORD" || bmst.positionalConstraint === "STARTS_WITH" || bmst.positionalConstraint === "ENDS_WITH"){
+      guidanceHelper.getGuidance("byteMatchStatementPositionalConstraint", bmst.positionalConstraint);
+    }
     ByteMatchStatement = {
       PositionalConstraint: bmst.positionalConstraint,
-      SearchString: bmst.searchString ? convertStringToUint8Array(bmst.searchString) : undefined,
+      SearchString: bmst.searchString ? wafHelper.convertStringToUint8Array(bmst.searchString) : undefined,
       TextTransformations,
       FieldToMatch
     };
@@ -319,6 +322,7 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
           Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "rateBasedStatement":
+          guidanceHelper.getGuidance("nestedRateStatement", "And/OrStatement");
           RateBasedStatement = tranformRateBasedStatement(currentstatement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
           Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
@@ -423,6 +427,7 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
         Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "rateBasedStatement":
+        guidanceHelper.getGuidance("nestedRateStatement", "NotStatement");
         RateBasedStatement = tranformRateBasedStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
         Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
@@ -465,7 +470,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
       case "ipSetReferenceStatement":
         IPSetReferenceStatement = transformIPSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty);
         Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break; 
+        break;
       case "regexPatternSetReferenceStatement":
         RegexPatternSetReferenceStatement = transformRegexPatternSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty);
         Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.

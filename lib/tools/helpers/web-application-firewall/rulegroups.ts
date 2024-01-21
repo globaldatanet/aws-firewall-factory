@@ -6,6 +6,7 @@ import { Scope, WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListA
 import { RuntimeProperties, ProcessProperties } from "../../../types/runtimeprops";
 import { transformWafRuleStatements } from "./statements";
 import { Construct } from "constructs";
+import { guidanceHelper } from "../../helpers";
 import * as cr from "aws-cdk-lib/custom-resources";
 
 
@@ -26,7 +27,7 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
   for (const managedRuleGroup of managedRuleGroups) {
     if(managedRuleGroup.overrideAction?.type === "COUNT"){
       // eslint-disable-next-line quotes
-      console.log("\x1b[31m",`\n🚨 OverrideAction of ManagedRuleGroup ${managedRuleGroup.name} is set to COUNT, which simply tallies all rules within the group.\n   However, this practice may create a vulnerability in your firewall and is not recommended.`,"\x1b[0m");
+      guidanceHelper.getGuidance("overrideActionManagedRuleGroup", managedRuleGroup.name);
     }
     if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
       console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");

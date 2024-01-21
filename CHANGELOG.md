@@ -1,6 +1,9 @@
 # Change Log
 
 ## Released
+## 4.2.1
+### Added
+- Guidance Helper - this Helper will help you to get guidance on implementing Best Practices for AWS Firewalls.
 
 ## 4.2.0
 ### Fixed

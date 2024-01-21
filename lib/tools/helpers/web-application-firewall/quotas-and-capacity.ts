@@ -4,7 +4,7 @@ import { Scope, WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, De
 import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
 import { RuntimeProperties, ProcessProperties } from "../../../types/runtimeprops";
 import { Config } from "../../../types/config";
-import { cloudformationHelper } from "../../helpers";
+import { cloudformationHelper, guidanceHelper } from "../../helpers";
 import * as lodash from "lodash";
 import {transformCdkRuletoSdkRule} from "../../transformer";
 import { Rule as FmsRule, ManagedRuleGroup } from "../../../types/fms";
@@ -208,6 +208,7 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
       processProperties = runtimeProperties.PostProcess;
       break;
   }
+  config.WebAcl.PreProcess.ManagedRuleGroups !== undefined && config.WebAcl.PostProcess.ManagedRuleGroups !== undefined ? guidanceHelper.getGuidance("noManageRuleGroups") : null;
   const managedcapacitieslog = [];
   managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
   for (const managedrule of managedrules) {
