@@ -51,7 +51,17 @@ export const outputInfoBanner = (config?:Config) => {
  */
 export function initRuntimeProperties() : RuntimeProperties {
   return {
-    Guidance: [],
+    GuidanceSummary: [],
+    Guidance: {
+      nestedRateStatementCount: 0,
+      nestedRateStatementInfo: [],
+      overrideActionManagedRuleGroupCount: 0,
+      overrideActionManagedRuleGroupInfo: [],
+      byteMatchStatementPositionalConstraintCount: 0,
+      byteMatchStatementPositionalConstraintInfo: [],
+      noRuleLabelsCount: 0,
+      noRuleLabelsInfo: []
+    },
     ManagedRuleCapacity: 0,
     PostProcess: {
       Capacity: 0,

@@ -1,9 +1,21 @@
 export interface RuntimeProperties {
-    Guidance: string[],
+    GuidanceSummary: string[],
+    Guidance: Guidance,
     PreProcess: ProcessProperties,
     PostProcess: ProcessProperties,
     ManagedRuleCapacity: number,
     Pricing: ResourcePrices,
+}
+
+export interface Guidance {
+    nestedRateStatementCount: number,
+    nestedRateStatementInfo: string[],
+    overrideActionManagedRuleGroupCount: number,
+    overrideActionManagedRuleGroupInfo: string[],
+    byteMatchStatementPositionalConstraintCount: number,
+    byteMatchStatementPositionalConstraintInfo: string[],
+    noRuleLabelsCount: number,
+    noRuleLabelsInfo: string[],
 }
 export interface ResourcePrices {
     Policy: number,
