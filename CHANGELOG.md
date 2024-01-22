@@ -2,6 +2,10 @@
 
 ## Released
 
+## 4.2.2
+### Added
+- Guidance Helper v1: This Helper is designed to provide comprehensive assistance in implementing Best Practices for AWS Firewalls. Additionally, it addresses [Issue279](https://github.com/globaldatanet/aws-firewall-factory/issues/279), ensuring a more robust and effective implementation. Guidances have severities: ℹ️ - can be adapted, ⚠️ should be adapted, 🚨 must be adapted - exceptions of course confirm the rules.
+
 ## 4.2.1
 ### Fixed
 - [Issue285](https://github.com/globaldatanet/aws-firewall-factory/issues/285) - Resolved an issue where the redeployment of changed capacity was not functioning correctly due to inconsistencies in the writing of ProcessProperties for DeployedRuleGroups.
