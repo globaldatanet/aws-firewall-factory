@@ -34,7 +34,7 @@ export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatch
       });
     }
     if(bmst.positionalConstraint === "CONTAINS" || bmst.positionalConstraint === "CONTAINS_WORD" || bmst.positionalConstraint === "STARTS_WITH" || bmst.positionalConstraint === "ENDS_WITH"){
-      guidanceHelper.getGuidance("byteMatchStatementPositionalConstraint", runtimeProperties, bmst.positionalConstraint +" - SearchString: "+ bmst.searchString);
+      guidanceHelper.getGuidance("byteMatchStatementPositionalConstraint", runtimeProperties, "CONTSTRAINT: " + bmst.positionalConstraint +"; SearchString: "+ bmst.searchString+"; FieldtoMatch: "+ JSON.stringify(FieldToMatch));
     }
     ByteMatchStatement = {
       PositionalConstraint: bmst.positionalConstraint,
