@@ -2,6 +2,31 @@ import * as cloudformation from "@aws-sdk/client-cloudformation";
 import { RuntimeProperties, ProcessProperties } from "../../types/runtimeprops";
 import { Config } from "../../types/config";
 
+
+
+/** Puts specified output values into the runtimeprops - this function is needed to identify chagend WCUs of WAF RuleGroups
+   * @param propertyName name of the property to write to eg.: DeployedRuleGroupNames
+   * @param runtimeProps runtime properties, where to write stack outputs into
+   * @param cloudformationOutputName name of the cloudformation output to get eg.: PreProcessDeployedRuleGroupNames
+   * @param describeStacksCommandOutput the output of the CloudFormation describeStacksCommand
+   */
+// eslint-disable-next-line no-inner-declarations
+function processOutputsToProcessProperties<K extends keyof ProcessProperties>(
+  propertyName: K,
+  runtimeProps: ProcessProperties,
+  cloudformationOutputName: string,
+  describeStacksCommandOutput: cloudformation.DescribeStacksCommandOutput){
+
+  const outputValue = describeStacksCommandOutput.Stacks?.[0]?.Outputs?.find(output => output.OutputKey === cloudformationOutputName)?.OutputValue || "";
+  if(propertyName === "DeployedRuleGroupNames" || propertyName === "DeployedRuleGroupIdentifier"){
+    Object.assign(runtimeProps,{ [propertyName]: outputValue.split(",", outputValue.length) as ProcessProperties[K] });
+  }
+  if(propertyName === "DeployedRuleGroupCapacities"){
+    Object.assign(runtimeProps,{ [propertyName]: outputValue?.split(",",outputValue?.length).map(Number) as ProcessProperties[K] });
+  }
+}
+
+
 /**
  * Writes outputs from an existing stack into the specified runtime props
  * @param deploymentRegion AWS region, e.g. eu-central-1
@@ -19,24 +44,14 @@ export async function setOutputsFromStack(deploymentRegion: string, runtimeProps
 
   try {
     const responseStack = await cloudformationClient.send(command);
+
     console.log("🫗  Get Outputs from existing CloudFormation Stack.\n");
-
-    const processOutput = (outputKey: string, target: ProcessProperties) => {
-      const outputValue = responseStack.Stacks?.[0]?.Outputs?.find(output => output.OutputKey === outputKey)?.OutputValue || "";
-      target.DeployedRuleGroupNames = outputValue.split(",", outputValue.length) || [];
-    };
-
-    processOutput("DeployedRuleGroupNames", runtimeProps.PreProcess);
-    processOutput("DeployedRuleGroupIdentifier", runtimeProps.PreProcess);
-    processOutput("DeployedRuleGroupCapacities", runtimeProps.PreProcess);
-
-    processOutput("PreProcessDeployedRuleGroupNames", runtimeProps.PreProcess);
-    processOutput("PreProcessDeployedRuleGroupIdentifier", runtimeProps.PreProcess);
-    processOutput("PreProcessDeployedRuleGroupCapacities", runtimeProps.PreProcess);
-
-    processOutput("PostProcessDeployedRuleGroupNames", runtimeProps.PostProcess);
-    processOutput("PostProcessDeployedRuleGroupIdentifier", runtimeProps.PostProcess);
-    processOutput("PostProcessDeployedRuleGroupCapacities", runtimeProps.PostProcess);
+    processOutputsToProcessProperties("DeployedRuleGroupNames", runtimeProps.PreProcess, "PreProcessDeployedRuleGroupNames", responseStack);
+    processOutputsToProcessProperties("DeployedRuleGroupIdentifier", runtimeProps.PreProcess, "PreProcessDeployedRuleGroupIdentifier", responseStack);
+    processOutputsToProcessProperties("DeployedRuleGroupCapacities", runtimeProps.PreProcess, "PreProcessDeployedRuleGroupCapacities", responseStack);
+    processOutputsToProcessProperties("DeployedRuleGroupNames", runtimeProps.PostProcess, "PostProcessDeployedRuleGroupNames", responseStack);
+    processOutputsToProcessProperties("DeployedRuleGroupIdentifier", runtimeProps.PostProcess,"PostProcessDeployedRuleGroupIdentifier", responseStack);
+    processOutputsToProcessProperties("DeployedRuleGroupCapacities", runtimeProps.PostProcess, "PostProcessDeployedRuleGroupCapacities", responseStack);
 
   } catch (e) {
     console.log("🆕 Creating new CloudFormation Stack.\n");

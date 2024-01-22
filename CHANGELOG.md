@@ -2,6 +2,15 @@
 
 ## Released
 
+## 4.2.1
+### Fixed
+- [Issue285](https://github.com/globaldatanet/aws-firewall-factory/issues/285) - Resolved an issue where the redeployment of changed capacity was not functioning correctly due to inconsistencies in the writing of ProcessProperties for DeployedRuleGroups.
+- Bump ts-jest from 29.1.1 to 29.1.2
+- Bump @aws-sdk/client-wafv2 from 3.490.0 to 3.496.0
+- Bump @aws-sdk/client-service-quotas from 3.490.0 to 3.496.0
+- Bump @types/node from 20.11.4 to 20.11.5
+- Bump @aws-sdk/client-pricing from 3.490.0 to 3.496.0
+
 ## 4.2.0
 ### Fixed
 - Output of the correct ManagedRuleGroup version if the stack has already been deployed, no version has been specifically set or Enforce Update has been set
