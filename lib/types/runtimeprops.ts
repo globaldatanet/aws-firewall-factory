@@ -8,6 +8,7 @@ export interface RuntimeProperties {
 }
 
 export interface Guidance {
+    rateBasedStatementCount: number,
     nestedRateStatementCount: number,
     nestedRateStatementInfo: string[],
     overrideActionManagedRuleGroupCount: number,

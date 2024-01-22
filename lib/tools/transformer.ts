@@ -6,7 +6,7 @@
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchStatement, SqliMatchStatement, RegexPatternSetReferenceStatement, Statement,
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
-  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body } from "@aws-sdk/client-wafv2";
+  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey } from "@aws-sdk/client-wafv2";
 import { wafHelper, guidanceHelper} from "./helpers";
 import { RuntimeProperties } from "../types/runtimeprops";
 
@@ -448,8 +448,11 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
 export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties: RuntimeProperties): RateBasedStatement {
   const rbst = statement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
   let RateBasedStatement = undefined;
+  let Limit: number | undefined = undefined;
+  let Statement: Statement | undefined = undefined;
+  let AggregateKeyType: string | undefined = undefined;
   if (rbst && rbst.scopeDownStatement) {
-    const Statement: Statement ={};
+    Statement = {};
     let ByteMatchStatement = undefined;
     let GeoMatchStatement = undefined;
     let IPSetReferenceStatement = undefined;
@@ -499,20 +502,28 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
       default:
         break;
     }
-    let ForwardedIPConfig = undefined;
-    if (rbst.forwardedIpConfig) {
-      const fic = rbst.forwardedIpConfig as wafv2.CfnWebACL.ForwardedIPConfigurationProperty;
-      ForwardedIPConfig ={
-        FallbackBehavior: fic.fallbackBehavior,
-        HeaderName: fic.headerName
-      };
-    }
-    RateBasedStatement = {
-      ForwardedIPConfig,
-      ScopeDownStatement: Statement,
-      Limit: rbst.limit,
+  }
+  let ForwardedIPConfig = undefined;
+  if (rbst && rbst.forwardedIpConfig) {
+    const fic = rbst.forwardedIpConfig as wafv2.CfnWebACL.ForwardedIPConfigurationProperty;
+    ForwardedIPConfig ={
+      FallbackBehavior: fic.fallbackBehavior,
+      HeaderName: fic.headerName
     };
   }
+  if(rbst && rbst.limit){
+    Limit = rbst.limit;
+  }
+  if(rbst && rbst.aggregateKeyType){
+    AggregateKeyType = rbst.aggregateKeyType;
+  }
+  RateBasedStatement = {
+    ForwardedIPConfig,
+    ScopeDownStatement: Statement,
+    Limit,
+    AggregateKeyType
+  };
+
   return RateBasedStatement as RateBasedStatement;
 }
 

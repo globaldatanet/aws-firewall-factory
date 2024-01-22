@@ -53,6 +53,7 @@ export function initRuntimeProperties() : RuntimeProperties {
   return {
     GuidanceSummary: [],
     Guidance: {
+      rateBasedStatementCount: 0,
       nestedRateStatementCount: 0,
       nestedRateStatementInfo: [],
       overrideActionManagedRuleGroupCount: 0,
