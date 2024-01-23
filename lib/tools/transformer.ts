@@ -6,7 +6,7 @@
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchStatement, SqliMatchStatement, RegexPatternSetReferenceStatement, Statement,
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
-  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey, RateLimitHeader, RateLimitQueryString, RateLimitUriPath, RateLimitQueryArgument } from "@aws-sdk/client-wafv2";
+  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey, RateLimitHeader, RateLimitQueryString, RateLimitUriPath, RateLimitIP,  RateLimitHTTPMethod } from "@aws-sdk/client-wafv2";
 import { wafHelper, guidanceHelper} from "./helpers";
 import { RuntimeProperties } from "../types/runtimeprops";
 
@@ -608,6 +608,39 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
           TextTransformations: TextTransformations,
         };
         CustomKeys.push(QueryString as RateBasedStatementCustomKey);
+      }
+      if(customkeys.uriPath){
+        const uriPath = customkeys.uriPath as wafv2.CfnWebACL.RateLimitUriPathProperty;
+        let TextTransformations = undefined;
+        if (uriPath.textTransformations) {
+          TextTransformations = [];
+          (uriPath.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        const UriPath: RateLimitUriPath = {
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(UriPath as RateBasedStatementCustomKey);
+      }
+      if(customkeys.forwardedIp){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const forwardedIp = customkeys.forwardedIp as any;
+        const ForwardedIp: RateLimitIP = {
+          HeaderName: forwardedIp.headerName,
+        };
+        CustomKeys.push(ForwardedIp as RateBasedStatementCustomKey);
+      }
+      if(customkeys.httpMethod){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const httpMethod = customkeys.httpMethod as any;
+        const HttpMethod: RateLimitHTTPMethod = {
+          Name: httpMethod.name,
+        };
+        CustomKeys.push(HttpMethod as RateBasedStatementCustomKey);
       }
     }
   }
