@@ -6,7 +6,7 @@
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchStatement, SqliMatchStatement, RegexPatternSetReferenceStatement, Statement,
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
-  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey, RateLimitHeader } from "@aws-sdk/client-wafv2";
+  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey, RateLimitHeader, RateLimitQueryString, RateLimitUriPath, RateLimitQueryArgument } from "@aws-sdk/client-wafv2";
 import { wafHelper, guidanceHelper} from "./helpers";
 import { RuntimeProperties } from "../types/runtimeprops";
 
@@ -540,6 +540,73 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
           TextTransformations: TextTransformations,
         };
         CustomKeys.push(Header as RateBasedStatementCustomKey);
+      }
+      if(customkeys.cookie){
+        const cookie = customkeys.cookie as wafv2.CfnWebACL.RateLimitCookieProperty;
+        let TextTransformations = undefined;
+        if (cookie.textTransformations) {
+          TextTransformations = [];
+          (cookie.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        const Cookie = {
+          Name: cookie.name,
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(Cookie as RateBasedStatementCustomKey);
+      }
+      if(customkeys.ip){
+        const ip = customkeys.ip as any;
+        const IP = {
+          Address: ip.address,
+        };
+        CustomKeys.push(IP as RateBasedStatementCustomKey);
+      }
+      if(customkeys.labelNamespace){
+        const labelNamespace = customkeys.labelNamespace as wafv2.CfnWebACL.RateLimitLabelNamespaceProperty;
+        const LabelNamespace = {
+          Namespace: labelNamespace.namespace,
+        };
+        CustomKeys.push(LabelNamespace as RateBasedStatementCustomKey);
+      }
+      if(customkeys.queryArgument){
+        const queryArgument = customkeys.queryArgument as wafv2.CfnWebACL.RateLimitQueryArgumentProperty;
+        let TextTransformations = undefined;
+        if (queryArgument.textTransformations) {
+          TextTransformations = [];
+          (queryArgument.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        const QueryArgument = {
+          Name: queryArgument.name,
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(QueryArgument as RateBasedStatementCustomKey);
+      }
+      if(customkeys.queryString){
+        const queryString = customkeys.queryString as wafv2.CfnWebACL.RateLimitQueryStringProperty;
+        let TextTransformations = undefined;
+        if (queryString.textTransformations) {
+          TextTransformations = [];
+          (queryString.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        const QueryString: RateLimitQueryString = {
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(QueryString as RateBasedStatementCustomKey);
       }
     }
   }
