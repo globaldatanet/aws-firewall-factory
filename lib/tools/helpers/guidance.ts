@@ -45,7 +45,7 @@ This function will print out the collected guidance for your Firewall.
 @param runtimeProperties - The runtimeProperties object.
  */
 export function outputGuidance(runtimeProperties: RuntimeProperties) {
-  if(runtimeProperties.GuidanceSummary.length !== 0){
+  if(runtimeProperties.GuidanceSummary.length !== 0 || runtimeProperties.Guidance.nestedRateStatementCount !== 0 || runtimeProperties.Guidance.overrideActionManagedRuleGroupCount !== 0 || runtimeProperties.Guidance.noRuleLabelsCount !== 0 || runtimeProperties.Guidance.byteMatchStatementPositionalConstraintCount !== 0){
     console.log("\x1b[0m","\n🛟  Guidance:","\x1b[0m");
     runtimeProperties.GuidanceSummary.forEach(element => {
       console.log(element);
