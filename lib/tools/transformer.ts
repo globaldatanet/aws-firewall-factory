@@ -560,6 +560,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
         CustomKeys.push(Cookie as RateBasedStatementCustomKey);
       }
       if(customkeys.ip){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ip = customkeys.ip as any;
         const IP = {
           Address: ip.address,
