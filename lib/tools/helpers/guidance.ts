@@ -54,29 +54,29 @@ export function outputGuidance(config: Config, runtimeProperties: RuntimePropert
     });
   }
   if(runtimeProperties.Guidance.nestedRateStatementCount !== 0){
-    console.log("\x1b[31m",`\n    🚨  Found ${runtimeProperties.Guidance.nestedRateStatementCount} Nested RateBasedStatement  - You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. \n       You can define a RateBasedStatement inside a web ACL and inside a rule group.`,"\x1b[0m");
-    console.log("\x1b[1m","      Affected Statements:\n","\x1b[0m");
+    console.log("\x1b[31m",`\n    🚨  Found ${runtimeProperties.Guidance.nestedRateStatementCount} Nested RateBasedStatement  - You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement.\n       You can define a RateBasedStatement inside a web ACL and inside a rule group.`,"\x1b[0m");
+    console.log("\x1b[1m","       Affected Statements:\n","\x1b[0m");
     runtimeProperties.Guidance.nestedRateStatementInfo.forEach(element => {
       console.log("        − "+element);
     });
   }
   if(runtimeProperties.Guidance.overrideActionManagedRuleGroupCount !== 0){
-    console.log("\x1b[31m",`\n    🚨  Found OverrideAction in ManagedRuleGroup - OverrideAction of ${runtimeProperties.Guidance.overrideActionManagedRuleGroupCount} ManagedRuleGroup is set to COUNT, which simply tallies all rules within the group. \n       However, this practice may create a vulnerability in your firewall and is not recommended.`,"\x1b[0m");
-    console.log("\x1b[1m","      Affected ManagedRuleGroups:\n","\x1b[0m");
+    console.log("\x1b[31m",`\n    🚨  Found OverrideAction in ManagedRuleGroup - OverrideAction of ${runtimeProperties.Guidance.overrideActionManagedRuleGroupCount} ManagedRuleGroup is set to COUNT, which simply tallies all rules within the group.\n       However, this practice may create a vulnerability in your firewall and is not recommended.`,"\x1b[0m");
+    console.log("\x1b[1m","       Affected ManagedRuleGroups:\n","\x1b[0m");
     runtimeProperties.Guidance.overrideActionManagedRuleGroupInfo.forEach(element => {
       console.log("        − "+element);
     });
   }
   if(runtimeProperties.Guidance.noRuleLabelsCount !== 0){
     console.log("\x1b[0m",`\n    ℹ️  Found ${runtimeProperties.Guidance.noRuleLabelsCount} CustomRules without RuleLabels - Rule Labels help you to mitigate False/Positives.`,"\x1b[0m");
-    console.log("\x1b[1m","     Affected CustomRules:\n","\x1b[0m");
+    console.log("\x1b[1m","      Affected CustomRules:\n","\x1b[0m");
     runtimeProperties.Guidance.noRuleLabelsInfo.forEach(element => {
       console.log("        − "+element);
     });
   }
   if(runtimeProperties.Guidance.byteMatchStatementPositionalConstraintCount !== 0){
     console.log("\x1b[0m",`\n    ℹ️  Found ${runtimeProperties.Guidance.byteMatchStatementPositionalConstraintCount} ByteMatchStatements with PositionalConstraint - It is cheaper from WCU perspektive to use a RegexMatchStatement in this Case.`,"\x1b[0m");
-    console.log("\x1b[1m","     Affected CONTSTRAINT Information:\n","\x1b[0m");
+    console.log("\x1b[1m","      Affected CONTSTRAINT Information:\n","\x1b[0m");
     runtimeProperties.Guidance.byteMatchStatementPositionalConstraintInfo.forEach(element => {
       console.log("        − "+element);
     });
