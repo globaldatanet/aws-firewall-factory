@@ -116,6 +116,6 @@ void (async () => {
     });
 
     await pricingHelper.isWafPriceCalculated(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
-    await guidanceHelper.outputGuidance(runtimeProperties);
+    await guidanceHelper.outputGuidance(config, runtimeProperties);
   }
 })();

@@ -456,6 +456,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
   let ForwardedIPConfig = undefined;
   if(rbst){
     if (rbst.scopeDownStatement) {
+      runtimeProperties.Guidance.rateBasedStatementCount++;
       Statement = {};
       let ByteMatchStatement = undefined;
       let GeoMatchStatement = undefined;
