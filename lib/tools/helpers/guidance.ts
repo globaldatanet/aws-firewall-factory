@@ -54,14 +54,14 @@ export function outputGuidance(config: Config, runtimeProperties: RuntimePropert
     });
   }
   if(runtimeProperties.Guidance.nestedRateStatementCount !== 0){
-    console.log("\x1b[31m",`\n    🚨  Found ${runtimeProperties.Guidance.nestedRateStatementCount} Nested RateBasedStatement  - You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement.\n       You can define a RateBasedStatement inside a web ACL and inside a rule group.`,"\x1b[0m");
+    console.log("\x1b[31m",`\n    🚨  Found ${runtimeProperties.Guidance.nestedRateStatementCount} Nested RateBasedStatement  - You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement.\n        You can define a RateBasedStatement inside a web ACL and inside a rule group.`,"\x1b[0m");
     console.log("\x1b[1m","       Affected Statements:\n","\x1b[0m");
     runtimeProperties.Guidance.nestedRateStatementInfo.forEach(element => {
       console.log("        − "+element);
     });
   }
   if(runtimeProperties.Guidance.overrideActionManagedRuleGroupCount !== 0){
-    console.log("\x1b[31m",`\n    🚨  Found OverrideAction in ManagedRuleGroup - OverrideAction of ${runtimeProperties.Guidance.overrideActionManagedRuleGroupCount} ManagedRuleGroup is set to COUNT, which simply tallies all rules within the group.\n       However, this practice may create a vulnerability in your firewall and is not recommended.`,"\x1b[0m");
+    console.log("\x1b[31m",`\n    🚨  Found OverrideAction in ManagedRuleGroup - OverrideAction of ${runtimeProperties.Guidance.overrideActionManagedRuleGroupCount} ManagedRuleGroup is set to COUNT, which simply tallies all rules within the group.\n        However, this practice may create a vulnerability in your firewall and is not recommended.`,"\x1b[0m");
     console.log("\x1b[1m","       Affected ManagedRuleGroups:\n","\x1b[0m");
     runtimeProperties.Guidance.overrideActionManagedRuleGroupInfo.forEach(element => {
       console.log("        − "+element);
