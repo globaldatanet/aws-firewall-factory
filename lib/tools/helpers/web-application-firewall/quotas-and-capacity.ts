@@ -241,7 +241,7 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
         break;
       }
       case "AWSManagedRulesAmazonIpReputationList": {
-        processProperties.ManagedRuleATPCount += 1;
+        processProperties.IpReputationListCount += 1;
         break;
       }
     }
