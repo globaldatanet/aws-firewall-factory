@@ -51,6 +51,18 @@ export const outputInfoBanner = (config?:Config) => {
  */
 export function initRuntimeProperties() : RuntimeProperties {
   return {
+    GuidanceSummary: [],
+    Guidance: {
+      rateBasedStatementCount: 0,
+      nestedRateStatementCount: 0,
+      nestedRateStatementInfo: [],
+      overrideActionManagedRuleGroupCount: 0,
+      overrideActionManagedRuleGroupInfo: [],
+      byteMatchStatementPositionalConstraintCount: 0,
+      byteMatchStatementPositionalConstraintInfo: [],
+      noRuleLabelsCount: 0,
+      noRuleLabelsInfo: []
+    },
     ManagedRuleCapacity: 0,
     PostProcess: {
       Capacity: 0,
@@ -62,6 +74,7 @@ export function initRuntimeProperties() : RuntimeProperties {
       ManagedRuleBotControlCount: 0,
       ManagedRuleATPCount: 0,
       CustomRuleCount: 0,
+      IpReputationListCount: 0,
       CustomRuleGroupCount: 0,
       CustomCaptchaRuleCount: 0
     },
@@ -74,6 +87,7 @@ export function initRuntimeProperties() : RuntimeProperties {
       ManagedRuleGroupCount: 0,
       ManagedRuleBotControlCount: 0,
       ManagedRuleATPCount: 0,
+      IpReputationListCount: 0,
       CustomRuleCount: 0,
       CustomRuleGroupCount: 0,
       CustomCaptchaRuleCount: 0

@@ -6,15 +6,16 @@
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchStatement, SqliMatchStatement, RegexPatternSetReferenceStatement, Statement,
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
-  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body } from "@aws-sdk/client-wafv2";
-import {convertStringToUint8Array} from "./helpers/web-application-firewall";
+  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey, RateLimitHeader, RateLimitQueryString, RateLimitUriPath, RateLimitIP,  RateLimitHTTPMethod } from "@aws-sdk/client-wafv2";
+import { wafHelper, guidanceHelper} from "./helpers";
+import { RuntimeProperties } from "../types/runtimeprops";
 
 /**
  * The function will map a CDK ByteMatchStatement Property to a SDK ByteMatchStatement Property
  * @param statement object of a CDK ByteMatchStatement Property
  * @return configuration object of a SDK ByteMatchStatement Property
  */
-export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatchStatementProperty): ByteMatchStatement {
+export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties: RuntimeProperties): ByteMatchStatement {
   const bmst = statement as wafv2.CfnWebACL.ByteMatchStatementProperty | undefined;
   let ByteMatchStatement = undefined;
   if (bmst) {
@@ -32,9 +33,12 @@ export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatch
         });
       });
     }
+    if(bmst.positionalConstraint === "CONTAINS" || bmst.positionalConstraint === "CONTAINS_WORD" || bmst.positionalConstraint === "STARTS_WITH" || bmst.positionalConstraint === "ENDS_WITH"){
+      guidanceHelper.getGuidance("byteMatchStatementPositionalConstraint", runtimeProperties, "CONTSTRAINT: " + bmst.positionalConstraint +"; SearchString: "+ bmst.searchString+"; FieldtoMatch: "+ JSON.stringify(FieldToMatch));
+    }
     ByteMatchStatement = {
       PositionalConstraint: bmst.positionalConstraint,
-      SearchString: bmst.searchString ? convertStringToUint8Array(bmst.searchString) : undefined,
+      SearchString: bmst.searchString ? wafHelper.convertStringToUint8Array(bmst.searchString) : undefined,
       TextTransformations,
       FieldToMatch
     };
@@ -258,7 +262,7 @@ export function transformXssMatchStatement(statement: wafv2.CfnWebACL.XssMatchSt
  * @param statement object of a CDK And/OrStatement Property  Property
  * @return configuration object of a SDK And/OrStatement Property  Property
  */
-export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isandStatement:boolean): AndStatement | OrStatement | undefined {
+export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isandStatement:boolean, runtimeProperties: RuntimeProperties): AndStatement | OrStatement | undefined {
   const Statements = [];
   let ConcatenatedStatement = undefined;
   if(statement.statements && Array.isArray(statement.statements)){
@@ -279,7 +283,7 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
       let AndStatement = undefined;
       switch(Object.keys(currentstatement)[0]){
         case "byteMatchStatement":
-          ByteMatchStatement = transformByteMatchStatement(currentstatement.byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
+          ByteMatchStatement = transformByteMatchStatement(currentstatement.byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
           Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "geoMatchStatement":
@@ -311,7 +315,7 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
           Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case  "notStatement":
-          NotStatement = tranformNotStatement(currentstatement.notStatement as wafv2.CfnWebACL.NotStatementProperty);
+          NotStatement = tranformNotStatement(currentstatement.notStatement as wafv2.CfnWebACL.NotStatementProperty, runtimeProperties);
           Statement.NotStatement = NotStatement as NotStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "regexMatchStatement":
@@ -319,15 +323,16 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
           Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "rateBasedStatement":
-          RateBasedStatement = tranformRateBasedStatement(currentstatement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
+          guidanceHelper.getGuidance("nestedRateStatement", runtimeProperties, "And/OrStatement");
+          RateBasedStatement = tranformRateBasedStatement(currentstatement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties);
           Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "orStatement":
-          OrStatement = transformConcatenatedStatement(currentstatement.orStatement as wafv2.CfnWebACL.OrStatementProperty, false);
+          OrStatement = transformConcatenatedStatement(currentstatement.orStatement as wafv2.CfnWebACL.OrStatementProperty, false, runtimeProperties);
           Statement.OrStatement = OrStatement as OrStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "andStatement":
-          AndStatement = transformConcatenatedStatement(currentstatement.andStatement as wafv2.CfnWebACL.AndStatementProperty, true);
+          AndStatement = transformConcatenatedStatement(currentstatement.andStatement as wafv2.CfnWebACL.AndStatementProperty, true, runtimeProperties);
           Statement.AndStatement = AndStatement as AndStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         default:
@@ -370,7 +375,7 @@ export function transformLabelMatchStatement(statement: wafv2.CfnWebACL.LabelMat
  * @param statement object of a CDK NotStatement Property
  * @return configuration object of a SDK NotStatement Property
  */
-export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProperty): NotStatement {
+export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProperty, runtimeProperties: RuntimeProperties): NotStatement {
   const nst = statement as wafv2.CfnWebACL.NotStatementProperty | undefined;
   let NotStatement = undefined;
   if (nst && nst.statement) {
@@ -387,7 +392,7 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
     let RateBasedStatement = undefined;
     switch(Object.keys(nst.statement)[0]){
       case "byteMatchStatement":
-        ByteMatchStatement = transformByteMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
+        ByteMatchStatement = transformByteMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
         Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "geoMatchStatement":
@@ -423,7 +428,8 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
         Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       case "rateBasedStatement":
-        RateBasedStatement = tranformRateBasedStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
+        guidanceHelper.getGuidance("nestedRateStatement", runtimeProperties, "NotStatement");
+        RateBasedStatement = tranformRateBasedStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties);
         Statement.RateBasedStatement = RateBasedStatement as RateBasedStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
         break;
       default:
@@ -439,61 +445,69 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
  * @param statement object of a CDK RateBasedStatement Property
  * @return configuration object of a SDK RateBasedStatement Property
  */
-export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty): RateBasedStatement {
+export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties: RuntimeProperties): RateBasedStatement {
   const rbst = statement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
   let RateBasedStatement = undefined;
-  if (rbst && rbst.scopeDownStatement) {
-    const Statement: Statement ={};
-    let ByteMatchStatement = undefined;
-    let GeoMatchStatement = undefined;
-    let IPSetReferenceStatement = undefined;
-    let RegexPatternSetReferenceStatement = undefined;
-    let SizeConstraintStatement = undefined;
-    let SqliMatchStatement = undefined;
-    let XssMatchStatement = undefined;
-    let LabelMatchStatement = undefined;
-    let RegexMatchStatement = undefined;
-    switch(Object.keys(rbst.scopeDownStatement)[0]){
-      case "byteMatchStatement":
-        ByteMatchStatement = transformByteMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
-        Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break;
-      case "geoMatchStatement":
-        GeoMatchStatement = transformGeoMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).geoMatchStatement as wafv2.CfnWebACL.GeoMatchStatementProperty);
-        Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break;
-      case "ipSetReferenceStatement":
-        IPSetReferenceStatement = transformIPSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty);
-        Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break; 
-      case "regexPatternSetReferenceStatement":
-        RegexPatternSetReferenceStatement = transformRegexPatternSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty);
-        Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break;
-      case "sizeConstraintStatement":
-        SizeConstraintStatement = transformSizeConstraintStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).sizeConstraintStatement as wafv2.CfnWebACL.SizeConstraintStatementProperty);
-        Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break;
-      case "sqliMatchStatement":
-        SqliMatchStatement = transformSqliMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).sqliMatchStatement as wafv2.CfnWebACL.SqliMatchStatementProperty);
-        Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break;
-      case "xssMatchStatement":
-        XssMatchStatement = transformXssMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).xssMatchStatement as wafv2.CfnWebACL.XssMatchStatementProperty);
-        Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break;
-      case "labelMatchStatement":
-        LabelMatchStatement = transformLabelMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).labelMatchStatement as wafv2.CfnWebACL.LabelMatchStatementProperty);
-        Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break;
-      case "regexMatchStatement":
-        RegexMatchStatement = transformRegexMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexMatchStatement as wafv2.CfnWebACL.RegexMatchStatementProperty);
-        Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
-        break;
-      default:
-        break;
+  let Limit: number | undefined = undefined;
+  let Statement: Statement | undefined = undefined;
+  let AggregateKeyType: string | undefined = undefined;
+  let CustomKeys: RateBasedStatementCustomKey[] | undefined = undefined;
+  let Header: RateLimitHeader | undefined = undefined;
+  let ForwardedIPConfig = undefined;
+  if(rbst){
+    runtimeProperties.Guidance.rateBasedStatementCount++;
+    if (rbst.scopeDownStatement) {
+      Statement = {};
+      let ByteMatchStatement = undefined;
+      let GeoMatchStatement = undefined;
+      let IPSetReferenceStatement = undefined;
+      let RegexPatternSetReferenceStatement = undefined;
+      let SizeConstraintStatement = undefined;
+      let SqliMatchStatement = undefined;
+      let XssMatchStatement = undefined;
+      let LabelMatchStatement = undefined;
+      let RegexMatchStatement = undefined;
+      switch(Object.keys(rbst.scopeDownStatement)[0]){
+        case "byteMatchStatement":
+          ByteMatchStatement = transformByteMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
+          Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "geoMatchStatement":
+          GeoMatchStatement = transformGeoMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).geoMatchStatement as wafv2.CfnWebACL.GeoMatchStatementProperty);
+          Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "ipSetReferenceStatement":
+          IPSetReferenceStatement = transformIPSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty);
+          Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "regexPatternSetReferenceStatement":
+          RegexPatternSetReferenceStatement = transformRegexPatternSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty);
+          Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "sizeConstraintStatement":
+          SizeConstraintStatement = transformSizeConstraintStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).sizeConstraintStatement as wafv2.CfnWebACL.SizeConstraintStatementProperty);
+          Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "sqliMatchStatement":
+          SqliMatchStatement = transformSqliMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).sqliMatchStatement as wafv2.CfnWebACL.SqliMatchStatementProperty);
+          Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "xssMatchStatement":
+          XssMatchStatement = transformXssMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).xssMatchStatement as wafv2.CfnWebACL.XssMatchStatementProperty);
+          Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "labelMatchStatement":
+          LabelMatchStatement = transformLabelMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).labelMatchStatement as wafv2.CfnWebACL.LabelMatchStatementProperty);
+          Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "regexMatchStatement":
+          RegexMatchStatement = transformRegexMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexMatchStatement as wafv2.CfnWebACL.RegexMatchStatementProperty);
+          Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        default:
+          break;
+      }
     }
-    let ForwardedIPConfig = undefined;
     if (rbst.forwardedIpConfig) {
       const fic = rbst.forwardedIpConfig as wafv2.CfnWebACL.ForwardedIPConfigurationProperty;
       ForwardedIPConfig ={
@@ -501,14 +515,149 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
         HeaderName: fic.headerName
       };
     }
-    RateBasedStatement = {
-      ForwardedIPConfig,
-      ScopeDownStatement: Statement,
-      Limit: rbst.limit,
-    };
+    if(rbst.limit){
+      Limit = rbst.limit;
+    }
+    if(rbst.aggregateKeyType){
+      AggregateKeyType = rbst.aggregateKeyType;
+    }
+    if(rbst.customKeys){
+      const customkeys = rbst.customKeys as wafv2.CfnWebACL.RateBasedStatementCustomKeyProperty;
+      CustomKeys = [];
+      if(customkeys.header){
+        const header = customkeys.header as wafv2.CfnWebACL.RateLimitHeaderProperty;
+        let TextTransformations = undefined;
+        if (header.textTransformations) {
+          TextTransformations = [];
+          (header.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        Header = {
+          Name: header.name,
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(Header as RateBasedStatementCustomKey);
+      }
+      if(customkeys.cookie){
+        const cookie = customkeys.cookie as wafv2.CfnWebACL.RateLimitCookieProperty;
+        let TextTransformations = undefined;
+        if (cookie.textTransformations) {
+          TextTransformations = [];
+          (cookie.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        const Cookie = {
+          Name: cookie.name,
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(Cookie as RateBasedStatementCustomKey);
+      }
+      if(customkeys.ip){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ip = customkeys.ip as any;
+        const IP = {
+          Address: ip.address,
+        };
+        CustomKeys.push(IP as RateBasedStatementCustomKey);
+      }
+      if(customkeys.labelNamespace){
+        const labelNamespace = customkeys.labelNamespace as wafv2.CfnWebACL.RateLimitLabelNamespaceProperty;
+        const LabelNamespace = {
+          Namespace: labelNamespace.namespace,
+        };
+        CustomKeys.push(LabelNamespace as RateBasedStatementCustomKey);
+      }
+      if(customkeys.queryArgument){
+        const queryArgument = customkeys.queryArgument as wafv2.CfnWebACL.RateLimitQueryArgumentProperty;
+        let TextTransformations = undefined;
+        if (queryArgument.textTransformations) {
+          TextTransformations = [];
+          (queryArgument.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        const QueryArgument = {
+          Name: queryArgument.name,
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(QueryArgument as RateBasedStatementCustomKey);
+      }
+      if(customkeys.queryString){
+        const queryString = customkeys.queryString as wafv2.CfnWebACL.RateLimitQueryStringProperty;
+        let TextTransformations = undefined;
+        if (queryString.textTransformations) {
+          TextTransformations = [];
+          (queryString.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        const QueryString: RateLimitQueryString = {
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(QueryString as RateBasedStatementCustomKey);
+      }
+      if(customkeys.uriPath){
+        const uriPath = customkeys.uriPath as wafv2.CfnWebACL.RateLimitUriPathProperty;
+        let TextTransformations = undefined;
+        if (uriPath.textTransformations) {
+          TextTransformations = [];
+          (uriPath.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+            TextTransformations?.push({
+              Priority: tt.priority,
+              Type: tt.type
+            });
+          });
+        }
+        const UriPath: RateLimitUriPath = {
+          TextTransformations: TextTransformations,
+        };
+        CustomKeys.push(UriPath as RateBasedStatementCustomKey);
+      }
+      if(customkeys.forwardedIp){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const forwardedIp = customkeys.forwardedIp as any;
+        const ForwardedIp: RateLimitIP = {
+          HeaderName: forwardedIp.headerName,
+        };
+        CustomKeys.push(ForwardedIp as RateBasedStatementCustomKey);
+      }
+      if(customkeys.httpMethod){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const httpMethod = customkeys.httpMethod as any;
+        const HttpMethod: RateLimitHTTPMethod = {
+          Name: httpMethod.name,
+        };
+        CustomKeys.push(HttpMethod as RateBasedStatementCustomKey);
+      }
+    }
   }
+  RateBasedStatement = {
+    ForwardedIPConfig,
+    ScopeDownStatement: Statement,
+    Limit,
+    AggregateKeyType,
+    CustomKeys
+  };
+
   return RateBasedStatement as RateBasedStatement;
 }
+
+
+
 
 
 /**
@@ -516,7 +665,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
  * @param cdkRule configuration object of a CDK Rule Property
  * @return configuration object of a SDK Rule Property
  */
-export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty): Rule {
+export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty, runtimeProperties: RuntimeProperties): Rule {
   const action = (cdkRule.action as wafv2.CfnWebACL.RuleActionProperty) as wafv2.CfnWebACL.RuleActionProperty | undefined;
   let Action = undefined;
   if (action) {
@@ -728,7 +877,7 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
 
   switch(Object.keys(cdkRule.statement)[0]){
     case "byteMatchStatement":
-      ByteMatchStatement = transformByteMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty);
+      ByteMatchStatement = transformByteMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
       break;
     case "geoMatchStatement":
       GeoMatchStatement = transformGeoMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).geoMatchStatement as wafv2.CfnWebACL.GeoMatchStatementProperty);
@@ -749,22 +898,22 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty)
       XssMatchStatement = transformXssMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).xssMatchStatement as wafv2.CfnWebACL.XssMatchStatementProperty);
       break;
     case "andStatement":
-      AndStatement = transformConcatenatedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).andStatement as wafv2.CfnWebACL.AndStatementProperty, true);
+      AndStatement = transformConcatenatedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).andStatement as wafv2.CfnWebACL.AndStatementProperty, true, runtimeProperties);
       break;
     case "orStatement":
-      OrStatement = transformConcatenatedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).orStatement as wafv2.CfnWebACL.OrStatementProperty, false);
+      OrStatement = transformConcatenatedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).orStatement as wafv2.CfnWebACL.OrStatementProperty, false, runtimeProperties);
       break;
     case "labelMatchStatement":
       LabelMatchStatement = transformLabelMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).labelMatchStatement as wafv2.CfnWebACL.LabelMatchStatementProperty);
       break;
     case  "notStatement":
-      NotStatement = tranformNotStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).notStatement as wafv2.CfnWebACL.NotStatementProperty);
+      NotStatement = tranformNotStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).notStatement as wafv2.CfnWebACL.NotStatementProperty, runtimeProperties);
       break;
     case "regexMatchStatement":
       RegexMatchStatement = transformRegexMatchStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).regexMatchStatement as wafv2.CfnWebACL.RegexMatchStatementProperty);
       break;
     case "rateBasedStatement":
-      RateBasedStatement = tranformRateBasedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty);
+      RateBasedStatement = tranformRateBasedStatement((cdkRule.statement as wafv2.CfnWebACL.StatementProperty).rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties);
       break;
     default:
       break;

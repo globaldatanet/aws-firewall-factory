@@ -3,7 +3,7 @@ import { WafStack } from "../lib/_web-application-firewall-stack";
 import { PrerequisitesStack } from "../lib/_prerequisites-stack";
 import * as cdk from "aws-cdk-lib";
 import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
-import { wafHelper, afwfHelper, pricingHelper, cloudformationHelper } from "../lib/tools/helpers";
+import { wafHelper, afwfHelper, pricingHelper, cloudformationHelper, guidanceHelper } from "../lib/tools/helpers";
 import * as values from "../values";
 
 /**
@@ -58,7 +58,7 @@ void (async () => {
     await cloudformationHelper.setOutputsFromStack(deploymentRegion, runtimeProperties, config);
     if(config.General.DeployHash){
       console.log("#️⃣  Deployment Hash for this WAF: "+  config.General.DeployHash);
-      console.log("   ⚠️   Legacy functionality ⌛️\n\n");
+      guidanceHelper.getGuidance("deploymentHash", runtimeProperties);
     }
 
     console.log(`🔥 Deploy FMS Policy: ${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-"+config.General.DeployHash.toUpperCase() : ""}\n ⦂ Type:
@@ -116,5 +116,6 @@ void (async () => {
     });
 
     await pricingHelper.isWafPriceCalculated(PriceRegions[deploymentRegion as RegionString], runtimeProperties, config,deploymentRegion);
+    await guidanceHelper.outputGuidance(config, runtimeProperties);
   }
 })();

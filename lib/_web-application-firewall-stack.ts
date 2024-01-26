@@ -191,7 +191,7 @@ export class WafStack extends cdk.Stack {
     const MANAGEDRULEGROUPSINFO: string[]= [""];
     let subVariables : SubVariables = {};
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
-      const preProcessmanagedRgs = wafHelper.buildServiceDataManagedRgs(this, props.config.WebAcl.PreProcess.ManagedRuleGroups, managedRuleGroupVersionProvider, props.config.WebAcl.Scope);
+      const preProcessmanagedRgs = wafHelper.buildServiceDataManagedRgs(this, props.config.WebAcl.PreProcess.ManagedRuleGroups, managedRuleGroupVersionProvider, props.config.WebAcl.Scope, props.runtimeProperties);
       preProcessRuleGroups.push(...preProcessmanagedRgs.ServiceData);
       MANAGEDRULEGROUPSINFO.push(...preProcessmanagedRgs.ManagedRuleGroupInfo);
       subVariables = {...preProcessmanagedRgs.SubVariables};
@@ -199,7 +199,7 @@ export class WafStack extends cdk.Stack {
       console.log("\nℹ️  No ManagedRuleGroups defined in PreProcess.");
     }
     if (props.config.WebAcl.PostProcess.ManagedRuleGroups) {
-      const postProcessmanagedRgs = wafHelper.buildServiceDataManagedRgs(this, props.config.WebAcl.PostProcess.ManagedRuleGroups, managedRuleGroupVersionProvider, props.config.WebAcl.Scope);
+      const postProcessmanagedRgs = wafHelper.buildServiceDataManagedRgs(this, props.config.WebAcl.PostProcess.ManagedRuleGroups, managedRuleGroupVersionProvider, props.config.WebAcl.Scope, props.runtimeProperties);
       postProcessRuleGroups.push(...postProcessmanagedRgs.ServiceData);
       MANAGEDRULEGROUPSINFO.push(...postProcessmanagedRgs.ManagedRuleGroupInfo);
       subVariables = {...postProcessmanagedRgs.SubVariables};
