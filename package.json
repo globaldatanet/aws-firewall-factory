@@ -29,7 +29,7 @@
     "@aws-sdk/client-pricing": "^3.496.0",
     "@aws-sdk/client-service-quotas": "^3.496.0",
     "@aws-sdk/client-shield": "^3.490.0",
-    "@aws-sdk/client-wafv2": "^3.496.0",
+    "@aws-sdk/client-wafv2": "^3.501.0",
     "@babel/traverse": "^7.23.7",
     "@mhlabs/cfn-diagram": "^1.1.38",
     "@slack/types": "^2.11.0",
