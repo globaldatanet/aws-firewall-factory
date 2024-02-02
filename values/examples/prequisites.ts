@@ -3,12 +3,9 @@ export const prequisites: Prerequisites = {
   General: {
     Prefix: "aws-firewall-factory1",
   },
-  Information: {
-    SlackWebhook: "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX",
-  },
   Logging: {
     BucketProperties: {
-      BucketName: "aws-firewall-factory-logs12",
+      BucketName: "aws-firewall-factory-logs",
       KmsEncryptionKey: true,
       ObjectLock: {
         Days: 5,
@@ -16,8 +13,8 @@ export const prequisites: Prerequisites = {
       }
     },
     FireHoseKey: {
-      KeyAlias: "aws-firewall-factory-firehosekey12"
+      KeyAlias: "aws-firewall-factory-firehosekey"
     },
-    CrossAccountIdforPermissions: "859220371210",
+    CrossAccountIdforPermissions: "123456789012",
   }
 };

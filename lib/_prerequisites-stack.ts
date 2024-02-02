@@ -36,7 +36,6 @@ export class PrerequisitesStack extends cdk.Stack {
           "MESSENGER": Messenger,
           "WEBHOOK_URL": WebhookUrl,
         },
-        logRetention: logs.RetentionDays.ONE_WEEK,
         runtime: lambda.Runtime.NODEJS_20_X,
         memorySize: 128,
         bundling: {
@@ -44,6 +43,12 @@ export class PrerequisitesStack extends cdk.Stack {
         },
         description: "Lambda Function to send AWS managed rule group change status notifications (like upcoming new versions and urgent security updates) to messengers (Slack/Teams)",
       });
+
+      new logs.LogGroup(this, "AWS-Firewall-Factory-ManagedRuleGroupInfo-LogGroup",{
+        logGroupName: "/aws/lambda/"+ManagedRuleGroupInfo.functionName,
+        retention: logs.RetentionDays.ONE_WEEK,
+      });
+
       ManagedRuleGroupInfo.addToRolePolicy(new iam.PolicyStatement({
         actions: ["wafv2:ListAvailableManagedRuleGroupVersions"],
         resources: ["*"],
