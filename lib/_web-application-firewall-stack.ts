@@ -175,8 +175,12 @@ export class WafStack extends cdk.Stack {
       bundling: {
         minify: true,
       },
-      logRetention: logs.RetentionDays.TWO_WEEKS,
       runtime: lambda.Runtime.NODEJS_LATEST,
+    });
+
+    new logs.LogGroup(this, "managedRuleGroupVersionLambdaFunctionLogGroup",{
+      logGroupName: "/aws/lambda/"+managedRuleGroupVersionLambda.functionName,
+      retention: logs.RetentionDays.TWO_WEEKS,
     });
 
     const managedRuleGroupVersionProvider = new cr.Provider(this, "CustomResourceProviderManagedRuleGroupVersionLambda", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it. 
