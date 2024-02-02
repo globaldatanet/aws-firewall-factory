@@ -27,7 +27,7 @@ export class PrerequisitesStack extends cdk.Stack {
         Messenger="Teams";
         WebhookUrl=props.prerequisites.Information.TeamsWebhook;
       }
-      const ManagedRuleGroupInfo = new NodejsFunction.NodejsFunction(this, "AWS-Firewall-Factory-ManagedRuleGroupInfo", {
+      const ManagedRuleGroupInfo = new NodejsFunction.NodejsFunction(this, "AwsFirewallFactoryManagedRuleGroupInfo", {
         architecture: lambda.Architecture.ARM_64,
         entry: path.join(__dirname, "../lib/lambda/ManagedRuleGroupInfo/index.ts"),
         handler: "handler",
@@ -43,7 +43,7 @@ export class PrerequisitesStack extends cdk.Stack {
         },
         description: "Lambda Function to send AWS managed rule group change status notifications (like upcoming new versions and urgent security updates) to messengers (Slack/Teams)",
       });
-
+      
       new logs.LogGroup(this, "AWS-Firewall-Factory-ManagedRuleGroupInfo-LogGroup",{
         logGroupName: "/aws/lambda/"+ManagedRuleGroupInfo.functionName,
         retention: logs.RetentionDays.ONE_WEEK,
