@@ -2,6 +2,14 @@
 
 ## Released
 
+
+## 4.2.3
+### Fixed
+- [Issue293](https://github.com/globaldatanet/aws-firewall-factory/issues/293) Warning on task deploy: "aws-cdk-lib.aws_lambda.FunctionOptions#logRetention is deprecated." - We are creating now a fully customizable log group with `logs.LogGroup`.
+ℹ️ Migrating from `logRetention` to `logGroup` will cause the name of the log group to change.
+
+
+
 ## 4.2.2
 ### Added
 - Guidance Helper v1: This Helper is designed to provide comprehensive assistance in implementing Best Practices for AWS Firewalls. Additionally, it addresses [Issue279](https://github.com/globaldatanet/aws-firewall-factory/issues/279), ensuring a more robust and effective implementation. Guidances have severities: ℹ️ - can be adapted, ⚠️ should be adapted, 🚨 must be adapted - exceptions of course confirm the rules.
