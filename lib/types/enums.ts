@@ -52,6 +52,22 @@ export enum AwsManagedRules {
 }
 
 /**
+ * Enum for Labels which are related to AWSManagedRulesATPRuleSet & AWSManagedRulesBotControlRuleSet
+ */
+export enum AwsManagedRulesGeneralLabels{
+  ManagedTokenRejectedNotSolved = "awswaf:managed:token:rejected:not_solved",
+  ManagedTokenRejectedExpired = "awswaf:managed:token:rejected:expired",
+  ManagedTokenRejectedDomainMismatch = "awswaf:managed:token:rejected:domain_mismatch",
+  ManagedTokenRejectedInvalid = "awswaf:managed:token:rejected:invalid",
+  ManagedCaptchaRejected = "awswaf:managed:captcha:rejected",
+  ManagedCaptchaAccepted = "awswaf:managed:captcha:accepted",
+  ManagedCaptchaRejectedNotSolved = "awswaf:managed:captcha:rejected:not_solved",
+  ManagedCaptchaRejectedExpired = "awswaf:managed:captcha:rejected:expired",
+  ManagedCaptchaRejectedDomainMismatch = "awswaf:managed:captcha:rejected:domain_mismatch",
+  ManagedCaptchaRejectedInvalid = "awswaf:managed:captcha:rejected:invalid"
+}
+
+/**
  * Enum for AWSManagedRulesACFPRuleSet Rules
  */
 export enum ACFP_RULE_SET_RULES {
@@ -81,6 +97,9 @@ export enum ACFP_RULE_SET_LABELS {
   VolumetricSessionHigh ="awswaf:managed:aws:acfp:aggregate:volumetric:session:creation:high",
   VolumetricSessionMedium ="awswaf:managed:aws:acfp:aggregate:volumetric:session:creation:medium",
   VolumetricSessionLow ="awswaf:managed:aws:acfp:aggregate:volumetric:session:creation:low",
+  VolumetricSessionSessionFailedCreationResponseHigh = "awswaf:managed:aws:acfp:aggregate:volumetric:session:failed_creation_response:high",
+  VolumetricSessionSessionFailedCreationResponseMedium = "awswaf:managed:aws:acfp:aggregate:volumetric:session:failed_creation_response:medium",
+  VolumetricSessionSessionFailedCreationResponseLow = "awswaf:managed:aws:acfp:aggregate:volumetric:session:failed_creation_response:low",
   VolumetricSessionSuccessfulResponseHigh = "awswaf:managed:aws:acfp:aggregate:volumetric:session:successful_creation_response:high",
   VolumetricSessionSuccessfulResponseMedium = "awswaf:managed:aws:acfp:aggregate:volumetric:session:successful_creation_response:medium",
   VolumetricSessionSuccessfulResponseLow = "awswaf:managed:aws:acfp:aggregate:volumetric:session:successful_creation_response:low",
@@ -120,7 +139,7 @@ export enum ACFP_RULE_SET_LABELS {
   RiskScoreHigh ="awswaf:managed:aws:acfp:risk_score:high",
   RiskScoreMedium ="awswaf:managed:aws:acfp:risk_score:medium",
   RiskScoreLow ="awswaf:managed:aws:acfp:risk_score:low",
-  RiskScoreEvaluationFailed =" awswaf:managed:aws:acfp:risk_score:evaluation_failed",
+  RiskScoreEvaluationFailed = "awswaf:managed:aws:acfp:risk_score:evaluation_failed",
   RiskScoreContributorIpReputationHigh = "awswaf:managed:aws:acfp:risk_score:contributor:ip_reputation:high",
   RiskScoreContributorIpReputationMedium = "awswaf:managed:aws:acfp:risk_score:contributor:ip_reputation:medium",
   RiskScoreContributorIpReputationLow = "awswaf:managed:aws:acfp:risk_score:contributor:ip_reputation:low",
@@ -177,6 +196,7 @@ export enum ATP_RULE_SET_LABELS {
   TokenRejected = "awswaf:managed:token:rejected",
   TokenAccepted = "awswaf:managed:token:accepted",
   TokenAbsent = "awswaf:managed:token:absent",
+  CaptchaAbsent = "awswaf:managed:captcha:absent",
 }
 
 
@@ -551,8 +571,8 @@ export enum UNIX_RULE_SET_RULES {
  * Enum for AWSManagedRulesUnixRuleSet Labels
  */
 export enum UNIX_RULE_SET_LABELS {
-  UNIXShellCommandsVariables_BODY = "awswaf:managed:aws:posix-os:UNIXShellCommandsVariables_BODY",
-  UNIXShellCommandsVariables_QUERYARGUMENTS = "awswaf:managed:aws:posix-os:UNIXShellCommandsVariables_QUERYARGUMENTS",
+  UNIXShellCommandsVariables_BODY = "awswaf:managed:aws:posix-os:UNIXShellCommandsVariables_Body",
+  UNIXShellCommandsVariables_QUERYARGUMENTS = "awswaf:managed:aws:posix-os:UNIXShellCommandsVariables_QueryArguments",
 }
 
 /**
@@ -578,9 +598,15 @@ export enum LINUX_RULE_SET_LABELS {
 export enum SQLI_RULE_SET_RULES {
   SQLiExtendedPatterns_QUERYARGUMENTS = "SQLiExtendedPatterns_QUERYARGUMENTS",
   SQLi_QUERYARGUMENTS = "SQLi_QUERYARGUMENTS",
+  SQLiExtendedPatterns_BODY = "SQLiExtendedPatterns_BODY",
   SQLi_BODY = "SQLi_BODY",
   SQLi_COOKIE = "SQLi_COOKIE",
   SQLi_URIPATH  = "SQLi_URIPATH",
+  SQLi_URIPATH_RC_COUNT = "SQLi_URIPATH_RC_COUNT",
+  SQLi_COOKIE_RC_COUNT = "SQLi_COOKIE_RC_COUNT",
+  SQLi_BODY_RC_COUNT = "SQLi_BODY_RC_COUNT",
+  SQLi_QUERYARGUMENTS_RC_COUNT = "SQLi_QUERYARGUMENTS_RC_COUNT",
+  SQLiExtendedPatterns_QUERYARGUMENTS_RC_COUNT = "SQLiExtendedPatterns_QUERYARGUMENTS_RC_COUNT"
 }
 /**
  * Enum for AWSManagedRulesSQLiRuleSet Labels
@@ -591,6 +617,12 @@ export enum SQLI_RULE_SET_LABELS {
   SQLi_QUERYARGUMENTS = "awswaf:managed:aws:sql-database:SQLi_QueryArguments",
   SQLi_BODY = "awswaf:managed:aws:sql-database:SQLi_Body",
   SQLi_COOKIE = "awswaf:managed:aws:sql-database:SQLi_Cookie",
+  SQLiExtendedPatterns_BODY = "awswaf:managed:aws:sql-database:SQLiExtendedPatterns_Body",
+  SQLi_Cookie_RC_COUNT = "awswaf:managed:aws:sql-database:SQLi_Cookie_RC_COUNT",
+  SQLi_Body_RC_COUNT = "awswaf:managed:aws:sql-database:SQLi_Body_RC_COUNT",
+  SQLi_QueryArguments_RC_COUNT = "awswaf:managed:aws:sql-database:SQLi_QueryArguments_RC_COUNT",
+  SQLi_URIPath_RC_COUNT = "awswaf:managed:aws:sql-database:SQLi_URIPath_RC_COUNT",
+  SQLiExtendedPatterns_QueryArguments_RC_COUNT = "awswaf:managed:aws:sql-database:SQLiExtendedPatterns_QueryArguments_RC_COUNT"
 }
 
 /**

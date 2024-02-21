@@ -4,10 +4,12 @@
 
 
 ## 4.2.3
+### Added
+- Enum Checker - Script to check for new Labels and Rules which are available for Managed Rule Groups.
 ### Fixed
 - [Issue293](https://github.com/globaldatanet/aws-firewall-factory/issues/293) Warning on task deploy: "aws-cdk-lib.aws_lambda.FunctionOptions#logRetention is deprecated." - We are creating now a fully customizable log group with `logs.LogGroup`.
 ℹ️ Migrating from `logRetention` to `logGroup` will cause the name of the log group to change.
-
+- Added new Labels and Rules which are available for Managed Rule Groups to enum.ts
 
 
 ## 4.2.2
