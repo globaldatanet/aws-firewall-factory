@@ -9,13 +9,14 @@
 ### Fixed
 - [Issue293](https://github.com/globaldatanet/aws-firewall-factory/issues/293) Warning on task deploy: "aws-cdk-lib.aws_lambda.FunctionOptions#logRetention is deprecated." - We are creating now a fully customizable log group with `logs.LogGroup`.
 ℹ️ Migrating from `logRetention` to `logGroup` will cause the name of the log group to change.
+- False Positive for Guidance: noManageRuleGroups
 - Added new Labels and Rules which are available for Managed Rule Groups to enum.ts
 - Bump @types/node from 20.11.5 to 20.11.19
 - Bump @typescript-eslint/eslint-plugin from 6.19.0 to 7.0.0
 - Bump @aws-sdk/client-wafv2 from 3.496.0 to 3.515.0
 - Bump aws-cdk-lib from 2.121.1 to 2.128.0
 - Bump @types/uuid from 9.0.7 to 9.0.8
-  
+
 ## 4.2.2
 ### Added
 - Guidance Helper v1: This Helper is designed to provide comprehensive assistance in implementing Best Practices for AWS Firewalls. Additionally, it addresses [Issue279](https://github.com/globaldatanet/aws-firewall-factory/issues/279), ensuring a more robust and effective implementation. Guidances have severities: ℹ️ - can be adapted, ⚠️ should be adapted, 🚨 must be adapted - exceptions of course confirm the rules.
