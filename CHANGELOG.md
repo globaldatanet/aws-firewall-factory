@@ -6,6 +6,8 @@
 ## 4.2.3
 ### Added
 - Initial release of Enum Checker script. Implemented functionality to check for new Labels and Rules available for Managed Rule Groups. Provides clear output indicating any new Labels or Rules discovered.
+- [Issue#295](https://github.com/globaldatanet/aws-firewall-factory/issues/295) - Optional Athena table added to Prerequisites stack: Introducing support for the Athena WAF (web application firewall) log table. Users can now easily query and analyse WAF log data using Athena. Gain insight into web application security events, including blocked requests, allowed traffic and threat patterns.
+
 ### Fixed
 - [Issue293](https://github.com/globaldatanet/aws-firewall-factory/issues/293) Warning on task deploy: "aws-cdk-lib.aws_lambda.FunctionOptions#logRetention is deprecated." - We are creating now a fully customizable log group with `logs.LogGroup`.
 ℹ️ Migrating from `logRetention` to `logGroup` will cause the name of the log group to change.

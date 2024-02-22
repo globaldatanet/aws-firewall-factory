@@ -204,6 +204,21 @@ export interface Prerequisites {
        * Defines access to a central security account. Please specify a account ID such as 123456789012.This is necessary if you want to use a different account for all your firewalls.
        */
       readonly CrossAccountIdforPermissions?: string,
+      readonly Athena?: {
+        /**
+         * Define a Athena Table for the Firewall Logs will be created.
+         */
+        readonly TableName: string,
+        /**
+         * Define a Athena DatabaseName where the Table will be created.
+         */
+        readonly DatabaseName: string,
+        /**
+         * Define a AWS Regions where FMS WAFs will be created. This value is used to create Index for regions on Athena Table.
+         * If this value is not set, the Index will be created for all AWS Regions using [public region parameter](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-public-parameters-global-infrastructure.html).
+         */
+        readonly Regions?: string,
+      }
   }
 }
 /**
