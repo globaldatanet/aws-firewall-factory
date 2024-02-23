@@ -11,10 +11,10 @@ permissions:
 
 concurrency: ci-${{ github.ref }}
 
-on:
-    schedule:
-      - cron: "* * * * *"
-        #"0 10 * * 1"
+on: [workflow_dispatch]
+    # schedule:
+    #   - cron: "* * * * *"
+    #     #"0 10 * * 1"
 jobs:
   deploy_production_main:
     name: Check Enums for ManagedRule Groups
