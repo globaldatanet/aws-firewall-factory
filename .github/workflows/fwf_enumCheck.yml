@@ -13,7 +13,8 @@ concurrency: ci-${{ github.ref }}
 
 on:
     schedule:
-      - cron: "0 10 * * 1"
+      - cron: "* * * * *"
+        #"0 10 * * 1"
 jobs:
   deploy_production_main:
     name: Check Enums for ManagedRule Groups
