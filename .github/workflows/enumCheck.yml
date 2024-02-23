@@ -53,4 +53,5 @@ jobs:
           role-session-name: GitHubActionsSession
           mask-aws-account-id: false
       - name: 🧪 Check Enums for ManagedRule Groups
-        uses: ts-node ./lib/tools/enumcheck.ts
+        run: |
+            ts-node ./lib/tools/enumcheck.ts
