@@ -208,7 +208,7 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
       processProperties = runtimeProperties.PostProcess;
       break;
   }
-  config.WebAcl.PreProcess.ManagedRuleGroups !== undefined && config.WebAcl.PostProcess.ManagedRuleGroups !== undefined ? guidanceHelper.getGuidance("noManageRuleGroups", runtimeProperties) : null;
+  config.WebAcl.PreProcess.ManagedRuleGroups === undefined && config.WebAcl.PostProcess.ManagedRuleGroups === undefined ? guidanceHelper.getGuidance("noManageRuleGroups", runtimeProperties) : null;
   const managedcapacitieslog = [];
   managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
   for (const managedrule of managedrules) {

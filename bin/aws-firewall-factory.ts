@@ -3,7 +3,7 @@ import { WafStack } from "../lib/_web-application-firewall-stack";
 import { PrerequisitesStack } from "../lib/_prerequisites-stack";
 import * as cdk from "aws-cdk-lib";
 import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
-import { wafHelper, afwfHelper, pricingHelper, cloudformationHelper, guidanceHelper } from "../lib/tools/helpers";
+import { wafHelper, afwfHelper, pricingHelper, cloudformationHelper, guidanceHelper, ssmHelper } from "../lib/tools/helpers";
 import * as values from "../values";
 
 /**
@@ -25,8 +25,9 @@ void (async () => {
   if(process.env.PREREQUISITE === "true") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
     const prerequisites: Prerequisites = values.prereq[CONFIG_OBJECT_NAME];
-    afwfHelper.outputInfoBanner();
-
+    const deploymentRegion= afwfHelper.outputInfoBanner();
+    const runtimeProperties = afwfHelper.initRuntimeProperties();
+    ssmHelper.getAllAwsRegionsFromPublicSsmParameter(deploymentRegion, runtimeProperties);
     console.log("ℹ️   Deploying Prerequisites Stack.");
     const app = new cdk.App();
     new PrerequisitesStack(app, prerequisites.General.Prefix.toUpperCase() + "-AWS-FIREWALL-FACTORY-PREQUISITES", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
@@ -35,6 +36,7 @@ void (async () => {
         region: process.env.AWS_REGION,
         account: process.env.CDK_DEFAULT_ACCOUNT,
       },
+      runtimeProperties: runtimeProperties,
     });
   }
 

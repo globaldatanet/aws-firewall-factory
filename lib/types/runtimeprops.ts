@@ -5,6 +5,7 @@ export interface RuntimeProperties {
     PostProcess: ProcessProperties,
     ManagedRuleCapacity: number,
     Pricing: ResourcePrices,
+    AllAwsRegions: string[],
 }
 
 export interface Guidance {
