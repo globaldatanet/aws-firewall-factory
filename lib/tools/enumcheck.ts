@@ -44,7 +44,7 @@ async function checkLabelsForRuleGroup(ruleGroupName: any) {
     const availableLabels = response.AvailableLabels.map((label: { Name: unknown; }) => label.Name);
 
     // Read labels from enums.ts file
-    const enumFilePath = "../types/enums.ts";
+    const enumFilePath = "./lib/types/enums.ts";
     const enumLabels = readEnumFile(enumFilePath);
 
     // Check if available labels are present in the enums.ts file
@@ -75,7 +75,7 @@ async function checkRulesForRuleGroup(ruleGroupName: unknown) {
     const availableRules = response.Rules.map((rule: { Name: unknown; }) => rule.Name);
 
     // Read rules from enums.ts file
-    const enumFilePath = "./types/enums.ts";
+    const enumFilePath = "./lib/types/enums.ts";
     const enumRules = readEnumFile(enumFilePath);
 
     // Check if available rules are present in the enums.ts file
