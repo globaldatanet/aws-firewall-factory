@@ -42,6 +42,9 @@ export const outputInfoBanner = (config?:Config) => {
       console.log("\x1b[32m",`                      ${deploymentRegion}`,"\x1b[0m \n");
     }
   }
+  else{
+    deploymentRegion = process.env.REGION || "eu-central-1";
+  }
   return deploymentRegion;
 };
 
@@ -51,6 +54,7 @@ export const outputInfoBanner = (config?:Config) => {
  */
 export function initRuntimeProperties() : RuntimeProperties {
   return {
+    AllAwsRegions: [],
     GuidanceSummary: [],
     Guidance: {
       rateBasedStatementCount: 0,
@@ -61,7 +65,7 @@ export function initRuntimeProperties() : RuntimeProperties {
       byteMatchStatementPositionalConstraintCount: 0,
       byteMatchStatementPositionalConstraintInfo: [],
       noRuleLabelsCount: 0,
-      noRuleLabelsInfo: []
+      noRuleLabelsInfo: [],
     },
     ManagedRuleCapacity: 0,
     PostProcess: {

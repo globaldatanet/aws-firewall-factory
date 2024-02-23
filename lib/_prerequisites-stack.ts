@@ -1,11 +1,13 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { Prerequisites } from "./types/config";
-import { aws_s3 as s3, aws_kms as kms, aws_iam as iam, aws_lambda as lambda, aws_lambda_nodejs as NodejsFunction, aws_logs as logs, aws_glue as glue, aws_ssm as ssm  } from "aws-cdk-lib";
+import { RuntimeProperties } from "./types/runtimeprops";
+import { aws_s3 as s3, aws_kms as kms, aws_iam as iam, aws_lambda as lambda, aws_lambda_nodejs as NodejsFunction, aws_logs as logs, aws_glue as glue} from "aws-cdk-lib";
 import * as path from "path";
 
 export interface StackProps extends cdk.StackProps {
     readonly prerequisites: Prerequisites;
+    runtimeProperties: RuntimeProperties;
   }
 
 
@@ -177,11 +179,10 @@ export class PrerequisitesStack extends cdk.Stack {
           regionpartition: { name: "region", type: "string" },
           daypartition: { name: "day", type: "string" }
         };
-        
-        const aws_regions = ssm.StringParameter.valueForStringParameter(this, "/aws/service/global-infrastructure/services/ssm/regions");
+
         // WAF Athena Table
         new glue.CfnTable(this, "FmsLogsAthenaTable", {
-          databaseName: props.prerequisites.Logging.Athena.DatabaseName,
+          databaseName: props.prerequisites.Logging.Athena.DatabaseName ? props.prerequisites.Logging.Athena.DatabaseName : "default",
           catalogId: cdk.Aws.ACCOUNT_ID,
           tableInput: {
             description: "description",
@@ -198,7 +199,7 @@ export class PrerequisitesStack extends cdk.Stack {
               "projection.day.type": "date",
               "projection.enabled": "true",
               "projection.region.type": "enum",
-              "projection.region.values":  props.prerequisites.Logging.Athena.Regions ? props.prerequisites.Logging.Athena.Regions : aws_regions.toString(),
+              "projection.region.values":  props.prerequisites.Logging.Athena.Regions ? props.prerequisites.Logging.Athena.Regions : props.runtimeProperties.AllAwsRegions.toString(),
               "storage.location.template": `s3://${props.prerequisites.Logging.BucketProperties?.BucketName ? props.prerequisites.General.Prefix.toLocaleLowerCase() + "-" + props.prerequisites.Logging.BucketProperties?.BucketName : props.prerequisites.General.Prefix.toLocaleLowerCase() + "-awsfirewallfactory-logging-" + accountId + "-" + region}/AWSLogs/\${accountids}/FirewallManager/\${region}/\${day}`,
             },
             retention: 0,

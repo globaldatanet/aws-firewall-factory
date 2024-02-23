@@ -212,7 +212,7 @@ export interface Prerequisites {
         /**
          * Define a Athena DatabaseName where the Table will be created.
          */
-        readonly DatabaseName: string,
+        readonly DatabaseName?: string,
         /**
          * Define a AWS Regions where FMS WAFs will be created. This value is used to create Index for regions on Athena Table.
          * If this value is not set, the Index will be created for all AWS Regions using [public region parameter](https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-public-parameters-global-infrastructure.html).
