@@ -1,4 +1,4 @@
-name: IpSet-Firewall
+name: FwfEnumCheck
 
 env:
   AWS_REGION: eu-central-1
