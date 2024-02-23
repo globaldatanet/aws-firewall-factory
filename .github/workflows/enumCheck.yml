@@ -14,6 +14,12 @@ concurrency: ci-${{ github.ref }}
 on:
     schedule:
       - cron: "0 10 * * 1"
+    workflow_dispatch:
+        inputs:
+            logLevel:
+              description: 'Log level'
+              required: true
+              default: 'warning'
 jobs:
   deploy_production_main:
     name: Check Enums for ManagedRule Groups
