@@ -11,7 +11,11 @@ permissions:
 
 concurrency: ci-${{ github.ref }}
 
-on: [workflow_dispatch]
+on: 
+  push:
+    branches:
+      - 4.2.3
+
     # schedule:
     #   - cron: "* * * * *"
     #     #"0 10 * * 1"
