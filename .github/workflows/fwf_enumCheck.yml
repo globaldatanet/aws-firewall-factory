@@ -11,14 +11,10 @@ permissions:
 
 concurrency: ci-${{ github.ref }}
 
-on: 
-  push:
-    branches:
-      - 4.2.3
+on:
+  schedule:
+    - cron: "0 10 * * 1"
 
-    # schedule:
-    #   - cron: "* * * * *"
-    #     #"0 10 * * 1"
 jobs:
   deploy_production_main:
     name: Check Enums for ManagedRule Groups
@@ -26,9 +22,6 @@ jobs:
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v3
-      - name: 📁 Install Taskfile
-        run: |
-          npm install -g @go-task/cli
       - name: ☊ Use Node.js
         uses: actions/setup-node@v1
         with:
