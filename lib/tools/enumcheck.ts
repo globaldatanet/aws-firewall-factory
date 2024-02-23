@@ -31,6 +31,7 @@ const wafv2Client = new WAFV2({
 });
 
 // Function to check labels for a specific managed rule group
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function checkLabelsForRuleGroup(ruleGroupName: any) {
   try {
     // Describe the managed rule group
