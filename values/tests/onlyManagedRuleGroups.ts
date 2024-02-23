@@ -34,6 +34,9 @@ export const config: Config = {
         {
           vendor: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.COMMON_RULE_SET,
+          version: "Version_1.11",
+          versionEnabled: true,
+          enforceUpdate: true
         },
         {
           vendor: ManagedRuleGroupVendor.AWS,
@@ -44,14 +47,15 @@ export const config: Config = {
         {
           vendor: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.SQLI_RULE_SET,
-          enforceUpdate: true,
-          versionEnabled: true
+          version: "Version_2.0",
+          versionEnabled: true,
+          enforceUpdate: true
         },
         {
           vendor: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.ADMIN_PROTECTION_RULE_SET,
           enforceUpdate: false,
-          versionEnabled: true
+          versionEnabled: true,
         }
       ]
     },
