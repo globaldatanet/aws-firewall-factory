@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.490.0",
-    "@aws-sdk/client-cloudwatch": "^3.490.0",
+    "@aws-sdk/client-cloudwatch": "^3.525.0",
     "@aws-sdk/client-fms": "^3.490.0",
     "@aws-sdk/client-pricing": "^3.496.0",
     "@aws-sdk/client-service-quotas": "^3.496.0",
