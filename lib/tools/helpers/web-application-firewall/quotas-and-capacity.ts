@@ -54,9 +54,20 @@ async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONA
     Rules: rules,
   };
   const command = new CheckCapacityCommand(input);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const response : any = await client.send(command);
-  return response.Capacity || 0;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response : any = await client.send(command);
+    return response.Capacity || 0;
+  } catch(err) {
+    console.log();
+    console.log("🚨 Error in checking capacity of rules!");
+    console.log();
+    console.log("The rules which failed:");
+    console.log(JSON.stringify(input, null, 2));
+    console.log();
+
+    throw err;
+  }
 }
 
 /**
