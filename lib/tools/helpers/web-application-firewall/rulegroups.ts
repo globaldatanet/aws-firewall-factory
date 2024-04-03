@@ -153,7 +153,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
           rulename = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
         }
         // transform ipSetReferenceStatements
-        const statement = transformWafRuleStatements(rule, prefix, stage, ipSets,regexPatternSets);
+        const statement = transformWafRuleStatements(rule, prefix, stage, config.WebAcl.Name, ipSets,regexPatternSets);
     
         const cfnRuleProperty = {
           name: rulename,
@@ -392,7 +392,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
             rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-"+deployHash : ""}`;
           }
     
-          const statement = transformWafRuleStatements(ruleGroupSet[statementindex],prefix, stage, ipSets, regexPatternSets);
+          const statement = transformWafRuleStatements(ruleGroupSet[statementindex],prefix, stage, config.WebAcl.Name, ipSets, regexPatternSets);
           const cfnRuleProperty = {
             name: rulename,
             priority: ruleGroupSet[statementindex].priority,
