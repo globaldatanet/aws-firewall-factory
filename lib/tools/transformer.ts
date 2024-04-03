@@ -522,126 +522,129 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
       AggregateKeyType = rbst.aggregateKeyType;
     }
     if(rbst.customKeys){
-      const customkeys = rbst.customKeys as wafv2.CfnWebACL.RateBasedStatementCustomKeyProperty;
+      const customkeys = rbst.customKeys as wafv2.CfnWebACL.RateBasedStatementCustomKeyProperty[];
       CustomKeys = [];
-      if(customkeys.header){
-        const header = customkeys.header as wafv2.CfnWebACL.RateLimitHeaderProperty;
-        let TextTransformations = undefined;
-        if (header.textTransformations) {
-          TextTransformations = [];
-          (header.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
-            TextTransformations?.push({
-              Priority: tt.priority,
-              Type: tt.type
+      
+      for(const customKey of customkeys) {
+        if(customKey.header){
+          const header = customKey.header as wafv2.CfnWebACL.RateLimitHeaderProperty;
+          let TextTransformations = undefined;
+          if (header.textTransformations) {
+            TextTransformations = [];
+            (header.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+              TextTransformations?.push({
+                Priority: tt.priority,
+                Type: tt.type
+              });
             });
-          });
+          }
+          Header = {
+            Name: header.name,
+            TextTransformations: TextTransformations,
+          };
+          CustomKeys.push(Header as RateBasedStatementCustomKey);
         }
-        Header = {
-          Name: header.name,
-          TextTransformations: TextTransformations,
-        };
-        CustomKeys.push(Header as RateBasedStatementCustomKey);
-      }
-      if(customkeys.cookie){
-        const cookie = customkeys.cookie as wafv2.CfnWebACL.RateLimitCookieProperty;
-        let TextTransformations = undefined;
-        if (cookie.textTransformations) {
-          TextTransformations = [];
-          (cookie.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
-            TextTransformations?.push({
-              Priority: tt.priority,
-              Type: tt.type
+        if(customKey.cookie){
+          const cookie = customKey.cookie as wafv2.CfnWebACL.RateLimitCookieProperty;
+          let TextTransformations = undefined;
+          if (cookie.textTransformations) {
+            TextTransformations = [];
+            (cookie.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+              TextTransformations?.push({
+                Priority: tt.priority,
+                Type: tt.type
+              });
             });
-          });
+          }
+          const Cookie = {
+            Name: cookie.name,
+            TextTransformations: TextTransformations,
+          };
+          CustomKeys.push(Cookie as RateBasedStatementCustomKey);
         }
-        const Cookie = {
-          Name: cookie.name,
-          TextTransformations: TextTransformations,
-        };
-        CustomKeys.push(Cookie as RateBasedStatementCustomKey);
-      }
-      if(customkeys.ip){
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const ip = customkeys.ip as any;
-        const IP = {
-          Address: ip.address,
-        };
-        CustomKeys.push(IP as RateBasedStatementCustomKey);
-      }
-      if(customkeys.labelNamespace){
-        const labelNamespace = customkeys.labelNamespace as wafv2.CfnWebACL.RateLimitLabelNamespaceProperty;
-        const LabelNamespace = {
-          Namespace: labelNamespace.namespace,
-        };
-        CustomKeys.push(LabelNamespace as RateBasedStatementCustomKey);
-      }
-      if(customkeys.queryArgument){
-        const queryArgument = customkeys.queryArgument as wafv2.CfnWebACL.RateLimitQueryArgumentProperty;
-        let TextTransformations = undefined;
-        if (queryArgument.textTransformations) {
-          TextTransformations = [];
-          (queryArgument.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
-            TextTransformations?.push({
-              Priority: tt.priority,
-              Type: tt.type
+        if(customKey.ip){
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const ip = customKey.ip as any;
+          const IP = {
+            Address: ip.address,
+          };
+          CustomKeys.push(IP as RateBasedStatementCustomKey);
+        }
+        if(customKey.labelNamespace){
+          const labelNamespace = customKey.labelNamespace as wafv2.CfnWebACL.RateLimitLabelNamespaceProperty;
+          const LabelNamespace = {
+            Namespace: labelNamespace.namespace,
+          };
+          CustomKeys.push(LabelNamespace as RateBasedStatementCustomKey);
+        }
+        if(customKey.queryArgument){
+          const queryArgument = customKey.queryArgument as wafv2.CfnWebACL.RateLimitQueryArgumentProperty;
+          let TextTransformations = undefined;
+          if (queryArgument.textTransformations) {
+            TextTransformations = [];
+            (queryArgument.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+              TextTransformations?.push({
+                Priority: tt.priority,
+                Type: tt.type
+              });
             });
-          });
+          }
+          const QueryArgument = {
+            Name: queryArgument.name,
+            TextTransformations: TextTransformations,
+          };
+          CustomKeys.push(QueryArgument as RateBasedStatementCustomKey);
         }
-        const QueryArgument = {
-          Name: queryArgument.name,
-          TextTransformations: TextTransformations,
-        };
-        CustomKeys.push(QueryArgument as RateBasedStatementCustomKey);
-      }
-      if(customkeys.queryString){
-        const queryString = customkeys.queryString as wafv2.CfnWebACL.RateLimitQueryStringProperty;
-        let TextTransformations = undefined;
-        if (queryString.textTransformations) {
-          TextTransformations = [];
-          (queryString.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
-            TextTransformations?.push({
-              Priority: tt.priority,
-              Type: tt.type
+        if(customKey.queryString){
+          const queryString = customKey.queryString as wafv2.CfnWebACL.RateLimitQueryStringProperty;
+          let TextTransformations = undefined;
+          if (queryString.textTransformations) {
+            TextTransformations = [];
+            (queryString.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+              TextTransformations?.push({
+                Priority: tt.priority,
+                Type: tt.type
+              });
             });
-          });
+          }
+          const QueryString: RateLimitQueryString = {
+            TextTransformations: TextTransformations,
+          };
+          CustomKeys.push(QueryString as RateBasedStatementCustomKey);
         }
-        const QueryString: RateLimitQueryString = {
-          TextTransformations: TextTransformations,
-        };
-        CustomKeys.push(QueryString as RateBasedStatementCustomKey);
-      }
-      if(customkeys.uriPath){
-        const uriPath = customkeys.uriPath as wafv2.CfnWebACL.RateLimitUriPathProperty;
-        let TextTransformations = undefined;
-        if (uriPath.textTransformations) {
-          TextTransformations = [];
-          (uriPath.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
-            TextTransformations?.push({
-              Priority: tt.priority,
-              Type: tt.type
+        if(customKey.uriPath){
+          const uriPath = customKey.uriPath as wafv2.CfnWebACL.RateLimitUriPathProperty;
+          let TextTransformations = undefined;
+          if (uriPath.textTransformations) {
+            TextTransformations = [];
+            (uriPath.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
+              TextTransformations?.push({
+                Priority: tt.priority,
+                Type: tt.type
+              });
             });
-          });
+          }
+          const UriPath: RateLimitUriPath = {
+            TextTransformations: TextTransformations,
+          };
+          CustomKeys.push(UriPath as RateBasedStatementCustomKey);
         }
-        const UriPath: RateLimitUriPath = {
-          TextTransformations: TextTransformations,
-        };
-        CustomKeys.push(UriPath as RateBasedStatementCustomKey);
-      }
-      if(customkeys.forwardedIp){
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const forwardedIp = customkeys.forwardedIp as any;
-        const ForwardedIp: RateLimitIP = {
-          HeaderName: forwardedIp.headerName,
-        };
-        CustomKeys.push(ForwardedIp as RateBasedStatementCustomKey);
-      }
-      if(customkeys.httpMethod){
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const httpMethod = customkeys.httpMethod as any;
-        const HttpMethod: RateLimitHTTPMethod = {
-          Name: httpMethod.name,
-        };
-        CustomKeys.push(HttpMethod as RateBasedStatementCustomKey);
+        if(customKey.forwardedIp){
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const forwardedIp = customKey.forwardedIp as any;
+          const ForwardedIp: RateLimitIP = {
+            HeaderName: forwardedIp.headerName,
+          };
+          CustomKeys.push(ForwardedIp as RateBasedStatementCustomKey);
+        }
+        if(customKey.httpMethod){
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const httpMethod = customKey.httpMethod as any;
+          const HttpMethod: RateLimitHTTPMethod = {
+            Name: httpMethod.name,
+          };
+          CustomKeys.push(HttpMethod as RateBasedStatementCustomKey);
+        }
       }
     }
   }
@@ -655,10 +658,6 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
 
   return RateBasedStatement as RateBasedStatement;
 }
-
-
-
-
 
 /**
  * The function will map a CDK Rule Property to a SDK Rule Property
