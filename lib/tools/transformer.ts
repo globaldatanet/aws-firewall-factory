@@ -441,6 +441,52 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
 }
 
 /**
+ * Function to transform property names into camel case like AWS needs it
+ * @param o object which property names has to be transformed to camel case
+ * @returns the object with the transformed property names in camel case
+ */
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function toAwsCamel(o: any): any {
+  let newO: any, origKey: any, newKey: any, value: any;
+  if (o instanceof Array) {
+    return o.map(function(value) {
+      if (typeof value === "object") {
+        value = toAwsCamel(value);
+      }
+      if(value === "Arn"){
+        value = "ARN";
+      }
+      if(value === "IpSetReferenceStatement"){
+        value = "IPSetReferenceStatement";
+      }
+      return value;
+    });
+  } else {
+    newO = {};
+    for (origKey in o) {
+      if (Object.prototype.hasOwnProperty.call(o, origKey)) {
+        newKey = (origKey.charAt(0).toUpperCase() + origKey.slice(1) || origKey).toString();
+        if(value === "Arn"){
+          value = "ARN";
+        }
+        if(value === "IpSetReferenceStatement"){
+          value = "IPSetReferenceStatement";
+        }
+        value = o[origKey];
+        if (value instanceof Array || (value !== null && value.constructor === Object)) {
+          value = toAwsCamel(value);
+          if(value === "Arn"){
+            value = "ARN";
+          }
+        }
+        newO[newKey] = value;
+      }
+    }
+  }
+  return newO;
+}
+
+/**
  * The function will map a CDK RateBasedStatement Property to a SDK RateBasedStatement Property
  * @param statement object of a CDK RateBasedStatement Property
  * @return configuration object of a SDK RateBasedStatement Property
@@ -457,7 +503,9 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
   if(rbst){
     runtimeProperties.Guidance.rateBasedStatementCount++;
     if (rbst.scopeDownStatement) {
-      Statement = {};
+      // FIXME: The scopeDownStatement can have "and", "or" and "not" statements, the commented code below needs to be recursive
+      Statement = toAwsCamel(rbst.scopeDownStatement);
+      /*
       let ByteMatchStatement = undefined;
       let GeoMatchStatement = undefined;
       let IPSetReferenceStatement = undefined;
@@ -507,6 +555,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
         default:
           break;
       }
+      */
     }
     if (rbst.forwardedIpConfig) {
       const fic = rbst.forwardedIpConfig as wafv2.CfnWebACL.ForwardedIPConfigurationProperty;
