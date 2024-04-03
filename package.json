@@ -1,6 +1,9 @@
 {
   "name": "aws-firewall-factory",
   "version": "4.2.3",
+  "engines": {
+    "node": ">=18 <19"
+  },
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },
@@ -9,7 +12,8 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "lint": "eslint --ext .ts ."
+    "lint": "eslint --ext .ts .",
+    "preinstall": "npx only-allow npm"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",
