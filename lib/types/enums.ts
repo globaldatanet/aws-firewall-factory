@@ -465,6 +465,8 @@ export enum BOT_CONTROL_RULE_SET_LABELS {
   TGT_TokenReuseIp = "awswaf:managed:aws:bot-control:targeted:aggregate:volumetric:session:token_reuse:ip",
   TGT_SignalAutomatedBrowser = "awswaf:managed:aws:bot-control:targeted:signal:automated_browser",
   TGT_SignalBrowserInconsistency = "awswaf:managed:aws:bot-control:targeted:signal:browser_inconsistency",
+  BrowserAutomationExtension = "awswaf:managed:aws:bot-control:targeted:signal:browser_automation_extension",
+  TGT_ML_CoordinatedActivityLow = "awswaf:managed:aws:bot-control:targeted:aggregate:coordinated_activity:low"
 }
 
 /**
