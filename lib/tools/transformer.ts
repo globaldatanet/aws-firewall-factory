@@ -499,6 +499,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
   let AggregateKeyType: string | undefined = undefined;
   let CustomKeys: RateBasedStatementCustomKey[] | undefined = undefined;
   let Header: RateLimitHeader | undefined = undefined;
+  let EvaluationWindowSec: number | undefined = undefined;
   let ForwardedIPConfig = undefined;
   if(rbst){
     runtimeProperties.Guidance.rateBasedStatementCount++;
@@ -573,7 +574,6 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
     if(rbst.customKeys){
       const customkeys = rbst.customKeys as wafv2.CfnWebACL.RateBasedStatementCustomKeyProperty[];
       CustomKeys = [];
-      
       for(const customKey of customkeys) {
         if(customKey.header){
           const header = customKey.header as wafv2.CfnWebACL.RateLimitHeaderProperty;
@@ -696,12 +696,16 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
         }
       }
     }
+    if (rbst.evaluationWindowSec) {
+      EvaluationWindowSec = rbst.evaluationWindowSec;
+    }
   }
   RateBasedStatement = {
     ForwardedIPConfig,
     ScopeDownStatement: Statement,
     Limit,
     AggregateKeyType,
+    EvaluationWindowSec,
     CustomKeys
   };
 
