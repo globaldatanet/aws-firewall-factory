@@ -197,6 +197,7 @@ export enum ATP_RULE_SET_LABELS {
   TokenAccepted = "awswaf:managed:token:accepted",
   TokenAbsent = "awswaf:managed:token:absent",
   CaptchaAbsent = "awswaf:managed:captcha:absent",
+  SuspiciousTlsFingerprint= "awswaf:managed:aws:atp:aggregate:attribute:suspicious_tls_fingerprint"
 }
 
 
