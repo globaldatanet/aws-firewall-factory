@@ -323,7 +323,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
       capacities.push(calculateIpsSetStatementCapacity(ipSetReferenceStatement));
     }
     else if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-      capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+      capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
     }
     else if(notStatement && notStatement.statement) {
       const notStatementProp = notStatement.statement as wafv2.CfnWebACL.StatementProperty;
@@ -333,7 +333,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         capacities.push(calculateIpsSetStatementCapacity(notipSetReferenceStatement));
       }
       else if(notregexPatternSetReferenceStatement && !notregexPatternSetReferenceStatement.arn.startsWith("arn:aws:")) {
-        capacities.push(regexPatternSetsStatementsCapacity(notregexPatternSetReferenceStatement));
+        capacities.push(calculateRegexPatternSetsStatementsCapacity(notregexPatternSetReferenceStatement));
       }
       else{
         capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope, runtimeProperties));
@@ -347,7 +347,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         }
         const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
         if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-          capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+          capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
         }
         const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
         if(notStatementStatement && notStatementStatement.statement) {
@@ -358,7 +358,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           }
           const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
           if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+            capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
           }
         }
         const orStatementStatement = statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
@@ -369,7 +369,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           }
           const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
           if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+            capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
           }
           const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
           if(notStatementStatement && notStatementStatement.statement) {
@@ -380,7 +380,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
             }
             const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
             if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+              capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
             }
           }
         }
@@ -403,7 +403,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         }
         const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
         if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-          capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+          capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
         }
         const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
         if(notStatementStatement && notStatementStatement.statement) {
@@ -414,7 +414,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           }
           const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
           if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+            capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
           }
         }
       }
@@ -428,7 +428,6 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         capacities.push(capacity);
       }
     }
-
     else if(rateBasedStatement && rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.StatementProperty) {
       const scopeDownStatement = rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.StatementProperty | undefined;
       if(scopeDownStatement){
@@ -446,22 +445,25 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           for (const statement of andStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
             const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
             if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
             }
             const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
             if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
             }
             const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
             if(notStatementStatement && notStatementStatement.statement) {
               const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
               const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
               if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-                capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement));
+                const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+                capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
               }
               const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
               if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-                capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+                capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
               }
             }
           }
@@ -478,22 +480,26 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           for (const statement of orStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
             const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
             if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
             }
             const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
             if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
             }
             const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
             if(notStatementStatement && notStatementStatement.statement) {
               const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
               const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
               if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-                capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement));
+                const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+                capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
               }
               const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
               if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-                capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+                const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+                capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
               }
             }
           }
@@ -511,30 +517,36 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           const statement = notStatement.statement as wafv2.CfnWebACL.StatementProperty;
           const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
           if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
+            const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+            capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
           }
           const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
           if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+            const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+            capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
           }
           const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
           if(notStatementStatement && notStatementStatement.statement) {
             const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
             const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
             if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement));
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
             }
             const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
             if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
             }
           }
         }
         else if(ipSetReferenceStatement && !ipSetReferenceStatement.arn.startsWith("arn:aws:")) {
-          capacities.push(calculateIpsSetStatementCapacity(ipSetReferenceStatement));
+          const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+          capacities.push(calculateIpsSetStatementCapacity(ipSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
         }
         else if(regexPatternSetsStatement && !regexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-          capacities.push(regexPatternSetsStatementsCapacity(regexPatternSetsStatement));
+          const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+          capacities.push(calculateRegexPatternSetsStatementsCapacity(regexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(tempRule, deploymentRegion, scope, runtimeProperties));
         }
       }
     }
@@ -548,6 +560,24 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
   return capacities;
 }
 
+function calculateRatebasedStatementwithoutScopeDownStatement(customRule: FmsRule, rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty): FmsRule {
+  // Remove scopedDownStatement if it exists
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { scopeDownStatement, ...rateBasedWithoutScopeDown } = rateBasedStatement;
+  const statement:wafv2.CfnWebACL.StatementProperty = {
+    rateBasedStatement: rateBasedWithoutScopeDown
+  };
+  const tempCalcRule : FmsRule = {
+    name: customRule.name,
+    priority: customRule.priority,
+    visibilityConfig: customRule.visibilityConfig,
+    ruleLabels: customRule.ruleLabels,
+    captchaConfig: customRule.captchaConfig,
+    statement,
+    action: customRule.action
+  };
+  return tempCalcRule;
+}
 /**
    * Implementation of the calculation of the capacity for IPSet statements according to https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
    * @param ipSetReferenceStatement the IPSetReferenceStatement
@@ -584,7 +614,7 @@ async function calculateCustomRuleStatementsCapacity(customRule: FmsRule, deploy
    * @param regexPatternSets the regexPatternSetsStatements
    * @returns the capacity of the regexPatternSets statement
    */
-function regexPatternSetsStatementsCapacity(regexPatternSetsStatement: wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty) {
+function calculateRegexPatternSetsStatementsCapacity(regexPatternSetsStatement: wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty) {
   let regexRuleCapacity = 0;
   const regexRulebaseCost = 25;
   const regexPatterSetsFieldToMatch = regexPatternSetsStatement.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty | undefined;
