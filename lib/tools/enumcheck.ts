@@ -108,6 +108,7 @@ async function getAllManagedRuleGroups() {
       console.log(`\n\n${ruleGroupName}:`);
       await checkLabelsForRuleGroup(ruleGroupName);
       await checkRulesForRuleGroup(ruleGroupName);
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   } catch (error) {
     console.log("An error occurred while retrieving managed rule groups:", error);

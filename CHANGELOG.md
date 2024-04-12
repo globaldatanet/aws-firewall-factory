@@ -13,7 +13,7 @@
 - RateBasedStatement.CustomKeys is a array of objects, not a object
 - Recursive code for adding RateBasedStatement.ScopeDownStatement. The prop ScopeDownStatement of RateBasedStatements can have And, Or and Not statements, just like any other Statement. Without this fix, deploying RateBasedStatements with complex ScopeDownStatements fails on capacity checking.
 - Don't enforce update if EnforceUpdate prop is not defined. If its not defined, set `EnforceUpdate` to `false`.
-
+- Enhance the enumcheck to handle API throttling by adding sleep functionality.
 ## 4.2.3
 ### Added
 - Initial release of Enum Checker script. Implemented functionality to check for new Labels and Rules available for Managed Rule Groups. Provides clear output indicating any new Labels or Rules discovered.
