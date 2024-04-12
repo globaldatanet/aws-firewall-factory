@@ -302,7 +302,7 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
 async function calculateCustomRulesCapacities(customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
   const capacities = [];
   const capacitieslog = [];
-  capacitieslog.push(["🔺 Priority", "➕ RuleName", "Capacity"]);
+  capacitieslog.push(["🔺 Priority", "➕ RuleName", "🧮 Capacity", "ℹ StatementType"]);
   for (const customRule of customRules) {
     // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
     // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
@@ -553,12 +553,13 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
     else {
       capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope, runtimeProperties));
     }
-    capacitieslog.push([customRule.priority, customRule.name,capacities[capacities.length-1]]);
+    capacitieslog.push([customRule.priority, customRule.name,capacities[capacities.length-1], Object.keys(customRule.statement)[0].charAt(0).toUpperCase()+ Object.keys(customRule.statement)[0].slice(1)]);
   }
   capacitieslog.sort((a, b) => parseInt(a[0] as string,10) - parseInt(b[0] as string,10));
   console.log(table(capacitieslog));
   return capacities;
 }
+
 
 function calculateRatebasedStatementwithoutScopeDownStatement(customRule: FmsRule, rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty): FmsRule {
   // Remove scopedDownStatement if it exists
