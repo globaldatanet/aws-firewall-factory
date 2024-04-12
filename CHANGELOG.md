@@ -4,7 +4,6 @@
 
 ## 4.3.0
 ### Added
-- Ensure the repo runs only under Node 18. There were issues running it on Node 20. Also adds a change to ensure that only npm is used for managing dependencies, done by the script `npx only-allow npm`. Not a good idea to mix dependency managers on the same project, like npm and Yarn.
 - Allow reusing ipsets with same name. This commit differentiate ipsets from different FMS configs by adding the name of the webacl to it. Without this commit, trying to run aws-firewall-factory for two configs which uses a ipset with the same name would give a error on CloudFormation ('IpSet with name x already exists')
 - CheckCapacity: see which rule failed. This commit helps a lot by immediately letting us know which rule failed capacity checking and requires fixes
 - Save chars on ManagedServiceData FMS prop. The ManagedServiceData has a hard limit of 8192 characters. I've asked AWS about raising it and they said that this is a hard limit and they can't raise it. This commit is for saving as much chars as we can out of the ManagedServiceData prop, for squeezing in our rules (even if they have a ton of RuleActionOverrides on them)

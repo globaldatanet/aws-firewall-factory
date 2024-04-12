@@ -441,52 +441,6 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
 }
 
 /**
- * Function to transform property names into camel case like AWS needs it
- * @param o object which property names has to be transformed to camel case
- * @returns the object with the transformed property names in camel case
- */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function toAwsCamel(o: any): any {
-  let newO: any, origKey: any, newKey: any, value: any;
-  if (o instanceof Array) {
-    return o.map(function(value) {
-      if (typeof value === "object") {
-        value = toAwsCamel(value);
-      }
-      if(value === "Arn"){
-        value = "ARN";
-      }
-      if(value === "IpSetReferenceStatement"){
-        value = "IPSetReferenceStatement";
-      }
-      return value;
-    });
-  } else {
-    newO = {};
-    for (origKey in o) {
-      if (Object.prototype.hasOwnProperty.call(o, origKey)) {
-        newKey = (origKey.charAt(0).toUpperCase() + origKey.slice(1) || origKey).toString();
-        if(value === "Arn"){
-          value = "ARN";
-        }
-        if(value === "IpSetReferenceStatement"){
-          value = "IPSetReferenceStatement";
-        }
-        value = o[origKey];
-        if (value instanceof Array || (value !== null && value.constructor === Object)) {
-          value = toAwsCamel(value);
-          if(value === "Arn"){
-            value = "ARN";
-          }
-        }
-        newO[newKey] = value;
-      }
-    }
-  }
-  return newO;
-}
-
-/**
  * The function will map a CDK RateBasedStatement Property to a SDK RateBasedStatement Property
  * @param statement object of a CDK RateBasedStatement Property
  * @return configuration object of a SDK RateBasedStatement Property
@@ -495,7 +449,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
   const rbst = statement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
   let RateBasedStatement = undefined;
   let Limit: number | undefined = undefined;
-  let Statement: Statement | undefined = undefined;
+  let Statement: Statement | ByteMatchStatement | GeoMatchStatement | LabelMatchStatement | OrStatement | NotStatement | AndStatement | IPSetReferenceStatement | SizeConstraintStatement | XssMatchStatement | SqliMatchStatement  | undefined;
   let AggregateKeyType: string | undefined = undefined;
   let CustomKeys: RateBasedStatementCustomKey[] | undefined = undefined;
   let Header: RateLimitHeader | undefined = undefined;
@@ -504,9 +458,6 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
   if(rbst){
     runtimeProperties.Guidance.rateBasedStatementCount++;
     if (rbst.scopeDownStatement) {
-      // FIXME: The scopeDownStatement can have "and", "or" and "not" statements, the commented code below needs to be recursive
-      Statement = toAwsCamel(rbst.scopeDownStatement);
-      /*
       let ByteMatchStatement = undefined;
       let GeoMatchStatement = undefined;
       let IPSetReferenceStatement = undefined;
@@ -516,47 +467,59 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
       let XssMatchStatement = undefined;
       let LabelMatchStatement = undefined;
       let RegexMatchStatement = undefined;
+      let AndStatement = undefined;
+      let OrStatement = undefined;
+      let NotStatement = undefined;
       switch(Object.keys(rbst.scopeDownStatement)[0]){
         case "byteMatchStatement":
           ByteMatchStatement = transformByteMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
-          Statement.ByteMatchStatement = ByteMatchStatement as ByteMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"ByteMatchStatement" : ByteMatchStatement as ByteMatchStatement};  // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "geoMatchStatement":
           GeoMatchStatement = transformGeoMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).geoMatchStatement as wafv2.CfnWebACL.GeoMatchStatementProperty);
-          Statement.GeoMatchStatement = GeoMatchStatement as GeoMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"GeoMatchStatement" : GeoMatchStatement  as GeoMatchStatement}; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "ipSetReferenceStatement":
           IPSetReferenceStatement = transformIPSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty);
-          Statement.IPSetReferenceStatement = IPSetReferenceStatement as IPSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"IPSetReferenceStatement" :IPSetReferenceStatement as IPSetReferenceStatement};  // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "regexPatternSetReferenceStatement":
           RegexPatternSetReferenceStatement = transformRegexPatternSetReferenceStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty);
-          Statement.RegexPatternSetReferenceStatement = RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"RegexPatternSetReferenceStatement" : RegexPatternSetReferenceStatement as RegexPatternSetReferenceStatement}; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "sizeConstraintStatement":
           SizeConstraintStatement = transformSizeConstraintStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).sizeConstraintStatement as wafv2.CfnWebACL.SizeConstraintStatementProperty);
-          Statement.SizeConstraintStatement = SizeConstraintStatement as SizeConstraintStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"SizeConstraintStatement" : SizeConstraintStatement as SizeConstraintStatement};// NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "sqliMatchStatement":
           SqliMatchStatement = transformSqliMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).sqliMatchStatement as wafv2.CfnWebACL.SqliMatchStatementProperty);
-          Statement.SqliMatchStatement = SqliMatchStatement as SqliMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"SqliMatchStatement" : SqliMatchStatement  as SqliMatchStatement};// NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "xssMatchStatement":
           XssMatchStatement = transformXssMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).xssMatchStatement as wafv2.CfnWebACL.XssMatchStatementProperty);
-          Statement.XssMatchStatement = XssMatchStatement as XssMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"XssMatchStatement" : XssMatchStatement  as XssMatchStatement}; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "labelMatchStatement":
           LabelMatchStatement = transformLabelMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).labelMatchStatement as wafv2.CfnWebACL.LabelMatchStatementProperty);
-          Statement.LabelMatchStatement = LabelMatchStatement as LabelMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"LabelMatchStatement" : LabelMatchStatement  as LabelMatchStatement}; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
         case "regexMatchStatement":
           RegexMatchStatement = transformRegexMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).regexMatchStatement as wafv2.CfnWebACL.RegexMatchStatementProperty);
-          Statement.RegexMatchStatement = RegexMatchStatement as RegexMatchStatement; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          Statement = {"RegexMatchStatement": RegexMatchStatement  as RegexMatchStatement}; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
-        default:
+        case "andStatement":
+          AndStatement = transformConcatenatedStatement(rbst.scopeDownStatement as wafv2.CfnWebACL.AndStatementProperty, true, runtimeProperties);
+          Statement = {"AndStatement" :AndStatement as AndStatement}; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "orStatement":
+          OrStatement = transformConcatenatedStatement(rbst.scopeDownStatement as wafv2.CfnWebACL.OrStatementProperty, false, runtimeProperties);
+          Statement = {"OrStatement": OrStatement  as OrStatement}; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
+          break;
+        case "notStatement":
+          NotStatement = tranformNotStatement(rbst.scopeDownStatement as wafv2.CfnWebACL.NotStatementProperty, runtimeProperties);
+          Statement = {"NotStatement":NotStatement as NotStatement}; // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: This assertion is unnecessary since it does not change the type of the expression.
           break;
       }
-      */
     }
     if (rbst.forwardedIpConfig) {
       const fic = rbst.forwardedIpConfig as wafv2.CfnWebACL.ForwardedIPConfigurationProperty;
