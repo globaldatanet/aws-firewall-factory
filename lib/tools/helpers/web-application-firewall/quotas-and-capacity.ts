@@ -560,9 +560,13 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
   return capacities;
 }
 
-
+/**
+   * Function to remove the ScopeDown statement from the RateBasedStatement
+   * @param customRule the customRule
+   * @param rateBasedStatement the RateBasedStatement
+   * @returns tempCalcRule
+   */
 function calculateRatebasedStatementwithoutScopeDownStatement(customRule: FmsRule, rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty): FmsRule {
-  // Remove scopedDownStatement if it exists
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { scopeDownStatement, ...rateBasedWithoutScopeDown } = rateBasedStatement;
   const statement:wafv2.CfnWebACL.StatementProperty = {
@@ -640,7 +644,7 @@ function calculateRegexPatternSetsStatementsCapacity(regexPatternSetsStatement: 
  * @param customRule FmsRule
  * @param concatenatedStatement wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty
  * @param isOrStatement boolean
- * @returns 
+ * @returns tempCalcRule
  */
 function buildCustomRuleWithoutReferenceStatements(customRule: FmsRule, concatenatedStatement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isOrStatement: boolean) {
   const statements = concatenatedStatement.statements as wafv2.CfnWebACL.StatementProperty[];
