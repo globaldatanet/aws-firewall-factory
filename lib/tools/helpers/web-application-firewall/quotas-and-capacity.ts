@@ -62,7 +62,7 @@ async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONA
     console.log();
     console.log("🚨 Error in checking capacity of rules!");
     console.log();
-    console.log("The rules which failed:");
+    console.log("ℹ️ The following rule failed:");
     console.log(JSON.stringify(input, null, 2));
     console.log();
 
