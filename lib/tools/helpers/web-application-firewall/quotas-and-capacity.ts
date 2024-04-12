@@ -316,7 +316,6 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
     const notStatement = customRule.statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
     // in case rule has an rateBasedStatement
     const rateBasedStatement = customRule.statement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
-
     if(ipSetReferenceStatement && !ipSetReferenceStatement.arn.startsWith("arn:aws:")) {
       // Capacity for IPSet statements:
       // "WCUs – 1 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
@@ -429,15 +428,87 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         capacities.push(capacity);
       }
     }
-    else if(rateBasedStatement && rateBasedStatement.scopeDownStatement) {
+
+    else if(rateBasedStatement && rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.StatementProperty) {
+      const scopeDownStatement = rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.StatementProperty | undefined;
+      if(scopeDownStatement){
       // in case rule has an andStatement
-      const andStatement = rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
-      // in case rule has an orStatement
-      const orStatement = rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
-      // in case rule has an notStatement
-      const notStatement = rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
-      if(andStatement && andStatement.statements) {
-        for (const statement of andStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
+        const andStatement = scopeDownStatement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
+        // in case rule has an orStatement
+        const orStatement = scopeDownStatement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
+        // in case rule has an notStatement
+        const notStatement = scopeDownStatement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+        // in case rule has an ipSetReferenceStatement
+        const ipSetReferenceStatement = scopeDownStatement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+        // in case rule has an regexPatternSetReferenceStatement
+        const regexPatternSetsStatement = scopeDownStatement.regexMatchStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+        if(andStatement && andStatement.statements) {
+          for (const statement of andStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
+            const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+            if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+              capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
+            }
+            const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+            if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+              capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+            }
+            const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+            if(notStatementStatement && notStatementStatement.statement) {
+              const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
+              const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+              if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+                capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement));
+              }
+              const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+              if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+                capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+              }
+            }
+          }
+          const filteredAndStatements = {
+            statements: (andStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement =>
+              filterStatements(statement))};
+          if (filteredAndStatements && filteredAndStatements.statements && filteredAndStatements.statements.length > 0) {
+            const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredAndStatements, false);
+            const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope, runtimeProperties);
+            capacities.push(capacity);
+          }
+        }
+        else if(orStatement && orStatement.statements) {
+          for (const statement of orStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
+            const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+            if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+              capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
+            }
+            const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+            if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+              capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+            }
+            const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+            if(notStatementStatement && notStatementStatement.statement) {
+              const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
+              const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+              if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+                capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement));
+              }
+              const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+              if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+                capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+              }
+            }
+          }
+          const filteredOrStatements = {
+            statements: (orStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement =>
+              filterStatements(statement))
+          };
+          if (filteredOrStatements && filteredOrStatements.statements && filteredOrStatements.statements.length > 0) {
+            const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredOrStatements, true);
+            const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope, runtimeProperties);
+            capacities.push(capacity);
+          }
+        }
+        else if(notStatement && notStatement.statement) {
+          const statement = notStatement.statement as wafv2.CfnWebACL.StatementProperty;
           const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
           if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
             capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
@@ -459,52 +530,11 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
             }
           }
         }
-      }
-      else if(orStatement && orStatement.statements) {
-        for (const statement of orStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
-          const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-          if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
-          }
-          const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
-          if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
-          }
-          const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
-          if(notStatementStatement && notStatementStatement.statement) {
-            const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
-            const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-            if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement));
-            }
-            const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
-            if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
-            }
-          }
+        else if(ipSetReferenceStatement && !ipSetReferenceStatement.arn.startsWith("arn:aws:")) {
+          capacities.push(calculateIpsSetStatementCapacity(ipSetReferenceStatement));
         }
-      }
-      else if(notStatement && notStatement.statement) {
-        const statement = notStatement.statement as wafv2.CfnWebACL.StatementProperty;
-        const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-        if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-          capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement));
-        }
-        const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
-        if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-          capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
-        }
-        const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
-        if(notStatementStatement && notStatementStatement.statement) {
-          const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
-          const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-          if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement));
-          }
-          const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
-          if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
-          }
+        else if(regexPatternSetsStatement && !regexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+          capacities.push(regexPatternSetsStatementsCapacity(regexPatternSetsStatement));
         }
       }
     }
