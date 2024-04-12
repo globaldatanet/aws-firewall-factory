@@ -8,6 +8,7 @@
 - CheckCapacity: see which rule failed. This commit helps a lot by immediately letting us know which rule failed capacity checking and requires fixes
 - Save chars on ManagedServiceData FMS prop. The ManagedServiceData has a hard limit of 8192 characters. I've asked AWS about raising it and they said that this is a hard limit and they can't raise it. This commit is for saving as much chars as we can out of the ManagedServiceData prop, for squeezing in our rules (even if they have a ton of RuleActionOverrides on them)
 - Values: allow async code. This adds a dynamic import of the firewall config for enabling people that want to run async code on then, ensuring that all async code will run during the import
+- Evaluation time windows for request aggregation with rate-based rules. You can now select time windows of 1 minute, 2 minutes or 10 minutes, in addition to the previously supported 5 minutes.
 
 ### Fixed
 - RateBasedStatement.CustomKeys is a array of objects, not a object
