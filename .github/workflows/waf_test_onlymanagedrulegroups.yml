@@ -38,7 +38,7 @@ jobs:
         run: |
           npm install -g @go-task/cli
       - name: ☊ Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: '21.x'
       - name: 💾 Cache Node.js modules
@@ -51,7 +51,7 @@ jobs:
             ${{ runner.OS }}-
       - name: 🌐 Install CDK and typescript globally
         run: |
-          npm i -g aws-cdk typescript ts-node @types/node
+          npm i -g aws-cdk typescript ts-node @types/node yarn
           npm link typescript
       - name: 📦 Install Packages
         run: |
