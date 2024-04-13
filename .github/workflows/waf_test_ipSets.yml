@@ -1,5 +1,6 @@
 name: IpSet-Firewall
 
+
 env:
   AWS_REGION: eu-central-1
   AWS_ROLE: FirewallFactoryGithubPipelineRole
@@ -9,16 +10,15 @@ permissions:
   id-token: write
   contents: read
 
-concurrency: ci-${{ github.ref }}
+concurrency:
+  group: test_envrionment
+  cancel-in-progress: true
 
 on:
   push:
     branches:
       - master
-    paths:
-      - 'bin/**/*'
-      - 'lib/**/*'
-      - 'package*.json'
+      - pullrequests/vboufleur/fix/several
   pull_request:
     branches:
       - master
@@ -37,9 +37,9 @@ jobs:
         run: |
           npm install -g @go-task/cli
       - name: ☊ Use Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: '18.x'
+          node-version: '21.x'
       - name: 💾 Cache Node.js modules
         uses: actions/cache@v2
         with:
@@ -50,13 +50,13 @@ jobs:
             ${{ runner.OS }}-
       - name: 🌐 Install CDK and typescript globally
         run: |
-          npm i -g aws-cdk typescript ts-node @types/node
+          npm i -g aws-cdk typescript ts-node @types/node yarn
           npm link typescript
       - name: 📦 Install Packages
         run: |
           npm install
       - name: 🔑 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
+        uses: aws-actions/configure-aws-credentials@v4.0.2
         env:
           ACCOUNT_ID: ${{ env.AWS_ACCOUNT }}
         with:
@@ -65,9 +65,9 @@ jobs:
           role-session-name: GitHubActionsSession
           mask-aws-account-id: false
       - name: 🚀 Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: 🫙 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3.3.0
       - name: 🔥 Deploy Firewall to AWS
         run: |
           task deploy config=ipSetsTests
