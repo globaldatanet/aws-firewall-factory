@@ -40,7 +40,7 @@ jobs:
       - name: ☊ Use Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: '18.x'
+          node-version: '21.x'
       - name: 💾 Cache Node.js modules
         uses: actions/cache@v2
         with:
