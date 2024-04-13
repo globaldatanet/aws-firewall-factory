@@ -15,6 +15,7 @@ on:
   push:
     branches:
       - master
+      - pullrequests/vboufleur/fix/several
     # paths:
     #   - 'bin/**/*'
     #   - 'lib/**/*'
@@ -64,10 +65,10 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
           mask-aws-account-id: false
-      - name: 🚀 Set up QEMU
-        uses: docker/setup-qemu-action@v2
-      - name: 🫙 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      # - name: 🚀 Set up QEMU
+      #   uses: docker/setup-qemu-action@v2
+      # - name: 🫙 Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v2
       - name: 🔥 Deploy Firewall to AWS
         run: |
           task deploy config=onlyManagedRuleGroupsTests
