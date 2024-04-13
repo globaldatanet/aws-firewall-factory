@@ -168,7 +168,7 @@ export class WafStack extends cdk.Stack {
 
     const managedRuleGroupVersionLambda = new lambda.Function(this, "ManagedRuleGroupVersionLambdaFunction", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.)
       code: lambda.Code.fromAsset(path.join(__dirname, "../lib/lambda/ManagedRuleGroupVersion")),
-      handler: "index.handler",
+      handler: "handler",
       timeout: cdk.Duration.seconds(30),
       architecture:lambda.Architecture.ARM_64,
       role: managedRuleGroupVersionLambdaRole,

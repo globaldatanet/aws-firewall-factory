@@ -16,10 +16,6 @@ on:
     branches:
       - master
       - pullrequests/vboufleur/fix/several
-    # paths:
-    #   - 'bin/**/*'
-    #   - 'lib/**/*'
-    #   - 'package*.json'
   pull_request:
     branches:
       - master
@@ -57,7 +53,7 @@ jobs:
         run: |
           npm install
       - name: 🔑 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
+        uses: aws-actions/configure-aws-credentials@v4.2.0
         env:
           ACCOUNT_ID: ${{ env.AWS_ACCOUNT }}
         with:
@@ -65,10 +61,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
           mask-aws-account-id: false
-      # - name: 🚀 Set up QEMU
-      #   uses: docker/setup-qemu-action@v2
-      # - name: 🫙 Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v2
       - name: 🔥 Deploy Firewall to AWS
         run: |
           task deploy config=onlyManagedRuleGroupsTests
