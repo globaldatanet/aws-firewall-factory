@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { aws_wafv2 as wafv2, aws_fms as fms,aws_lambda_nodejs as NodejsFunction, aws_lambda as lambda, aws_kinesisfirehose as firehouse, aws_iam as iam, aws_logs as logs   } from "aws-cdk-lib";
+import { aws_wafv2 as wafv2, aws_fms as fms, aws_lambda as lambda, aws_kinesisfirehose as firehouse, aws_iam as iam, aws_logs as logs   } from "aws-cdk-lib";
 import { Config } from "./types/config";
 import { ManagedServiceData, SubVariables } from "./types/fms";
 import { RuntimeProperties } from "./types/runtimeprops";
@@ -166,16 +166,13 @@ export class WafStack extends cdk.Stack {
 
     managedRuleGroupVersionLambdaRole.addToPolicy(wafGetManagedRuleGroupVersion);
 
-    const managedRuleGroupVersionLambda = new NodejsFunction.NodejsFunction(this, "AwsManagedRuleGroupVersionLambdaFunction", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it. 
-      entry: path.join(__dirname, "../lib/lambda/ManagedRuleGroupVersion/index.ts"),
+    const managedRuleGroupVersionLambda = new lambda.Function(this, "ManagedRuleGroupVersionLambdaFunction", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.)
+      code: lambda.Code.fromAsset(path.join(__dirname, "../lib/lambda/ManagedRuleGroupVersion/index.ts")),
       handler: "handler",
       timeout: cdk.Duration.seconds(30),
       architecture:lambda.Architecture.ARM_64,
       role: managedRuleGroupVersionLambdaRole,
       memorySize: 128,
-      bundling: {
-        minify: true,
-      },
       runtime: lambda.Runtime.NODEJS_LATEST,
     });
 
