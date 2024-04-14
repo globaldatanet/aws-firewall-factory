@@ -9,9 +9,9 @@ permissions:
   id-token: write
   contents: read
 
-concurrency:
-  group: test_envrionment
-  cancel-in-progress: true
+# concurrency:
+#   group: test_envrionment
+#   cancel-in-progress: true
 
 on:
   push:
