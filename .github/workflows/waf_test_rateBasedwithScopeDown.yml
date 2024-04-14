@@ -1,0 +1,76 @@
+name: RateBased-with-ScopeDown-Firewall
+
+
+env:
+  AWS_REGION: eu-central-1
+  AWS_ROLE: FirewallFactoryGithubPipelineRole
+  AWS_ACCOUNT: 859220371210
+
+permissions:
+  id-token: write
+  contents: read
+
+# concurrency:
+#   group: test_envrionment
+#   cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - master
+      - pullrequests/vboufleur/fix/several
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'bin/**/*'
+      - 'lib/**/*'
+      - 'package*.json'
+jobs:
+  deploy_production_main:
+    name: Test and deploy RateBased-with-ScopeDown Firewall
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v3
+      - name: 📁 Install Taskfile
+        run: |
+          npm install -g @go-task/cli
+      - name: ☊ Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '21.x'
+      - name: 💾 Cache Node.js modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
+            ${{ runner.OS }}-
+      - name: 🌐 Install CDK and typescript globally
+        run: |
+          npm i -g aws-cdk typescript ts-node @types/node yarn
+          npm link typescript
+      - name: 📦 Install Packages
+        run: |
+          npm install
+      - name: 🔑 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        env:
+          ACCOUNT_ID: ${{ env.AWS_ACCOUNT }}
+        with:
+          role-to-assume: arn:aws:iam::${{ env.ACCOUNT_ID }}:role/${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActionsSession
+          mask-aws-account-id: false
+      - name: 🚀 Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: 🫙 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.3.0
+      - name: 🔥 Deploy Firewall to AWS
+        run: |
+          task deploy config=rateBasedwithScopeDownTests
+      - name: 🗑️ Remove Firewall from AWS
+        run: |
+          task destroy config=rateBasedwithScopeDownTests
