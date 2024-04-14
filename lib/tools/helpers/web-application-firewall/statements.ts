@@ -14,14 +14,14 @@ export function transformWafRuleStatements(rule: Rule, prefix: string, stage: st
   const notStatement = rule.statement.notStatement as NotStatementProperty | undefined;
   const ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
   const regexPatternSetReferenceStatement = rule.statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
-  
+  const rateBasedStatement = rule.statement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
+
   if(notStatement) {
     const adjustedstatement = handleNotStatement(notStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
     rule.statement = adjustedstatement as wafv2.CfnWebACL.StatementProperty;
   }
-  
   const andStatement = rule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
-  
+
   if (andStatement) {
     const statements = andStatement.statements as cdk.aws_wafv2.CfnWebACL.StatementProperty[];
     handleAndOrStatement (statements, prefix, stage, webAclName, ipSets, regexPatternSets);
@@ -43,7 +43,11 @@ export function transformWafRuleStatements(rule: Rule, prefix: string, stage: st
     statement = { andStatement };
   } else if (orStatement) {
     statement = { orStatement };
-  } else {
+  } else if (rateBasedStatement) {
+    const newstatement = handleRateStatement(rateBasedStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
+    statement = newstatement;
+  }
+  else {
     statement = rule.statement;
   }
   return statement;
@@ -146,7 +150,48 @@ function handleAndOrStatement(statements: wafv2.CfnWebACL.StatementProperty[], p
       const adjustedstatement = handleNotStatement(notStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
       statements[i] = adjustedstatement as wafv2.CfnWebACL.StatementProperty;
     }
+    const rateBasedStatement = statements[i].rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
+    if(rateBasedStatement && (ipSets || regexPatternSets)) {
+      const adjustedstatement = handleRateStatement(rateBasedStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
+      statements[i] = adjustedstatement as wafv2.CfnWebACL.StatementProperty;
+    }
   }
+}
+
+
+/**
+   * Function to transform RuleStatements in And- and OrStatements
+   * @param statements wafv2.CfnWebACL.RateBasedStatementProperty
+   * @param prefix string
+   * @param stage string
+   * @param ipSets cdk.aws_wafv2.CfnIPSet[]
+   * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
+   */
+function handleRateStatement(rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty, prefix: string, stage: string, webAclName: string, ipSets?: cdk.aws_wafv2.CfnIPSet[], regexPatternSets?: cdk.aws_wafv2.CfnRegexPatternSet[]) {
+  const scopeDownStatement = rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.StatementProperty | undefined;
+  if(scopeDownStatement) {
+    const ipSetReferenceStatement = scopeDownStatement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+    if (ipSetReferenceStatement && ipSets) {
+      const actualIpSetReferenceStatement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, webAclName, ipSets);
+      actualIpSetReferenceStatement as wafv2.CfnWebACL.StatementProperty;
+      rateBasedStatement = {
+        ...rateBasedStatement,
+        scopeDownStatement: actualIpSetReferenceStatement
+      };
+      return {rateBasedStatement} as wafv2.CfnWebACL.StatementProperty;
+    }
+    const regexPatternSetReferenceStatement = scopeDownStatement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+    if (regexPatternSetReferenceStatement && regexPatternSets) {
+      const actualRegexPatternSetReferenceStatement = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
+      actualRegexPatternSetReferenceStatement as wafv2.CfnWebACL.StatementProperty;
+      rateBasedStatement = {
+        ...rateBasedStatement,
+        scopeDownStatement: actualRegexPatternSetReferenceStatement
+      };
+      return {rateBasedStatement} as wafv2.CfnWebACL.StatementProperty;
+    }
+  }
+  return {rateBasedStatement} as wafv2.CfnWebACL.StatementProperty;
 }
 
 /**

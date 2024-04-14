@@ -154,7 +154,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         }
         // transform ipSetReferenceStatements
         const statement = transformWafRuleStatements(rule, prefix, stage, config.WebAcl.Name, ipSets,regexPatternSets);
-    
+        console.log(statement);
         const cfnRuleProperty = {
           name: rulename,
           priority: rule.priority,
