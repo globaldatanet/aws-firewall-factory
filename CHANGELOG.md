@@ -4,20 +4,19 @@
 
 ## 4.3.0
 ### Added
-- Allow reusing ipsets with same name. This commit differentiate ipsets from different FMS configs by adding the name of the webacl to it. Without this commit, trying to run aws-firewall-factory for two configs which uses a ipset with the same name would give a error on CloudFormation ('IpSet with name x already exists')
+- Allow reusing ipsets with same name. This commit differentiate ipsets from different FMS configs by adding the name of the webacl to it. Without this commit, trying to run aws-firewall-factory for two configs which uses a ipset with the same name would give a error on CloudFormation ('IpSet with name x already exists') - (Add Name of web application firewall to the IPSet Name) - ⚠️ Existing IPsets will be replaced during next update.
 - CheckCapacity: see which rule failed. This commit helps a lot by immediately letting us know which rule failed capacity checking and requires fixes
 - Save chars on ManagedServiceData FMS prop. The ManagedServiceData has a hard limit of 8192 characters. I've asked AWS about raising it and they said that this is a hard limit and they can't raise it. This commit is for saving as much chars as we can out of the ManagedServiceData prop, for squeezing in our rules (even if they have a ton of RuleActionOverrides on them)
 - Values: allow async code. This adds a dynamic import of the firewall config for enabling people that want to run async code on then, ensuring that all async code will run during the import
 - [Issue#317](https://github.com/globaldatanet/aws-firewall-factory/issues/317) Evaluation time windows for request aggregation with rate-based rules. You can now select time windows of 1 minute, 2 minutes or 10 minutes, in addition to the previously supported 5 minutes.
 - Extend Guidance Helper to check for valid Evaluation time windows.
 - CustomRule StatementType is now part of the log Capacity Table
-- Add Name of web application firewall to the IPSet Name - ⚠️ Existing IPsets will be replaced during next update. 
 ### Fixed
 - RateBasedStatement.CustomKeys is a array of objects, not a object
 - Recursive code for adding RateBasedStatement.ScopeDownStatement. The prop ScopeDownStatement of RateBasedStatements can have And, Or and Not statements, just like any other Statement. Without this fix, deploying RateBasedStatements with complex ScopeDownStatements fails on capacity checking.
 - Don't enforce update if EnforceUpdate prop is not defined. If its not defined, set `EnforceUpdate` to `false`.
 - Enhance the enumcheck to handle API throttling by adding sleep functionality.
-- Bumped Jest from version 29.7.0 to 29.7.0 
+- Bumped Jest from version 29.7.0 to 29.7.0
 - Bumped TypeScript from version 5.3.3 to 5.4.5
 - Bumped ESLint from version 8.56.0 to 8.56.0
 - Bumped Axios from version 1.6.5 to 1.6.8
