@@ -18,7 +18,6 @@ on:
   push:
     branches:
       - master
-      - pullrequests/vboufleur/fix/several
   pull_request:
     branches:
       - master

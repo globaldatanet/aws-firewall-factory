@@ -17,7 +17,6 @@ on:
   push:
     branches:
       - master
-      - pullrequests/vboufleur/fix/several
   pull_request:
     branches:
       - master
@@ -31,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
       - name: 📁 Install Taskfile
         run: |
           npm install -g @go-task/cli

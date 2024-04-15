@@ -7,14 +7,13 @@ on:
   push:
     branches:
       - master
-      - linting
 
 jobs:
   nodejs-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [20,21]
+        version: [21]
     steps:
       - uses: actions/checkout@v4.1.1
       - uses: actions/setup-node@v4.0.2
