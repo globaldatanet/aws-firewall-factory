@@ -17,11 +17,12 @@
 - Recursive code for adding RateBasedStatement.ScopeDownStatement. The prop ScopeDownStatement of RateBasedStatements can have And, Or and Not statements, just like any other Statement. Without this fix, deploying RateBasedStatements with complex ScopeDownStatements fails on capacity checking.
 - Don't enforce update if EnforceUpdate prop is not defined. If its not defined, set `EnforceUpdate` to `false`.
 - Enhance the enumcheck to handle API throttling by adding sleep functionality.
-- Bumped Jest from version 29.7.0 to 29.7.0 (old version: 29.7.0).
-- Bumped TypeScript from version 5.3.3 to 5.4.5 (old version: 5.3.3).
-- Bumped ESLint from version 8.56.0 to 8.56.0 (old version: 8.56.0).
-- Bumped @typescript-eslint/parser and @typescript-eslint/eslint-plugin from version 6.19.0 to 7.6.0.
-- Bumped AWS CDK from version 2.121.1 to 2.137.0 (old version: 2.121.1).
+- Bumped Jest from version 29.7.0 to 29.7.0 
+- Bumped TypeScript from version 5.3.3 to 5.4.5
+- Bumped ESLint from version 8.56.0 to 8.56.0
+- Bumped Axios from version 1.6.5 to 1.6.8
+- Bumped @typescript-eslint/parser and @typescript-eslint/eslint-plugin from version 6.19.0 to 7.6.0
+- Bumped AWS CDK from version 2.121.1 to 2.137.0
 - Bumped @aws-sdk/client-cloudformation, @aws-sdk/client-cloudwatch, @aws-sdk/client-fms, @aws-sdk/client-pricing, @aws-sdk/client-service-quotas, @aws-sdk/client-shield, @aws-sdk/client-ssm, and @aws-sdk/client-wafv2 from version 3.490.0 to 3.554.0
 - Removed redundant declaration of "@typescript-eslint/eslint-plugin" and "@typescript-eslint/parser" dependencies.
 - Removed redundant declaration of "@types/lodash" dependency.
