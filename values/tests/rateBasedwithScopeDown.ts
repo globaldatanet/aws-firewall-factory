@@ -50,6 +50,25 @@ export const config: Config = {
           },
           priority: 100,
         },
+        {
+          name: "ip-allow-two",
+          statement: {
+            rateBasedStatement: {
+              aggregateKeyType: "IP",
+              limit: 100,
+              evaluationWindowSec: 60,
+            },
+          },
+          action: {
+            block: {},
+          },
+          visibilityConfig: {
+            sampledRequestsEnabled: true,
+            cloudWatchMetricsEnabled: true,
+            metricName: "rate-test",
+          },
+          priority: 200,
+        },
       ],
     },
     PostProcess : {
