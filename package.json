@@ -1,9 +1,6 @@
 {
   "name": "aws-firewall-factory",
   "version": "4.3.0",
-  "engines": {
-    "node": ">=21"
-  },
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },

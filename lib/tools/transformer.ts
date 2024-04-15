@@ -660,6 +660,9 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
       }
     }
     if (rbst.evaluationWindowSec) {
+      if (rbst.evaluationWindowSec !== 60 && rbst.evaluationWindowSec !== 300 && rbst.evaluationWindowSec !== 120 && rbst.evaluationWindowSec !== 600) {
+        guidanceHelper.getGuidance("evaluationWindowSec", runtimeProperties, rbst.evaluationWindowSec.toString());
+      }
       EvaluationWindowSec = rbst.evaluationWindowSec;
     }
   }
