@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [18, 20]
+        version: [20,21]
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4.1.1
+      - uses: actions/setup-node@v4.0.2
         with:
           node-version: ${{ matrix.version }}
           cache: "npm"
