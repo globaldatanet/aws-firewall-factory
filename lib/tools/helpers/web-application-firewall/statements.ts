@@ -44,7 +44,7 @@ export function transformWafRuleStatements(rule: Rule, prefix: string, stage: st
   } else if (orStatement) {
     statement = { orStatement };
   } else if (rateBasedStatement) {
-    const newstatement = handleRateStatement(rateBasedStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
+    const newstatement = handleRateBasedStatement(rateBasedStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
     statement = newstatement;
   }
   else {
@@ -152,7 +152,7 @@ function handleAndOrStatement(statements: wafv2.CfnWebACL.StatementProperty[], p
     }
     const rateBasedStatement = statements[i].rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
     if(rateBasedStatement && (ipSets || regexPatternSets)) {
-      const adjustedstatement = handleRateStatement(rateBasedStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
+      const adjustedstatement = handleRateBasedStatement(rateBasedStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
       statements[i] = adjustedstatement as wafv2.CfnWebACL.StatementProperty;
     }
   }
@@ -160,14 +160,14 @@ function handleAndOrStatement(statements: wafv2.CfnWebACL.StatementProperty[], p
 
 
 /**
-   * Function to transform RuleStatements in And- and OrStatements
+   * Function to transform RuleStatements in RateBasedStatements
    * @param statements wafv2.CfnWebACL.RateBasedStatementProperty
    * @param prefix string
    * @param stage string
    * @param ipSets cdk.aws_wafv2.CfnIPSet[]
    * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
    */
-function handleRateStatement(rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty, prefix: string, stage: string, webAclName: string, ipSets?: cdk.aws_wafv2.CfnIPSet[], regexPatternSets?: cdk.aws_wafv2.CfnRegexPatternSet[]) {
+function handleRateBasedStatement(rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty, prefix: string, stage: string, webAclName: string, ipSets?: cdk.aws_wafv2.CfnIPSet[], regexPatternSets?: cdk.aws_wafv2.CfnRegexPatternSet[]) {
   const scopeDownStatement = rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.StatementProperty | undefined;
   if(scopeDownStatement) {
     const ipSetReferenceStatement = scopeDownStatement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
