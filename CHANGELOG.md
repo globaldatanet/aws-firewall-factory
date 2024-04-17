@@ -26,6 +26,9 @@
 - Removed redundant declaration of "@typescript-eslint/eslint-plugin" and "@typescript-eslint/parser" dependencies.
 - Removed redundant declaration of "@types/lodash" dependency.
 - Added missing comma after TypeScript version 5.3.3 in devDependencies.
+- Add CDK ToolKit StackName to cdk diff using taskfile - Sometimes the following error occurred if the template is more than 50kb in size this was because the cdk toolkit stackname was not set. 
+  - eg.: The template for stack "YOURSTACKNAME" is 64KiB. Templates larger than 50KiB must be uploaded to S3.
+
 ## 4.2.3
 ### Added
 - Initial release of Enum Checker script. Implemented functionality to check for new Labels and Rules available for Managed Rule Groups. Provides clear output indicating any new Labels or Rules discovered.

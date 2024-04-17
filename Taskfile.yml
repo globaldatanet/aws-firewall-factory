@@ -27,7 +27,7 @@ tasks:
   synth:
     desc: synth Stack
     cmds:
-      - cdk synth --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
+      - cdk synth
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
