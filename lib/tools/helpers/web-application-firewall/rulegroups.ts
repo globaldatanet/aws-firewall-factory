@@ -38,12 +38,12 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
         managedRuleGroupIdentifier: {
           vendorName: managedRuleGroup.vendor,
           managedRuleGroupName: managedRuleGroup.name,
-          version: null,
+          version: undefined,
           versionEnabled: undefined,
         },
         overrideAction: managedRuleGroup.overrideAction ? managedRuleGroup.overrideAction : { type: "NONE" },
-        ruleGroupArn: null,
-        excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : [],
+        ruleGroupArn: undefined,
+        excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : undefined,
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?? undefined,
         awsManagedRulesBotControlRuleSetProperty: managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ?? undefined,
@@ -82,8 +82,8 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
           versionEnabled: managedRuleGroup.versionEnabled ?? undefined,
         },
         overrideAction: managedRuleGroup.overrideAction ?? { type: "NONE" },
-        ruleGroupArn: null,
-        excludeRules: managedRuleGroup.excludeRules ?? [],
+        ruleGroupArn: undefined,
+        excludeRules: managedRuleGroup.excludeRules ?? undefined,
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?? undefined,
       });
@@ -153,8 +153,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
           rulename = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
         }
         // transform ipSetReferenceStatements
-        const statement = transformWafRuleStatements(rule, prefix, stage, ipSets,regexPatternSets);
-    
+        const statement = transformWafRuleStatements(rule, prefix, stage, config.WebAcl.Name, ipSets,regexPatternSets);
         const cfnRuleProperty = {
           name: rulename,
           priority: rule.priority,
@@ -392,7 +391,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
             rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-"+deployHash : ""}`;
           }
     
-          const statement = transformWafRuleStatements(ruleGroupSet[statementindex],prefix, stage, ipSets, regexPatternSets);
+          const statement = transformWafRuleStatements(ruleGroupSet[statementindex],prefix, stage, config.WebAcl.Name, ipSets, regexPatternSets);
           const cfnRuleProperty = {
             name: rulename,
             priority: ruleGroupSet[statementindex].priority,

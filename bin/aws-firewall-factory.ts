@@ -4,21 +4,22 @@ import { PrerequisitesStack } from "../lib/_prerequisites-stack";
 import * as cdk from "aws-cdk-lib";
 import { Config, Prerequisites, PriceRegions, RegionString } from "../lib/types/config";
 import { wafHelper, afwfHelper, pricingHelper, cloudformationHelper, guidanceHelper, ssmHelper } from "../lib/tools/helpers";
-import * as values from "../values";
-
-/**
- * relative path to config file imported from the env PROCESS_PARAMETERS
- */
-const CONFIG_OBJECT_NAME = process.env.PROCESS_PARAMETERS;
-
-if(!CONFIG_OBJECT_NAME || (values.configs[CONFIG_OBJECT_NAME] === undefined && values.prereq[CONFIG_OBJECT_NAME] === undefined)) {
-  console.log("Configuration ", CONFIG_OBJECT_NAME, " not found.");
-  process.exit(1);
-}
 
 const app = new cdk.App();
 
 void (async () => {
+  const values = await import("../values");
+
+  /**
+  - * relative path to config file imported from the env PROCESS_PARAMETERS
+  - */
+  const CONFIG_OBJECT_NAME = process.env.PROCESS_PARAMETERS;
+
+  if(!CONFIG_OBJECT_NAME || (values.configs[CONFIG_OBJECT_NAME] === undefined && values.prereq[CONFIG_OBJECT_NAME] === undefined)) {
+    console.log("Configuration ", CONFIG_OBJECT_NAME, " not found.");
+    process.exit(1);
+  }
+
   // ---------------------------------------------------------------------
   // Deploying prerequisite stack
   console.log(process.env.PREREQUISITE);

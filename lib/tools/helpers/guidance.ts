@@ -36,6 +36,9 @@ export function getGuidance(context: string, runtimeProperties: RuntimePropertie
     case "noAWSManagedIPDDoSList":
       runtimeProperties.GuidanceSummary.push("\x1b[33m","\n    ⚠️  No AWSManagedRulesAmazonIpReputationList is used in your Firewall - These Rules identify and block IPs acting as bots, conducting reconnaissance on AWS resources, or involved in DDoS activities. AWSManagedIPDDoSList rule has effectively blocked over 90% of malicious request floods.","\x1b[0m");
       break;
+    case "wrongEvaluationWindowSec":
+      runtimeProperties.GuidanceSummary.push("\x1b[31m",`\n    🚨  ${source} is not a EvaluationWindowSec for RateBasedStatements - Valid Settings are 60, 120, 300, and 600. \n       https://docs.aws.amazon.com/waf/latest/APIReference/API_RateBasedStatement.html.`,"\x1b[0m");
+      break;
     default:
       break;
   }

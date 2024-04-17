@@ -141,7 +141,7 @@ export interface ServiceDataAbstactRuleGroup {
   overrideAction: {
     type: "ALLOW" | "DENY" | "NONE" | "COUNT"
   },
-  ruleGroupArn: string | null,
+  ruleGroupArn?: string,
   ruleGroupType: string
 }
 

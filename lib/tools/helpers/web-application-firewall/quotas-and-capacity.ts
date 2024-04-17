@@ -37,12 +37,14 @@ async function getPolicyCount(deploymentRegion: string): Promise<number> {
 
 /**
  *
+ * @param config Config
+ * @param runtimeProperties RuntimeProperties
  * @param deploymentRegion AWS region, e.g. eu-central-1
  * @param scope whether scope is REGIONAL or CLOUDFRONT
  * @param rules rules for which you want to calculate the capacity
  * @returns the total capacity of the supplied rules
  */
-async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: SdkRule[]): Promise<number> {
+async function getTotalCapacityOfRules(config: Config, runtimeProperties: RuntimeProperties, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: SdkRule[]): Promise<number> {
   const client = new WAFV2Client({ region: deploymentRegion });
   if(scope === "CLOUDFRONT"){
     scope = Scope.CLOUDFRONT;
@@ -54,9 +56,21 @@ async function getTotalCapacityOfRules(deploymentRegion: string, scope: "REGIONA
     Rules: rules,
   };
   const command = new CheckCapacityCommand(input);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const response : any = await client.send(command);
-  return response.Capacity || 0;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response : any = await client.send(command);
+    return response.Capacity || 0;
+  } catch(err) {
+    guidanceHelper.outputGuidance(config, runtimeProperties);
+    console.log();
+    console.log("🚨 Error in checking capacity of rules!");
+    console.log();
+    console.log("ℹ️ The following rule failed:");
+    console.log(JSON.stringify(input, null, 2));
+    console.log();
+
+    throw err;
+  }
 }
 
 /**
@@ -161,7 +175,7 @@ async function calculateCapacities(
     console.log(" 🥇 PreProcess: ");
     runtimeProperties.PreProcess.CustomRuleCount = config.WebAcl.PreProcess.CustomRules.length;
     runtimeProperties.PreProcess.CustomCaptchaRuleCount = config.WebAcl.PreProcess.CustomRules.filter(rule => rule.action.captcha).length;
-    runtimeProperties.PreProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PreProcess.CustomRules, deploymentRegion, config.WebAcl.Scope, runtimeProperties)).reduce((a,b) => a+b, 0);
+    runtimeProperties.PreProcess.Capacity = (await calculateCustomRulesCapacities(config, config.WebAcl.PreProcess.CustomRules, deploymentRegion, config.WebAcl.Scope, runtimeProperties)).reduce((a,b) => a+b, 0);
   }
   if (!config.WebAcl.PostProcess.CustomRules) {
     console.log(
@@ -171,7 +185,7 @@ async function calculateCapacities(
     console.log("\n 🥈 PostProcess: ");
     runtimeProperties.PostProcess.CustomRuleCount = config.WebAcl.PostProcess.CustomRules.length;
     runtimeProperties.PostProcess.CustomCaptchaRuleCount = config.WebAcl.PostProcess.CustomRules.filter(rule => rule.action.captcha).length;
-    runtimeProperties.PostProcess.Capacity = (await calculateCustomRulesCapacities(config.WebAcl.PostProcess.CustomRules, deploymentRegion, config.WebAcl.Scope, runtimeProperties)).reduce((a,b) => a+b, 0);
+    runtimeProperties.PostProcess.Capacity = (await calculateCustomRulesCapacities(config, config.WebAcl.PostProcess.CustomRules, deploymentRegion, config.WebAcl.Scope, runtimeProperties)).reduce((a,b) => a+b, 0);
   }
   console.log("\n👀 Get ManagedRule Capacity:\n");
   if (!config.WebAcl.PreProcess.ManagedRuleGroups || config.WebAcl.PreProcess.ManagedRuleGroups?.length === 0) {
@@ -282,16 +296,17 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
   }
 }
 /**
-   *
+   * 
+   * @param config Config
    * @param customRules PreProcess Custom Rules or PostProcess Custom Rules
    * @param deploymentRegion the AWS region, e.g. eu-central-1
    * @param scope the scope of the WebACL, e.g. REGIONAL or CLOUDFRONT
    * @returns an array with the capacities of the supplied custom rules
    */
-async function calculateCustomRulesCapacities(customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
+async function calculateCustomRulesCapacities(config: Config, customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
   const capacities = [];
   const capacitieslog = [];
-  capacitieslog.push(["🔺 Priority", "➕ RuleName", "Capacity"]);
+  capacitieslog.push(["🔺 Priority", "➕ RuleName", "🧮 Capacity", "ℹ StatementType"]);
   for (const customRule of customRules) {
     // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
     // This means the IPSet will be created by this repo, maybe it doesn't exists yet. That fails this function. That's why the code below is needed.
@@ -303,6 +318,8 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
     const orStatement = customRule.statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
     // in case rule has an notStatement
     const notStatement = customRule.statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+    // in case rule has an rateBasedStatement
+    const rateBasedStatement = customRule.statement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
     if(ipSetReferenceStatement && !ipSetReferenceStatement.arn.startsWith("arn:aws:")) {
       // Capacity for IPSet statements:
       // "WCUs – 1 WCU for most. If you configure the statement to use forwarded IP addresses and specify a position of ANY, increase the WCU usage by 4."
@@ -310,7 +327,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
       capacities.push(calculateIpsSetStatementCapacity(ipSetReferenceStatement));
     }
     else if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-      capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+      capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
     }
     else if(notStatement && notStatement.statement) {
       const notStatementProp = notStatement.statement as wafv2.CfnWebACL.StatementProperty;
@@ -320,10 +337,10 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         capacities.push(calculateIpsSetStatementCapacity(notipSetReferenceStatement));
       }
       else if(notregexPatternSetReferenceStatement && !notregexPatternSetReferenceStatement.arn.startsWith("arn:aws:")) {
-        capacities.push(regexPatternSetsStatementsCapacity(notregexPatternSetReferenceStatement));
+        capacities.push(calculateRegexPatternSetsStatementsCapacity(notregexPatternSetReferenceStatement));
       }
       else{
-        capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope, runtimeProperties));
+        capacities.push(await calculateCustomRuleStatementsCapacity(config, customRule, deploymentRegion, scope, runtimeProperties));
       }
     }
     else if(andStatement && andStatement.statements) {
@@ -334,7 +351,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         }
         const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
         if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-          capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+          capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
         }
         const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
         if(notStatementStatement && notStatementStatement.statement) {
@@ -345,7 +362,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           }
           const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
           if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+            capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
           }
         }
         const orStatementStatement = statement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
@@ -356,7 +373,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           }
           const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
           if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+            capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
           }
           const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
           if(notStatementStatement && notStatementStatement.statement) {
@@ -367,7 +384,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
             }
             const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
             if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-              capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+              capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
             }
           }
         }
@@ -378,7 +395,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           filterStatements(statement))};
       if (filteredAndStatements && filteredAndStatements.statements && filteredAndStatements.statements.length > 0) {
         const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredAndStatements, false);
-        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope, runtimeProperties);
+        const capacity = await calculateCustomRuleStatementsCapacity(config, calcRule, deploymentRegion, scope, runtimeProperties);
         capacities.push(capacity);
       }
     }
@@ -390,7 +407,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
         }
         const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
         if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-          capacities.push(regexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
+          capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement));
         }
         const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
         if(notStatementStatement && notStatementStatement.statement) {
@@ -401,7 +418,7 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
           }
           const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
           if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
-            capacities.push(regexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+            capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
           }
         }
       }
@@ -411,20 +428,165 @@ async function calculateCustomRulesCapacities(customRules: FmsRule[], deployment
       };
       if (filteredOrStatements && filteredOrStatements.statements && filteredOrStatements.statements.length > 0) {
         const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredOrStatements, true);
-        const capacity = await calculateCustomRuleStatementsCapacity(calcRule, deploymentRegion, scope, runtimeProperties);
+        const capacity = await calculateCustomRuleStatementsCapacity(config, calcRule, deploymentRegion, scope, runtimeProperties);
         capacities.push(capacity);
       }
     }
-    else {
-      capacities.push(await calculateCustomRuleStatementsCapacity(customRule, deploymentRegion, scope, runtimeProperties));
+    else if(rateBasedStatement && rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.StatementProperty) {
+      const scopeDownStatement = rateBasedStatement.scopeDownStatement as wafv2.CfnWebACL.StatementProperty | undefined;
+      if(scopeDownStatement){
+      // in case rule has an andStatement
+        const andStatement = scopeDownStatement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
+        // in case rule has an orStatement
+        const orStatement = scopeDownStatement.orStatement as wafv2.CfnWebACL.OrStatementProperty | undefined;
+        // in case rule has an notStatement
+        const notStatement = scopeDownStatement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+        // in case rule has an ipSetReferenceStatement
+        const ipSetReferenceStatement = scopeDownStatement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+        // in case rule has an regexPatternSetReferenceStatement
+        const regexPatternSetsStatement = scopeDownStatement.regexMatchStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+        if(andStatement && andStatement.statements) {
+          for (const statement of andStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
+            const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+            if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+            }
+            const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+            if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+            }
+            const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+            if(notStatementStatement && notStatementStatement.statement) {
+              const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
+              const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+              if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+                const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+                capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+              }
+              const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+              if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+                capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement));
+              }
+            }
+          }
+          const filteredAndStatements = {
+            statements: (andStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement =>
+              filterStatements(statement))};
+          if (filteredAndStatements && filteredAndStatements.statements && filteredAndStatements.statements.length > 0) {
+            const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredAndStatements, false);
+            const capacity = await calculateCustomRuleStatementsCapacity(config, calcRule, deploymentRegion, scope, runtimeProperties);
+            capacities.push(capacity);
+          }
+        }
+        else if(orStatement && orStatement.statements) {
+          for (const statement of orStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
+            const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+            if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+            }
+            const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+            if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+            }
+            const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+            if(notStatementStatement && notStatementStatement.statement) {
+              const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
+              const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+              if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+                const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+                capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+              }
+              const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+              if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+                const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+                capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+              }
+            }
+          }
+          const filteredOrStatements = {
+            statements: (orStatement.statements as wafv2.CfnWebACL.StatementProperty[]).filter(statement =>
+              filterStatements(statement))
+          };
+          if (filteredOrStatements && filteredOrStatements.statements && filteredOrStatements.statements.length > 0) {
+            const calcRule = buildCustomRuleWithoutReferenceStatements(customRule, filteredOrStatements, true);
+            const capacity = await calculateCustomRuleStatementsCapacity(config, calcRule, deploymentRegion, scope, runtimeProperties);
+            capacities.push(capacity);
+          }
+        }
+        else if(notStatement && notStatement.statement) {
+          const statement = notStatement.statement as wafv2.CfnWebACL.StatementProperty;
+          const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+          if(statementIpSetReferenceStatement && !statementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+            const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+            capacities.push(calculateIpsSetStatementCapacity(statementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+          }
+          const statementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+          if(statementRegexPatternSetsStatement && !statementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+            const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+            capacities.push(calculateRegexPatternSetsStatementsCapacity(statementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+          }
+          const notStatementStatement = statement.notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
+          if(notStatementStatement && notStatementStatement.statement) {
+            const statement = notStatementStatement.statement as wafv2.CfnWebACL.StatementProperty;
+            const notstatementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
+            if(notstatementIpSetReferenceStatement && !notstatementIpSetReferenceStatement.arn.startsWith("arn:aws:")) {
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateIpsSetStatementCapacity(notstatementIpSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+            }
+            const notstatementRegexPatternSetsStatement = statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+            if(notstatementRegexPatternSetsStatement && notstatementRegexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+              const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+              capacities.push(calculateRegexPatternSetsStatementsCapacity(notstatementRegexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+            }
+          }
+        }
+        else if(ipSetReferenceStatement && !ipSetReferenceStatement.arn.startsWith("arn:aws:")) {
+          const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+          capacities.push(calculateIpsSetStatementCapacity(ipSetReferenceStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+        }
+        else if(regexPatternSetsStatement && !regexPatternSetsStatement.arn.startsWith("arn:aws:")) {
+          const tempRule = calculateRatebasedStatementwithoutScopeDownStatement(customRule, rateBasedStatement);
+          capacities.push(calculateRegexPatternSetsStatementsCapacity(regexPatternSetsStatement) + await calculateCustomRuleStatementsCapacity(config, tempRule, deploymentRegion, scope, runtimeProperties));
+        }
+      }
     }
-    capacitieslog.push([customRule.priority, customRule.name,capacities[capacities.length-1]]);
+    else {
+      capacities.push(await calculateCustomRuleStatementsCapacity(config, customRule, deploymentRegion, scope, runtimeProperties));
+    }
+    capacitieslog.push([customRule.priority, customRule.name,capacities[capacities.length-1], Object.keys(customRule.statement)[0].charAt(0).toUpperCase()+ Object.keys(customRule.statement)[0].slice(1)]);
   }
   capacitieslog.sort((a, b) => parseInt(a[0] as string,10) - parseInt(b[0] as string,10));
   console.log(table(capacitieslog));
   return capacities;
 }
 
+/**
+   * Function to remove the ScopeDown statement from the RateBasedStatement
+   * @param customRule the customRule
+   * @param rateBasedStatement the RateBasedStatement
+   * @returns tempCalcRule
+   */
+function calculateRatebasedStatementwithoutScopeDownStatement(customRule: FmsRule, rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty): FmsRule {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { scopeDownStatement, ...rateBasedWithoutScopeDown } = rateBasedStatement;
+  const statement:wafv2.CfnWebACL.StatementProperty = {
+    rateBasedStatement: rateBasedWithoutScopeDown
+  };
+  const tempCalcRule : FmsRule = {
+    name: customRule.name,
+    priority: customRule.priority,
+    visibilityConfig: customRule.visibilityConfig,
+    ruleLabels: customRule.ruleLabels,
+    captchaConfig: customRule.captchaConfig,
+    statement,
+    action: customRule.action
+  };
+  return tempCalcRule;
+}
 /**
    * Implementation of the calculation of the capacity for IPSet statements according to https://docs.aws.amazon.com/waf/latest/developerguide/waf-rule-statement-type-ipset-match.html
    * @param ipSetReferenceStatement the IPSetReferenceStatement
@@ -439,16 +601,19 @@ function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebA
 
 /**
  * Calculate Custom Rule Statements Capacity
+ * @param config Config
  * @param customRule FmsRule
  * @param deploymentRegion string
  * @param scope "REGIONAL" | "CLOUDFRONT"
  * @returns 
  */
-async function calculateCustomRuleStatementsCapacity(customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
+async function calculateCustomRuleStatementsCapacity(config: Config, customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
   const ruleCalculatedCapacityJson = [];
   const rule = transformCdkRuletoSdkRule(customRule, runtimeProperties);
   ruleCalculatedCapacityJson.push(rule);
   const capacity = await getTotalCapacityOfRules(
+    config,
+    runtimeProperties,
     deploymentRegion,
     scope,
     ruleCalculatedCapacityJson
@@ -461,7 +626,7 @@ async function calculateCustomRuleStatementsCapacity(customRule: FmsRule, deploy
    * @param regexPatternSets the regexPatternSetsStatements
    * @returns the capacity of the regexPatternSets statement
    */
-function regexPatternSetsStatementsCapacity(regexPatternSetsStatement: wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty) {
+function calculateRegexPatternSetsStatementsCapacity(regexPatternSetsStatement: wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty) {
   let regexRuleCapacity = 0;
   const regexRulebaseCost = 25;
   const regexPatterSetsFieldToMatch = regexPatternSetsStatement.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty | undefined;
@@ -486,7 +651,7 @@ function regexPatternSetsStatementsCapacity(regexPatternSetsStatement: wafv2.Cfn
  * @param customRule FmsRule
  * @param concatenatedStatement wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty
  * @param isOrStatement boolean
- * @returns 
+ * @returns tempCalcRule
  */
 function buildCustomRuleWithoutReferenceStatements(customRule: FmsRule, concatenatedStatement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isOrStatement: boolean) {
   const statements = concatenatedStatement.statements as wafv2.CfnWebACL.StatementProperty[];

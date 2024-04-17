@@ -38,7 +38,7 @@ tasks:
   diff:
     desc: CDK Diff
     cmds:
-      - cdk diff
+      - cdk diff --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
     silent: true
     interactive: true
     env:

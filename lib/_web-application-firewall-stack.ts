@@ -123,7 +123,8 @@ export class WafStack extends cdk.Stack {
         const deployHashString = props.config.General.DeployHash ? `-${props.config.General.DeployHash}` : "";
         const ipSetDescription = ipSet.description || `IP Set created by AWS Firewall Factory\nused in ${props.config.General.Prefix.toUpperCase()}-${props.config.WebAcl.Name}-${props.config.General.Stage}-Firewall${deployHashString}`;
         const cfnipset = new wafv2.CfnIPSet(this, ipSet.name, { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it. 
-          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${ipSet.name}`,
+          // TODO: Push adding the config name to the ipset to upstream
+          name: `${props.config.General.Prefix}-${props.config.General.Stage}-${props.config.WebAcl.Name}-${ipSet.name}`,
           description: ipSetDescription,
           addresses: addresses,
           ipAddressVersion: ipSet.ipAddressVersion,
@@ -175,7 +176,7 @@ export class WafStack extends cdk.Stack {
       bundling: {
         minify: true,
       },
-      runtime: lambda.Runtime.NODEJS_LATEST,
+      runtime: lambda.Runtime.NODEJS_20_X,
     });
 
     new logs.LogGroup(this, "managedRuleGroupVersionLambdaFunctionLogGroup",{

@@ -40,7 +40,7 @@ export const handler = async (
       ParamVersion = Event.ResourceProperties.ManagedRuleGroupVersion;
     }
     Latest = Event.ResourceProperties.Latest === "true" ? true : false;
-    enforceUpdate = Event.ResourceProperties.EnforceUpdate === "false" ? true : false;
+    enforceUpdate = Event.ResourceProperties.EnforceUpdate === "true" ? true : false;
     ManagedVersionInfo = await getManagedRuleGroupVersion(Event.ResourceProperties.VendorName, Event.ResourceProperties.Name, Event.ResourceProperties.Scope, ParamVersion, Latest, enforceUpdate);
     if(ManagedVersionInfo.State === "SUCCESS"){
       Response.Status = "SUCCESS";
