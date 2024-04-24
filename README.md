@@ -48,7 +48,6 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 - [📊 Slides: Managing AWS Web Application Firewalls at Scale - Language: 🇺🇸](https://docs.google.com/presentation/d/1jE_DmNk0cCc1XM8eBYPM2za0pzGyg9Lv/edit?usp=sharing&ouid=115444461121738087344&rtpof=true&sd=true)
 - Secure Serverless Applications against OWASP TOP 10 in 5 Minutes - Language: 🇺🇸
   - [📊 Slides](https://docs.google.com/file/d/1YJCfTt8ILa2R9n23fHDFLpfLhTwhB4ea/edit?filetype=mspresentation) - [📺 Video](https://www.youtube.com/watch?v=jrYpr0DLKfo)
-- [🎙 Podcast coming soon](https://github.com/richarvey/aws-community-radio/issues/3)
 
 #### 🔗 Useful Links
 
