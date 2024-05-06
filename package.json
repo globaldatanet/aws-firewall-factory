@@ -24,7 +24,7 @@
     "typescript": "5.4.5"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudformation": "3.554.0",
+    "@aws-sdk/client-cloudformation": "3.569.0",
     "@aws-sdk/client-cloudwatch": "3.554.0",
     "@aws-sdk/client-fms": "3.554.0",
     "@aws-sdk/client-pricing": "3.554.0",
