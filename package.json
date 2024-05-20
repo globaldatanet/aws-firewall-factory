@@ -28,7 +28,7 @@
     "@aws-sdk/client-cloudwatch": "3.554.0",
     "@aws-sdk/client-fms": "3.554.0",
     "@aws-sdk/client-pricing": "3.554.0",
-    "@aws-sdk/client-service-quotas": "3.554.0",
+    "@aws-sdk/client-service-quotas": "3.577.0",
     "@aws-sdk/client-shield": "3.554.0",
     "@aws-sdk/client-ssm": "3.554.0",
     "@aws-sdk/client-wafv2": "3.554.0",
