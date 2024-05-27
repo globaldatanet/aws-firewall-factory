@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  GithubOrganization:
+    Type: String
+    Description: 'The name of the your github Organization'
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: '[\w+=,.@-]+'
+  RoleName:
+    Type: String
+    Description: 'The name of the role to be created'
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: '[\w+=,.@-]+'
+    ConstraintDescription: 'Must be a valid role name'
+  RoleDescription:
+    Type: String
+    Description: 'The description of the role to be created'
+    MinLength: 1
+    MaxLength: 1000
+    ConstraintDescription: 'Must be a valid role description'
+Resources:
+  IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Ref RoleName
+      Description: !Ref RoleDescription
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Federated: !Sub arn:aws:iam::${AWS::Accountid}:oidc-provider/token.actions.githubusercontent.com
+          Action: sts:AssumeRoleWithWebIdentity
+          Condition:
+            StringEquals:
+              token.actions.githubusercontent.com:aud: sts.amazonaws.com
+            StringLike:
+              token.actions.githubusercontent.com:sub: !Sub repo:/${GithubOrganization}aws-firewall-factory:*
+
+      Policies:
+        - PolicyName: 'IAMPermissions'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 'iam:ListAccountAliases'
+                Resource: '*'
+        - PolicyName: 'Ec2Permissions'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 'ec2:DescribeRegions'
+                Resource: '*'
+        - PolicyName: 'CloudFrontPermissions'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'cloudfront:ListDistributionsByWebACLId'
+                Resource: '*'
+        - PolicyName: 'WAFPermissionPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 
+                  - 'wafv2:ListResourcesForWebACL'
+                  - 'wafv2:ListWebACLs'
+                Resource: '*'

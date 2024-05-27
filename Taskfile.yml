@@ -2,7 +2,8 @@ version: '3'
 #output: prefixed
 env:
   SKIP_QUOTA_CHECK: true
-  WAF_TEST: false
+  WAF_TEST: TRUE
+  WAF_TEST_PASS_STATUS_CODES: 200 # HTTP response status code that WAF uses while passing requests (default [200,404])
   CREATE_DIAGRAM: false
   TOOL_KIT_STACKNAME: CDKToolkit
   LASTEST_FIREWALLFACTORY_VERSION:
@@ -38,7 +39,7 @@ tasks:
   diff:
     desc: CDK Diff
     cmds:
-      - cdk diff --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
+      - cdk diff
     silent: true
     interactive: true
     env:
@@ -47,7 +48,7 @@ tasks:
   cdkdestroy:
     desc: CDK Destroy
     cmds:
-      - cdk destroy --require-approval never --force
+      - cdk destroy
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
@@ -59,7 +60,7 @@ tasks:
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - DOCKER_BUILDKIT=1 cdk deploy --require-approval never {{.TAGS}} --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
+      - cdk deploy --require-approval never {{.TAGS}} --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
@@ -86,7 +87,7 @@ tasks:
         items=$(ts-node ./gotestwaf/gotestwaf.ts | jq -r '.[] | .SecuredDomain[]?')
         for item in ${items[@]}; do
             echo "Using fqdn in 🖥  url : $item"
-            ./gotestwaf/gotestwaf --url https://$item --workers 50 --blockConnReset  --wafName="$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Prefix')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.WebAcl.Name')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Stage')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck --reportPath "./waf-evaluation-report/$(date '+%Y-%m-%d')" --reportName "$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Prefix')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.WebAcl.Name')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Stage')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.DeployHash')"
+            ./gotestwaf/gotestwaf --url https://$item --workers 50 --blockConnReset  --wafName="$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Prefix')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.WebAcl.Name')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Stage')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.DeployHash')" --configPath=./gotestwaf/config.yaml --testCasesPath=./gotestwaf/testcases --skipWAFBlockCheck --reportPath "./waf-evaluation-report/$(date '+%Y-%m-%d')" --reportName "$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Prefix')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.WebAcl.Name')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.Stage')-$(ts-node ./gotestwaf/gotestwaf.ts| jq -r '.General.DeployHash')-$item" --passStatusCodes {{.WAF_TEST_PASS_STATUS_CODES}} --blockConnReset
         done
     silent: true
     env:

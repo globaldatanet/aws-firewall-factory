@@ -1,0 +1,90 @@
+---
+Version: '2012-10-17'
+Statement:
+- Effect: Allow
+  Action:
+  - cloudformation:DescribeStacks
+  - cloudformation:ListStacks
+  - logs:DescribeLogGroups
+  - servicequotas:GetAWSDefaultServiceQuota
+  - shield:GetSubscriptionState
+  - sts:GetCallerIdentity
+  - wafv2:CheckCapacity
+  - wafv2:DescribeManagedRuleGroup
+  - wafv2:ListAvailableManagedRuleGroupVersions
+  - wafv2:ListAvailableManagedRuleGroups
+  - wafv2:ListRuleGroups
+  - wafv2:ListTagsForResource
+  Resource: "*"
+- Effect: Allow
+  Action:
+  - cloudformation:CreateChangeSet
+  - cloudformation:DeleteChangeSet
+  - cloudformation:DeleteStack
+  - cloudformation:DescribeChangeSet
+  - cloudformation:DescribeStackEvents
+  - cloudformation:ExecuteChangeSet
+  - cloudformation:GetTemplate
+  Resource: arn:aws:cloudformation:${Region}:${Account}:stack/*/*
+- Effect: Allow
+  Action:
+  - fms:DeletePolicy
+  - fms:PutPolicy
+  Resource: arn:aws:fms:${Region}:${Account}:policy/*
+- Effect: Allow
+  Action:
+  - iam:AttachRolePolicy
+  - iam:CreateRole
+  - iam:DeleteRole
+  - iam:DeleteRolePolicy
+  - iam:DetachRolePolicy
+  - iam:GetRole
+  - iam:GetRolePolicy
+  - iam:ListAttachedRolePolicies
+  - iam:ListRolePolicies
+  - iam:PutRolePolicy
+  Resource: arn:aws:iam::${Account}:role/*
+- Effect: Allow
+  Action:
+  - kms:CreateGrant
+  - kms:Decrypt
+  - kms:DescribeKey
+  - kms:Encrypt
+  Resource: arn:aws:kms:${Region}:${Account}:key/*
+- Effect: Allow
+  Action:
+  - lambda:CreateFunction
+  - lambda:DeleteFunction
+  - lambda:GetFunction
+  - lambda:GetFunctionCodeSigningConfig
+  - lambda:GetRuntimeManagementConfig
+  Resource: arn:aws:lambda:${Region}:${Account}:function:*:*:*
+- Effect: Allow
+  Action:
+  - logs:CreateLogGroup
+  - logs:PutRetentionPolicy
+  Resource: arn:aws:logs:${Region}:${Account}:log-group:*:*
+- Effect: Allow
+  Action:
+  - s3:GetBucketLocation
+  - s3:GetBucketPolicy
+  - s3:PutBucketPolicy
+  Resource: arn:aws:s3:::${BucketName}
+- Effect: Allow
+  Action:
+  - wafv2:CreateIPSet
+  - wafv2:DeleteIPSet
+  - wafv2:GetIPSet
+  Resource: arn:aws:wafv2:${Region}:${Account}:*/ipset/*/*
+- Effect: Allow
+  Action:
+  - wafv2:CreateRegexPatternSet
+  - wafv2:DeleteRegexPatternSet
+  - wafv2:GetRegexPatternSet
+  Resource: arn:aws:wafv2:${Region}:${Account}:*/regexpatternset/*/*
+- Effect: Allow
+  Action:
+  - wafv2:CreateRuleGroup
+  - wafv2:DeleteRuleGroup
+  - wafv2:GetRuleGroup
+  Resource: arn:aws:wafv2:${Region}:${Account}:*/rulegroup/*/*

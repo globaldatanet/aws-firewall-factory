@@ -2,8 +2,11 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { Prerequisites } from "./types/config";
 import { RuntimeProperties } from "./types/runtimeprops";
-import { aws_s3 as s3, aws_kms as kms, aws_iam as iam, aws_lambda as lambda, aws_lambda_nodejs as NodejsFunction, aws_logs as logs, aws_glue as glue} from "aws-cdk-lib";
+import { aws_s3 as s3, aws_kms as kms, aws_iam as iam, aws_lambda as lambda, aws_lambda_nodejs as NodejsFunction, aws_logs as logs, aws_glue as glue, aws_stepfunctions as sfn,
+  aws_stepfunctions_tasks as tasks, aws_sns as sns, aws_fms as fms} from "aws-cdk-lib";
+import { EventbridgeToStepfunctions, EventbridgeToStepfunctionsProps } from "@aws-solutions-constructs/aws-eventbridge-stepfunctions";
 import * as path from "path";
+import { SopsSyncProvider, SopsSecret } from "cdk-sops-secrets";
 
 export interface StackProps extends cdk.StackProps {
     readonly prerequisites: Prerequisites;
@@ -17,26 +20,27 @@ export class PrerequisitesStack extends cdk.Stack {
     const accountId = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
 
+    // Create SOPS SecretProvider Construct
+    const sopsSyncProvider = new SopsSyncProvider(
+      this,
+      "SopsSyncProvider"
+    );
+
+
     if(props.prerequisites.Information){
       console.log("📢  Creating Lambda Function to send AWS managed rule group change status notifications to messengers (Slack/Teams)");
-      let Messenger:string = "";
-      let WebhookUrl:string = "";
-      if(props.prerequisites.Information.SlackWebhook) {
-        Messenger="Slack";
-        WebhookUrl=props.prerequisites.Information.SlackWebhook;
-      }
-      if(props.prerequisites.Information.TeamsWebhook) {
-        Messenger="Teams";
-        WebhookUrl=props.prerequisites.Information.TeamsWebhook;
-      }
+
+      const InformationSecret = new SopsSecret(this,  "InformationSopsSecret", {
+        sopsFilePath: props.prerequisites.Information.WebhookSopsFile,
+        sopsProvider: sopsSyncProvider,
+      });
       const ManagedRuleGroupInfo = new NodejsFunction.NodejsFunction(this, "AwsFirewallFactoryManagedRuleGroupInfo", {
         architecture: lambda.Architecture.ARM_64,
         entry: path.join(__dirname, "../lib/lambda/ManagedRuleGroupInfo/index.ts"),
         handler: "handler",
         timeout: cdk.Duration.seconds(30),
         environment: {
-          "MESSENGER": Messenger,
-          "WEBHOOK_URL": WebhookUrl,
+          "WEBHOOK_SECRET": InformationSecret.secretName,
         },
         runtime: lambda.Runtime.NODEJS_20_X,
         memorySize: 128,
@@ -45,6 +49,7 @@ export class PrerequisitesStack extends cdk.Stack {
         },
         description: "Lambda Function to send AWS managed rule group change status notifications (like upcoming new versions and urgent security updates) to messengers (Slack/Teams)",
       });
+      InformationSecret.grantRead(ManagedRuleGroupInfo);
 
       new logs.LogGroup(this, "AWS-Firewall-Factory-ManagedRuleGroupInfo-LogGroup",{
         logGroupName: "/aws/lambda/"+ManagedRuleGroupInfo.functionName,
@@ -60,6 +65,126 @@ export class PrerequisitesStack extends cdk.Stack {
         principal: new iam.ServicePrincipal("sns.amazonaws.com"),
         sourceArn: "arn:aws:sns:us-east-1:248400274283:aws-managed-waf-rule-notifications",
       });
+    }
+
+    if(props.prerequisites.UnutilizedWafs){
+      console.log("📢  Creating StepFunction to send notification about unutilized Firewalls to messengers (Slack/Teams)");
+
+      const UnutilizedWafsSecret = new SopsSecret(this,  "UnutilizedWafsSopsSecret", {
+        sopsFilePath: props.prerequisites.UnutilizedWafs.WebhookSopsFile,
+        sopsProvider: sopsSyncProvider,
+      });
+      const unutilizedWafsBucket = new s3.Bucket(this, "AWS-Firewall-Factory-Unused-Resources", {
+        blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+        encryption: s3.BucketEncryption.S3_MANAGED,
+        enforceSSL: true,
+        removalPolicy: cdk.RemovalPolicy.RETAIN,
+        bucketName: props.prerequisites.General.Prefix.toLocaleLowerCase() + "-afwf-unutilized-resources-" + accountId + "-" + region
+      });
+
+      const GetMemberAccountsofFms = new NodejsFunction.NodejsFunction(this, "GetMemberAccountsofFms", {
+        architecture: lambda.Architecture.ARM_64,
+        entry: path.join(__dirname, "../lib/lambda/GetMemberAccountsofFms/index.ts"),
+        handler: "handler",
+        logRetention: logs.RetentionDays.ONE_WEEK,
+        timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_20_X,
+        memorySize: 128,
+        bundling: {
+          minify: true,
+        },
+        description: "Lambda Function to get all member accounts of AWS Firewall Manager",
+      });
+
+      GetMemberAccountsofFms.addToRolePolicy(new iam.PolicyStatement({
+        actions: ["fms:ListMemberAccounts"],
+        resources: ["*"],
+      }));
+
+
+
+      const CheckUnusedWebApplicationFirewalls = new NodejsFunction.NodejsFunction(this, "CheckUnusedWebApplicationFirewalls", {
+        architecture: lambda.Architecture.ARM_64,
+        entry: path.join(__dirname, "../lib/lambda/CheckUnusedWebApplicationFirewalls/index.ts"),
+        handler: "handler",
+        timeout: cdk.Duration.seconds(900),
+        runtime: lambda.Runtime.NODEJS_20_X,
+        memorySize: 128,
+        logRetention: logs.RetentionDays.ONE_WEEK,
+        bundling: {
+          minify: true,
+        },
+        environment: {
+          "BUCKET_NAME": unutilizedWafsBucket.bucketName,
+          "CROSS_ACCOUNT_ROLE_NAME": props.prerequisites.UnutilizedWafs.CrossAccountRoleName,
+          "REGEX_STRING": props.prerequisites.UnutilizedWafs.SkipWafRegexString || "",
+          "AWS_ACCOUNT_ID": cdk.Aws.ACCOUNT_ID,
+        },
+        description: "Lambda Function to get usage of AWS WAFv2 WebACLs",
+      });
+
+      CheckUnusedWebApplicationFirewalls.addToRolePolicy(new iam.PolicyStatement({
+        actions: ["sts:AssumeRole"],
+        resources: ["*"],
+      }));
+      unutilizedWafsBucket.grantReadWrite(CheckUnusedWebApplicationFirewalls);
+
+      const SendUnusedResourceNotification = new NodejsFunction.NodejsFunction(this, "SendUnusedResourceNotification", {
+        architecture: lambda.Architecture.ARM_64,
+        entry: path.join(__dirname, "../lib/lambda/SendUnusedResourceNotification/index.ts"),
+        handler: "handler",
+        timeout: cdk.Duration.seconds(30),
+        runtime: lambda.Runtime.NODEJS_20_X,
+        logRetention: logs.RetentionDays.ONE_WEEK,
+        memorySize: 128,
+        bundling: {
+          minify: true,
+        },
+        environment: {
+          "WEBHOOK_SECRET": UnutilizedWafsSecret.secretName,
+          "BUCKET_NAME": unutilizedWafsBucket.bucketName,
+        },
+        description: "Lambda Function to send notifications about unused AWS WAFv2 WebACLs",
+      });
+      SendUnusedResourceNotification.addToRolePolicy(new iam.PolicyStatement({
+        actions: ["pricing:Get*","pricing:Describe*","pricing:List*","pricing:Search*"],
+        resources: ["*"],
+      }));
+      SendUnusedResourceNotification.addToRolePolicy(new iam.PolicyStatement({
+        actions: ["fms:ListPolicies"],
+        resources: ["*"],
+      }));
+      SendUnusedResourceNotification.addToRolePolicy(new iam.PolicyStatement({
+        actions: ["ec2:DescribeRegions"],
+        resources: ["*"],
+      }));
+      unutilizedWafsBucket.grantReadWrite(SendUnusedResourceNotification);
+      UnutilizedWafsSecret.grantRead(SendUnusedResourceNotification);
+
+      const chain = sfn.Chain.start(new tasks.LambdaInvoke(this, "GetMemberAccountsofFmsLambda", {
+        lambdaFunction: GetMemberAccountsofFms,
+        retryOnServiceExceptions: true,
+      })).next(new sfn.Map(this, "Map", {
+        itemsPath: sfn.JsonPath.stringAt("$.Payload"),
+        resultPath: sfn.JsonPath.DISCARD,
+      }).itemProcessor(new tasks.LambdaInvoke(this, "CheckUnusedWebApplicationFirewallsLambda", {
+        lambdaFunction: CheckUnusedWebApplicationFirewalls,
+        payloadResponseOnly: true,
+        retryOnServiceExceptions: true,
+      }))).next(new tasks.LambdaInvoke(this, "SendUnsuedResourceNotificationLambda", {
+        lambdaFunction: SendUnusedResourceNotification,
+        retryOnServiceExceptions: true,
+      }));
+
+      const constructProps: EventbridgeToStepfunctionsProps = {
+        stateMachineProps: {
+          stateMachineName: "aws-firewall-factory-unutilizedWafs-"+ accountId + "-" + region,
+          definitionBody: sfn.DefinitionBody.fromChainable(chain),
+        },
+        eventRuleProps: {
+          schedule: props.prerequisites.UnutilizedWafs.ScheduleExpression,
+        }};
+      new EventbridgeToStepfunctions(this, "eventbridge-stepfunction-invoke", constructProps);
     }
 
     if(props.prerequisites.Logging) {
@@ -226,6 +351,50 @@ export class PrerequisitesStack extends cdk.Stack {
           },
         });
       }
+    }
+
+    if(props.prerequisites.DdosNotifications) {
+      console.log("📢  Creating Lambda Function that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams)");
+
+      const DdosFmsNotificationSecret = new SopsSecret(this,  "DdosFmsNotificationSopsSecret", {
+        sopsFilePath: props.prerequisites.DdosNotifications.WebhookSopsFile,
+        sopsProvider: sopsSyncProvider,
+      });
+
+      const DdosFmsNotification = new NodejsFunction.NodejsFunction(this, "AWS-Firewall-Factory-FMS-Notifications", {
+        architecture: lambda.Architecture.ARM_64,
+        entry: path.join(__dirname, "../lib/lambda/FmsDdosNotification/index.ts"),
+        handler: "handler",
+        timeout: cdk.Duration.seconds(60),
+        runtime: lambda.Runtime.NODEJS_20_X,
+        memorySize: 128,
+        logRetention: logs.RetentionDays.ONE_WEEK,
+        bundling: {
+          minify: true,
+        },
+        environment: {
+          "WEBHOOK_SECRET": DdosFmsNotificationSecret.secretName,
+        },
+        description: "Lambda Function that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams)",
+      });
+
+      DdosFmsNotificationSecret.grantRead(DdosFmsNotification);
+
+      const snsRoleName = iam.Role.fromRoleName(this, "AWSServiceRoleForFMS", "aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS").roleArn;
+      const FmsTopic = new sns.Topic(this, "FMS-Notifications-Topic");
+      FmsTopic.addToResourcePolicy(new iam.PolicyStatement({
+        actions: ["sns:Publish"],
+        principals: [iam.Role.fromRoleArn(this, "AWSServiceRoleForFMS",snsRoleName)],
+      }));
+      DdosFmsNotification.addPermission("InvokeByFmsSnsTopic", {
+        action: "lambda:InvokeFunction",
+        principal: new iam.ServicePrincipal("sns.amazonaws.com"),
+        sourceArn: FmsTopic.topicArn,
+      });
+      new fms.CfnNotificationChannel(this, "AWS-Firewall-Factory-FMS-NotificationChannel", {
+        snsRoleName,
+        snsTopicArn: FmsTopic.topicArn,
+      });
     }
 
   }

@@ -6,8 +6,8 @@ import {
   CdkCustomResourceEvent,
   CdkCustomResourceResponse
 } from "aws-lambda";
-import { getManagedRuleGroupVersion } from "./services/waf";
-import {ManagedRuleGroupVersionResponse} from "./types/index";
+import { getManagedRuleGroupVersion } from "../SharedComponents/services/waf";
+import {ManagedRuleGroupVersionResponse} from "../SharedComponents/types/index";
 
 export const handler = async (
   Event: CdkCustomResourceEvent,

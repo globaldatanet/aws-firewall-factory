@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Rule, ManagedRuleGroup } from "./fms";
-import { aws_fms as fms, CfnTag } from "aws-cdk-lib";
+import { aws_fms as fms, CfnTag, aws_events as events } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
 
 /**
@@ -161,16 +161,41 @@ export interface Prerequisites {
     * Will add a Lambda function to the prerequisite stack that sends notifications when new versions and updates to a AWS ManagedRuleGroup appear in messengers (Slack/Teams).
   */
   readonly Information?:{
-    SlackWebhook?: string,
-    TeamsWebhook?: string,
+    WebhookSopsFile: string,
   }
+
+    /**
+    * Will add a StepFunction which is indentifying and sending information about unutilized WAFs to messengers (Slack/Teams).
+  */
+    readonly UnutilizedWafs?:{
+      /**
+       * Define a Schedule for the StepFunction. The ScheduleExpression is a cron expression that specifies when the rule is triggered.
+       */
+      ScheduleExpression: events.Schedule,
+      /**
+       * Define a Sops File for the Webhook URL with the Slack or Teams Webhook URL.
+       * https://github.com/dbsystel/cdk-sops-secrets
+       */
+      WebhookSopsFile: string,
+      /**
+       * Define a Regex to skip WAFs with specific names
+       */
+      SkipWafRegexString?: string,
+      /**
+       * Define a Cross Account Role Name for the Lambda which is identifying unutilized WAFs in the managed accounts.
+       */
+      CrossAccountRoleName: string,
+    }
   /**
     * Will add a Lambda function to prerequisite Stack that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams)
     * This feature, coupled with [AWS Shield Advanced](https://aws.amazon.com/shield/).
   */
   readonly DdosNotifications?:{
-    SlackWebhook?: string,
-    TeamsWebhook?: string,
+    /**
+     * Define a Sops File for the Webhook URL with the Slack or Teams Webhook URL. 
+     * https://github.com/dbsystel/cdk-sops-secrets
+     */
+    WebhookSopsFile: string
   }
   readonly Logging?: {
       readonly BucketProperties?: {

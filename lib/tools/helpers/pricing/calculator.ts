@@ -123,7 +123,7 @@ async function getDashboardPrice(deploymentRegion: string, config: Config ): Pro
  * @param operation
  * @returns price for one product
  */
-async function getProductPrice(deploymentRegion: PriceRegions, servicecode: string, operation?: string,group?: string, groupDescription?: string): Promise<number> {
+export async function getProductPrice(deploymentRegion: PriceRegions, servicecode: string, operation?: string,group?: string, groupDescription?: string): Promise<number> {
   const client = new PricingClient({region: PRICING_API_ENDPOINT_REGION});
   const filters: {Type: FilterType, Field: string, Value: string}[] = [];
   if(groupDescription){
