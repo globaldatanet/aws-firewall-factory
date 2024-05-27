@@ -20,9 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.1.1
       - name: 🔑 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1.7.0
+        uses: aws-actions/configure-aws-credentials@v4.0.2
         env:
           ACCOUNT_ID: ${{ env.AWS_ACCOUNT }}
         with:
