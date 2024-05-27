@@ -9,6 +9,7 @@
 
 ### Fixed
 - [Issue#380](https://github.com/globaldatanet/aws-firewall-factory/issues/380) Fixes on the CloudWatch dashboard.
+- Restructure Lambda code with ShareComonents to reduce code duplicates
 - Using [cdk-sops-secrets](https://github.com/dbsystel/cdk-sops-secrets) now for all Webhooks - see WebHookSecretDefinition:
  ```
   {
