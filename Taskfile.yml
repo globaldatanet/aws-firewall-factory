@@ -48,7 +48,7 @@ tasks:
   cdkdestroy:
     desc: CDK Destroy
     cmds:
-      - cdk destroy
+      - cdk destroy --force
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
