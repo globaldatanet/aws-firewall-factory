@@ -8,12 +8,8 @@ import { SNSEventRecord } from "aws-lambda";
 
 import * as AdaptiveCards from "adaptivecards";
 
-export async function mangedRuleGroupNotificationTeams(CurrentDefaultVersion: string, WafRuleGroupInfoText:string, Record: SNSEventRecord, Webhook: string) {
+export async function ddosNotificationTeams(Record: SNSEventRecord, Webhook: string) {
   const webhook = new IncomingWebhook(Webhook);
-  const cardfacts: AdaptiveCards.Fact[] = [];
-  cardfacts.push(new AdaptiveCards.Fact("Managed Rule Group", Record.Sns.MessageAttributes.managed_rule_group.Value));
-  cardfacts.push(new AdaptiveCards.Fact("Current Default Version", CurrentDefaultVersion));
-
   const card = new AdaptiveCards.AdaptiveCard();
   card.version = AdaptiveCards.Versions.v1_4;
   card.height = "stretch";
@@ -32,16 +28,6 @@ export async function mangedRuleGroupNotificationTeams(CurrentDefaultVersion: st
   messageBlock.wrap = true;
   card.addItem(messageBlock);
 
-  const facts = new AdaptiveCards.FactSet();
-  facts.facts = cardfacts;
-  card.addItem(facts);
-
-  const InfoTextBlock = new AdaptiveCards.TextBlock();
-  InfoTextBlock.text = WafRuleGroupInfoText;
-  InfoTextBlock.weight = AdaptiveCards.TextWeight.Default;
-  InfoTextBlock.wrap = true;
-  InfoTextBlock.separator = true;
-  card.addItem(InfoTextBlock);
 
   const response = await webhook.send(card);
   console.log("ℹ️ Teams Notification reponse-Code: " + response?.status);

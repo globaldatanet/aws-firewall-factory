@@ -2,6 +2,41 @@
 
 ## Released
 
+## 4.3.1
+### Added
+- [Issue#365](https://github.com/globaldatanet/aws-firewall-factory/issues/365) UnutilizedWafs - Implemented automated identification and notification system in Firewall Factory to manage unused WAFs, leveraging Lambda and notification services to streamline infrastructure, optimize costs, and enhance security by addressing WAF sprawl proactively and ensuring efficient resource utilization.
+- Added example IAM Role which can be used for [ci-cd](./static/roles/ci-cd-role.yaml) deployments
+
+### Fixed
+- [Issue#380](https://github.com/globaldatanet/aws-firewall-factory/issues/380) Fixes on the CloudWatch dashboard.
+- Restructure Lambda code with ShareComonents to reduce code duplicates
+- Using [cdk-sops-secrets](https://github.com/dbsystel/cdk-sops-secrets) now for all Webhooks - see WebHookSecretDefinition:
+ ```
+  {
+    WebhookUrl: string
+    Messenger: "Slack" | "Teams"
+  }
+```
+- Adding missing: Optional Lambda function to prerequisite Stack that send notifications about potential DDoS activity for protected resources to messengers (Slack/Teams) - [AWS Shield Advanced] - this was removed while migrating lambdas from python to typescript
+- Bump @aws-sdk/client-cloudformation from 3.554.0  to 3.556.0
+- Bump @aws-sdk/client-cloudfront from  3.568.0 to  3.577.0
+- Bump @aws-sdk/client-cloudwatch from 3.554.0 to  3.556.0
+- Bump @aws-sdk/client-config-service from  3.568.0 to  3.577.0
+- Bump @aws-sdk/client-ec2 from  3.568.0 to  3.577.0
+- Bump @aws-sdk/client-fms from 3.554.0 to  3.577.0
+- Bump @aws-sdk/client-pricing from 3.554.0 to  3.556.0
+- Bump @aws-sdk/client-s3 from  3.569.0 to  3.577.0
+- Bump @aws-sdk/client-service-quotas from 3.554.0 to  3.577.0
+- Bump @aws-sdk/client-shield from 3.554.0 to  3.556.0
+- Bump @aws-sdk/client-ssm from 3.554.0 to  3.577.0
+- Bump @aws-sdk/client-wafv2 from 3.554.0 to  3.556.0
+- Bump aws-cdk from  2.137.0 to  2.142.0
+- Bump aws-cdk-lib from 2.137.0 to  2.142.0
+- Bump @typescript-eslint/eslint-plugin from 7.6.0 to 7.9.0
+- Bump @typescript-eslint/parser from 7.6.0 to 7.9.0
+- Bump @types/lodash  from 4.17.0 to 4.17.1
+
+
 ## 4.3.0
 ### Added
 - Allow reusing ipsets with same name. This commit differentiate ipsets from different FMS configs by adding the name of the webacl to it. Without this commit, trying to run aws-firewall-factory for two configs which uses a ipset with the same name would give a error on CloudFormation ('IpSet with name x already exists') - (Add Name of web application firewall to the IPSet Name) - ⚠️ Existing IPsets will be replaced during next update.
@@ -333,7 +368,7 @@ The documentation will be updated regularly to provide you with the most current
 - Fix counter in package.json for versioning
 ## 3.1.2
 ### Added
-- Feature [Issue#52](https://github.com/globaldatanet/aws-firewall-factory/issues/52) - Added Regex for FMS Description Pattern: ^([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$. -> Thanks to [@vboufleur](https://github.com/vboufleur)
+- Feature [Issue#52](https://github.com/globaldatanet/aws-firewall-factory/issues/52) - Added Regex for FMS Description Pattern:  ([\p{L}\p{Z}\p{N}_.:/=+\-@]*)$. -> Thanks to [@vboufleur](https://github.com/vboufleur)
 - Allow a list of resource types to apply firewall -> Kudos to [@vboufleur](https://github.com/vboufleur) for implementing this feature.
 
 ### Fixed

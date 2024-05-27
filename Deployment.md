@@ -4,13 +4,15 @@
 1. [Organizations trusted access with Firewall Manager](https://docs.aws.amazon.com/organizations/latest/userguide/services-that-can-integrate-fms.html)
 2. [Taskfile](https://taskfile.dev/)
 3. [AWS CDK](https://aws.amazon.com/cdk/)
-4. [cfn-dia](https://www.npmjs.com/package/@mhlabs/cfn-diagram?s=03)
-5. Invoke `npm i` to install dependencies
-6. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
+4. [Sops](https://github.com/getsops/sops)
+5. [cfn-dia](https://www.npmjs.com/package/@mhlabs/cfn-diagram?s=03)
+6. Invoke `npm i` to install dependencies
+7. ⚠️ Before installing a stack to your aws account using aws cdk you need to prepare the account using a [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html)
 
-7. (Optional) If you want to use CloudWatch Dashboards - You need to enable your target accounts to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) to see how to do it.
-8. Assume AWS Profile `awsume PROFILENAME`
-9. (Optional) Enter `task generateprerequisitesconfig`
+8. (Optional) If you want to use CloudWatch Dashboards - You need to enable your target accounts to share CloudWatch data with the central security account follow [this](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Cross-Account-Cross-Region.html#enable-cross-account-cross-Region) to see how to do it.
+9. (Optional) If you want to use the UnutilizedWafs Feature -  You need to enable your target accounts with a Cross Account Role - You can find an example CfnTemplate you can use [here](static/roles/cross_account_roles_unutilized_wafs.yaml).
+10. Assume AWS Profile `awsume PROFILENAME`
+11. (Optional) Enter `task generateprerequisitesconfig`
 
   | Parameter  | Value |
   | ------------- | ------------- |

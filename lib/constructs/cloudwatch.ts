@@ -18,39 +18,15 @@ export class WafCloudWatchDashboard extends Construct {
 
   constructor(scope: Construct, id: string, config: Config,managedRuleGroupsInfo:string[]) {
     super(scope, id);
-    console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", config.General.Prefix.toUpperCase() +
-"-" +
-config.WebAcl.Name +
-"-" +
-config.General.Stage +
-"-" +
-config.General.DeployHash,"\u001b[0m");
+    console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", `${config.General.Prefix.toUpperCase()}-${config.WebAcl.Name}-${config.General.Stage}${config.General.DeployHash ? "-"+config.General.DeployHash : ""}`,"\u001b[0m");
     console.log("   ℹ️  Warnings for Math expressions can be ignored.");
     const cwdashboard = new cloudwatch.Dashboard(this, "dashboard", {
-      dashboardName: config.General.Prefix.toUpperCase() +
-  "-" +
-  config.WebAcl.Name +
-  "-" +
-  config.General.Stage +
-  "-" +
-  config.General.DeployHash,
+      dashboardName: `${config.General.Prefix.toUpperCase()}-${config.WebAcl.Name}-${config.General.Stage}${config.General.DeployHash ? "-"+config.General.DeployHash : ""}`,
       periodOverride: cloudwatch.PeriodOverride.AUTO,
       start: "-PT24H"
     });
-    const webaclName = config.General.Prefix.toUpperCase() +
-"-" +
-config.WebAcl.Name +
-"-" +
-config.General.Stage +
-"-" +
-config.General.DeployHash;
-    const webaclNamewithPrefix =  "FMManagedWebACLV2-" + config.General.Prefix.toUpperCase() +
-"-" +
-config.WebAcl.Name +
-"-" +
-config.General.Stage +
-"-" +
-config.General.DeployHash;
+    const webaclName = `${config.General.Prefix.toUpperCase()}-${config.WebAcl.Name}-${config.General.Stage}${config.General.DeployHash ? "-"+config.General.DeployHash : ""}`;
+    const webaclNamewithPrefix =  `FMManagedWebACLV2-${config.General.Prefix.toUpperCase()}-${config.WebAcl.Name}-${config.General.Stage}${config.General.DeployHash ? "-"+config.General.DeployHash : ""}`;
 
     if(config.WebAcl.IncludeMap.account){
       const infowidget = new cloudwatch.TextWidget({
@@ -62,7 +38,7 @@ config.General.DeployHash;
       const securedDomain = config.General.SecuredDomain.toString();
 
       const app = new cloudwatch.TextWidget({
-        markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + managedRuleGroupsInfo.toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+securedDomain+")",
+        markdown: "⚙️ Used [ManagedRuleGroups](https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html):\n" + managedRuleGroupsInfo.filter(value => Object.keys(value).length !== 0).toString().replace(/,/g,"\n - ") + "\n\n--- \n\n\nℹ️ Link to your secured [Application]("+securedDomain+")",
         width: 7,
         height: 4
       });
