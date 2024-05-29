@@ -593,7 +593,16 @@ function calculateRatebasedStatementwithoutScopeDownStatement(customRule: FmsRul
    * @returns the capacity of the IPSet statement
    */
 function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty) {
-  let ipSetRuleCapacity = 1;
+  // FIXME: ipset statements doesn't always has a capacity of one, it can vary, which was giving a error while deploying (sample of the error available below)
+  // So we've increased the fixed capacity to four to bypass that error.
+  // The error is "Error reason: You exceeded the capacity limit for a rule group or web ACL", which happens during cdk deploy
+  //
+  // We need to later change the fixed integer below by implementing a logic on aws-firewall-factory that:
+  // 1) First aws-firewall-factory deploys the ipsets on a different CloudFormation stack then the FMS one.
+  // 2) That ipsets stack outputs the ipsets ARNs.
+  // 3) On the config file, in memory (not on disk), replace the IPSets names with their respectives ARNs.
+  // 4) Replace the fixed number below with a logic that consults the actual ipset statement capacity on AWS's API.
+  let ipSetRuleCapacity = 4;
   const ipSetForwardedIpConfig = ipSetReferenceStatement.ipSetForwardedIpConfig as wafv2.CfnWebACL.IPSetForwardedIPConfigurationProperty | undefined;
   if(ipSetForwardedIpConfig && ipSetForwardedIpConfig.position === "ANY") ipSetRuleCapacity = 4;
   return ipSetRuleCapacity;
