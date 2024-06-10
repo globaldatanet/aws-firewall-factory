@@ -35,7 +35,7 @@
     "@aws-sdk/client-secrets-manager": "^3.583.0",
     "@aws-sdk/client-service-quotas": "3.556.0",
     "@aws-sdk/client-shield": "3.556.0",
-    "@aws-sdk/client-ssm": "3.556.0",
+    "@aws-sdk/client-ssm": "3.592.0",
     "@aws-sdk/client-wafv2": "3.556.0",
     "@aws-solutions-constructs/aws-eventbridge-stepfunctions": "^2.57.0",
     "@babel/traverse": "^7.23.7",
