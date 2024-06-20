@@ -48,8 +48,8 @@ const shieldProps = {
   ],
 };
 
-export class Shiedstack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: shield_props) {
+export class ShieldStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: any) {
     super(scope, id, props);
 
     // props - accounts and regions (global + specific) (map keys resourcetype, region, ?account?)
@@ -84,26 +84,32 @@ export class Shiedstack extends cdk.Stack {
         logDestinationConfigs: [loggingConfiguration || ""],
       },
     };
-    const cfnShieldPolicyProps = {
+    const cfnShieldPolicyProps: fms.CfnPolicyProps = {
       // remediationEnabled - should be true
       remediationEnabled: true,
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#resourcetype:~:text=fms%2Dpolicy%2Dresourcetags-,resourceType,-%3F
-      resourceTypeList: "AWS::CloudFront::Distribution,AWS::ElasticLoadBalancingV2::LoadBalancer , AWS::ElasticLoadBalancing::LoadBalancer , AWS::EC2::EIP",
-      policyName: 'ShieldAdvancedPolicy',
-      
-      includeMap: {ACCOUNT : ['962355891833']},
-      excludeMap:{},
+      resourceTypeList: [
+        "AWS::CloudFront::Distribution",
+        "AWS::ElasticLoadBalancingV2::LoadBalancer",
+        "AWS::ElasticLoadBalancing::LoadBalancer",
+        "AWS::EC2::EIP",
+      ],
+      resourceType: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      policyName: "ShieldAdvancedPolicyCdkTest",
+      includeMap: { account: ["962355891833"] },
+      excludeMap: {},
       excludeResourceTags: false,
       //https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#:~:text=Specification%20for%20SHIELD_ADVANCED%20for%20Amazon%20CloudFront%20distributions
       securityServicePolicyData: {
         type: "SHIELD_ADVANCED",
-        managedServiceData: cdk.Fn.sub(
-          JSON.stringify(managedServiceData),
-          {}
-        ),
+        managedServiceData: cdk.Fn.sub(JSON.stringify(managedServiceData), {}),
       },
     };
 
-    const fmspolicy = new fms.CfnPolicy(this, "CfnPolicy", cfnShieldPolicyProps); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.
+    const fmspolicy = new fms.CfnPolicy(
+      this,
+      "CfnPolicy",
+      cfnShieldPolicyProps
+    ); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.
   }
 }
