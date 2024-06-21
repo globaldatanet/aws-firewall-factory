@@ -5,71 +5,58 @@ import { RuntimeProperties } from "./types/runtimeprops";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { ManagedServiceData, SubVariables } from "./types/fms";
 
-export interface StackProps extends cdk.StackProps {
-  readonly prerequisites: Prerequisites;
-  runtimeProperties: RuntimeProperties;
-}
+// export interface StackProps extends cdk.StackProps {
+//   readonly prerequisites: Prerequisites;
+//   runtimeProperties: RuntimeProperties;
+// }
 
-// GLobal vs region-specific
-export enum ShieldTypes {
-  LOAD_BALANCER = "LOAD_BALANCER",
-  CLOUDFRONT = "CLOUDFRONT",
-}
+// // GLobal vs region-specific
+// export enum ShieldTypes {
+//   LOAD_BALANCER = "LOAD_BALANCER",
+//   CLOUDFRONT = "CLOUDFRONT",
+// }
 
-export interface ResourceTypePerRegion {
-  type: ShieldTypes;
-  regions: string[];
-}
+// export interface ResourceTypePerRegion {
+//   type: ShieldTypes;
+//   regions: string[];
+// }
 
-export interface ShieldAccount {
-  accountId: string;
-  resourceTypePerRegion: ResourceTypePerRegion[];
-}
+// export interface ShieldAccount {
+//   accountId: string;
+//   resourceTypePerRegion: ResourceTypePerRegion[];
+// }
+
+// export interface shield_props extends cdk.StackProps {
+//   accounts: ShieldAccount[];
+//  
+// }
+// 
+// const shieldProps: shield_props = {
+//   accounts: [
+//     {
+//       accountId: "123456789012",
+//       resourceTypePerRegion: [
+//         {
+//           type: ShieldTypes.LOAD_BALANCER,
+//           regions: ["us-east-1", "us-west-2"],
+//         },
+//         {
+//           type: ShieldTypes.CLOUDFRONT,
+//           regions: ["global"],
+//         },
+//       ],
+//     },
+//   ],
+//   cfnpolicy: cfnShieldPolicyProps
+// };
 
 export interface shield_props extends cdk.StackProps {
-  accounts: ShieldAccount[];
+  resourceType: string;
 }
-
-const shieldProps = {
-  accounts: [
-    {
-      accountId: "123456789012",
-      resourceTypePerRegion: [
-        {
-          type: ShieldTypes.LOAD_BALANCER,
-          regions: ["us-east-1", "us-west-2"],
-        },
-        {
-          type: ShieldTypes.CLOUDFRONT,
-          regions: ["global"],
-        },
-      ],
-    },
-  ],
-};
-
 export class ShieldStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: any) {
+  constructor(scope: Construct, id: string, props: shield_props ) {
     super(scope, id, props);
 
-    // props - accounts and regions (global + specific) (map keys resourcetype, region, ?account?)
-    const shieldProps = {
-      accounts: [
-        {
-          accountId: "123456789012",
-          resourceTypePerRegion: [
-            {
-              type: ShieldTypes.LOAD_BALANCER,
-              regions: ["us-east-1", "us-west-2"],
-            },
-            {
-              type: ShieldTypes.CLOUDFRONT,
-              regions: ["global"],
-            },
-          ],
-        },
-      ],
-    };
     // might be unnecessary
     const preProcessRuleGroups: never[] = [];
     const postProcessRuleGroups: never[] = [];
@@ -94,7 +81,7 @@ export class ShieldStack extends cdk.Stack {
         "AWS::ElasticLoadBalancing::LoadBalancer",
         "AWS::EC2::EIP",
       ],
-      resourceType: "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      resourceType: props.resourceType,
       policyName: "ShieldAdvancedPolicyCdkTest",
       includeMap: { account: ["962355891833"] },
       excludeMap: {},

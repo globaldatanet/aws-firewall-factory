@@ -38,6 +38,7 @@ export interface Config {
      */
     readonly CreateDashboard?: boolean,
   },
+  
   readonly WebAcl:{
     /**
      * Defines Name of your web application firewall.
@@ -385,3 +386,5 @@ export interface RegexPatternSet {
  * Represents all AWS ManagedRuleGroups which are not versioned
  */
 export const NONEVERSIONEDMANAGEDRULEGRPOUP = ["AWSManagedRulesBotControlRuleSet","AWSManagedRulesATPRuleSet","AWSManagedRulesACFPRuleSet","AWSManagedRulesAmazonIpReputationList","AWSManagedRulesAnonymousIpList"];
+
+
