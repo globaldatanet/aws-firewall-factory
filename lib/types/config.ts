@@ -2,7 +2,7 @@
 import { Rule, ManagedRuleGroup } from "./fms";
 import { aws_fms as fms, CfnTag, aws_events as events } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
-
+import * as cdk from "aws-cdk-lib";
 /**
  * Settings for the AWS WAF policy (type WAFV2) that specifies rule groups to run first in the corresponding AWS WAF Web ACL and rule groups to run last in the Web ACL.
  */
@@ -38,7 +38,7 @@ export interface Config {
      */
     readonly CreateDashboard?: boolean,
   },
-  
+
   readonly WebAcl:{
     /**
      * Defines Name of your web application firewall.
@@ -145,7 +145,18 @@ export interface Config {
     readonly PostProcess: RuleGroupSet,
   },
 }
-
+export interface ShieldConfig {
+  readonly remediationEnabled: boolean | cdk.IResolvable,
+  readonly resourceTypeList?: Array<string>,
+  readonly resourceType: string,
+  readonly policyName: string,
+  readonly includeMap?: fms.CfnPolicy.IEMapProperty | cdk.IResolvable,
+  readonly excludeMap?: fms.CfnPolicy.IEMapProperty | cdk.IResolvable,
+  readonly excludeResourceTags: boolean | cdk.IResolvable,
+  readonly securityServicePolicyData:
+    | cdk.IResolvable
+    | fms.CfnPolicy.SecurityServicePolicyDataProperty,
+}
 /**
  * The type of resource protected by or in scope of the policy. To apply this policy to multiple resource types, specify a resource type of ResourceTypeList and then specify the resource types in a ResourceTypeList.
  */
