@@ -50,8 +50,6 @@ import { ShieldConfig } from "./types/config";
 //   cfnpolicy: cfnShieldPolicyProps
 // };
 
-
-
 // export interface shield_props extends cdk.StackProps {
 //   remediationEnabled: boolean | cdk.IResolvable;
 //   resourceTypeList?: Array<string>;
@@ -83,19 +81,34 @@ export class ShieldStack extends cdk.Stack {
     //   //https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#:~:text=Specification%20for%20SHIELD_ADVANCED%20for%20Amazon%20CloudFront%20distributions
     //   securityServicePolicyData: props.securityServicePolicyData,
     // };
-
+    const preProcessRuleGroups: never[] = [];
+    const postProcessRuleGroups: never[] = [];
+    let loggingConfiguration;
+    const managedServiceData: ManagedServiceData = {
+      type: "SHIELD_ADVANCED",
+      defaultAction: { type: "ALLOW" },
+      preProcessRuleGroups: preProcessRuleGroups,
+      postProcessRuleGroups: postProcessRuleGroups,
+      overrideCustomerWebACLAssociation: false,
+      loggingConfiguration: {
+        logDestinationConfigs: [loggingConfiguration || ""],
+      },
+    };
     const cfnShieldPolicyProps: fms.CfnPolicyProps = {
       // remediationEnabled - should be true
       remediationEnabled: props.config.remediationEnabled,
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#resourcetype:~:text=fms%2Dpolicy%2Dresourcetags-,resourceType,-%3F
-      resourceTypeList:props.config.resourceTypeList,
+      resourceTypeList: props.config.resourceTypeList,
       resourceType: props.config.resourceType,
       policyName: props.config.policyName,
       includeMap: props.config.includeMap,
       excludeMap: props.config.excludeMap,
       excludeResourceTags: props.config.excludeResourceTags,
       //https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#:~:text=Specification%20for%20SHIELD_ADVANCED%20for%20Amazon%20CloudFront%20distributions
-      securityServicePolicyData: props.config.securityServicePolicyData,
+      securityServicePolicyData: {
+        type: "SHIELD_ADVANCED",
+        managedServiceData: cdk.Fn.sub(JSON.stringify(managedServiceData), {}),
+      },
     };
     const fmspolicy = new fms.CfnPolicy(
       this,
