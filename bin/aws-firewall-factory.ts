@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 import { WafStack } from "../lib/_web-application-firewall-stack";
 import { PrerequisitesStack } from "../lib/_prerequisites-stack";
+import { ShieldStack } from "../lib/_shield-advanced-stack";
 import * as cdk from "aws-cdk-lib";
 import {
   Config,
+  ShieldConfig,
   Prerequisites,
   PriceRegions,
   RegionString,
@@ -16,7 +18,7 @@ import {
   guidanceHelper,
   ssmHelper,
 } from "../lib/tools/helpers";
-import { ShieldStack } from "../lib/_shield-advanced-stack";
+
 
 const app = new cdk.App();
 
@@ -27,11 +29,12 @@ void (async () => {
   - * relative path to config file imported from the env PROCESS_PARAMETERS
   - */
   const CONFIG_OBJECT_NAME = process.env.PROCESS_PARAMETERS;
-
+ 
   if (
     !CONFIG_OBJECT_NAME ||
     (values.configs[CONFIG_OBJECT_NAME] === undefined &&
-      values.prereq[CONFIG_OBJECT_NAME] === undefined)
+      values.prereq[CONFIG_OBJECT_NAME] === undefined&&
+      values.shieldConfigs[CONFIG_OBJECT_NAME] === undefined)
   ) {
     console.log("Configuration ", CONFIG_OBJECT_NAME, " not found.");
     process.exit(1);
@@ -66,7 +69,33 @@ void (async () => {
       }
     );
   }
-
+ // ---------------------------------------------------------------------
+ // Deploying advanced shield stack
+  console.log(process.env.ADVANCED_SHIELD);
+  if (process.env.ADVANCED_SHIELD === "true") {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
+    const shieldConfig: ShieldConfig = values.shieldConfigs[CONFIG_OBJECT_NAME];
+    const deploymentRegion = afwfHelper.outputInfoBanner();
+    const runtimeProperties = afwfHelper.initRuntimeProperties();
+    ssmHelper.getAllAwsRegionsFromPublicSsmParameter(
+      deploymentRegion,
+      runtimeProperties
+    );
+    console.log("ℹ️   Deploying Shield Advanced Stack.");
+    const app = new cdk.App();
+    new ShieldStack(
+      app,
+      shieldConfig.General.Prefix.toUpperCase()+"-SHIELD-ADVANCED-"+shieldConfig.General.Stage.toUpperCase(),
+      {
+        shieldConfig,
+        // env: {
+        //   region: process.env.AWS_REGION,
+        //   account: process.env.CDK_DEFAULT_ACCOUNT,
+        // },
+        // runtimeProperties: runtimeProperties,
+      }
+    );
+  }
   // ---------------------------------------------------------------------
   // Deploying Firewall stack
   else {

@@ -63,7 +63,7 @@ import { ShieldConfig } from "./types/config";
 //     | fms.CfnPolicy.SecurityServicePolicyDataProperty;
 // }
 export interface shield_props extends cdk.StackProps {
-  readonly config: ShieldConfig;
+  readonly shieldConfig: ShieldConfig;
 }
 export class ShieldStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: shield_props) {
@@ -96,14 +96,14 @@ export class ShieldStack extends cdk.Stack {
     };
     const cfnShieldPolicyProps: fms.CfnPolicyProps = {
       // remediationEnabled - should be true
-      remediationEnabled: props.config.remediationEnabled,
+      remediationEnabled: props.shieldConfig.remediationEnabled,
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#resourcetype:~:text=fms%2Dpolicy%2Dresourcetags-,resourceType,-%3F
-      resourceTypeList: props.config.resourceTypeList,
-      resourceType: props.config.resourceType,
-      policyName: props.config.policyName,
-      includeMap: props.config.includeMap,
-      excludeMap: props.config.excludeMap,
-      excludeResourceTags: props.config.excludeResourceTags,
+      resourceTypeList: props.shieldConfig.resourceTypeList,
+      resourceType: props.shieldConfig.resourceType,
+      policyName: props.shieldConfig.policyName,
+      includeMap: props.shieldConfig.includeMap,
+      excludeMap: props.shieldConfig.excludeMap,
+      excludeResourceTags: props.shieldConfig.excludeResourceTags,
       //https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#:~:text=Specification%20for%20SHIELD_ADVANCED%20for%20Amazon%20CloudFront%20distributions
       securityServicePolicyData: {
         type: "SHIELD_ADVANCED",
