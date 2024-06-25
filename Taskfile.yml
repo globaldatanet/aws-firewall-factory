@@ -48,7 +48,7 @@ tasks:
   cdkdestroy:
     desc: CDK Destroy
     cmds:
-      - cdk destroy --force
+      - bash -c 'source options.sh && cdk destroy --force'
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account
@@ -60,7 +60,7 @@ tasks:
   cdkdeploy:
     desc: CDK Deploy
     cmds:
-      - cdk deploy --require-approval never {{.TAGS}} --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}
+      - bash -c 'source options.sh && cdk deploy --require-approval never {{.TAGS}} --toolkit-stack-name {{.TOOL_KIT_STACKNAME}}'
     vars:
       ACCOUNT:
         sh: aws sts get-caller-identity |jq -r .Account

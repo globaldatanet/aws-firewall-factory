@@ -4,7 +4,7 @@
 choices=()
 
 # Options array
-options=("Option 1" "Option 2" "Option 3")
+options=("PreRequisiteStack" "WAFStack" "ShieldAdvancedStack")
 
 # Calculate the height (number of options + 5)
 height=$(( ${#options[@]} + 5 ))
@@ -24,6 +24,8 @@ process_choices() {
   echo "You selected:"
   for choice in "${choices[@]}"; do
     echo "- $choice"
+    export "STACK_NAME=$choice"
+    echo "Environment variable STACK_NAME set to $STACK_NAME"
   done
 }
 
