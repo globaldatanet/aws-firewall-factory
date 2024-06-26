@@ -1,6 +1,10 @@
 # Change Log
 
 ## Released
+## 4.5.0
+### Added
+
+Advanced Shield Stack .....
 
 ## 4.3.1
 ### Added
