@@ -28,6 +28,14 @@ export const outputInfoBanner = (config?:Config, shieldConfig?: ShieldConfig) =>
     console.log("\n👤 AWS FMS Administrator Account: ");
     console.log("\x1b[33m",`                        ${process.env.CDK_DEFAULT_ACCOUNT}`,"\x1b[0m");
     }
+  if(shieldConfig){
+    if(shieldConfig.resourceType === "AWS::CloudFront::Distribution"){
+      deploymentRegion = "us-east-1";
+    }
+    else{
+      deploymentRegion = process.env.REGION || "eu-central-1";
+    }
+  }
   if(config){
     if(process.env.PREREQUISITE === "true"){
       console.log("🌎 Deployment region:");

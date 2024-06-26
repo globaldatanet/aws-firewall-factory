@@ -39,6 +39,9 @@ export function getGuidance(context: string, runtimeProperties: RuntimePropertie
     case "wrongEvaluationWindowSec":
       runtimeProperties.GuidanceSummary.push("\x1b[31m",`\n    🚨  ${source} is not a EvaluationWindowSec for RateBasedStatements - Valid Settings are 60, 120, 300, and 600. \n       https://docs.aws.amazon.com/waf/latest/APIReference/API_RateBasedStatement.html.`,"\x1b[0m");
       break;
+    case "remediationNotEnabled":
+      runtimeProperties.GuidanceSummary.push("\x1b[33m","\n    ⚠️  Remediation is not enabled for your Firewall - Remediation takes care that the policy is automatically be applied to new resources..","\x1b[0m");
+      break;
     default:
       break;
   }
@@ -49,7 +52,7 @@ export function getGuidance(context: string, runtimeProperties: RuntimePropertie
 This function will print out the collected guidance for your Firewall.
 @param runtimeProperties - The runtimeProperties object.
  */
-export function outputGuidance(config: Config, runtimeProperties: RuntimeProperties) {
+export function outputGuidance(runtimeProperties: RuntimeProperties, config?: Config) {
   if(runtimeProperties.GuidanceSummary.length !== 0 || runtimeProperties.Guidance.nestedRateStatementCount !== 0 || runtimeProperties.Guidance.overrideActionManagedRuleGroupCount !== 0 || runtimeProperties.Guidance.noRuleLabelsCount !== 0 || runtimeProperties.Guidance.byteMatchStatementPositionalConstraintCount !== 0){
     console.log("\x1b[0m","\n🛟  Guidance:","\x1b[0m");
     runtimeProperties.GuidanceSummary.forEach(element => {
@@ -84,7 +87,7 @@ export function outputGuidance(config: Config, runtimeProperties: RuntimePropert
       console.log("        − "+element);
     });
   }
-  if(runtimeProperties.Guidance.rateBasedStatementCount === 0 && config.WebAcl.Type === "AWS::ElasticLoadBalancingV2::LoadBalancer"){
+  if(runtimeProperties.Guidance.rateBasedStatementCount === 0 && config?.WebAcl.Type === "AWS::ElasticLoadBalancingV2::LoadBalancer"){
     console.log("\x1b[0m","\n    ℹ️  You are securing a LoadBalancer with your Firewall with usage of a RateBasedStatement.\n       RateBasedStatements empower you to automatically block requests originating from problematic source IPs until their request rate diminishes below a predetermined threshold.","\x1b[0m");
   }
   console.log("\n\n");

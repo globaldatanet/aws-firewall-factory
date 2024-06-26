@@ -80,6 +80,7 @@ void (async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
       const shieldConfig: ShieldConfig = values.shieldConfigs[CONFIG_OBJECT_NAME];
       afwfHelper.outputInfoBanner();
+      const runtimeProperties = afwfHelper.initRuntimeProperties();
       console.log(`🛡️  Deploy Shield Policy: ${shieldConfig.General.Prefix.toUpperCase()}-${shieldConfig.General.Stage}
       \n ⦂ Type:
       ${shieldConfig.resourceType}\n`);
@@ -113,9 +114,11 @@ void (async () => {
             region: process.env.AWS_REGION,
             account: process.env.CDK_DEFAULT_ACCOUNT,
           },
-          // runtimeProperties: runtimeProperties,
+          runtimeProperties: runtimeProperties,
         }
       );
+      await pricingHelper.isShieldPriceCalculated(shieldConfig);
+      await guidanceHelper.outputGuidance(runtimeProperties);
     }
     // ---------------------------------------------------------------------
     // Deploying Firewall stack
@@ -259,7 +262,7 @@ void (async () => {
         config,
         deploymentRegion
       );
-      await guidanceHelper.outputGuidance(config, runtimeProperties);
+      await guidanceHelper.outputGuidance(runtimeProperties, config);
     }
 
 })();

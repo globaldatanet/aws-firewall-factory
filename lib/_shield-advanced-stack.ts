@@ -2,11 +2,14 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { ManagedServiceData, SubVariables } from "./types/fms";
+import { getGuidance } from "./tools/helpers/guidance";
+import { RuntimeProperties } from "./types/runtimeprops";
 import { ShieldConfig } from "./types/config";
 
 
 export interface shield_props extends cdk.StackProps {
   readonly shieldConfig: ShieldConfig;
+  readonly runtimeProperties: RuntimeProperties;
 }
 export class ShieldStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: shield_props) {
@@ -38,6 +41,8 @@ export class ShieldStack extends cdk.Stack {
         logDestinationConfigs: [loggingConfiguration || ""],
       },
     };
+
+    props.shieldConfig.remediationEnabled === false ? getGuidance("remediationNotEnabled", props.runtimeProperties) : null;
     const cfnShieldPolicyProps: fms.CfnPolicyProps = {
       // remediationEnabled - should be true
       remediationEnabled: props.shieldConfig.remediationEnabled,
