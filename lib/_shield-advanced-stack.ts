@@ -1,7 +1,5 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { Prerequisites } from "./types/config";
-import { RuntimeProperties } from "./types/runtimeprops";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { ManagedServiceData, SubVariables } from "./types/fms";
 import { ShieldConfig } from "./types/config";

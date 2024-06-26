@@ -11,7 +11,19 @@ height=$(( ${#options[@]} + 5 ))
 
 # Function to display menu and capture selections using fzf
 display_menu() {
-  selections=$(printf "%s\n" "${options[@]}" | fzf --multi --prompt="Select options: " --height=${height} --bind 'space:toggle' --no-info)
+  npx cfonts "AWS FIREWALL FACTORY" \
+  --font block \
+  --align center \
+  --colors "#00ecbd" \
+  --background "transparent" \
+  --letter-spacing 0 \
+  --line-height 0 \
+  --space true \
+  --max-length 13 \
+  --env "node" \
+  --width "80%"
+  echo "© by globaldatanet"
+  selections=$(printf "%s\n" "${options[@]}" | fzf --multi --prompt="Select which stack you want to deploy: " --height=${height} --bind 'space:toggle' --no-info)
 
   # Add selections to choices array
   for choice in $selections; do
