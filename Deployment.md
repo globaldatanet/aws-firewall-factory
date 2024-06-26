@@ -24,8 +24,9 @@
   | FireHoseKey - KeyAlias [^1] | Alias for Key |
   | CrossAccountIdforPermissions [^1] | Id of AWS Account for CrossAccount Permission for Bucket and KMS Key(s)|
 
-10. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
-
+10. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+11. Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
+![List of Resources](./static/options.jpg "Stacks")
 
 ### 🏁 Deployment via Taskfile
 
@@ -34,3 +35,5 @@
 2. Assume AWS Profile `awsume / assume PROFILENAME`
 3. (Optional) Enter `task generate-waf-skeleton`
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+5.  Select the type of resource to be deployed((Pre-requisite Stacks, WAF or Shield Advanced))
+![List of Resources](./static/options.jpg "Stacks")
