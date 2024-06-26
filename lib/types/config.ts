@@ -145,6 +145,7 @@ export interface Config {
     readonly PostProcess: RuleGroupSet;
   };
 }
+
 export interface ShieldConfig {
   readonly General: {
     /**
@@ -177,6 +178,14 @@ export interface ShieldConfig {
      */
     readonly CreateDashboard?: boolean;
   };
+  readonly WebAcl: {
+    /**
+     * Replace web ACLs that are currently associated with in-scope resources with the web ACLs created by this policy - Default is False
+     */
+    readonly OverrideCustomerWebACLAssociation?: boolean;
+  };
+  
+  defaultActionType: "ALLOW" | "DENY" | "COUNT" | "NONE";
   /**
    * Indicates if the policy should be automatically applied to new resources.
    *

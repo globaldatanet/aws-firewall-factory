@@ -5,63 +5,8 @@ import { RuntimeProperties } from "./types/runtimeprops";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { ManagedServiceData, SubVariables } from "./types/fms";
 import { ShieldConfig } from "./types/config";
-// export interface StackProps extends cdk.StackProps {
-//   readonly prerequisites: Prerequisites;
-//   runtimeProperties: RuntimeProperties;
-// }
 
-// // GLobal vs region-specific
-// export enum ShieldTypes {
-//   LOAD_BALANCER = "LOAD_BALANCER",
-//   CLOUDFRONT = "CLOUDFRONT",
-// }
 
-// export interface ResourceTypePerRegion {
-//   type: ShieldTypes;
-//   regions: string[];
-// }
-
-// export interface ShieldAccount {
-//   accountId: string;
-//   resourceTypePerRegion: ResourceTypePerRegion[];
-// }
-
-// export interface shield_props extends cdk.StackProps {
-//   accounts: ShieldAccount[];
-//
-// }
-//
-// const shieldProps: shield_props = {
-//   accounts: [
-//     {
-//       accountId: "123456789012",
-//       resourceTypePerRegion: [
-//         {
-//           type: ShieldTypes.LOAD_BALANCER,
-//           regions: ["us-east-1", "us-west-2"],
-//         },
-//         {
-//           type: ShieldTypes.CLOUDFRONT,
-//           regions: ["global"],
-//         },
-//       ],
-//     },
-//   ],
-//   cfnpolicy: cfnShieldPolicyProps
-// };
-
-// export interface shield_props extends cdk.StackProps {
-//   remediationEnabled: boolean | cdk.IResolvable;
-//   resourceTypeList?: Array<string>;
-//   resourceType: string;
-//   policyName: string;
-//   includeMap?: fms.CfnPolicy.IEMapProperty | cdk.IResolvable;
-//   excludeMap?: fms.CfnPolicy.IEMapProperty | cdk.IResolvable;
-//   excludeResourceTags: boolean | cdk.IResolvable;
-//   securityServicePolicyData:
-//     | cdk.IResolvable
-//     | fms.CfnPolicy.SecurityServicePolicyDataProperty;
-// }
 export interface shield_props extends cdk.StackProps {
   readonly shieldConfig: ShieldConfig;
 }
@@ -86,10 +31,11 @@ export class ShieldStack extends cdk.Stack {
     let loggingConfiguration;
     const managedServiceData: ManagedServiceData = {
       type: "SHIELD_ADVANCED",
-      defaultAction: { type: "ALLOW" },
+      defaultAction: { type: props.shieldConfig.defaultActionType },
       preProcessRuleGroups: preProcessRuleGroups,
       postProcessRuleGroups: postProcessRuleGroups,
-      overrideCustomerWebACLAssociation: false,
+      // overrideCustomerWebACLAssociation: false,
+      overrideCustomerWebACLAssociation: props.shieldConfig.WebAcl.OverrideCustomerWebACLAssociation ? props.shieldConfig.WebAcl.OverrideCustomerWebACLAssociation : false,
       loggingConfiguration: {
         logDestinationConfigs: [loggingConfiguration || ""],
       },
@@ -100,7 +46,8 @@ export class ShieldStack extends cdk.Stack {
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#resourcetype:~:text=fms%2Dpolicy%2Dresourcetags-,resourceType,-%3F
       resourceTypeList: props.shieldConfig.resourceTypeList,
       resourceType: props.shieldConfig.resourceType,
-      policyName: props.shieldConfig.policyName,
+      // policyName: props.shieldConfig.policyName,
+      policyName:`${props.shieldConfig.General.Prefix.toUpperCase()}-${props.shieldConfig.General.Stage}`,
       includeMap: props.shieldConfig.includeMap,
       excludeMap: props.shieldConfig.excludeMap,
       excludeResourceTags: props.shieldConfig.excludeResourceTags,
