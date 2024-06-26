@@ -79,7 +79,30 @@ void (async () => {
     if (process.env.STACK_NAME === "ShieldAdvancedStack") {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
       const shieldConfig: ShieldConfig = values.shieldConfigs[CONFIG_OBJECT_NAME];
-      console.log("ℹ️   Deploying Shield Advanced Stack.");
+      afwfHelper.outputInfoBanner();
+      console.log(`🛡️  Deploy Shield Policy: ${shieldConfig.General.Prefix.toUpperCase()}-${shieldConfig.General.Stage}
+      \n ⦂ Type:
+      ${shieldConfig.resourceType}\n`);
+      console.log("\n 🎯 Targets:");
+      if (shieldConfig.includeMap?.account) {
+        for (const account of shieldConfig.includeMap.account) {
+          console.log("\x1b[32m", `   🛬 ${account}`, "\x1b[0m");
+        }
+      }
+      if (shieldConfig.includeMap?.orgunit) {
+        for (const unit of shieldConfig.includeMap?.orgunit) {
+          console.log("\x1b[32m", `   🛬 ${unit}`, "\x1b[0m");
+        }
+      }
+      console.log("\n 📑 Logging:");
+      if (shieldConfig.General.LoggingConfiguration === "Firehose") {
+        console.log("   🧯  " + shieldConfig.General.LoggingConfiguration);
+        console.log("      ⚙️  [" + shieldConfig.General.S3LoggingBucketName + "]");
+      }
+      if (shieldConfig.General.LoggingConfiguration === "S3") {
+        console.log("   🪣  " + shieldConfig.General.LoggingConfiguration);
+        console.log("      ⚙️  [" + shieldConfig.General.S3LoggingBucketName + "]");
+      }
       const app = new cdk.App();
       new ShieldStack(
         app,

@@ -238,7 +238,7 @@ export interface ShieldConfig {
    *
    * @see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-fms-policy.html#cfn-fms-policy-includemap
    */
-  readonly includeMap?: fms.CfnPolicy.IEMapProperty | cdk.IResolvable;
+  readonly includeMap?: fms.CfnPolicy.IEMapProperty;
   /**
    * Specifies the AWS account IDs and AWS Organizations organizational units (OUs) to exclude from the policy.
    *
@@ -254,7 +254,7 @@ export interface ShieldConfig {
    *
    * @see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-fms-policy.html#cfn-fms-policy-excludemap
    */
-  readonly excludeMap?: fms.CfnPolicy.IEMapProperty | cdk.IResolvable;
+  readonly excludeMap?: fms.CfnPolicy.IEMapProperty;
   /**
    * Used only when tags are specified in the `ResourceTags` property.
    *
@@ -262,7 +262,7 @@ export interface ShieldConfig {
    *
    * @see http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-fms-policy.html#cfn-fms-policy-excluderesourcetags
    */
-  readonly excludeResourceTags: boolean | cdk.IResolvable;
+  readonly excludeResourceTags: boolean;
 }
 /**
  * The type of resource protected by or in scope of the policy. To apply this policy to multiple resource types, specify a resource type of ResourceTypeList and then specify the resource types in a ResourceTypeList.

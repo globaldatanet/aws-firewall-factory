@@ -2,7 +2,7 @@
 import cfonts = require("cfonts");
 import * as packageJsonObject from "../../../package.json";
 import { RuntimeProperties } from "../../types/runtimeprops";
-import { Config } from "../../types/config";
+import { Config, ShieldConfig } from "../../types/config";
 
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
@@ -15,7 +15,7 @@ const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
  * @param config configuration object of the values.json
  * @return deploymentRegion AWS region, e.g. eu-central-1
  */
-export const outputInfoBanner = (config?:Config) => {
+export const outputInfoBanner = (config?:Config, shieldConfig?: ShieldConfig) => {
   /**
    * the region into which the stack is deployed
    */
@@ -24,9 +24,11 @@ export const outputInfoBanner = (config?:Config) => {
   cfonts.say("AWS FIREWALL FACTORY", {font: "block",align: "center",colors: ["#00ecbd"],background: "transparent",letterSpacing: 0,lineHeight: 0,space: true,maxLength: "13",gradient: false,independentGradient: false,transitionGradient: false,env: "node",width:"80%"});
   console.log("\n © by globaldatanet");
   console.log("\n🏷  Version: ","\x1B[1m",FIREWALL_FACTORY_VERSION,"\x1b[0m");
-  if(config){
+  if(shieldConfig || config){
     console.log("\n👤 AWS FMS Administrator Account: ");
     console.log("\x1b[33m",`                        ${process.env.CDK_DEFAULT_ACCOUNT}`,"\x1b[0m");
+    }
+  if(config){
     if(process.env.PREREQUISITE === "true"){
       console.log("🌎 Deployment region:");
       console.log("\x1b[32m",`                      ${process.env.AWS_REGION}`,"\x1b[0m \n\n");
