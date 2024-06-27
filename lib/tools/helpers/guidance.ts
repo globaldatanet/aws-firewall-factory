@@ -40,7 +40,7 @@ export function getGuidance(context: string, runtimeProperties: RuntimePropertie
       runtimeProperties.GuidanceSummary.push("\x1b[31m",`\n    🚨  ${source} is not a EvaluationWindowSec for RateBasedStatements - Valid Settings are 60, 120, 300, and 600. \n       https://docs.aws.amazon.com/waf/latest/APIReference/API_RateBasedStatement.html.`,"\x1b[0m");
       break;
     case "remediationNotEnabled":
-      runtimeProperties.GuidanceSummary.push("\x1b[33m","\n    ⚠️  Remediation is not enabled for your Firewall - Remediation takes care that the policy is automatically be applied to new resources..","\x1b[0m");
+      runtimeProperties.GuidanceSummary.push("\x1b[33m","\n    ⚠️  Remediation is not enabled for your Shield Policy. \n       Remediation takes care that the policy is automatically be applied to new resources.","\x1b[0m");
       break;
     default:
       break;
