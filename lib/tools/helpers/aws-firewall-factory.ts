@@ -33,7 +33,7 @@ export const outputInfoBanner = (config?:Config, shieldConfig?: ShieldConfig) =>
       deploymentRegion = "us-east-1";
     }
     else{
-      deploymentRegion = process.env.REGION || "eu-central-1";
+      deploymentRegion = process.env.AWS_REGION || "eu-central-1";
     }
   }
   if(config){
