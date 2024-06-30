@@ -4,7 +4,7 @@
 ## ⁉️ .What is a Web Application Firewall?
 
 A crucial security component for **every** web app. It acts as a **protective barrier** between your application and potential threats. Offering a range of **practical functionalities** to mitigate known risks, emerging threats, harmful activities and many more.
-✨ AWS Firewall Factory has know extended it capability by supporitng deployment of Advanced Shield Policy through AWS Firewall Manager. You can find the Advanced Shield stacks available from our version 4.5 release.
+✨ AWS Firewall Factory has extended its capabilities to support Advanced Shield policy deployment through AWS Firewall Manager. The Advanced Shield stacks are available starting with our version 4.5 release.
 
 ## 🔥 About our AWS Firewall Factory
 

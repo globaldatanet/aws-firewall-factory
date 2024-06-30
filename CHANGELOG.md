@@ -3,10 +3,16 @@
 ## Released
 ## 4.5.0
 ### Added
+ - Added support for deploying Shield Advanced policies, including the ability to calculate pricing. AWS Shield Advanced provides customized detection based on traffic patterns to your protected resources, detects and alerts on smaller DDoS attacks, and identifies application layer attacks by baselining traffic and spotting anomalies.
+ For Shield Advanced policies, we have introduced an Advanced Shield stack with sample configurations (./values/examples/shield-advanced.ts).
 
-- Advanced Shield: Added support for deploying Shield Advanced policies.
-- New Advanced Shield stack with examples(./values/examples/shield-advanced-parameters.ts).
-- Added Advanced Shiled price calculation.
+### Fixed
+Bump @aws-sdk/client-cloudfront from 3.577.0 to 3.600.0 
+Bump @aws-sdk/client-cloudformation from 3.556.0 to 3.600.0 
+Bump @aws-sdk/client-wafv2 from 3.556.0 to 3.600.0 
+Bump @aws-sdk/client-ssm from 3.556.0 to 3.600.0
+Bump eslint from 8.56.0 to 8.57.0 
+
 
 ## 4.3.1
 ### Added

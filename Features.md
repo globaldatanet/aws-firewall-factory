@@ -79,3 +79,4 @@ See example:
 22. Centralized management of RegexPatternSets - No longer will there be a need for manual updates of RegexPatternSets across multiple AWS accounts. These can now be defined in code and replicated for use by WAF rules wherever needed.
 
 23. Automated identification and notification system in Firewall Factory to manage unused WAFs, leveraging Lambda and notification services to streamline infrastructure, optimize costs, and enhance security by addressing WAF sprawl proactively and ensuring efficient resource utilization.
+24. Support Advanced Shield policy deployment through AWS Firewall Manager. AWS Shield Advanced provides customized detection based on traffic patterns to your protected resources, detects and alerts on smaller DDoS attacks, and identifies application layer attacks by baselining traffic and spotting anomalies.
