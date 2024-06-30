@@ -7,39 +7,39 @@
  For Shield Advanced policies, we have introduced an Advanced Shield stack with sample configurations (./values/examples/shield-advanced.ts).
 
 ### Fixed
-Bump @aws-sdk/client-cloudformation to  3.606.0
-Bump @aws-sdk/client-cloudfront to 3.606.0
-Bump @aws-sdk/client-cloudwatch to 3.606.0
-Bump @aws-sdk/client-config-service to 3.606.0
-Bump @aws-sdk/client-ec2 to 3.606.0
-Bump @aws-sdk/client-fms to 3.606.0
-Bump @aws-sdk/client-pricing to 3.606.0
-Bump @aws-sdk/client-s3 to 3.606.0
-Bump @aws-sdk/client-secrets-manager to 3.606.0
-Bump @aws-sdk/client-service-quotas to 3.606.0
-Bump @aws-sdk/client-shield to 3.606.0
-Bump @aws-sdk/client-ssm to 3.606.0
-Bump @aws-sdk/client-wafv2 to 3.606.0
-Bump @aws-solutions-constructs/aws-eventbridge-stepfunctions to 2.60.0
-Bump @babel/traverse to 7.24.7
-Bump @mhlabs/cfn-diagram to 1.1.40
-Bump @slack/types to 2.12.0
-Bump @types/aws-lambda to 8.10.140
-Bump @types/lodash to 4.17.6
-Bump @types/uuid to 10.0.0
-Bump adaptivecards to 3.0.4
-Bump aws-cdk-lib to 2.147.2
-Bump axios to 1.7.2
-Bump cdk-sops-secrets to 1.12.0
-Bump cfonts to 3.3.0
-Bump npm to 10.8.1
-Bump table to 6.8.2
-Bump uuid to 10.0.0"
-Bump @types/node to 20.14.9
-Bump @typescript-eslint/eslint-plugin to 7.14.1
-Bump @typescript-eslint/parser to 7.14.1
-Bump aws-cdk to 2.147.2
-Bump ts-jest to 29.1.5
+- Bump @aws-sdk/client-cloudformation to  3.606.0
+- Bump @aws-sdk/client-cloudfront to 3.606.0
+- Bump @aws-sdk/client-cloudwatch to 3.606.0
+- Bump @aws-sdk/client-config-service to 3.606.0
+- Bump @aws-sdk/client-ec2 to 3.606.0
+- Bump @aws-sdk/client-fms to 3.606.0
+- Bump @aws-sdk/client-pricing to 3.606.0
+- Bump @aws-sdk/client-s3 to 3.606.0
+- Bump @aws-sdk/client-secrets-manager to 3.606.0
+- Bump @aws-sdk/client-service-quotas to 3.606.0
+- Bump @aws-sdk/client-shield to 3.606.0
+- Bump @aws-sdk/client-ssm to 3.606.0
+- Bump @aws-sdk/client-wafv2 to 3.606.0
+- Bump @aws-solutions-constructs/aws-eventbridge-stepfunctions to 2.60.0
+- Bump @babel/traverse to 7.24.7
+- Bump @mhlabs/cfn-diagram to 1.1.40
+- Bump @slack/types to 2.12.0
+- Bump @types/aws-lambda to 8.10.140
+- Bump @types/lodash to 4.17.6
+- Bump @types/uuid to 10.0.0
+- Bump adaptivecards to 3.0.4
+- Bump aws-cdk-lib to 2.147.2
+- Bump axios to 1.7.2
+- Bump cdk-sops-secrets to 1.12.0
+- Bump cfonts to 3.3.0
+- Bump npm to 10.8.1
+- Bump table to 6.8.2
+- Bump uuid to 10.0.0
+- Bump @types/node to 20.14.9
+- Bump @typescript-eslint/eslint-plugin to 7.14.1
+- Bump @typescript-eslint/parser to 7.14.1
+- Bump aws-cdk to 2.147.2
+- Bump ts-jest to 29.1.5
 
 ## 4.3.1
 ### Added
