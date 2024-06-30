@@ -3,7 +3,7 @@ import { Construct } from "constructs";
 import { Prerequisites } from "./types/config";
 import { RuntimeProperties } from "./types/runtimeprops";
 import { aws_s3 as s3, aws_kms as kms, aws_iam as iam, aws_lambda as lambda, aws_lambda_nodejs as NodejsFunction, aws_logs as logs, aws_glue as glue, aws_stepfunctions as sfn,
-  aws_stepfunctions_tasks as tasks, aws_sns as sns, aws_fms as fms, aws_glue as glue} from "aws-cdk-lib";
+  aws_stepfunctions_tasks as tasks, aws_sns as sns, aws_fms as fms, aws_athena as athena} from "aws-cdk-lib";
 import { EventbridgeToStepfunctions, EventbridgeToStepfunctionsProps } from "@aws-solutions-constructs/aws-eventbridge-stepfunctions";
 import * as path from "path";
 import { SopsSyncProvider, SopsSecret } from "cdk-sops-secrets";
@@ -426,10 +426,10 @@ export class PrerequisitesStack extends cdk.Stack {
           description: "Database for AWS Firewall Factory Grafana Dashboards",
         },
       });
-      const GlueCrawler = new glue.CfnCrawler(this, "AWS-Firewall-Factory-Grafana-Crawler", {
+      new glue.CfnCrawler(this, "AWS-Firewall-Factory-Grafana-Crawler", {
         name: "aws-firewall-factory-grafana-crawler",
         role: GlueCrawlerRole.roleArn,
-        databaseName: "aws_firewall_factory_grafana",
+        databaseName: GlueDatabase.ref,
         targets: {
           s3Targets: [
             {
@@ -441,7 +441,28 @@ export class PrerequisitesStack extends cdk.Stack {
         },
       });
 
-      //TODO add Athena Workspace and NamedQuery
-    }
+      const AthenaWorkgroup = new athena.CfnWorkGroup(this, "AWS-Firewall-Factory-Grafana-WorkGroup", {
+        name: "aws_firewall_factory_db",
+        state: "ENABLED",
+        workGroupConfiguration: {
+          enforceWorkGroupConfiguration: true,
+          publishCloudWatchMetricsEnabled: true,
+          resultConfiguration: {
+            outputLocation: `s3://${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/`,
+          },
+        },
+      });
 
-  }}
+      new athena.CfnNamedQuery(this, "AWS-Firewall-Factory-Grafana-NamedQuery", {
+        database: GlueDatabase.ref,
+        queryString: `CREATE OR REPLACE VIEW "waflogs" AS
+        SELECT DISTINCT *
+        FROM
+        "AwsDataCatalog".aws_firewall_factory_db.aws_waf_logs`,
+        name: "aws_firewall_factory_waf_centralized_logging",
+        description: "AWS WAF Logging dashboard summary view",
+        workGroup: AthenaWorkgroup.ref,
+      });
+    }
+  }
+}
