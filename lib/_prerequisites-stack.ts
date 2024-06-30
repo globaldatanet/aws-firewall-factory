@@ -401,18 +401,24 @@ export class PrerequisitesStack extends cdk.Stack {
 
       const GlueCrawlerRole = new iam.Role(this, "AWS-Firewall-Factory-Grafana-Crawler-Role", {
         assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
-    })
-    GlueCrawlerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"));
-    GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
-      actions: ["s3:GetObject", "s3:ListBucket"],
-      resources: [`arn:aws:s3:::${props.prerequisites.Grafana.BucketName}/*`],
-    }));
+      });
+      GlueCrawlerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"));
+      GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
+        actions: ["s3:GetObject", "s3:ListBucket"],
+        resources: [`arn:aws:s3:::${props.prerequisites.Grafana.BucketName}/*`],
+      }));
 
-    GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
-      actions: ["s3:PutObject", "s3:GetObject"],
-      resources: [`arn:aws:s3:::${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/*`],
-    }));
+      GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
+        actions: ["s3:PutObject", "s3:GetObject"],
+        resources: [`arn:aws:s3:::${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/*`],
+      }));
 
+      if(props.prerequisites.Grafana.BucketKmsKey){
+        GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
+          actions: ["kms:Decrypt", "kms:Encrypt"],
+          resources: [props.prerequisites.Grafana.BucketKmsKey],
+        }));
+      }
       const GlueDatabase = new glue.CfnDatabase(this, "AWS-Firewall-Factory-Grafana-Database", {
         catalogId: cdk.Aws.ACCOUNT_ID,
         databaseInput: {
@@ -436,5 +442,6 @@ export class PrerequisitesStack extends cdk.Stack {
       });
 
       //TODO add Athena Workspace and NamedQuery
-  }
-}
+    }
+
+  }}
