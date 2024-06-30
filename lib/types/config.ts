@@ -367,6 +367,17 @@ export interface Prerequisites {
       readonly Regions?: string;
     };
   };
+
+  readonly Grafana?: {
+      /**
+       * S3 Bucket where the FMS Logs are beeing stored. Allowed Pattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
+       */
+      readonly BucketName?: string;
+      /*
+      * Specify the KMS Key for the S3 Bucket - if its KMS Encrypted
+      */
+     readonly BucketKmsKey?: string;
+  }
 }
 /**
  * S3 Object Lock provides two retention modes:

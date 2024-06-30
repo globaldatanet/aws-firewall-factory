@@ -3,7 +3,7 @@ import { Construct } from "constructs";
 import { Prerequisites } from "./types/config";
 import { RuntimeProperties } from "./types/runtimeprops";
 import { aws_s3 as s3, aws_kms as kms, aws_iam as iam, aws_lambda as lambda, aws_lambda_nodejs as NodejsFunction, aws_logs as logs, aws_glue as glue, aws_stepfunctions as sfn,
-  aws_stepfunctions_tasks as tasks, aws_sns as sns, aws_fms as fms} from "aws-cdk-lib";
+  aws_stepfunctions_tasks as tasks, aws_sns as sns, aws_fms as fms, aws_glue as glue} from "aws-cdk-lib";
 import { EventbridgeToStepfunctions, EventbridgeToStepfunctionsProps } from "@aws-solutions-constructs/aws-eventbridge-stepfunctions";
 import * as path from "path";
 import { SopsSyncProvider, SopsSecret } from "cdk-sops-secrets";
@@ -397,5 +397,44 @@ export class PrerequisitesStack extends cdk.Stack {
       });
     }
 
+    if(props.prerequisites.Grafana){
+
+      const GlueCrawlerRole = new iam.Role(this, "AWS-Firewall-Factory-Grafana-Crawler-Role", {
+        assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
+    })
+    GlueCrawlerRole.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"));
+    GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
+      actions: ["s3:GetObject", "s3:ListBucket"],
+      resources: [`arn:aws:s3:::${props.prerequisites.Grafana.BucketName}/*`],
+    }));
+
+    GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
+      actions: ["s3:PutObject", "s3:GetObject"],
+      resources: [`arn:aws:s3:::${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/*`],
+    }));
+
+      const GlueDatabase = new glue.CfnDatabase(this, "AWS-Firewall-Factory-Grafana-Database", {
+        catalogId: cdk.Aws.ACCOUNT_ID,
+        databaseInput: {
+          name: "aws_firewall_factory_grafana",
+          description: "Database for AWS Firewall Factory Grafana Dashboards",
+        },
+      });
+      const GlueCrawler = new glue.CfnCrawler(this, "AWS-Firewall-Factory-Grafana-Crawler", {
+        name: "aws-firewall-factory-grafana-crawler",
+        role: GlueCrawlerRole.roleArn,
+        databaseName: "aws_firewall_factory_grafana",
+        targets: {
+          s3Targets: [
+            {
+              path: `s3://${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/`,
+            },]
+        },
+        schedule: {
+          scheduleExpression: "cron(0 */1 * * ? *)",
+        },
+      });
+
+      //TODO add Athena Workspace and NamedQuery
   }
 }
