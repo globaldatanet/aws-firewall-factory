@@ -4,7 +4,9 @@
 ## 4.5.0
 ### Added
 
-Advanced Shield Stack .....
+- Advanced Shield: Added support for deploying Shield Advanced policies.
+- New Advanced Shield stack with examples(./values/examples/shield-advanced-parameters.ts).
+- Added Advanced Shiled price calculation.
 
 ## 4.3.1
 ### Added
