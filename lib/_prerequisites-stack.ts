@@ -399,6 +399,11 @@ export class PrerequisitesStack extends cdk.Stack {
 
     if(props.prerequisites.Grafana){
 
+      const AthenaWorkGroupKey = new kms.Key(this, "AWS-Firewall-Factory-Grafana-AthenaWorkGroupKey", {
+        enableKeyRotation: true,
+        alias: props.prerequisites.General.Prefix.toLocaleLowerCase() + "-AWS-Firewall-Factory-Grafana-AthenaWorkGroupKey"
+      });
+
       const GlueCrawlerRole = new iam.Role(this, "AWS-Firewall-Factory-Grafana-Crawler-Role", {
         assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
       });
@@ -416,7 +421,7 @@ export class PrerequisitesStack extends cdk.Stack {
       if(props.prerequisites.Grafana.BucketKmsKey){
         GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
           actions: ["kms:Decrypt", "kms:Encrypt"],
-          resources: [props.prerequisites.Grafana.BucketKmsKey],
+          resources: [props.prerequisites.Grafana.BucketKmsKey, AthenaWorkGroupKey.keyArn],
         }));
       }
       const GlueDatabase = new glue.CfnDatabase(this, "AWS-Firewall-Factory-Grafana-Database", {
@@ -449,6 +454,9 @@ export class PrerequisitesStack extends cdk.Stack {
           publishCloudWatchMetricsEnabled: true,
           resultConfiguration: {
             outputLocation: `s3://${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/`,
+          },
+          customerContentEncryptionConfiguration: {
+            kmsKey: AthenaWorkGroupKey.keyArn,
           },
         },
       });
