@@ -36,7 +36,7 @@
     "@aws-sdk/client-service-quotas": "3.556.0",
     "@aws-sdk/client-shield": "3.556.0",
     "@aws-sdk/client-ssm": "3.556.0",
-    "@aws-sdk/client-wafv2": "3.556.0",
+    "@aws-sdk/client-wafv2": "3.606.0",
     "@aws-solutions-constructs/aws-eventbridge-stepfunctions": "^2.57.0",
     "@babel/traverse": "^7.23.7",
     "@mhlabs/cfn-diagram": "^1.1.38",
