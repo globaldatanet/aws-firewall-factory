@@ -380,11 +380,15 @@ export class PrerequisitesStack extends cdk.Stack {
 
       DdosFmsNotificationSecret.grantRead(DdosFmsNotification);
 
-      const snsRoleName = iam.Role.fromRoleName(this, "AWSServiceRoleForFMS", "aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS").roleArn;
+      const snsRole = iam.Role.fromRoleName(this, "AWSServiceRoleForFMS", "aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS");
+      const snsRoleName = snsRole.roleArn;
+      
+      // const snsRoleArn = snsRoleName.roleArn;
       const FmsTopic = new sns.Topic(this, "FMS-Notifications-Topic");
       FmsTopic.addToResourcePolicy(new iam.PolicyStatement({
         actions: ["sns:Publish"],
-        principals: [iam.Role.fromRoleArn(this, "AWSServiceRoleForFMS",snsRoleName)],
+        principals: [snsRole],
+        resources: [FmsTopic.topicArn], 
       }));
       DdosFmsNotification.addPermission("InvokeByFmsSnsTopic", {
         action: "lambda:InvokeFunction",
@@ -396,8 +400,7 @@ export class PrerequisitesStack extends cdk.Stack {
         snsTopicArn: FmsTopic.topicArn,
       });
     }
-
-    if(props.prerequisites.Grafana){
+      if(props.prerequisites.Grafana){
 
       const FmsDelegatedAdminAccountId = props.prerequisites.Grafana.DelegatedAdminAccountId ? props.prerequisites.Grafana.DelegatedAdminAccountId : cdk.Aws.ACCOUNT_ID;
       const AthenaWorkGroupKey = new kms.Key(this, "AWS-Firewall-Factory-Grafana-AthenaWorkGroupKey", {
@@ -473,5 +476,6 @@ export class PrerequisitesStack extends cdk.Stack {
         workGroup: AthenaWorkgroup.ref,
       });
     }
+
   }
 }
