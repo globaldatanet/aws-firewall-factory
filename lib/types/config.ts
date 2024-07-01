@@ -377,6 +377,11 @@ export interface Prerequisites {
       * Specify the KMS Key for the S3 Bucket - if its KMS Encrypted
       */
      readonly BucketKmsKey?: string;
+     /**
+      * Firewall Manager Delegated Admin Account Id
+      * @TJS-pattern "^[0-9]{12}$"
+      */
+     readonly DelegatedAdminAccountId?: string;
   }
 }
 /**

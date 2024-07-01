@@ -399,6 +399,7 @@ export class PrerequisitesStack extends cdk.Stack {
 
     if(props.prerequisites.Grafana){
 
+      const FmsDelegatedAdminAccountId = props.prerequisites.Grafana.DelegatedAdminAccountId ? props.prerequisites.Grafana.DelegatedAdminAccountId : cdk.Aws.ACCOUNT_ID;
       const AthenaWorkGroupKey = new kms.Key(this, "AWS-Firewall-Factory-Grafana-AthenaWorkGroupKey", {
         enableKeyRotation: true,
         alias: props.prerequisites.General.Prefix.toLocaleLowerCase() + "-AWS-Firewall-Factory-Grafana-AthenaWorkGroupKey"
@@ -415,7 +416,7 @@ export class PrerequisitesStack extends cdk.Stack {
 
       GlueCrawlerRole.addToPolicy(new iam.PolicyStatement({
         actions: ["s3:PutObject", "s3:GetObject"],
-        resources: [`arn:aws:s3:::${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/*`],
+        resources: [`arn:aws:s3:::${props.prerequisites.Grafana.BucketName}/${FmsDelegatedAdminAccountId}/AwsFirewallFactory/Grafana/*`],
       }));
 
       if(props.prerequisites.Grafana.BucketKmsKey){
@@ -438,7 +439,7 @@ export class PrerequisitesStack extends cdk.Stack {
         targets: {
           s3Targets: [
             {
-              path: `s3://${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/`,
+              path: `s3://${props.prerequisites.Grafana.BucketName}/${FmsDelegatedAdminAccountId}/FirewallManager/`,
             },]
         },
         schedule: {
@@ -453,7 +454,7 @@ export class PrerequisitesStack extends cdk.Stack {
           enforceWorkGroupConfiguration: true,
           publishCloudWatchMetricsEnabled: true,
           resultConfiguration: {
-            outputLocation: `s3://${props.prerequisites.Grafana.BucketName}/${cdk.Aws.ACCOUNT_ID}/AwsFirewallFactory/Grafana/`,
+            outputLocation: `s3://${props.prerequisites.Grafana.BucketName}/${FmsDelegatedAdminAccountId}/AwsFirewallFactory/Grafana/`,
           },
           customerContentEncryptionConfiguration: {
             kmsKey: AthenaWorkGroupKey.keyArn,
