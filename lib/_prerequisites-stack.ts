@@ -395,6 +395,11 @@ export class PrerequisitesStack extends cdk.Stack {
         principal: new iam.ServicePrincipal("sns.amazonaws.com"),
         sourceArn: FmsTopic.topicArn,
       });
+      new sns.Subscription(this, "FMSNotificationsTopicSubscription", {
+        topic: FmsTopic,
+        protocol: sns.SubscriptionProtocol.LAMBDA,
+        endpoint: DdosFmsNotification.functionArn,
+      });
       new fms.CfnNotificationChannel(this, "AWS-Firewall-Factory-FMS-NotificationChannel", {
         snsRoleName,
         snsTopicArn: FmsTopic.topicArn,
