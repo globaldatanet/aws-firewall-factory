@@ -14,6 +14,7 @@
   Example Grafana Dashboard can be found [here](./static/grafana/waf-dashboard.json)
   __Note__:
     - Your need to configure [Amazon Athena Data Source](https://docs.aws.amazon.com/athena/latest/ug/work-with-data-stores.html) in Amazon Managed Grafana
+      - Example Role template for Cross Account Access can be found [here](./static/roles/grafana-role.yaml)
     - ⚠️ You need to adjust the json and replace the  uid of your grafana-athena-datasource - while importing into your Grafana.
 
 
