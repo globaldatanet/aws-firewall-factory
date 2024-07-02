@@ -398,6 +398,7 @@ export class PrerequisitesStack extends cdk.Stack {
     }
 
     if(props.prerequisites.Grafana){
+      console.log("📢 Amazon Athena table and an Amazon Athena view to build a Managed Grafana dashboard to visualize the events in near real time.");
 
       const FmsDelegatedAdminAccountId = props.prerequisites.Grafana.DelegatedAdminAccountId ? props.prerequisites.Grafana.DelegatedAdminAccountId : cdk.Aws.ACCOUNT_ID;
       const AthenaWorkGroupKey = new kms.Key(this, "AWS-Firewall-Factory-Grafana-AthenaWorkGroupKey", {
