@@ -5,6 +5,8 @@
 ### Added
  - Added support for deploying Shield Advanced policies, including the ability to calculate pricing. AWS Shield Advanced provides customized detection based on traffic patterns to your protected resources, detects and alerts on smaller DDoS attacks, and identifies application layer attacks by baselining traffic and spotting anomalies.
  For Shield Advanced policies, we have introduced an Advanced Shield stack with sample configurations (./values/examples/shield-advanced.ts).
+  - Add AWS Glue crawler job, an Amazon Athena table and an Amazon Athena view to build a Managed Grafana dashboard to visualize the events in near real time - This is an optional component in the Prequisite Stack.
+
 
 ### Fixed
 - Bump @aws-sdk/client-cloudformation to  3.606.0

@@ -466,6 +466,7 @@ export class PrerequisitesStack extends cdk.Stack {
             kmsKey: AthenaWorkGroupKey.keyArn,
           },
         },
+        tags: [ {key: "GrafanaDataSource", value: "true"}],
       });
 
       new athena.CfnNamedQuery(this, "AWS-Firewall-Factory-Grafana-NamedQuery", {
