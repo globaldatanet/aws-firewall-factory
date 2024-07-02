@@ -491,7 +491,7 @@
             "table": "waflogs"
           }
         ],
-        "title": "Request by Endpoint",
+        "title": "Request by Endpoint (TOP 10)",
         "type": "barchart"
       },
       {
