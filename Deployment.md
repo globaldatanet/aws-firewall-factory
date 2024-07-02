@@ -24,16 +24,24 @@
   | FireHoseKey - KeyAlias [^1] | Alias for Key |
   | CrossAccountIdforPermissions [^1] | Id of AWS Account for CrossAccount Permission for Bucket and KMS Key(s)|
 
-10. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
-11. Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
-![List of Resources](./static/options.jpg "Stacks")
-
+12. When Deploying from a CI/CD pipeline, set an environment variable STACK_NAME to specify which resources to deploy.
+      - `export STACK_NAME=PreRequisiteStack` => _prerequisites-stack.ts
+      - `export STACK_NAME=WAFStack` => _web-application-firewall-stack.ts
+      - `export STACK_NAME=ShieldAdvancedStack` => _shield-advanced-stack.ts
+13. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+14. If STACK_NAME isn't set yet, select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
+  ![List of Resources](./static/options.jpg "Stacks")
 ### 🏁 Deployment via Taskfile
 
 1. Create new ts file for you WAF and configure Rules in the Configuration (see [owasptopten.ts](values/examples/owasptop10.ts) to see structure) or use enter `task generate-waf-skeleton`
 
 2. Assume AWS Profile `awsume / assume PROFILENAME`
 3. (Optional) Enter `task generate-waf-skeleton`
-4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
-5.  Select the type of resource to be deployed((Pre-requisite Stacks, WAF or Shield Advanced))
-![List of Resources](./static/options.jpg "Stacks")
+4. When Deploying from a CI/CD pipeline, set an environment variable STACK_NAME to specify which resources to deploy.
+    - `export STACK_NAME=PreRequisiteStack` => _prerequisites-stack.ts
+    - `export STACK_NAME=WAFStack` => _web-application-firewall-stack.ts
+    - `export STACK_NAME=ShieldAdvancedStack` => _shield-advanced-stack.ts
+5. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+6. If STACK_NAME isn't set yet, select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
+  ![List of Resources](./static/options.jpg "Stacks")
+  
