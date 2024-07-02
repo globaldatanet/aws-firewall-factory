@@ -466,6 +466,7 @@ export class PrerequisitesStack extends cdk.Stack {
             kmsKey: AthenaWorkGroupKey.keyArn,
           },
         },
+        tags: [ {key: "GrafanaDataSource", value: "true"}],
       });
 
       new athena.CfnNamedQuery(this, "AWS-Firewall-Factory-Grafana-NamedQuery", {
@@ -473,7 +474,8 @@ export class PrerequisitesStack extends cdk.Stack {
         queryString: `CREATE OR REPLACE VIEW "waflogs" AS
         SELECT DISTINCT *
         FROM
-        "AwsDataCatalog".aws_firewall_factory_db.aws_waf_logs`,
+        "AwsDataCatalog".${props.prerequisites.Grafana.FmsLogAthenaDatabase}.${props.prerequisites.Grafana.FmsLogsAthenaTable}
+        WHERE cast(date_parse(day, '%Y/%m/%d') as date) > current_date - interval '${props.prerequisites.Grafana.TimeWindow}' day`,
         name: "aws_firewall_factory_waf_centralized_logging",
         description: "AWS WAF Logging dashboard summary view",
         workGroup: AthenaWorkgroup.ref,
