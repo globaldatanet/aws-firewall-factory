@@ -80,3 +80,15 @@ See example:
 
 23. Automated identification and notification system in Firewall Factory to manage unused WAFs, leveraging Lambda and notification services to streamline infrastructure, optimize costs, and enhance security by addressing WAF sprawl proactively and ensuring efficient resource utilization.
 24. Support Advanced Shield policy deployment through AWS Firewall Manager. AWS Shield Advanced provides customized detection based on traffic patterns to your protected resources, detects and alerts on smaller DDoS attacks, and identifies application layer attacks by baselining traffic and spotting anomalies.
+
+25. Add Grafana Dashbording - The Firewall Factory is able to provision prequsistes and a Central Grafana Dashboard.
+  The Dashboard shows:
+    - Request Map Across Countries
+    - Request Count by Action
+    - Request by Endpoint (TOP 10)
+    - Request Count by IP
+    - Top HTTP Methods
+    - Top 10 URIs
+    - Top 10 Terminating Rule Groups
+  See example:
+  ![GrafanaFirewallDashboard](./static/grafana-dashboard.jpg)
