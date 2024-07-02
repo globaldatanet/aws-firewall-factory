@@ -1,0 +1,785 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "target": {
+            "column": "timestamp",
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": false,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "format": 1,
+            "limit": 100,
+            "matchAny": false,
+            "rawSQL": "",
+            "table": "waflogs",
+            "tags": [],
+            "type": "dashboard"
+          },
+          "type": "dashboard"
+        }
+      ]
+    },
+    "description": "Deep Dive AWS Web Application Firewall Insights",
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 71,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "description": "",
+        "gridPos": {
+          "h": 3,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 123153,
+        "options": {
+          "code": {
+            "language": "plaintext",
+            "showLineNumbers": false,
+            "showMiniMap": false
+          },
+          "content": "<p>🏷 <a href=\"https://github.com/globaldatanet/aws-firewall-factory/releases/latest\">Repo</a><br>📄 <a href=\"https://docs.aws-firewall-factory.com/\">Docs</a></p>\n",
+          "mode": "html"
+        },
+        "pluginVersion": "9.4.7",
+        "targets": [
+          {
+            "column": "day",
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": false,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "rawSQL": "",
+            "refId": "A",
+            "table": "waflogs"
+          },
+          {
+            "column": "day",
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default",
+              "resultReuseEnabled": false,
+              "resultReuseMaxAgeInMinutes": 60
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "hide": false,
+            "rawSQL": "",
+            "refId": "B",
+            "table": "waflogs"
+          }
+        ],
+        "title": "AWS FIREWALL FACTORY",
+        "transparent": true,
+        "type": "text"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlYlRd"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 17,
+          "w": 12,
+          "x": 0,
+          "y": 3
+        },
+        "id": 123145,
+        "options": {
+          "basemap": {
+            "config": {},
+            "name": "Layer 0",
+            "type": "default"
+          },
+          "controls": {
+            "mouseWheelZoom": true,
+            "showAttribution": true,
+            "showDebug": false,
+            "showMeasure": false,
+            "showScale": false,
+            "showZoom": true
+          },
+          "layers": [
+            {
+              "config": {
+                "showLegend": true,
+                "style": {
+                  "color": {
+                    "field": "count",
+                    "fixed": "dark-green"
+                  },
+                  "opacity": 0.4,
+                  "rotation": {
+                    "fixed": 0,
+                    "max": 360,
+                    "min": -360,
+                    "mode": "mod"
+                  },
+                  "size": {
+                    "field": "count",
+                    "fixed": 5,
+                    "max": 15,
+                    "min": 4
+                  },
+                  "symbol": {
+                    "fixed": "img/icons/marker/circle.svg",
+                    "mode": "fixed"
+                  },
+                  "text": {
+                    "field": "country",
+                    "fixed": "",
+                    "mode": "field"
+                  },
+                  "textConfig": {
+                    "fontSize": 17,
+                    "offsetX": 25,
+                    "offsetY": 0,
+                    "textAlign": "center",
+                    "textBaseline": "middle"
+                  }
+                }
+              },
+              "location": {
+                "lookup": "country",
+                "mode": "lookup"
+              },
+              "name": "Countries",
+              "tooltip": true,
+              "type": "markers"
+            }
+          ],
+          "tooltip": {
+            "mode": "details"
+          },
+          "view": {
+            "allLayers": true,
+            "id": "zero",
+            "lat": 0,
+            "lon": 0,
+            "shared": true,
+            "zoom": 1
+          }
+        },
+        "pluginVersion": "9.4.7",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default"
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "rawSQL": "\nSELECT \n  COUNT(httpRequest.country) as count, \n  httpRequest.country \nFROM \"waflogs\" \ngroup by httpRequest.country ",
+            "refId": "A",
+            "table": "waflogs"
+          }
+        ],
+        "title": "Request Map Across Countries",
+        "type": "geomap"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "description": "",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "fixedColor": "purple",
+              "mode": "palette-classic"
+            },
+            "mappings": [],
+            "max": 6,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "purple",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 14,
+          "w": 11,
+          "x": 12,
+          "y": 3
+        },
+        "id": 123127,
+        "options": {
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [],
+            "fields": "",
+            "values": true
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": false,
+          "text": {}
+        },
+        "pluginVersion": "9.4.7",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default"
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "hide": false,
+            "rawSQL": "select count(*) as AllRequests\nfrom \"waflogs\"",
+            "refId": "A",
+            "table": "newjsons3_aws_waf_logs_firewall_manager_central"
+          },
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default"
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "hide": false,
+            "rawSQL": "select count(*) as AllRequests, action\nfrom \"waflogs\" \ngroup by action",
+            "refId": "B",
+            "table": "waflogs"
+          }
+        ],
+        "title": "Request Count by Action",
+        "transparent": true,
+        "type": "gauge"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 14,
+          "w": 12,
+          "x": 12,
+          "y": 17
+        },
+        "id": 123143,
+        "options": {
+          "displayMode": "lcd",
+          "minVizHeight": 10,
+          "minVizWidth": 0,
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [],
+            "fields": "",
+            "values": true
+          },
+          "showUnfilled": true
+        },
+        "pluginVersion": "9.4.7",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default"
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "rawSQL": "select count(*) , httprequest.clientIp\nfrom \"waflogs\" \ngroup by httprequest.clientIp\n",
+            "refId": "A",
+            "table": "waflogs"
+          }
+        ],
+        "title": "Request Count By IP",
+        "type": "bargauge"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-BlPu"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "axisSoftMin": 0,
+              "fillOpacity": 80,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineWidth": 1,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 11,
+          "w": 12,
+          "x": 0,
+          "y": 20
+        },
+        "id": 123141,
+        "options": {
+          "barRadius": 0.05,
+          "barWidth": 0.59,
+          "colorByField": "httpsourceid",
+          "fullHighlight": false,
+          "groupWidth": 0.7,
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "right",
+            "showLegend": false
+          },
+          "orientation": "horizontal",
+          "showValue": "never",
+          "stacking": "none",
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "xTickLabelMaxLength": 0,
+          "xTickLabelRotation": 0,
+          "xTickLabelSpacing": 0
+        },
+        "pluginVersion": "8.4.7",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default"
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "rawSQL": "select count(*) , httpsourceid\nfrom \"waflogs\"   \ngroup by httpsourceid\norder by count(*) desc",
+            "refId": "A",
+            "table": "waflogs"
+          }
+        ],
+        "title": "Request Distribution by CloudFront ID",
+        "type": "barchart"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "color-text"
+              },
+              "filterable": true,
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 8,
+          "x": 0,
+          "y": 31
+        },
+        "id": 123147,
+        "options": {
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "pluginVersion": "9.4.7",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default"
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "rawSQL": "SELECT \n  COUNT(httpRequest.uri) as count, \n  httpRequest.uri \nFROM \"waflogs\" \nGROUP BY httpRequest.uri\nlimit 10;\n",
+            "refId": "A",
+            "table": "waflogs"
+          }
+        ],
+        "title": "Top 10 URIs",
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "color-text"
+              },
+              "filterable": true,
+              "inspect": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 4,
+          "x": 8,
+          "y": 31
+        },
+        "id": 123149,
+        "options": {
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true
+        },
+        "pluginVersion": "9.4.7",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default"
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "rawSQL": "SELECT \n  COUNT(httpRequest.uri) as count, \n  httpRequest.httpMethod \nFROM \"waflogs\" \nGROUP BY httpRequest.httpMethod\nlimit 10;\n",
+            "refId": "A",
+            "table": "waflogs"
+          }
+        ],
+        "title": "Top HTTP Methods",
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "continuous-RdYlGr"
+            },
+            "custom": {
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "axisSoftMin": 0,
+              "fillOpacity": 48,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "lineWidth": 2,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 9,
+          "w": 12,
+          "x": 12,
+          "y": 31
+        },
+        "id": 123155,
+        "options": {
+          "barRadius": 0,
+          "barWidth": 0.97,
+          "colorByField": "RuleCount",
+          "fullHighlight": false,
+          "groupWidth": 0.7,
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "orientation": "vertical",
+          "showValue": "never",
+          "stacking": "none",
+          "text": {},
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          },
+          "xField": "terminatingruletype",
+          "xTickLabelMaxLength": 0,
+          "xTickLabelRotation": -15,
+          "xTickLabelSpacing": 100
+        },
+        "pluginVersion": "8.4.7",
+        "targets": [
+          {
+            "connectionArgs": {
+              "catalog": "__default",
+              "database": "__default",
+              "region": "__default"
+            },
+            "datasource": {
+              "type": "grafana-athena-datasource",
+              "uid": "WZNSmrQSz"
+            },
+            "format": 1,
+            "rawSQL": "select count(*) as RuleCount , \"terminatingruletype\" from \"waflogs\" \ngroup by \"terminatingruletype\"",
+            "refId": "A",
+            "table": "waflogs"
+          }
+        ],
+        "title": "Top 10 Terminating Rule Groups",
+        "type": "barchart"
+      }
+    ],
+    "refresh": "",
+    "revision": 1,
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-5m",
+      "to": "now"
+    },
+    "timepicker": {
+      "hidden": true,
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ],
+      "type": "timepicker"
+    },
+    "timezone": "browser",
+    "title": "AWS Firewall Factory - WAF Dashboard",
+    "uid": "exO6hEB4k",
+    "version": 8,
+    "weekStart": ""
+  }
