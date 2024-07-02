@@ -382,6 +382,18 @@ export interface Prerequisites {
       * @TJS-pattern "^[0-9]{12}$"
       */
      readonly DelegatedAdminAccountId?: string;
+     /*
+      * Specify the Athena Table Name for the FMS Logs
+      */
+      readonly FmsLogsAthenaTable: string;
+      /*
+      * Specify the Athena Database Name for the FMS Logs
+      */
+      readonly FmsLogAthenaDatabase: string;
+      /*
+      * Specify the Time Window in Days for the FMS Logs to be Queried - This will be used to create the Athena View for Grafana
+      */
+     readonly TimeWindow: number;
   }
 }
 /**
