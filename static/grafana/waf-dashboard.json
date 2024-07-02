@@ -486,7 +486,7 @@
               "uid": "WZNSmrQSz"
             },
             "format": 1,
-            "rawSQL": "select count(*) , httpsourceid\nfrom \"waflogs\"   \ngroup by httpsourceid\norder by count(*) desc",
+            "rawSQL": "select count(*) , httpsourceid\nfrom \"waflogs\"   \ngroup by httpsourceid\norder by count(*) desc\nLIMIT 10;",
             "refId": "A",
             "table": "waflogs"
           }
