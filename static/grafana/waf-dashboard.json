@@ -491,7 +491,7 @@
             "table": "waflogs"
           }
         ],
-        "title": "Request Distribution by CloudFront ID",
+        "title": "Request by Endpoint",
         "type": "barchart"
       },
       {
