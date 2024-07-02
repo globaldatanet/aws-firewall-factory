@@ -16,7 +16,7 @@ export const shieldConfig: ShieldConfig = {
     "AWS::ElasticLoadBalancing::LoadBalancer",
     "AWS::EC2::EIP",
   ],
-  resourceType: "AWS::ElasticLoadBalancing::LoadBalancer",
+  resourceType: "AWS::CloudFront::Distribution",
   policyName: "ACS-FIREWALL-FACTORY-SHIELD-ADVANCED",
   includeMap: { account: ["962355891833"] },
   excludeMap: {},
