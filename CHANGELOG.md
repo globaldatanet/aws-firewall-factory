@@ -9,11 +9,12 @@
     - `export STACK_NAME=PreRequisiteStack` => _prerequisites-stack.ts
     - `export STACK_NAME=WAFStack` => _web-application-firewall-stack.ts
     - `export STACK_NAME=ShieldAdvancedStack` => _shield-advanced-stack.ts
+
   - Add AWS Glue crawler job, an Amazon Athena table and an Amazon Athena view to build a Managed Grafana dashboard to visualize the events in near real time - This is an optional component in the Prequisite Stack. 
-  Example Grafana Dashboard can be found [here](./static/grafana/waf-dashboard.json) - [Screenshot](./static/grafana-dashboard.jpg) 
-  __Note__:  
-  - Your need to configure [Amazon Athena Data Source](https://docs.aws.amazon.com/athena/latest/ug/work-with-data-stores.html) in Amazon Managed Grafana
-  - ⚠️ You need to adjust the json and replace the  uid of your grafana-athena-datasource - while importing into your Grafana.
+  Example Grafana Dashboard can be found [here](./static/grafana/waf-dashboard.json) - [Screenshot](./static/grafana-dashboard.jpg)
+  __Note__:
+    - Your need to configure [Amazon Athena Data Source](https://docs.aws.amazon.com/athena/latest/ug/work-with-data-stores.html) in Amazon Managed Grafana
+    - ⚠️ You need to adjust the json and replace the  uid of your grafana-athena-datasource - while importing into your Grafana.
 
 
 ### Fixed
