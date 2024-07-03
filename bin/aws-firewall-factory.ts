@@ -19,10 +19,7 @@ import {
   ssmHelper,
 } from "../lib/tools/helpers";
 
-
 const app = new cdk.App();
-
-
 
 // Main function to handle the user choice and deploy respective stack
 
@@ -61,7 +58,7 @@ void (async () => {
     new PrerequisitesStack(
       app,
       prerequisites.General.Prefix.toUpperCase() +
-          "-AWS-FIREWALL-FACTORY-PREQUISITES",
+        "-AWS-FIREWALL-FACTORY-PREQUISITES",
       {
         // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
         prerequisites,
@@ -81,7 +78,9 @@ void (async () => {
     const shieldConfig: ShieldConfig = values.shieldConfigs[CONFIG_OBJECT_NAME];
     afwfHelper.outputInfoBanner();
     const runtimeProperties = afwfHelper.initRuntimeProperties();
-    console.log(`🛡️  Deploy Shield Policy: ${shieldConfig.General.Prefix.toUpperCase()}-${shieldConfig.General.Stage}
+    console.log(`🛡️  Deploy Shield Policy: ${shieldConfig.General.Prefix.toUpperCase()}-${
+      shieldConfig.General.Stage
+    }
       \n ⦂ Type:
       ${shieldConfig.resourceType}\n`);
     console.log("\n 🎯 Targets:");
@@ -98,20 +97,26 @@ void (async () => {
     console.log("\n 📑 Logging:");
     if (shieldConfig.General.LoggingConfiguration === "Firehose") {
       console.log("   🧯  " + shieldConfig.General.LoggingConfiguration);
-      console.log("      ⚙️  [" + shieldConfig.General.S3LoggingBucketName + "]");
+      console.log(
+        "      ⚙️  [" + shieldConfig.General.S3LoggingBucketName + "]"
+      );
     }
     if (shieldConfig.General.LoggingConfiguration === "S3") {
       console.log("   🪣  " + shieldConfig.General.LoggingConfiguration);
-      console.log("      ⚙️  [" + shieldConfig.General.S3LoggingBucketName + "]");
+      console.log(
+        "      ⚙️  [" + shieldConfig.General.S3LoggingBucketName + "]"
+      );
     }
     const app = new cdk.App();
     new ShieldStack(
       app,
-      shieldConfig.General.Prefix.toUpperCase()+"-SHIELD-ADVANCED-"+shieldConfig.General.Stage.toUpperCase(),
+      shieldConfig.General.Prefix.toUpperCase() +
+        "-SHIELD-ADVANCED-" +
+        shieldConfig.General.Stage.toUpperCase(),
       {
         shieldConfig,
         env: {
-          region: process.env.AWS_REGION,
+          region: "us-east-1",
           account: process.env.CDK_DEFAULT_ACCOUNT,
         },
         runtimeProperties: runtimeProperties,
@@ -191,23 +196,23 @@ void (async () => {
     }
     if (
       Array.isArray(config.WebAcl.IPSets) &&
-        config.WebAcl.IPSets.length > 0
+      config.WebAcl.IPSets.length > 0
     ) {
       console.log("\n𝍂 IPSets");
       for (const ipSet of config.WebAcl.IPSets) {
         console.log("   ➕ " + ipSet.name);
         console.log(
           "      ⚙️  [" +
-              ipSet.ipAddressVersion +
-              "] | 🌎 [" +
-              config.WebAcl.Scope +
-              "]"
+            ipSet.ipAddressVersion +
+            "] | 🌎 [" +
+            config.WebAcl.Scope +
+            "]"
         );
       }
     }
     if (
       Array.isArray(config.WebAcl.RegexPatternSets) &&
-        config.WebAcl.RegexPatternSets.length > 0
+      config.WebAcl.RegexPatternSets.length > 0
     ) {
       console.log("\n𝍂 RegexPatternSets");
       for (const regpatternset of config.WebAcl.RegexPatternSets) {
@@ -233,7 +238,7 @@ void (async () => {
         "\u001B[31m",
         " 🚨 ERROR: Amazon S3 bucket name is invalid 🚨 ",
         "\x1b[0m" +
-            "\n     🪣 Amazon S3 bucket name must begin with \"aws-waf-logs-\" followed by at least one \n     of the following characters [a-z0-9_.-]\n\n",
+          '\n     🪣 Amazon S3 bucket name must begin with "aws-waf-logs-" followed by at least one \n     of the following characters [a-z0-9_.-]\n\n',
         "\x1b[0m" + "\n\n"
       );
       process.exit(1);
@@ -264,5 +269,4 @@ void (async () => {
     );
     await guidanceHelper.outputGuidance(runtimeProperties, config);
   }
-
 })();

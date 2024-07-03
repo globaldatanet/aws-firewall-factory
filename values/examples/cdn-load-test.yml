@@ -1,35 +1,26 @@
 config:
-  # This is a test server run by team Artillery
-  # It's designed to be highly scalable
   target: https://du2xtenyij8hn.cloudfront.net
   phases:
     - duration: 60
-      arrivalRate: 1
-      rampTo: 5
+      arrivalRate: 500
       name: Warm up phase
     - duration: 60
-      arrivalRate: 5
-      rampTo: 10
+      arrivalRate: 1000
       name: Ramp up load
-    - duration: 30
-      arrivalRate: 10
-      rampTo: 30
+    - duration: 60
+      arrivalRate: 2000
       name: Spike phase
-  # Load & configure a couple of useful plugins
-  # https://docs.art/reference/extensions
-  plugins:
-    ensure: {}
-    apdex: {}
-    metrics-by-endpoint: {}
-  apdex:
-    threshold: 100
-  ensure:
-    thresholds:
-      - http.response_time.p99: 100
-      - http.response_time.p95: 75
 scenarios:
   - flow:
       - loop:
           - get:
-              url: '/'
-        count: 100
+              url: "/"
+          - post:
+              url: "/submit"
+              json:
+                data: "Large payload data to simulate larger request size"
+          - get:
+              url: "/nonexistent"
+              expect:
+                - statusCode: 404
+        count: 1000 # Increased count to generate more load
