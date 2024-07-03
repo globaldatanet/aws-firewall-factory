@@ -86,7 +86,7 @@ See example:
     - Request Map Across Countries
     - Request Count by Action
     - Request by Endpoint (TOP 10)
-    - Request Count by IP
+    - Request Count by IP (TOP 10)
     - Top HTTP Methods
     - Top 10 URIs
     - Top 10 Terminating Rule Groups

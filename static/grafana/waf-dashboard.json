@@ -1,785 +1,809 @@
 {
-    "annotations": {
-      "list": [
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana-athena-datasource",
+          "uid": "WZNSmrQSz"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "column": "timestamp",
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
+          },
+          "format": 1,
+          "limit": 100,
+          "matchAny": false,
+          "rawSQL": "",
+          "table": "waflogs",
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Deep Dive AWS Web Application Firewall Insights",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 71,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-athena-datasource",
+        "uid": "WZNSmrQSz"
+      },
+      "description": "",
+      "gridPos": {
+        "h": 4,
+        "w": 23,
+        "x": 0,
+        "y": 0
+      },
+      "id": 123153,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<p>🏷 <a href=\"https://github.com/globaldatanet/aws-firewall-factory/releases/latest\">Repo</a><br>📄 <a href=\"https://docs.aws-firewall-factory.com/\">Docs</a></p>\n",
+        "mode": "html"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
         {
-          "builtIn": 1,
+          "column": "day",
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
+          },
           "datasource": {
             "type": "grafana-athena-datasource",
             "uid": "WZNSmrQSz"
           },
-          "enable": true,
-          "hide": true,
-          "iconColor": "rgba(0, 211, 255, 1)",
-          "name": "Annotations & Alerts",
-          "target": {
-            "column": "timestamp",
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default",
-              "resultReuseEnabled": false,
-              "resultReuseMaxAgeInMinutes": 60
-            },
-            "format": 1,
-            "limit": 100,
-            "matchAny": false,
-            "rawSQL": "",
-            "table": "waflogs",
-            "tags": [],
-            "type": "dashboard"
+          "format": 1,
+          "rawSQL": "",
+          "refId": "A",
+          "table": "waflogs"
+        },
+        {
+          "column": "day",
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
           },
-          "type": "dashboard"
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
+          },
+          "format": 1,
+          "hide": false,
+          "rawSQL": "",
+          "refId": "B",
+          "table": "waflogs"
         }
-      ]
+      ],
+      "title": "AWS FIREWALL FACTORY",
+      "transparent": true,
+      "type": "text"
     },
-    "description": "Deep Dive AWS Web Application Firewall Insights",
-    "editable": true,
-    "fiscalYearStartMonth": 0,
-    "graphTooltip": 0,
-    "id": 71,
-    "links": [],
-    "liveNow": false,
-    "panels": [
-      {
-        "datasource": {
-          "type": "grafana-athena-datasource",
-          "uid": "WZNSmrQSz"
-        },
-        "description": "",
-        "gridPos": {
-          "h": 3,
-          "w": 24,
-          "x": 0,
-          "y": 0
-        },
-        "id": 123153,
-        "options": {
-          "code": {
-            "language": "plaintext",
-            "showLineNumbers": false,
-            "showMiniMap": false
-          },
-          "content": "<p>🏷 <a href=\"https://github.com/globaldatanet/aws-firewall-factory/releases/latest\">Repo</a><br>📄 <a href=\"https://docs.aws-firewall-factory.com/\">Docs</a></p>\n",
-          "mode": "html"
-        },
-        "pluginVersion": "9.4.7",
-        "targets": [
-          {
-            "column": "day",
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default",
-              "resultReuseEnabled": false,
-              "resultReuseMaxAgeInMinutes": 60
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "rawSQL": "",
-            "refId": "A",
-            "table": "waflogs"
-          },
-          {
-            "column": "day",
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default",
-              "resultReuseEnabled": false,
-              "resultReuseMaxAgeInMinutes": 60
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "hide": false,
-            "rawSQL": "",
-            "refId": "B",
-            "table": "waflogs"
-          }
-        ],
-        "title": "AWS FIREWALL FACTORY",
-        "transparent": true,
-        "type": "text"
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "rqQqNANIk"
       },
-      {
-        "datasource": {
-          "type": "grafana-athena-datasource",
-          "uid": "WZNSmrQSz"
+      "gridPos": {
+        "h": 4,
+        "w": 1,
+        "x": 23,
+        "y": 0
+      },
+      "id": 123157,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
         },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "continuous-BlYlRd"
-            },
-            "custom": {
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
+        "content": "<img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABhCAYAAAAgLwTnAAAEsmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS41LjAiPgogPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iCiAgICB4bWxuczpleGlmPSJodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyIKICAgIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIKICAgIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIKICAgIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIgogICAgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIKICAgdGlmZjpJbWFnZUxlbmd0aD0iOTciCiAgIHRpZmY6SW1hZ2VXaWR0aD0iMTAwIgogICB0aWZmOlJlc29sdXRpb25Vbml0PSIyIgogICB0aWZmOlhSZXNvbHV0aW9uPSI3Mi8xIgogICB0aWZmOllSZXNvbHV0aW9uPSI3Mi8xIgogICBleGlmOlBpeGVsWERpbWVuc2lvbj0iMTAwIgogICBleGlmOlBpeGVsWURpbWVuc2lvbj0iOTciCiAgIGV4aWY6Q29sb3JTcGFjZT0iMSIKICAgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIKICAgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIgogICB4bXA6TW9kaWZ5RGF0ZT0iMjAyMi0w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\">",
+        "mode": "html"
+      },
+      "pluginVersion": "9.4.7",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "datasource": {
+        "type": "grafana-athena-datasource",
+        "uid": "WZNSmrQSz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlYlRd"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 17,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "id": 123145,
+      "options": {
+        "basemap": {
+          "config": {},
+          "name": "Layer 0",
+          "type": "default"
+        },
+        "controls": {
+          "mouseWheelZoom": true,
+          "showAttribution": true,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": true,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "showLegend": true,
+              "style": {
+                "color": {
+                  "field": "count",
+                  "fixed": "dark-green"
+                },
+                "opacity": 0.4,
+                "rotation": {
+                  "fixed": 0,
+                  "max": 360,
+                  "min": -360,
+                  "mode": "mod"
+                },
+                "size": {
+                  "field": "count",
+                  "fixed": 5,
+                  "max": 15,
+                  "min": 4
+                },
+                "symbol": {
+                  "fixed": "img/icons/marker/circle.svg",
+                  "mode": "fixed"
+                },
+                "text": {
+                  "field": "country",
+                  "fixed": "",
+                  "mode": "field"
+                },
+                "textConfig": {
+                  "fontSize": 17,
+                  "offsetX": 25,
+                  "offsetY": 0,
+                  "textAlign": "center",
+                  "textBaseline": "middle"
+                }
               }
             },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
+            "location": {
+              "lookup": "country",
+              "mode": "lookup"
+            },
+            "name": "Countries",
+            "tooltip": false,
+            "type": "markers"
+          }
+        ],
+        "tooltip": {
+          "mode": "details"
+        },
+        "view": {
+          "allLayers": true,
+          "id": "coords",
+          "lat": 0,
+          "lon": 0,
+          "shared": false,
+          "zoom": 1.35
+        }
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
+          },
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
+          },
+          "format": 1,
+          "rawSQL": "\nSELECT \n  COUNT(httpRequest.country) as count, \n  httpRequest.country \nFROM \"waflogs\" \ngroup by httpRequest.country ",
+          "refId": "A",
+          "table": "waflogs"
+        }
+      ],
+      "title": "Request Map Across Countries",
+      "transparent": true,
+      "type": "geomap"
+    },
+    {
+      "datasource": {
+        "type": "grafana-athena-datasource",
+        "uid": "WZNSmrQSz"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "max": 6,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 0
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 17,
+        "w": 11,
+        "x": 12,
+        "y": 4
+      },
+      "id": 123127,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false,
+        "text": {}
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
+          },
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
+          },
+          "format": 1,
+          "hide": false,
+          "rawSQL": "select count(*) as AllRequests\nfrom \"waflogs\"",
+          "refId": "A",
+          "table": "newjsons3_aws_waf_logs_firewall_manager_central"
+        },
+        {
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
+          },
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
+          },
+          "format": 1,
+          "hide": false,
+          "rawSQL": "select count(*) as AllRequests, action\nfrom \"waflogs\" \ngroup by action",
+          "refId": "B",
+          "table": "waflogs"
+        }
+      ],
+      "title": "Request Count by Action",
+      "transparent": true,
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "grafana-athena-datasource",
+        "uid": "WZNSmrQSz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-BlPu"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMin": 0,
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
             }
           },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 17,
-          "w": 12,
-          "x": 0,
-          "y": 3
-        },
-        "id": 123145,
-        "options": {
-          "basemap": {
-            "config": {},
-            "name": "Layer 0",
-            "type": "default"
-          },
-          "controls": {
-            "mouseWheelZoom": true,
-            "showAttribution": true,
-            "showDebug": false,
-            "showMeasure": false,
-            "showScale": false,
-            "showZoom": true
-          },
-          "layers": [
-            {
-              "config": {
-                "showLegend": true,
-                "style": {
-                  "color": {
-                    "field": "count",
-                    "fixed": "dark-green"
-                  },
-                  "opacity": 0.4,
-                  "rotation": {
-                    "fixed": 0,
-                    "max": 360,
-                    "min": -360,
-                    "mode": "mod"
-                  },
-                  "size": {
-                    "field": "count",
-                    "fixed": 5,
-                    "max": 15,
-                    "min": 4
-                  },
-                  "symbol": {
-                    "fixed": "img/icons/marker/circle.svg",
-                    "mode": "fixed"
-                  },
-                  "text": {
-                    "field": "country",
-                    "fixed": "",
-                    "mode": "field"
-                  },
-                  "textConfig": {
-                    "fontSize": 17,
-                    "offsetX": 25,
-                    "offsetY": 0,
-                    "textAlign": "center",
-                    "textBaseline": "middle"
-                  }
-                }
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               },
-              "location": {
-                "lookup": "country",
-                "mode": "lookup"
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "id": 123141,
+      "options": {
+        "barRadius": 0.05,
+        "barWidth": 0.59,
+        "colorByField": "httpsourceid",
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": false
+        },
+        "orientation": "horizontal",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelMaxLength": 0,
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "8.4.7",
+      "targets": [
+        {
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
+          },
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
+          },
+          "format": 1,
+          "rawSQL": "SELECT COUNT(*) AS count, httpsourceid\nFROM waflogs\nGROUP BY httpsourceid\nORDER BY count DESC\nLIMIT 10;",
+          "refId": "A",
+          "table": "waflogs"
+        }
+      ],
+      "title": "Request by Endpoint (TOP 10)",
+      "transparent": true,
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-athena-datasource",
+        "uid": "WZNSmrQSz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               },
-              "name": "Countries",
-              "tooltip": true,
-              "type": "markers"
-            }
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 13,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "id": 123143,
+      "options": {
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
           ],
-          "tooltip": {
-            "mode": "details"
-          },
-          "view": {
-            "allLayers": true,
-            "id": "zero",
-            "lat": 0,
-            "lon": 0,
-            "shared": true,
-            "zoom": 1
-          }
+          "show": false
         },
-        "pluginVersion": "9.4.7",
-        "targets": [
-          {
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default"
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "rawSQL": "\nSELECT \n  COUNT(httpRequest.country) as count, \n  httpRequest.country \nFROM \"waflogs\" \ngroup by httpRequest.country ",
-            "refId": "A",
-            "table": "waflogs"
-          }
-        ],
-        "title": "Request Map Across Countries",
-        "type": "geomap"
+        "showHeader": true
       },
-      {
-        "datasource": {
-          "type": "grafana-athena-datasource",
-          "uid": "WZNSmrQSz"
-        },
-        "description": "",
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "fixedColor": "purple",
-              "mode": "palette-classic"
-            },
-            "mappings": [],
-            "max": 6,
-            "min": 0,
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "purple",
-                  "value": null
-                }
-              ]
-            }
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
           },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 14,
-          "w": 11,
-          "x": 12,
-          "y": 3
-        },
-        "id": 123127,
-        "options": {
-          "orientation": "auto",
-          "reduceOptions": {
-            "calcs": [],
-            "fields": "",
-            "values": true
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
           },
-          "showThresholdLabels": false,
-          "showThresholdMarkers": false,
-          "text": {}
-        },
-        "pluginVersion": "9.4.7",
-        "targets": [
-          {
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default"
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "hide": false,
-            "rawSQL": "select count(*) as AllRequests\nfrom \"waflogs\"",
-            "refId": "A",
-            "table": "newjsons3_aws_waf_logs_firewall_manager_central"
-          },
-          {
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default"
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "hide": false,
-            "rawSQL": "select count(*) as AllRequests, action\nfrom \"waflogs\" \ngroup by action",
-            "refId": "B",
-            "table": "waflogs"
-          }
-        ],
-        "title": "Request Count by Action",
-        "transparent": true,
-        "type": "gauge"
+          "format": 1,
+          "rawSQL": "select count(*) as Requests, httprequest.clientIp\nfrom \"waflogs\" \ngroup by httprequest.clientIp ORDER BY Requests DESC LIMIT 10;\n",
+          "refId": "A",
+          "table": "waflogs"
+        }
+      ],
+      "title": "Request Count By IP (TOP10)",
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-athena-datasource",
+        "uid": "WZNSmrQSz"
       },
-      {
-        "datasource": {
-          "type": "grafana-athena-datasource",
-          "uid": "WZNSmrQSz"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "color-text"
             },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            }
+            "filterable": true,
+            "inspect": false
           },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 14,
-          "w": 12,
-          "x": 12,
-          "y": 17
-        },
-        "id": 123143,
-        "options": {
-          "displayMode": "lcd",
-          "minVizHeight": 10,
-          "minVizWidth": 0,
-          "orientation": "horizontal",
-          "reduceOptions": {
-            "calcs": [],
-            "fields": "",
-            "values": true
-          },
-          "showUnfilled": true
-        },
-        "pluginVersion": "9.4.7",
-        "targets": [
-          {
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default"
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "rawSQL": "select count(*) , httprequest.clientIp\nfrom \"waflogs\" \ngroup by httprequest.clientIp\n",
-            "refId": "A",
-            "table": "waflogs"
-          }
-        ],
-        "title": "Request Count By IP",
-        "type": "bargauge"
-      },
-      {
-        "datasource": {
-          "type": "grafana-athena-datasource",
-          "uid": "WZNSmrQSz"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "continuous-BlPu"
-            },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "axisSoftMin": 0,
-              "fillOpacity": 80,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               },
-              "lineWidth": 1,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
+              {
+                "color": "red",
+                "value": 80
               }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            },
-            "unit": "short"
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 11,
-          "w": 12,
-          "x": 0,
-          "y": 20
-        },
-        "id": 123141,
-        "options": {
-          "barRadius": 0.05,
-          "barWidth": 0.59,
-          "colorByField": "httpsourceid",
-          "fullHighlight": false,
-          "groupWidth": 0.7,
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "right",
-            "showLegend": false
-          },
-          "orientation": "horizontal",
-          "showValue": "never",
-          "stacking": "none",
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
-          },
-          "xTickLabelMaxLength": 0,
-          "xTickLabelRotation": 0,
-          "xTickLabelSpacing": 0
-        },
-        "pluginVersion": "8.4.7",
-        "targets": [
-          {
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default"
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "rawSQL": "select count(*) , httpsourceid\nfrom \"waflogs\"   \ngroup by httpsourceid\norder by count(*) desc\nLIMIT 10;",
-            "refId": "A",
-            "table": "waflogs"
+            ]
           }
-        ],
-        "title": "Request by Endpoint (TOP 10)",
-        "type": "barchart"
+        },
+        "overrides": []
       },
-      {
-        "datasource": {
-          "type": "grafana-athena-datasource",
-          "uid": "WZNSmrQSz"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "custom": {
-              "align": "auto",
-              "cellOptions": {
-                "type": "color-text"
-              },
-              "filterable": true,
-              "inspect": false
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            }
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 9,
-          "w": 8,
-          "x": 0,
-          "y": 31
-        },
-        "id": 123147,
-        "options": {
-          "footer": {
-            "countRows": false,
-            "fields": "",
-            "reducer": [
-              "sum"
-            ],
-            "show": false
-          },
-          "showHeader": true
-        },
-        "pluginVersion": "9.4.7",
-        "targets": [
-          {
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default"
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "rawSQL": "SELECT \n  COUNT(httpRequest.uri) as count, \n  httpRequest.uri \nFROM \"waflogs\" \nGROUP BY httpRequest.uri\nlimit 10;\n",
-            "refId": "A",
-            "table": "waflogs"
-          }
-        ],
-        "title": "Top 10 URIs",
-        "type": "table"
+      "gridPos": {
+        "h": 9,
+        "w": 4,
+        "x": 0,
+        "y": 34
       },
-      {
-        "datasource": {
-          "type": "grafana-athena-datasource",
-          "uid": "WZNSmrQSz"
+      "id": 123149,
+      "options": {
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
         },
-        "fieldConfig": {
-          "defaults": {
-            "custom": {
-              "align": "auto",
-              "cellOptions": {
-                "type": "color-text"
-              },
-              "filterable": true,
-              "inspect": false
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
-            }
-          },
-          "overrides": []
-        },
-        "gridPos": {
-          "h": 9,
-          "w": 4,
-          "x": 8,
-          "y": 31
-        },
-        "id": 123149,
-        "options": {
-          "footer": {
-            "countRows": false,
-            "fields": "",
-            "reducer": [
-              "sum"
-            ],
-            "show": false
-          },
-          "showHeader": true
-        },
-        "pluginVersion": "9.4.7",
-        "targets": [
-          {
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default"
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "rawSQL": "SELECT \n  COUNT(httpRequest.uri) as count, \n  httpRequest.httpMethod \nFROM \"waflogs\" \nGROUP BY httpRequest.httpMethod\nlimit 10;\n",
-            "refId": "A",
-            "table": "waflogs"
-          }
-        ],
-        "title": "Top HTTP Methods",
-        "type": "table"
+        "showHeader": true
       },
-      {
-        "datasource": {
-          "type": "grafana-athena-datasource",
-          "uid": "WZNSmrQSz"
-        },
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "continuous-RdYlGr"
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
+          },
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
+          },
+          "format": 1,
+          "rawSQL": "SELECT \n  COUNT(httpRequest.uri) as count, \n  httpRequest.httpMethod \nFROM \"waflogs\" \nGROUP BY httpRequest.httpMethod\nlimit 10;\n",
+          "refId": "A",
+          "table": "waflogs"
+        }
+      ],
+      "title": "Top HTTP Methods",
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-athena-datasource",
+        "uid": "WZNSmrQSz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "color-text"
             },
-            "custom": {
-              "axisCenteredZero": false,
-              "axisColorMode": "text",
-              "axisLabel": "",
-              "axisPlacement": "auto",
-              "axisSoftMin": 0,
-              "fillOpacity": 48,
-              "gradientMode": "none",
-              "hideFrom": {
-                "legend": false,
-                "tooltip": false,
-                "viz": false
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
               },
-              "lineWidth": 2,
-              "scaleDistribution": {
-                "type": "linear"
-              },
-              "thresholdsStyle": {
-                "mode": "off"
+              {
+                "color": "red",
+                "value": 80
               }
-            },
-            "mappings": [],
-            "thresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "green",
-                  "value": null
-                },
-                {
-                  "color": "red",
-                  "value": 80
-                }
-              ]
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 4,
+        "y": 34
+      },
+      "id": 123147,
+      "options": {
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
+          },
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
+          },
+          "format": 1,
+          "rawSQL": "SELECT \n  COUNT(httpRequest.uri) as count, \n  httpRequest.uri \nFROM \"waflogs\" \nGROUP BY httpRequest.uri\nlimit 10;\n",
+          "refId": "A",
+          "table": "waflogs"
+        }
+      ],
+      "title": "Top 10 URIs",
+      "transparent": true,
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-athena-datasource",
+        "uid": "WZNSmrQSz"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
             }
           },
-          "overrides": []
+          "mappings": []
         },
-        "gridPos": {
-          "h": 9,
-          "w": 12,
-          "x": 12,
-          "y": 31
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 34
+      },
+      "id": 123155,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
         },
-        "id": 123155,
-        "options": {
-          "barRadius": 0,
-          "barWidth": 0.97,
-          "colorByField": "RuleCount",
-          "fullHighlight": false,
-          "groupWidth": 0.7,
-          "legend": {
-            "calcs": [],
-            "displayMode": "list",
-            "placement": "bottom",
-            "showLegend": true
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "8.4.7",
+      "targets": [
+        {
+          "connectionArgs": {
+            "catalog": "__default",
+            "database": "__default",
+            "region": "__default",
+            "resultReuseEnabled": false,
+            "resultReuseMaxAgeInMinutes": 60
           },
-          "orientation": "vertical",
-          "showValue": "never",
-          "stacking": "none",
-          "text": {},
-          "tooltip": {
-            "mode": "single",
-            "sort": "none"
+          "datasource": {
+            "type": "grafana-athena-datasource",
+            "uid": "WZNSmrQSz"
           },
-          "xField": "terminatingruletype",
-          "xTickLabelMaxLength": 0,
-          "xTickLabelRotation": -15,
-          "xTickLabelSpacing": 100
-        },
-        "pluginVersion": "8.4.7",
-        "targets": [
-          {
-            "connectionArgs": {
-              "catalog": "__default",
-              "database": "__default",
-              "region": "__default"
-            },
-            "datasource": {
-              "type": "grafana-athena-datasource",
-              "uid": "WZNSmrQSz"
-            },
-            "format": 1,
-            "rawSQL": "select count(*) as RuleCount , \"terminatingruletype\" from \"waflogs\" \ngroup by \"terminatingruletype\"",
-            "refId": "A",
-            "table": "waflogs"
-          }
-        ],
-        "title": "Top 10 Terminating Rule Groups",
-        "type": "barchart"
-      }
+          "format": 1,
+          "rawSQL": "SELECT terminatingruleid, count (*) as Count FROM waflogs GROUP by terminatingruleid LIMIT 10",
+          "refId": "A",
+          "table": "waflogs"
+        }
+      ],
+      "title": "Top 10 Terminating Rule Groups",
+      "transparent": true,
+      "type": "piechart"
+    }
+  ],
+  "refresh": "",
+  "revision": 1,
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {
+    "hidden": true,
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
     ],
-    "refresh": "",
-    "revision": 1,
-    "schemaVersion": 38,
-    "style": "dark",
-    "tags": [],
-    "templating": {
-      "list": []
-    },
-    "time": {
-      "from": "now-5m",
-      "to": "now"
-    },
-    "timepicker": {
-      "hidden": true,
-      "refresh_intervals": [
-        "5s",
-        "10s",
-        "30s",
-        "1m",
-        "5m",
-        "15m",
-        "30m",
-        "1h",
-        "2h",
-        "1d"
-      ],
-      "time_options": [
-        "5m",
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ],
-      "type": "timepicker"
-    },
-    "timezone": "browser",
-    "title": "AWS Firewall Factory - WAF Dashboard",
-    "uid": "exO6hEB4k",
-    "version": 8,
-    "weekStart": ""
-  }
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ],
+    "type": "timepicker"
+  },
+  "timezone": "browser",
+  "title": "AWS Firewall Factory - WAF Dashboard",
+  "uid": "exO6hEB4k",
+  "version": 18,
+  "weekStart": ""
+}
