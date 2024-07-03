@@ -380,11 +380,13 @@ export class PrerequisitesStack extends cdk.Stack {
 
       DdosFmsNotificationSecret.grantRead(DdosFmsNotification);
 
-      const snsRoleName = iam.Role.fromRoleName(this, "AWSServiceRoleForFMS", "aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS").roleArn;
+      const snsRole = iam.Role.fromRoleName(this, "AWSServiceRoleForFMS", "aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS");
+      const snsRoleName = snsRole.roleArn;
       const FmsTopic = new sns.Topic(this, "FMS-Notifications-Topic");
       FmsTopic.addToResourcePolicy(new iam.PolicyStatement({
         actions: ["sns:Publish"],
-        principals: [iam.Role.fromRoleArn(this, "AWSServiceRoleForFMS",snsRoleName)],
+        principals: [snsRole],
+        resources: [FmsTopic.topicArn],
       }));
       DdosFmsNotification.addPermission("InvokeByFmsSnsTopic", {
         action: "lambda:InvokeFunction",
