@@ -7,8 +7,9 @@ config:
     - duration: 60
       arrivalRate: 1000
       name: Ramp up load
-    - duration: 60
-      arrivalRate: 2000
+    - duration: 200
+      arrivalRate: 10
+      rampTo: 30
       name: Spike phase
 scenarios:
   - flow:
