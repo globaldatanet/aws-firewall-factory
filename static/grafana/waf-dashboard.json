@@ -36,7 +36,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 71,
+  "id": 72,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -720,8 +720,8 @@
       "id": 123155,
       "options": {
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
+          "displayMode": "table",
+          "placement": "right",
           "showLegend": true
         },
         "pieType": "pie",
@@ -804,6 +804,6 @@
   "timezone": "browser",
   "title": "AWS Firewall Factory - WAF Dashboard",
   "uid": "exO6hEB4k",
-  "version": 18,
+  "version": 2,
   "weekStart": ""
 }
