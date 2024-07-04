@@ -1,27 +1,9 @@
 config:
   target: https://du2xtenyij8hn.cloudfront.net
   phases:
-    - duration: 60
-      arrivalRate: 500
-      name: Warm up phase
-    - duration: 60
+    - duration: 300
       arrivalRate: 1000
-      name: Ramp up load
-    - duration: 200
-      arrivalRate: 10
-      rampTo: 30
-      name: Spike phase
 scenarios:
   - flow:
-      - loop:
-          - get:
-              url: "/"
-          - post:
-              url: "/submit"
-              json:
-                data: "Large payload data to simulate larger request size"
-          - get:
-              url: "/nonexistent"
-              expect:
-                - statusCode: 404
-        count: 1000 # Increased count to generate more load
+      - get:
+          url: "/"
