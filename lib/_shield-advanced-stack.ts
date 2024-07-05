@@ -5,14 +5,7 @@ import { ManagedServiceData, SubVariables } from "./types/fms";
 import { getGuidance } from "./tools/helpers/guidance";
 import { RuntimeProperties } from "./types/runtimeprops";
 import { ShieldConfig } from "./types/config";
-import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
 import { ShieldDashboard } from "./constructs/ShieldDashboard";
-import { CfnSink } from "aws-cdk-lib/aws-oam";
-import {
-  AnyPrincipal,
-  PolicyDocument,
-  PolicyStatement,
-} from "aws-cdk-lib/aws-iam";
 import { CrossAccountSink } from "./constructs/CrossAccountSink";
 
 export interface shield_props extends cdk.StackProps {
@@ -101,11 +94,6 @@ export class ShieldStack extends cdk.Stack {
           },
           includeMap: props.shieldConfig.includeMap,
         },
-      });
-
-      new CrossAccountSink(this, "CrossAccountSink", {
-        principalOrgID: props.shieldConfig.General.OrganizationId!,
-        sinkName: `CrossAccountSink-${process.env.AWS_REGION}`,
       });
     }
   }

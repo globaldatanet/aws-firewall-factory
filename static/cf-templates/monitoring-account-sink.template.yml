@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create an OAM sink with a cross-account policy
+
+Parameters:
+  PrincipalOrgID:
+    Type: String
+    Description: The AWS Organization ID that can create links to the sink
+  SinkName:
+    Type: String
+    Description: The name of the OAM sink
+
+Resources:
+  OAMSink:
+    Type: "AWS::OAM::Sink"
+    Properties:
+      Name: !Ref SinkName
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - oam:CreateLink
+              - oam:UpdateLink
+            Resource: "*"
+            Principal: "*"
+            Condition:
+              "ForAllValues:StringEquals":
+                "oam:PrincipalOrgID": !Ref PrincipalOrgID
+
+  SinkArnParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties: 
+      Name: !Sub "/oam/${SinkName}/arn"
+      Type: String
+      Value: !GetAtt OAMSink.Arn
+      Description: !Sub "The ARN of the OAM sink for region: ${AWS::Region}"
+
+Outputs:
+  SinkArn:
+    Description: The ARN of the OAM sink
+    Value: !GetAtt OAMSink.Arn

@@ -76,7 +76,7 @@ void (async () => {
   if (process.env.STACK_NAME === "ShieldAdvancedStack") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
     const shieldConfig: ShieldConfig = values.shieldConfigs[CONFIG_OBJECT_NAME];
-    const deploymentRegion = afwfHelper.outputInfoBanner();
+    const deploymentRegion = process.env.AWS_REGION;
     const runtimeProperties = afwfHelper.initRuntimeProperties();
     console.log(`🛡️  Deploy Shield Policy: ${shieldConfig.General.Prefix.toUpperCase()}-${
       shieldConfig.General.Stage
