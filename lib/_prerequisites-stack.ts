@@ -15,6 +15,8 @@ import {
   aws_sns as sns,
   aws_fms as fms,
   aws_athena as athena,
+  aws_cloudwatch as cloudwatch,
+  aws_cloudwatch_actions as cloudwatch_actions,
 } from "aws-cdk-lib";
 import {
   EventbridgeToStepfunctions,
@@ -637,6 +639,21 @@ export class PrerequisitesStack extends cdk.Stack {
           snsTopicArn: FmsTopic.topicArn,
         }
       );
+      // Create a CloudWatch Alarm for DDoS attack metrics and add the SNS topic as an action
+    const ddosAlarm = new cloudwatch.Alarm(this, "DdosAlarm", {
+      metric: new cloudwatch.Metric({
+        namespace: "AWS/DDoSProtection",
+        metricName: "DDoSDetected",
+        statistic: "Sum",
+        period: cdk.Duration.minutes(1),
+      }),
+      threshold: 0,
+      evaluationPeriods: 1,
+      alarmDescription: "Alarm when a DDoS attack is detected",
+      actionsEnabled: true,
+    });
+
+    ddosAlarm.addAlarmAction(new cloudwatch_actions.SnsAction(FmsTopic));
     }
 
     if (props.prerequisites.Grafana) {
@@ -763,5 +780,6 @@ export class PrerequisitesStack extends cdk.Stack {
         }
       );
     }
+    
   }
 }
