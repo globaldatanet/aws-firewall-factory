@@ -149,6 +149,10 @@ export interface Config {
 export interface ShieldConfig {
   readonly General: {
     /**
+     * ID of AWS Organization. Must be enabled if CreateDashboard is set to true.
+     */
+    readonly OrganizationId?: string;
+    /**
      * Defines a Prefix which will be added to all resources.
      */
     readonly Prefix: string;
@@ -184,7 +188,7 @@ export interface ShieldConfig {
      */
     readonly OverrideCustomerWebACLAssociation?: boolean;
   };
-  
+
   defaultActionType: "ALLOW" | "DENY" | "COUNT" | "NONE";
   /**
    * Indicates if the policy should be automatically applied to new resources.
@@ -369,32 +373,32 @@ export interface Prerequisites {
   };
 
   readonly Grafana?: {
-      /**
-       * S3 Bucket where the FMS Logs are beeing stored. Allowed Pattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
-       */
-      readonly BucketName?: string;
-      /*
-      * Specify the KMS Key for the S3 Bucket - if its KMS Encrypted
-      */
-     readonly BucketKmsKey?: string;
-     /**
-      * Firewall Manager Delegated Admin Account Id
-      * @TJS-pattern "^[0-9]{12}$"
-      */
-     readonly DelegatedAdminAccountId?: string;
-     /*
-      * Specify the Athena Table Name for the FMS Logs
-      */
-      readonly FmsLogsAthenaTable: string;
-      /*
-      * Specify the Athena Database Name for the FMS Logs
-      */
-      readonly FmsLogAthenaDatabase: string;
-      /*
-      * Specify the Time Window in Days for the FMS Logs to be Queried - This will be used to create the Athena View for Grafana
-      */
-     readonly TimeWindow: number;
-  }
+    /**
+     * S3 Bucket where the FMS Logs are beeing stored. Allowed Pattern: ^[a-z0-9][a-z0-9//.//-]*[a-z0-9]$
+     */
+    readonly BucketName?: string;
+    /*
+     * Specify the KMS Key for the S3 Bucket - if its KMS Encrypted
+     */
+    readonly BucketKmsKey?: string;
+    /**
+     * Firewall Manager Delegated Admin Account Id
+     * @TJS-pattern "^[0-9]{12}$"
+     */
+    readonly DelegatedAdminAccountId?: string;
+    /*
+     * Specify the Athena Table Name for the FMS Logs
+     */
+    readonly FmsLogsAthenaTable: string;
+    /*
+     * Specify the Athena Database Name for the FMS Logs
+     */
+    readonly FmsLogAthenaDatabase: string;
+    /*
+     * Specify the Time Window in Days for the FMS Logs to be Queried - This will be used to create the Athena View for Grafana
+     */
+    readonly TimeWindow: number;
+  };
 }
 /**
  * S3 Object Lock provides two retention modes:

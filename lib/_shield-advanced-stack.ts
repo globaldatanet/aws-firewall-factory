@@ -6,13 +6,22 @@ import { getGuidance } from "./tools/helpers/guidance";
 import { RuntimeProperties } from "./types/runtimeprops";
 import { ShieldConfig } from "./types/config";
 import * as cloudwatch from "aws-cdk-lib/aws-cloudwatch";
-import { ShieldDashboard } from "./constructs/cloudwatch/ShieldDashboard";
+import { ShieldDashboard } from "./constructs/ShieldDashboard";
+import { CfnSink } from "aws-cdk-lib/aws-oam";
+import {
+  AnyPrincipal,
+  PolicyDocument,
+  PolicyStatement,
+} from "aws-cdk-lib/aws-iam";
+import { CrossAccountSink } from "./constructs/CrossAccountSink";
 
 export interface shield_props extends cdk.StackProps {
   readonly shieldConfig: ShieldConfig;
   readonly runtimeProperties: RuntimeProperties;
 }
 export class ShieldStack extends cdk.Stack {
+  readonly oamSinkArn: string;
+
   constructor(scope: Construct, id: string, props: shield_props) {
     super(scope, id, props);
     // const cfnShieldPolicyProps: fms.CfnPolicyProps = {
@@ -74,15 +83,30 @@ export class ShieldStack extends cdk.Stack {
       cfnShieldPolicyProps
     ); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.
 
-    // todo: add conditional
-    new ShieldDashboard(this, "ShieldDashboardConstruct", {
-      shieldConfig: {
-        General: {
-          Prefix: props.shieldConfig.General.Prefix,
-          Stage: props.shieldConfig.General.Stage,
+    if (props.shieldConfig.General.CreateDashboard === true) {
+      if (!props.shieldConfig.General.OrganizationId) {
+        console.error(
+          "\u001B[31m",
+          "🚨 ERROR: Exit process due to missing Organization ID which is required for cross account CloudWatch link 🚨 \n\n",
+          "\x1b[0m" + "\n\n"
+        );
+        process.exit(1);
+      }
+
+      new ShieldDashboard(this, "ShieldDashboardConstruct", {
+        shieldConfig: {
+          General: {
+            Prefix: props.shieldConfig.General.Prefix,
+            Stage: props.shieldConfig.General.Stage,
+          },
+          includeMap: props.shieldConfig.includeMap,
         },
-        includeMap: props.shieldConfig.includeMap,
-      },
-    });
+      });
+
+      new CrossAccountSink(this, "CrossAccountSink", {
+        principalOrgID: props.shieldConfig.General.OrganizationId!,
+        sinkName: `CrossAccountSink-${process.env.AWS_REGION}`,
+      });
+    }
   }
 }

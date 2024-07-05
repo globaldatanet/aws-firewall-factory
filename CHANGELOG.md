@@ -14,7 +14,7 @@
   Example Grafana Dashboard can be found [here](./static/grafana/waf-dashboard.json)
   __Note__:
     - Your need to configure [Amazon Athena Data Source](https://docs.aws.amazon.com/athena/latest/ug/work-with-data-stores.html) in Amazon Managed Grafana
-      - Example Role template for Cross Account Access can be found [here](./static/roles/grafana-role.yaml)
+      - Example Role template for Cross Account Access can be found [here](./static/cf-templates/grafana-role.yaml)
     - ⚠️ You need to adjust the json and replace the  uid of your grafana-athena-datasource - while importing into your Grafana.
 
 
@@ -56,7 +56,7 @@
 ## 4.3.1
 ### Added
 - [Issue#365](https://github.com/globaldatanet/aws-firewall-factory/issues/365) UnutilizedWafs - Implemented automated identification and notification system in Firewall Factory to manage unused WAFs, leveraging Lambda and notification services to streamline infrastructure, optimize costs, and enhance security by addressing WAF sprawl proactively and ensuring efficient resource utilization.
-- Added example IAM Role which can be used for [ci-cd](./static/roles/ci-cd-role.yaml) deployments
+- Added example IAM Role which can be used for [ci-cd](./static/cf-templates/ci-cd-role.yaml) deployments
 
 ### Fixed
 - [Issue#380](https://github.com/globaldatanet/aws-firewall-factory/issues/380) Fixes on the CloudWatch dashboard.

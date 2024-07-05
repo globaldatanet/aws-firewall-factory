@@ -76,7 +76,7 @@ void (async () => {
   if (process.env.STACK_NAME === "ShieldAdvancedStack") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
     const shieldConfig: ShieldConfig = values.shieldConfigs[CONFIG_OBJECT_NAME];
-    afwfHelper.outputInfoBanner();
+    const deploymentRegion = afwfHelper.outputInfoBanner();
     const runtimeProperties = afwfHelper.initRuntimeProperties();
     console.log(`🛡️  Deploy Shield Policy: ${shieldConfig.General.Prefix.toUpperCase()}-${
       shieldConfig.General.Stage
@@ -108,6 +108,7 @@ void (async () => {
       );
     }
     const app = new cdk.App();
+
     new ShieldStack(
       app,
       shieldConfig.General.Prefix.toUpperCase() +
@@ -116,12 +117,13 @@ void (async () => {
       {
         shieldConfig,
         env: {
-          region: "us-east-1",
+          region: deploymentRegion,
           account: process.env.CDK_DEFAULT_ACCOUNT,
         },
         runtimeProperties: runtimeProperties,
       }
     );
+
     await pricingHelper.isShieldPriceCalculated(shieldConfig);
     await guidanceHelper.outputGuidance(runtimeProperties);
   }
