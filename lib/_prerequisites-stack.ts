@@ -613,22 +613,17 @@ export class PrerequisitesStack extends cdk.Stack {
         "aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS"
       );
       const snsRoleName = snsRole.roleArn;
+      const cwService= new iam.ServicePrincipal('cloudwatch.amazonaws.com');
       const FmsTopic = new sns.Topic(this, "FMS-Notifications-Topic");
       FmsTopic.addToResourcePolicy(
         new iam.PolicyStatement({
           actions: ["sns:Publish"],
-          principals: [snsRole],
+          // Add permission for CloudWatchand FMS to publish to the SNS topic
+          principals: [snsRole,cwService],
           resources: [FmsTopic.topicArn],
         })
       );
-       // Add permission for CloudWatch to publish to the SNS topic
-      FmsTopic.addToResourcePolicy(
-        new iam.PolicyStatement({
-          actions: ["sns:Publish"],
-          principals: [new iam.ServicePrincipal('cloudwatch.amazonaws.com')],
-          resources: [FmsTopic.topicArn],
-        })
-      );
+
       DdosFmsNotification.addPermission("InvokeByFmsSnsTopic", {
         action: "lambda:InvokeFunction",
         principal: new iam.ServicePrincipal("sns.amazonaws.com"),
