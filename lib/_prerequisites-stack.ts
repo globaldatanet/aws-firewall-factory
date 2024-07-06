@@ -621,6 +621,14 @@ export class PrerequisitesStack extends cdk.Stack {
           resources: [FmsTopic.topicArn],
         })
       );
+       // Add permission for CloudWatch to publish to the SNS topic
+      FmsTopic.addToResourcePolicy(
+        new iam.PolicyStatement({
+          actions: ["sns:Publish"],
+          principals: [new iam.ServicePrincipal('cloudwatch.amazonaws.com')],
+          resources: [FmsTopic.topicArn],
+        })
+      );
       DdosFmsNotification.addPermission("InvokeByFmsSnsTopic", {
         action: "lambda:InvokeFunction",
         principal: new iam.ServicePrincipal("sns.amazonaws.com"),
