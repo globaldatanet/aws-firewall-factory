@@ -36,7 +36,9 @@
 1. Create new ts file for you WAF and configure Rules in the Configuration (see [owasptopten.ts](values/examples/owasptop10.ts) to see structure) or use enter `task generate-waf-skeleton`
 
 2. Assume AWS Profile `awsume / assume PROFILENAME`
-3. (Optional) Enter `task generate-waf-skeleton`
+3. (Optional) 
+   1. Enter `task generate-waf-skeleton`
+   2. Enter `task generate-shield-skeleton`
 4. When Deploying from a CI/CD pipeline, set an environment variable STACK_NAME to specify which resources to deploy.
     - `export STACK_NAME=PreRequisiteStack` => _prerequisites-stack.ts
     - `export STACK_NAME=WAFStack` => _web-application-firewall-stack.ts
