@@ -96,7 +96,12 @@ tasks:
       - sh: "[ '{{.WAF_TEST}}' != 'true' ]"
         msg: ⏭  Skipping WAF Testing 🧪
   generate-waf-skeleton:
-    desc: Generate Skeleton
+    desc: Generate WAF Skeleton
     silent: true
     cmds:
-      - ts-node ./lib/tools/generate-skeleton.ts
+      - ts-node ./lib/tools/generate-waf-skeleton.ts
+  generate-shield-skeleton:
+    desc: Generate Shield Skeleton
+    silent: true
+    cmds:
+      - ts-node ./lib/tools/generate-shield-skeleton.ts
