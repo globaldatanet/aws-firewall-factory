@@ -59,9 +59,11 @@ All releases are tested prior to release using automated test workflows of sampl
 
 ### 🏁 Deployment via Taskfile
 
-1. Create new ts file for you WAF and configure Rules in the Configuration (see [owasptopten.ts](https://github.com/globaldatanet/aws-firewall-factory/blob/master/values/examples/owasptop10.ts) to see structure) or use enter `task generate-waf-skeleton`
+1. Create new ts file for you WAF and configure Rules in the Configuration (see [owasptopten.ts](https://github.com/globaldatanet/aws-firewall-factory/blob/master/values/examples/owasptop10.ts) to see structure) or use enter `task generate-waf-skeleton` / enter `task generate-shield-skeleton`
 2. Assume AWS Profile `awsume / assume PROFILENAME`
-3. (Optional) Enter `task generate-waf-skeleton`
+3. (Optional)
+   1. Enter `task generate-waf-skeleton`
+   2. Enter `task generate-shield-skeleton`
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
-11. Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
+5.  Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
 ![List of Resources](./static/options.jpg "Stacks")
