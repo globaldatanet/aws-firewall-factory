@@ -92,3 +92,17 @@ See example:
     - Top 10 Terminating Rule Groups
   See example:
   ![GrafanaFirewallDashboard](./static/grafana-dashboard.jpg)
+
+26. Shield Cloudwatch Dashboard - The Firewall Factory is able to provision a centralized CloudWatch Dashboard.
+  The Dashboard shows the ammount of DDoS attacks detected
+
+  See example:
+  ![ShieldDashboard](./static/shield-dashboard.png)
+
+27. Cloudwatch Cross-Accoount association - The Firewall Factory offers CloudFormation templates for associating the monitoring account with source accounts:
+    - [Monitoring account template](./static/cf-templates/monitoring-account-sink.template.yml)
+    - [Source account template](./static/cf-templates/cross_account_cw_stack.template.yml)
+    
+
+
+  

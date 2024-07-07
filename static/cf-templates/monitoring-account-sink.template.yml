@@ -11,10 +11,10 @@ Parameters:
 
 Resources:
   OAMSink:
-    Type: "AWS::OAM::Sink"
+    Type: AWS::Oam::Sink
     Properties:
       Name: !Ref SinkName
-      PolicyDocument:
+      Policy:
         Version: '2012-10-17'
         Statement:
           - Effect: Allow
@@ -22,13 +22,14 @@ Resources:
               - oam:CreateLink
               - oam:UpdateLink
             Resource: "*"
-            Principal: "*"
+            Principal:
+              AWS: "*"
             Condition:
-              "ForAllValues:StringEquals":
-                "oam:PrincipalOrgID": !Ref PrincipalOrgID
+              ForAllValues:StringEquals:
+                oam:PrincipalOrgID: !Ref PrincipalOrgID
 
   SinkArnParameter:
-    Type: "AWS::SSM::Parameter"
+    Type: AWS::SSM::Parameter
     Properties: 
       Name: !Sub "/oam/${SinkName}/arn"
       Type: String

@@ -95,6 +95,11 @@ export class ShieldStack extends cdk.Stack {
           includeMap: props.shieldConfig.includeMap,
         },
       });
+
+      // new CrossAccountSink(this, "CrossAccountSinkConstruct", {
+      //   principalOrgID: props.shieldConfig.General.OrganizationId,
+      //   sinkName: `${props.shieldConfig.General.Prefix}-${props.shieldConfig.General.Stage}-ShieldAdvancedSink`,
+      // });
     }
   }
 }
