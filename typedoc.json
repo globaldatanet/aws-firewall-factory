@@ -7,7 +7,6 @@
     "entryPointStrategy": "Expand",
     "exclude": ["**/gotestwaf/**","**/bin/**","**/values/**","**/lambda/**","**/constructs/**","**/adaptivecards/**"],
     "plugin": ["typedoc-plugin-extras", "typedoc-plugin-keywords"],
-    "keywords": ["aws", "firewall", "waf", "fms", "factory", "globaldatanet", "cdk"],
     "favicon": "static/icon/aws_firewall_factory_favicon.ico",
     "searchInComments": true,
     "hideGenerator": true,

@@ -27,6 +27,7 @@
 - Bump @aws-sdk/client-fms to 3.606.0
 - Bump @aws-sdk/client-pricing to 3.606.0
 - Bump @aws-sdk/client-s3 to 3.606.0
+- Bump @aws-sdk/client-iam to 3.606.0
 - Bump @aws-sdk/client-secrets-manager to 3.606.0
 - Bump @aws-sdk/client-service-quotas to 3.606.0
 - Bump @aws-sdk/client-shield to 3.606.0
@@ -40,7 +41,7 @@
 - Bump @types/lodash to 4.17.6
 - Bump @types/uuid to 10.0.0
 - Bump adaptivecards to 3.0.4
-- Bump aws-cdk-lib to 2.147.2
+- Bump aws-cdk-lib to 2.148.0
 - Bump axios to 1.7.2
 - Bump cdk-sops-secrets to 1.12.0
 - Bump cfonts to 3.3.0
