@@ -1,12 +1,11 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_fms as fms } from "aws-cdk-lib";
-import { ManagedServiceData, SubVariables } from "./types/fms";
+import { ManagedServiceData } from "./types/fms";
 import { getGuidance } from "./tools/helpers/guidance";
 import { RuntimeProperties } from "./types/runtimeprops";
 import { ShieldConfig } from "./types/config";
 import { ShieldDashboard } from "./constructs/ShieldDashboard";
-import { CrossAccountSink } from "./constructs/CrossAccountSink";
 
 export interface shield_props extends cdk.StackProps {
   readonly shieldConfig: ShieldConfig;
@@ -17,19 +16,6 @@ export class ShieldStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: shield_props) {
     super(scope, id, props);
-    // const cfnShieldPolicyProps: fms.CfnPolicyProps = {
-    //   // remediationEnabled - should be true
-    //   remediationEnabled: props.remediationEnabled,
-    //   // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#resourcetype:~:text=fms%2Dpolicy%2Dresourcetags-,resourceType,-%3F
-    //   resourceTypeList:props.resourceTypeList,
-    //   resourceType: props.resourceType,
-    //   policyName: props.policyName,
-    //   includeMap: props.includeMap,
-    //   excludeMap: props.excludeMap,
-    //   excludeResourceTags: props.excludeResourceTags,
-    //   //https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#:~:text=Specification%20for%20SHIELD_ADVANCED%20for%20Amazon%20CloudFront%20distributions
-    //   securityServicePolicyData: props.securityServicePolicyData,
-    // };
     const preProcessRuleGroups: never[] = [];
     const postProcessRuleGroups: never[] = [];
     let loggingConfiguration;
@@ -38,7 +24,6 @@ export class ShieldStack extends cdk.Stack {
       defaultAction: { type: props.shieldConfig.defaultActionType },
       preProcessRuleGroups: preProcessRuleGroups,
       postProcessRuleGroups: postProcessRuleGroups,
-      // overrideCustomerWebACLAssociation: false,
       overrideCustomerWebACLAssociation: props.shieldConfig.WebAcl
         .OverrideCustomerWebACLAssociation
         ? props.shieldConfig.WebAcl.OverrideCustomerWebACLAssociation
@@ -52,12 +37,10 @@ export class ShieldStack extends cdk.Stack {
       ? getGuidance("remediationNotEnabled", props.runtimeProperties)
       : null;
     const cfnShieldPolicyProps: fms.CfnPolicyProps = {
-      // remediationEnabled - should be true
       remediationEnabled: props.shieldConfig.remediationEnabled,
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#resourcetype:~:text=fms%2Dpolicy%2Dresourcetags-,resourceType,-%3F
       resourceTypeList: props.shieldConfig.resourceTypeList,
       resourceType: props.shieldConfig.resourceType,
-      // policyName: props.shieldConfig.policyName,
       policyName: `${props.shieldConfig.General.Prefix.toUpperCase()}-${
         props.shieldConfig.General.Stage
       }`,
@@ -95,11 +78,6 @@ export class ShieldStack extends cdk.Stack {
           includeMap: props.shieldConfig.includeMap,
         },
       });
-
-      // new CrossAccountSink(this, "CrossAccountSinkConstruct", {
-      //   principalOrgID: props.shieldConfig.General.OrganizationId,
-      //   sinkName: `${props.shieldConfig.General.Prefix}-${props.shieldConfig.General.Stage}-ShieldAdvancedSink`,
-      // });
     }
   }
 }
