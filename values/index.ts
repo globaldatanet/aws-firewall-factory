@@ -1,6 +1,6 @@
 import {Config, Prerequisites, ShieldConfig} from "../lib/types/config";
 
-import {  owasptopTen, prequisites, ipSetsManagedTest,shieldAdvancedParameters, shieldAdvancedTest} from "./examples";
+import {  owasptopTen, prequisites, ipSetsManagedTest, shieldConfigExample} from "./examples";
 import * as tests from "./tests";
 export const configs : { [key: string]: Config } = {
   owasptopTen,
@@ -8,8 +8,7 @@ export const configs : { [key: string]: Config } = {
   ...tests,
 };
 export const shieldConfigs : { [key: string]: ShieldConfig } = {
-  shieldAdvancedParameters,
-  shieldAdvancedTest
+  shieldConfigExample
 };
 export const prereq : { [key: string]: Prerequisites } = {
   prequisites,
