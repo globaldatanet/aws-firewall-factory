@@ -9,7 +9,8 @@
     - `export STACK_NAME=PreRequisiteStack` => _prerequisites-stack.ts
     - `export STACK_NAME=WAFStack` => _web-application-firewall-stack.ts
     - `export STACK_NAME=ShieldAdvancedStack` => _shield-advanced-stack.ts
--  Add Shield Cloudwatch Dashboard - [Example Shield Dashboard](./static/shield-dashboard.png)- The Firewall Factory is able to provision a centralized CloudWatch Dashboard.
+ -  Add Shield Cloudwatch Dashboard - [Example Shield Dashboard](./static/shield-dashboard.png)- The Firewall Factory is able to provision a centralized CloudWatch Dashboard.
+ - Add Cloudwatch Alarms: Cloudwatch Alarms are now part of the prerequisite stack and can be used to triger the SNS topics incase of DDoS.
   The Dashboard shows the ammount of DDoS attacks detected
   - Add Grafana Dashbording - [Example Grafana Dashboard](./static/grafana-dashboard.jpg)- AWS Glue crawler job, an Amazon Athena table and an Amazon Athena view to build a Managed Grafana dashboard to visualize the events in near real time - This is an optional component in the Prequisite Stack. 
   Example Grafana Dashboard can be found [here](./static/grafana/waf-dashboard.json)

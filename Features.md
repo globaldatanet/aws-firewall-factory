@@ -102,7 +102,8 @@ See example:
 27. Cloudwatch Cross-Account association - The Firewall Factory offers CloudFormation templates for associating the monitoring account with source accounts:
     - [Monitoring account template](./static/cf-templates/monitoring-account-sink.template.yml)
     - [Source account template](./static/cf-templates/cross_account_cw_stack.template.yml)
-    
+
+28. Add Cloudwatch Alarms - The prerequisite stack contains Cloudwatch Alarm resource that can be used to trigger the SNS topics incase of DDoS.    
 
 
   
