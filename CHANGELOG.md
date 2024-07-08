@@ -4,7 +4,7 @@
 ## 4.5.0
 ### Added
  - Added support for deploying Shield Advanced policies, including the ability to calculate pricing. AWS Shield Advanced provides customized detection based on traffic patterns to your protected resources, detects and alerts on smaller DDoS attacks, and identifies application layer attacks by baselining traffic and spotting anomalies.
- For Shield Advanced policies, we have introduced an Advanced Shield stack with sample configurations (./values/examples/shield-advanced.ts).
+ For Shield Advanced policies, we have introduced an Advanced Shield stack with [sample configurations](./values/examples/shield-advanced.ts).
  __Note__: If you are deploying WAF in a CI/CD environment, make sure you set your environment variable STACK_NAME for the resource you want to deploy.
     - `export STACK_NAME=PreRequisiteStack` => _prerequisites-stack.ts
     - `export STACK_NAME=WAFStack` => _web-application-firewall-stack.ts
