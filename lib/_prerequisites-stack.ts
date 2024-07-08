@@ -613,13 +613,13 @@ export class PrerequisitesStack extends cdk.Stack {
         "aws-service-role/fms.amazonaws.com/AWSServiceRoleForFMS"
       );
       const snsRoleName = snsRole.roleArn;
-      const cwService= new iam.ServicePrincipal('cloudwatch.amazonaws.com');
+      const cwService = new iam.ServicePrincipal("cloudwatch.amazonaws.com");
       const FmsTopic = new sns.Topic(this, "FMS-Notifications-Topic");
       FmsTopic.addToResourcePolicy(
         new iam.PolicyStatement({
           actions: ["sns:Publish"],
           // Add permission for CloudWatchand FMS to publish to the SNS topic
-          principals: [snsRole,cwService],
+          principals: [snsRole, cwService],
           resources: [FmsTopic.topicArn],
         })
       );
@@ -643,20 +643,20 @@ export class PrerequisitesStack extends cdk.Stack {
         }
       );
       // Create a CloudWatch Alarm for DDoS attack metrics and add the SNS topic as an action
-    const ddosAlarm = new cloudwatch.Alarm(this, "DdosAlarm", {
-      metric: new cloudwatch.Metric({
-        namespace: "AWS/DDoSProtection",
-        metricName: "DDoSDetected",
-        statistic: "Sum",
-        period: cdk.Duration.minutes(1),
-      }),
-      threshold: 0,
-      evaluationPeriods: 1,
-      alarmDescription: "Alarm when a DDoS attack is detected",
-      actionsEnabled: true,
-    });
+      const ddosAlarm = new cloudwatch.Alarm(this, "DdosAlarm", {
+        metric: new cloudwatch.Metric({
+          namespace: "AWS/DDoSProtection",
+          metricName: "DDoSDetected",
+          statistic: "Sum",
+          period: cdk.Duration.minutes(1),
+        }),
+        threshold: 0,
+        evaluationPeriods: 1,
+        alarmDescription: "Alarm when a DDoS attack is detected",
+        actionsEnabled: true,
+      });
 
-    ddosAlarm.addAlarmAction(new cloudwatch_actions.SnsAction(FmsTopic));
+      ddosAlarm.addAlarmAction(new cloudwatch_actions.SnsAction(FmsTopic));
     }
 
     if (props.prerequisites.Grafana) {
@@ -783,6 +783,5 @@ export class PrerequisitesStack extends cdk.Stack {
         }
       );
     }
-    
   }
 }

@@ -243,6 +243,7 @@ void (async () => {
           '\n     🪣 Amazon S3 bucket name must begin with "aws-waf-logs-" followed by at least one \n     of the following characters [a-z0-9_.-]\n\n',
         "\x1b[0m" + "\n\n"
       );
+
       process.exit(1);
     }
     new WafStack(

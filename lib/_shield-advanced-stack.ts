@@ -53,12 +53,13 @@ export class ShieldStack extends cdk.Stack {
         managedServiceData: cdk.Fn.sub(JSON.stringify(managedServiceData), {}),
       },
     };
+    /* eslint-disable @typescript-eslint/no-unused-vars */
     const fmspolicy = new fms.CfnPolicy(
       this,
       "CfnPolicy",
       cfnShieldPolicyProps
     ); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.
-
+     /* eslint-enable @typescript-eslint/no-unused-vars */
     if (props.shieldConfig.General.CreateDashboard === true) {
       new ShieldDashboard(this, "ShieldDashboardConstruct", {
         shieldConfig: {
