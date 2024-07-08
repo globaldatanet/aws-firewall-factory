@@ -69,7 +69,9 @@ jobs:
         uses: docker/setup-buildx-action@v3.3.0
       - name: 🔥 Deploy Firewall to AWS
         run: |
+          export STACK_NAME=WAFStack
           task deploy config=ipSetsTests
       - name: 🗑️ Remove Firewall from AWS
         run: |
+          export STACK_NAME=WAFStack
           task destroy config=ipSetsTests
