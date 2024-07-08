@@ -149,10 +149,6 @@ export interface Config {
 export interface ShieldConfig {
   readonly General: {
     /**
-     * ID of AWS Organization. Must be enabled if CreateDashboard is set to true.
-     */
-    readonly OrganizationId?: string;
-    /**
      * Defines a Prefix which will be added to all resources.
      */
     readonly Prefix: string;

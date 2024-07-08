@@ -60,15 +60,6 @@ export class ShieldStack extends cdk.Stack {
     ); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.
 
     if (props.shieldConfig.General.CreateDashboard === true) {
-      if (!props.shieldConfig.General.OrganizationId) {
-        console.error(
-          "\u001B[31m",
-          "🚨 ERROR: Exit process due to missing Organization ID which is required for cross account CloudWatch link 🚨 \n\n",
-          "\x1b[0m" + "\n\n"
-        );
-        process.exit(1);
-      }
-
       new ShieldDashboard(this, "ShieldDashboardConstruct", {
         shieldConfig: {
           General: {
