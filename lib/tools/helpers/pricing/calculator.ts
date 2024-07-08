@@ -9,7 +9,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { PricingClient, GetProductsCommand, GetProductsCommandInput, FilterType } from "@aws-sdk/client-pricing";
 import { RuntimeProperties } from "../../../types/runtimeprops";
-import { Config, PriceRegions } from "../../../types/config";
+import { Config, PriceRegions, ShieldConfig } from "../../../types/config";
 import {CloudWatchClient, ListDashboardsCommand, ListDashboardsCommandInput } from "@aws-sdk/client-cloudwatch";
 import { ShieldClient, GetSubscriptionStateCommand } from "@aws-sdk/client-shield";
 
@@ -237,4 +237,28 @@ async function getShieldSubscriptionState(){
   const command = new GetSubscriptionStateCommand(input);
   const subscriptionState = (await client.send(command)).SubscriptionState;
   return subscriptionState;
+}
+
+/**
+ * The function calculated the price of the deployed WAF
+ * @param runtimeProps runtime properties object, where to get prices
+ * @returns whether price is successfully calculated or not
+ */
+export async function isShieldPriceCalculated(shieldconfig: ShieldConfig): Promise<boolean> {
+  const shieldSubscriptionState = await getShieldSubscriptionState();
+  console.log("\n🛡️  Shield Advanced State: " + shieldSubscriptionState);
+
+  console.log("\n💰 Cost: \n");
+  console.log("   🛡️ Shield Advanced Subscription: \n     3000 $ per month (whole Organization)\n");
+  console.log("   ⌗ Data Transfer Out Usage Fees: \n");
+
+  if(shieldconfig.resourceType === "AWS::CloudFront::Distribution" || shieldconfig.resourceType === "AWS::GlobalAccelerator::Accelerator"){
+    console.log("     first 100 TB 0.025 $ per GB \n      next 400 TB 0.020 $ per GB");
+  }
+  else if(shieldconfig.resourceType === "AWS::ElasticLoadBalancingV2::LoadBalancer" || shieldconfig.resourceType === "AWS::ElasticLoadBalancing::LoadBalancer" || shieldconfig.resourceType === "AWS::EC2::EIP"){
+    console.log("     first 100 TB 0.05 $ per GB \n      next 400 TB 0.04 $ per GB");
+  }
+  console.log("\n      ℹ The costs are calculated based on the provided information at https://aws.amazon.com/shield/pricing/. ");
+
+  return true;
 }

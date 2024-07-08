@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  RoleName:
+    Type: String
+    Description: 'The name of the role to be created'
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: '[\w+=,.@-]+'
+    ConstraintDescription: 'Must be a valid role name'
+  RoleDescription:
+    Type: String
+    Description: 'The description of the role to be created'
+    ConstraintDescription: 'Must be a valid role description'
+  S3Bucket:
+    Type: String
+    Description: 'The name of the S3 bucket where the logs are stored'
+    MinLength: 1
+    MaxLength: 64
+    AllowedPattern: '[\w+=,.@-]+'
+    ConstraintDescription: 'Must be a valid S3 bucket name'
+  KmsKeyArn:
+    Type: String
+    Description: 'The ARN of the KMS key used to encrypt and decrypt the logs'
+    AllowedPattern: '^arn:aws:kms:[a-z0-9-]+:[0-9]{12}:key/[a-f0-9-]+$'
+    ConstraintDescription: 'Must be a valid KMS key ARN'
+  AwsAccountwithManagedGrafana:
+    Type: String
+    Description: 'The AWS account ID with the managed Grafana'
+    AllowedPattern: '[0-9]{12}'
+    ConstraintDescription: 'Must be a valid AWS account ID'
+Resources:
+  IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Ref RoleName
+      Description: !Ref RoleDescription
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS: !Sub arn:aws:iam::${AwsAccountwithManagedGrafana}:root
+          Action: sts:AssumeRole
+          Condition: {}
+      ManagedPolicyArns:
+           - arn:aws:iam::aws:policy/service-role/AmazonGrafanaAthenaAccess
+      Policies:
+        - PolicyName: 'S3Permissions'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 's3:*'
+                Resource:
+                  - !Sub arn:aws:s3:::${S3Bucket}/*
+                  - !Sub arn:aws:s3:::${S3Bucket}
+        - PolicyName: 'KMSPermissions'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'kms:Decrypt'
+                  - 'kms:Encrypt'
+                Resource: !Ref KmsKeyArn

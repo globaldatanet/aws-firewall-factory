@@ -4,6 +4,7 @@
 ## ⁉️ .What is a Web Application Firewall?
 
 A crucial security component for **every** web app. It acts as a **protective barrier** between your application and potential threats. Offering a range of **practical functionalities** to mitigate known risks, emerging threats, harmful activities and many more.
+✨ AWS Firewall Factory has extended its capabilities to support Advanced Shield policy deployment through AWS Firewall Manager. The Advanced Shield stacks are available starting with our version 4.5 release.
 
 ## 🔥 About our AWS Firewall Factory
 
@@ -13,6 +14,9 @@ It automates your security management, can be tailored with individual WAF confi
 
  - **♾️ Fully automated to centralize your WAF Deployment & Management:**
   It simplifies the entire process by minimising administrative effort. Making it easier for you to ensure consistent protection and overseeing your WAF across applications.
+
+   - **🛡️ Fully automated to centralize your Advanced Shield Policy Deployment:**
+  Supports deployment of AWS Advanced Shield Policy through AWS Firewall Manager. You can now seamlessly protect your resources fom DDoS attacks across your accounts in a centralised manner.
 
  - **🔖 Comprehensive Testing with Detailed Reports:**
   It uncovers wether your application is resilient or not and reports issues precisely. With these insights you can dive deep into strengthening your application’s weaknesses.
@@ -50,11 +54,16 @@ All releases are tested prior to release using automated test workflows of sampl
 8. Assume AWS Profile `awsume PROFILENAME`
 9. (Optional) Enter `task generateprerequisitesconfig`
 10. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
-
+11. Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
+![List of Resources](./static/options.jpg "Stacks")
 
 ### 🏁 Deployment via Taskfile
 
-1. Create new ts file for you WAF and configure Rules in the Configuration (see [owasptopten.ts](https://github.com/globaldatanet/aws-firewall-factory/blob/master/values/examples/owasptop10.ts) to see structure) or use enter `task generate-waf-skeleton`
+1. Create new ts file for you WAF and configure Rules in the Configuration (see [owasptopten.ts](https://github.com/globaldatanet/aws-firewall-factory/blob/master/values/examples/owasptop10.ts) to see structure) or use enter `task generate-waf-skeleton` / enter `task generate-shield-skeleton`
 2. Assume AWS Profile `awsume / assume PROFILENAME`
-3. (Optional) Enter `task generate-waf-skeleton`
+3. (Optional)
+   1. Enter `task generate-waf-skeleton`
+   2. Enter `task generate-shield-skeleton`
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
+5.  Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
+![List of Resources](./static/options.jpg "Stacks")

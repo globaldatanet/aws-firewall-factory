@@ -1,0 +1,8 @@
+{
+    "yaml.schemas": {
+        "https://www.artillery.io/schema.json": [
+            "file:///Users/musabyusuf/audi-aws-firewall-factory/values/examples/asciiart-load-test.yml",
+            "git:/Users/musabyusuf/audi-aws-firewall-factory/values/examples/cdn-load-test.yml?%7B%22path%22%3A%22%2FUsers%2Fmusabyusuf%2Faudi-aws-firewall-factory%2Fvalues%2Fexamples%2Fcdn-load-test.yml%22%2C%22ref%22%3A%22~%22%7D"
+        ]
+    }
+}

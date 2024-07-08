@@ -5,6 +5,7 @@ env:
   AWS_REGION: eu-central-1
   AWS_ROLE: FirewallFactoryGithubPipelineRole
   AWS_ACCOUNT: 859220371210
+  STACK_NAME: WAFStack
 
 permissions:
   id-token: write

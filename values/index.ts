@@ -1,13 +1,31 @@
-import {Config, Prerequisites} from "../lib/types/config";
+import { Config, Prerequisites, ShieldConfig } from "../lib/types/config";
 
-import {  owasptopTen, prequisites, ipSetsManagedTest} from "./examples";
-import * as tests from "./tests";
-export const configs : { [key: string]: Config } = {
+import {
+  owasptopTen,
+  prequisites,
+  ipSetsManagedTest,
+  shieldAdvancedParameters,
+  shieldAdvancedTest,
+} from "./examples";
+import {
+  ipSetsTests,
+  regexPatternSetsTests,
+  onlyManagedRuleGroupsTests,
+  rateBasedwithScopeDownTests,
+} from "./tests";
+// import * as tests from "./tests";
+export const configs: { [key: string]: Config } = {
   owasptopTen,
   ipSetsManagedTest,
-  ...tests,
+  ipSetsTests,
+  regexPatternSetsTests,
+  onlyManagedRuleGroupsTests,
+  rateBasedwithScopeDownTests,
 };
-
-export const prereq : { [key: string]: Prerequisites } = {
+export const shieldConfigs: { [key: string]: ShieldConfig } = {
+  shieldAdvancedParameters,
+  shieldAdvancedTest,
+};
+export const prereq: { [key: string]: Prerequisites } = {
   prequisites,
 };
