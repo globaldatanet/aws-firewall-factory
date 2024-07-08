@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "3.556.0",
-    "@aws-sdk/client-cloudfront": "^3.557.0",
+    "@aws-sdk/client-cloudfront": "^3.609.0",
     "@aws-sdk/client-cloudwatch": "3.556.0",
     "@aws-sdk/client-config-service": "^3.557.0",
     "@aws-sdk/client-ec2": "^3.557.0",
