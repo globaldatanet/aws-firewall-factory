@@ -1,9 +1,9 @@
 import { Config } from "../../lib/types/config";
 export const config: Config = {
   General: {
-    Prefix: "testcases",
+    Prefix: "testcase",
     Stage: "test",
-    S3LoggingBucketName: "aws-waf-logs-aws-firewall-factory-test",
+    S3LoggingBucketName: "aws-firewall-factory1-aws-firewall-factory-logs1",
     LoggingConfiguration: "S3",
     SecuredDomain: ["test.aws-firewall-factory.com"]
   },
