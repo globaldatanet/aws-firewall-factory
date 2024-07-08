@@ -61,7 +61,7 @@ async function getTotalCapacityOfRules(config: Config, runtimeProperties: Runtim
     const response : any = await client.send(command);
     return response.Capacity || 0;
   } catch(err) {
-    guidanceHelper.outputGuidance(config, runtimeProperties);
+    guidanceHelper.outputGuidance(runtimeProperties, config);
     console.log();
     console.log("🚨 Error in checking capacity of rules!");
     console.log();

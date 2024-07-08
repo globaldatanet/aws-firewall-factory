@@ -16,5 +16,6 @@ export const prequisites: Prerequisites = {
       KeyAlias: "aws-firewall-factory-firehosekey"
     },
     CrossAccountIdforPermissions: "123456789012",
-  }
+  },
+  DdosNotifications:{WebhookSopsFile: "./values/examples/webhooks/slack.json"}
 };

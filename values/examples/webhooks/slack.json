@@ -1,0 +1,4 @@
+{
+	"WebhookUrl": " Your Webhook URL", 
+	"Messenger": "Either Slack or Teams" 
+}

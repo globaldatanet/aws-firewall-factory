@@ -1,11 +1,65 @@
 # Change Log
 
 ## Released
+## 4.5.0
+### Added
+ - Added support for deploying Shield Advanced policies, including the ability to calculate pricing. AWS Shield Advanced provides customized detection based on traffic patterns to your protected resources, detects and alerts on smaller DDoS attacks, and identifies application layer attacks by baselining traffic and spotting anomalies.
+ For Shield Advanced policies, we have introduced an Advanced Shield stack with [sample configurations](./values/examples/shield-advanced.ts).
+ __Note__: If you are deploying WAF in a CI/CD environment, make sure you set your environment variable STACK_NAME for the resource you want to deploy.
+    - `export STACK_NAME=PreRequisiteStack` => _prerequisites-stack.ts
+    - `export STACK_NAME=WAFStack` => _web-application-firewall-stack.ts
+    - `export STACK_NAME=ShieldAdvancedStack` => _shield-advanced-stack.ts
+ -  Add Shield Cloudwatch Dashboard - [Example Shield Dashboard](./static/shield-dashboard.png)- The Firewall Factory is able to provision a centralized CloudWatch Dashboard.
+ - Add Cloudwatch Alarms: Cloudwatch Alarms are now part of the prerequisite stack and can be used to triger the SNS topics incase of DDoS.
+  The Dashboard shows the ammount of DDoS attacks detected
+  - Add Grafana Dashbording - [Example Grafana Dashboard](./static/grafana-dashboard.jpg)- AWS Glue crawler job, an Amazon Athena table and an Amazon Athena view to build a Managed Grafana dashboard to visualize the events in near real time - This is an optional component in the Prequisite Stack. 
+  Example Grafana Dashboard can be found [here](./static/grafana/waf-dashboard.json)
+  __Note__:
+    - Your need to configure [Amazon Athena Data Source](https://docs.aws.amazon.com/athena/latest/ug/work-with-data-stores.html) in Amazon Managed Grafana
+      - Example Role template for Cross Account Access can be found [here](./static/cf-templates/grafana-role.yaml)
+    - ⚠️ You need to adjust the json and replace the  uid of your grafana-athena-datasource - while importing into your Grafana.
+
+
+### Fixed
+- Bump @aws-sdk/client-cloudformation to  3.606.0
+- Bump @aws-sdk/client-cloudfront to 3.606.0
+- Bump @aws-sdk/client-cloudwatch to 3.606.0
+- Bump @aws-sdk/client-config-service to 3.606.0
+- Bump @aws-sdk/client-ec2 to 3.606.0
+- Bump @aws-sdk/client-fms to 3.606.0
+- Bump @aws-sdk/client-pricing to 3.606.0
+- Bump @aws-sdk/client-s3 to 3.606.0
+- Bump @aws-sdk/client-iam to 3.606.0
+- Bump @aws-sdk/client-secrets-manager to 3.606.0
+- Bump @aws-sdk/client-service-quotas to 3.606.0
+- Bump @aws-sdk/client-shield to 3.606.0
+- Bump @aws-sdk/client-ssm to 3.606.0
+- Bump @aws-sdk/client-wafv2 to 3.606.0
+- Bump @aws-solutions-constructs/aws-eventbridge-stepfunctions to 2.60.0
+- Bump @babel/traverse to 7.24.7
+- Bump @mhlabs/cfn-diagram to 1.1.40
+- Bump @slack/types to 2.12.0
+- Bump @types/aws-lambda to 8.10.140
+- Bump @types/lodash to 4.17.6
+- Bump @types/uuid to 10.0.0
+- Bump adaptivecards to 3.0.4
+- Bump aws-cdk-lib to 2.148.0
+- Bump axios to 1.7.2
+- Bump cdk-sops-secrets to 1.12.0
+- Bump cfonts to 3.3.0
+- Bump npm to 10.8.1
+- Bump table to 6.8.2
+- Bump uuid to 10.0.0
+- Bump @types/node to 20.14.9
+- Bump @typescript-eslint/eslint-plugin to 7.14.1
+- Bump @typescript-eslint/parser to 7.14.1
+- Bump aws-cdk to 2.147.2
+- Bump ts-jest to 29.1.5
 
 ## 4.3.1
 ### Added
 - [Issue#365](https://github.com/globaldatanet/aws-firewall-factory/issues/365) UnutilizedWafs - Implemented automated identification and notification system in Firewall Factory to manage unused WAFs, leveraging Lambda and notification services to streamline infrastructure, optimize costs, and enhance security by addressing WAF sprawl proactively and ensuring efficient resource utilization.
-- Added example IAM Role which can be used for [ci-cd](./static/roles/ci-cd-role.yaml) deployments
+- Added example IAM Role which can be used for [ci-cd](./static/cf-templates/ci-cd-role.yaml) deployments
 
 ### Fixed
 - [Issue#380](https://github.com/globaldatanet/aws-firewall-factory/issues/380) Fixes on the CloudWatch dashboard.
