@@ -1,7 +1,7 @@
 import { ShieldConfig } from "../../lib/types/config";
 export const shieldConfig: ShieldConfig = {
   General: {
-    Prefix: "ACS",
+    Prefix: "aws-firewall-factory1",
     Stage: "test",
     S3LoggingBucketName: "aws-waf-logs-aws-firewall-factory-test",
     LoggingConfiguration: "S3",

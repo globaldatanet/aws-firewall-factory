@@ -1,7 +1,7 @@
 import { ShieldConfig } from "../../lib/types/config";
 export const shieldConfig: ShieldConfig = {
   General: {
-    Prefix: "ACS",
+    Prefix: "aws-firewall-factory1",
     Stage: "test",
     S3LoggingBucketName: "aws-waf-logs-aws-firewall-factory-test",
     LoggingConfiguration: "S3",
@@ -19,7 +19,7 @@ export const shieldConfig: ShieldConfig = {
   ],
   resourceType: "AWS::CloudFront::Distribution",
   policyName: "ACS-FIREWALL-FACTORY-SHIELD-ADVANCED",
-  includeMap: { account: ["962355891833"] },
+  includeMap: { account: ["123456789012"] },
   excludeMap: {},
   excludeResourceTags: false,
 };

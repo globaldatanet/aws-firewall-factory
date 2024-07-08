@@ -1,11 +1,11 @@
 import { Prerequisites } from "../../lib/types/config";
 export const prequisites: Prerequisites = {
   General: {
-    Prefix: "aws-firewall-factory-ddos",
+    Prefix: "aws-firewall-factory1",
   },
   Logging: {
     BucketProperties: {
-      BucketName: "aff-logs-ddos",
+      BucketName: "aws-firewall-factory-logs",
       KmsEncryptionKey: true,
       ObjectLock: {
         Days: 5,
@@ -13,9 +13,9 @@ export const prequisites: Prerequisites = {
       }
     },
     FireHoseKey: {
-      KeyAlias: "aws-firewall-factory-firehosekey-ddos"
+      KeyAlias: "aws-firewall-factory-firehosekey"
     },
-    CrossAccountIdforPermissions: "534441076043",
+    CrossAccountIdforPermissions: "123456789012",
   },
   DdosNotifications:{WebhookSopsFile: "./values/examples/webhooks/slack.json"}
 };
