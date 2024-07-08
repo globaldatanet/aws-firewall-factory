@@ -33,7 +33,7 @@
     "@aws-sdk/client-pricing": "3.556.0",
     "@aws-sdk/client-s3": "^3.557.0",
     "@aws-sdk/client-secrets-manager": "^3.583.0",
-    "@aws-sdk/client-service-quotas": "3.556.0",
+    "@aws-sdk/client-service-quotas": "3.609.0",
     "@aws-sdk/client-shield": "3.556.0",
     "@aws-sdk/client-ssm": "3.556.0",
     "@aws-sdk/client-wafv2": "3.556.0",
