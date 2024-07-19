@@ -1,14 +1,24 @@
 {
     "$schema": "https://typedoc.org/schema.json",
-    "entryPoints": ["lib/_shield-advanced-stack.ts","lib/_web-application-firewall-stack.ts","lib/_prerequisites-stack.ts","lib/types/config.ts", "lib/types/enums.ts", "lib/types/fms.ts", "node_modules/aws-cdk-lib/aws-fms",  "node_modules/aws-cdk-lib/aws-wafv2", "node_modules/aws-cdk-lib/core/lib/cfn-tag.d.ts", "node_modules/aws-cdk-lib/core/lib/tag-manager.d.ts","lib/tools/helpers"],
+    "entryPoints": ["lib/_shield-advanced-stack.ts","lib/_web-application-firewall-stack.ts","lib/_prerequisites-stack.ts","lib/types/config.ts", "lib/types/runtimeprops.ts", "lib/types/enums.ts", "lib/types/fms.ts", "node_modules/aws-cdk-lib/aws-fms",  "node_modules/aws-cdk-lib/aws-wafv2", "node_modules/aws-cdk-lib/core/lib/cfn-tag.d.ts", "node_modules/aws-cdk-lib/core/lib/tag-manager.d.ts","lib/tools/helpers"],
     "readme": "./static/docs/README.md",
     "customCss": "./static/docs/custom.css",
     "name": "AWS Firewall Factory Documentation",
     "entryPointStrategy": "Expand",
     "exclude": ["**/gotestwaf/**","**/bin/**","**/values/**","**/lambda/**","**/constructs/**","**/adaptivecards/**"],
-    "plugin": ["typedoc-plugin-extras"],
+    "plugin": ["typedoc-plugin-extras", "typedoc-plugin-coverage"],
     "favicon": "static/icon/aws_firewall_factory_favicon.ico",
     "searchInComments": true,
     "hideGenerator": true,
-    "customDescription": "Explore the comprehensive AWS Firewall Factory Documentation. Elevate your cloud security with our firewall management solution."
+    "customDescription": "Explore the comprehensive AWS Firewall Factory Documentation. Elevate your cloud security with our firewall management solution.",
+    "customFooterHtml": "<p>© 2024 <a href='globaldatanet.com'>globaldatanet</a>. All rights reserved.</p>",
+    "requiredToBeDocumented": [
+        "Enum",
+        "Variable",
+        "Function",
+        "Interface",
+        "Property",
+        "Method"
+      ],
+    "includeVersion": true
 }

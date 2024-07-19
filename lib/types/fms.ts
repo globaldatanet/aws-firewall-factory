@@ -4,6 +4,9 @@
 import { aws_wafv2 as waf } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
 
+/*
+  * Interface for the CustomRequestHandling
+  */
 export interface CustomRequestHandling {
   customRequestHandling?: {
     insertHeaders: {
@@ -19,6 +22,9 @@ export interface CustomRequestHandling {
   }
 }
 
+/**
+ * Interface for the CustomResponse
+ */
 export interface CustomResponse {
   customResponse?: {
     responseCode: number,
@@ -40,6 +46,9 @@ export interface CustomResponse {
   }
 }
 
+/**
+ * Interce for the WAF Action
+ */
 export interface Action  {
   block?: CustomResponse,
   allow?: CustomRequestHandling,
@@ -48,17 +57,27 @@ export interface Action  {
   challenge?: CustomRequestHandling
 }
 
+/**
+ * Interface for the RuleActionOverrideProperty
+ */
 export interface RuleActionOverrideProperty {
   name: string,
   actionToUse: Action
 }
 
+/**
+ * Type for the NameObject
+ */
 type NameObject = {
   /**
     * @TJS-pattern ^[0-9A-Za-z_\-:]+$
   */
   name: string
 }
+
+/**
+ * Interface for the ManagedRuleGroup
+ */
 export interface ManagedRuleGroup {
   vendor: fwmEnums.ManagedRuleGroupVendor | string | "AWS",
   name: fwmEnums.AwsManagedRules | string,
@@ -91,6 +110,10 @@ export interface ManagedRuleGroup {
   latestVersion?: boolean
   enforceUpdate?:boolean
 }
+
+/**
+ * Interface for the Rule
+ */
 export interface Rule {
   name: string,
   statement: waf.CfnWebACL.StatementProperty,
@@ -104,6 +127,9 @@ export interface Rule {
   priority: number,
 }
 
+/**
+ * Interface for the ManagedServiceData
+ */
 export interface ManagedServiceData {
   type: string,
   defaultAction: {
@@ -117,6 +143,9 @@ export interface ManagedServiceData {
   }
 }
 
+/**
+ * Interface for the ServiceDataManagedRuleGroup
+ */
 export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup {
   managedRuleGroupIdentifier: {
     vendorName: string,
@@ -133,10 +162,16 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
   awsManagedRulesATPRuleSetProperty?: waf.CfnWebACL.AWSManagedRulesATPRuleSetProperty,
 }
 
+/**
+ * Interface for the ServiceDataRuleGroup
+ */
 export interface ServiceDataRuleGroup extends ServiceDataAbstactRuleGroup {
   ruleGroupType: "RuleGroup"
 }
 
+/**
+ * Interface for the ServiceDataAbstactRuleGroup
+ */
 export interface ServiceDataAbstactRuleGroup {
   overrideAction: {
     type: "ALLOW" | "DENY" | "NONE" | "COUNT"
@@ -145,10 +180,16 @@ export interface ServiceDataAbstactRuleGroup {
   ruleGroupType: string
 }
 
+/**
+ * Interface for the NotStatementProperty
+ */
 export interface NotStatementProperty {
   statement: waf.CfnWebACL.StatementProperty;
 }
 
+/**
+ * Interface for the SubVariables
+ */
 export interface SubVariables {
   [key: string]: string;
 }
