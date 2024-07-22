@@ -27,7 +27,7 @@
     "@aws-sdk/client-cloudformation": "3.606.0",
     "@aws-sdk/client-cloudfront": "^3.606.0",
     "@aws-sdk/client-cloudwatch": "3.606.0",
-    "@aws-sdk/client-config-service": "^3.606.0",
+    "@aws-sdk/client-config-service": "^3.616.0",
     "@aws-sdk/client-ec2": "^3.606.0",
     "@aws-sdk/client-fms": "3.606.0",
     "@aws-sdk/client-pricing": "3.606.0",
