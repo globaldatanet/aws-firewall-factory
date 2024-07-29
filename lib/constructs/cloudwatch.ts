@@ -4,7 +4,7 @@
 import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
 import * as packageJsonObject from "../../package.json";
 import * as cdk from "aws-cdk-lib";
-import { Config } from "../types/config";
+import { wafConfig } from "../types/config";
 import { Construct } from "constructs";
 
 const REGION = cdk.Aws.REGION;
@@ -14,9 +14,12 @@ const REGION = cdk.Aws.REGION;
  */
 const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
 
+/**
+ * Central CloudWatch Dashboard Construct
+ */
 export class WafCloudWatchDashboard extends Construct {
 
-  constructor(scope: Construct, id: string, config: Config,managedRuleGroupsInfo:string[]) {
+  constructor(scope: Construct, id: string, config: wafConfig,managedRuleGroupsInfo:string[]) {
     super(scope, id);
     console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", `${config.General.Prefix.toUpperCase()}-${config.WebAcl.Name}-${config.General.Stage}${config.General.DeployHash ? "-"+config.General.DeployHash : ""}`,"\u001b[0m");
     console.log("   ℹ️  Warnings for Math expressions can be ignored.");

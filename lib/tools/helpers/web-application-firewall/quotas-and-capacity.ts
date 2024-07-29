@@ -3,7 +3,7 @@ import * as quota from "@aws-sdk/client-service-quotas";
 import { Scope, WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput,DescribeManagedRuleGroupCommandOutput, Rule as SdkRule} from "@aws-sdk/client-wafv2";
 import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
 import { RuntimeProperties, ProcessProperties } from "../../../types/runtimeprops";
-import { Config } from "../../../types/config";
+import { wafConfig } from "../../../types/config";
 import { cloudformationHelper, guidanceHelper } from "../../helpers";
 import * as lodash from "lodash";
 import {transformCdkRuletoSdkRule} from "../../transformer";
@@ -44,7 +44,7 @@ async function getPolicyCount(deploymentRegion: string): Promise<number> {
  * @param rules rules for which you want to calculate the capacity
  * @returns the total capacity of the supplied rules
  */
-async function getTotalCapacityOfRules(config: Config, runtimeProperties: RuntimeProperties, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: SdkRule[]): Promise<number> {
+async function getTotalCapacityOfRules(config: wafConfig, runtimeProperties: RuntimeProperties, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: SdkRule[]): Promise<number> {
   const client = new WAFV2Client({ region: deploymentRegion });
   if(scope === "CLOUDFRONT"){
     scope = Scope.CLOUDFRONT;
@@ -162,7 +162,7 @@ async function getManagedRuleCapacity(deploymentRegion: string, vendor: string, 
  * @param runtimeProperties runtime properties object, where to store capacities
  */
 async function calculateCapacities(
-  config: Config,
+  config: wafConfig,
   deploymentRegion: string,
   runtimeProperties: RuntimeProperties
 ): Promise<void> {
@@ -209,7 +209,7 @@ async function calculateCapacities(
  * @param config Config
  * @param runtimeProperties RuntimeProperties
  */
-async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deploymentRegion:string, config: Config, runtimeProperties: RuntimeProperties): Promise<void> {
+async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deploymentRegion:string, config: wafConfig, runtimeProperties: RuntimeProperties): Promise<void> {
   let managedrules: ManagedRuleGroup[] = [];
   let processProperties: ProcessProperties;
   switch(type){
@@ -303,7 +303,7 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
    * @param scope the scope of the WebACL, e.g. REGIONAL or CLOUDFRONT
    * @returns an array with the capacities of the supplied custom rules
    */
-async function calculateCustomRulesCapacities(config: Config, customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
+async function calculateCustomRulesCapacities(config: wafConfig, customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
   const capacities = [];
   const capacitieslog = [];
   capacitieslog.push(["🔺 Priority", "➕ RuleName", "🧮 Capacity", "ℹ StatementType"]);
@@ -607,7 +607,7 @@ function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebA
  * @param scope "REGIONAL" | "CLOUDFRONT"
  * @returns 
  */
-async function calculateCustomRuleStatementsCapacity(config: Config, customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
+async function calculateCustomRuleStatementsCapacity(config: wafConfig, customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
   const ruleCalculatedCapacityJson = [];
   const rule = transformCdkRuletoSdkRule(customRule, runtimeProperties);
   ruleCalculatedCapacityJson.push(rule);
@@ -707,7 +707,7 @@ export async function isPolicyQuotaReached(deploymentRegion: string): Promise<bo
    * @param config configuration object of the values.json
    * @returns whether WCU limit is reached
    */
-export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: RuntimeProperties, config: Config): Promise<boolean> {
+export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: RuntimeProperties, config: wafConfig): Promise<boolean> {
   await calculateCapacities(config, deploymentRegion, runtimeProps);
   const customCapacity = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity;
   const totalWcu = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity + runtimeProps.ManagedRuleCapacity;

@@ -1,5 +1,5 @@
 
-[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) - [🔖 Imprint](https://globaldatanet.com/imprint) - [📅 Meeting](https://calendly.com/dakn/30min-1)
+[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) - [🔖 Imprint](https://globaldatanet.com/imprint) - [📅 Meeting](https://calendly.com/dakn/30min-1) - ![covergage](coverage.svg)
 
 ## ⁉️ .What is a Web Application Firewall?
 
@@ -66,4 +66,5 @@ All releases are tested prior to release using automated test workflows of sampl
    2. Enter `task generate-shield-skeleton`
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 5.  Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
-![List of Resources](./static/options.jpg "Stacks")
+![List of Resources](./static/images/options.jpg "Stacks")
+[[include:./static/images/options.jpg]]

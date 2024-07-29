@@ -7,8 +7,36 @@ import { RuntimeProperties } from "./types/runtimeprops";
 import { ShieldConfig } from "./types/config";
 import { ShieldDashboard } from "./constructs/ShieldDashboard";
 
+/**
+ *  @packageDocumentation
+ * 
+ * # AWS Firewall Factory Shield Advanced 
+ * 
+ * @description
+ * Specifies the AWS Shield Advanced configuration.
+
+ * This CDK creates a Shield Advanced Stack which will be managed by AWS Firewall Manager.
+ * 
+
+*/
+
+/**
+ * @group Interfaces
+ * @description
+ * Specifies the Shield Advanced Stack properties.
+ * 
+ * @param {ShieldConfig} shieldConfig  Variable for a Shield Config.
+ * @param {RuntimeProperties} runtimeProperties Variable for Runtime Properties.
+ */
+
 export interface shield_props extends cdk.StackProps {
+   /**
+   * Class Variable for a Shield Config.
+   */
   readonly shieldConfig: ShieldConfig;
+  /**
+   * Class Variable for Runtime Properties.
+   */
   readonly runtimeProperties: RuntimeProperties;
 }
 export class ShieldStack extends cdk.Stack {
@@ -53,13 +81,11 @@ export class ShieldStack extends cdk.Stack {
         managedServiceData: cdk.Fn.sub(JSON.stringify(managedServiceData), {}),
       },
     };
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    const fmspolicy = new fms.CfnPolicy(
+    new fms.CfnPolicy(
       this,
       "CfnPolicy",
       cfnShieldPolicyProps
     ); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.
-    /* eslint-enable @typescript-eslint/no-unused-vars */
     if (props.shieldConfig.General.CreateDashboard === true) {
       new ShieldDashboard(this, "ShieldDashboardConstruct", {
         shieldConfig: {
