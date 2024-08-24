@@ -14,7 +14,7 @@ import {
   FilterType,
 } from "@aws-sdk/client-pricing";
 import { RuntimeProperties } from "../../../types/runtimeprops";
-import { Config, PriceRegions, ShieldConfig } from "../../../types/config";
+import { wafConfig, PriceRegions, ShieldConfig } from "../../../types/config";
 import {
   CloudWatchClient,
   ListDashboardsCommand,
@@ -75,7 +75,7 @@ function findValuesHelper(obj: any, key: string, list: any) {
 async function getCurrentWafPrices(
   deploymentRegion: PriceRegions,
   runtimeProps: RuntimeProperties,
-  config: Config,
+  config: wafConfig,
   awsregion: string
 ): Promise<boolean> {
   console.log("   🔎  Getting current prices for: ", deploymentRegion, "\n");
@@ -143,7 +143,7 @@ async function getCurrentWafPrices(
  */
 async function getDashboardPrice(
   deploymentRegion: string,
-  config: Config
+  config: wafConfig
 ): Promise<number> {
   const client = new CloudWatchClient({ region: deploymentRegion });
   const input: ListDashboardsCommandInput = {};
@@ -232,7 +232,7 @@ export async function getProductPrice(
 export async function isWafPriceCalculated(
   deploymentRegion: PriceRegions,
   runtimeProps: RuntimeProperties,
-  config: Config,
+  config: wafConfig,
   awsregion: string
 ): Promise<boolean> {
   const shieldSubscriptionState = await getShieldSubscriptionState();

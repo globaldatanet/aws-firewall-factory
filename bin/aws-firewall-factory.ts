@@ -4,7 +4,7 @@ import { PrerequisitesStack } from "../lib/_prerequisites-stack";
 import { ShieldStack } from "../lib/_shield-advanced-stack";
 import * as cdk from "aws-cdk-lib";
 import {
-  Config,
+  wafConfig,
   ShieldConfig,
   Prerequisites,
   PriceRegions,
@@ -131,7 +131,7 @@ void (async () => {
   // Deploying Firewall stack
   if (process.env.STACK_NAME === "WAFStack") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const config: Config = values.configs[CONFIG_OBJECT_NAME];
+    const config: wafConfig = values.configs[CONFIG_OBJECT_NAME];
     const deploymentRegion = afwfHelper.outputInfoBanner(config);
     const runtimeProperties = afwfHelper.initRuntimeProperties();
     if (process.env.SKIP_QUOTA_CHECK === "true") {

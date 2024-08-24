@@ -1,7 +1,7 @@
-import { Config } from "../../lib/types/config";
+import { wafConfig } from "../../lib/types/config";
 import * as fwmEnums from "../../lib/types/enums";
 
-export const config: Config = {
+export const config: wafConfig = {
   General: {
     Prefix: "testcases",
     Stage: "test",

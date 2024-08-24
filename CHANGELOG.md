@@ -1,6 +1,46 @@
 # Change Log
 
 ## Released
+
+## 4.5.1
+
+### Fixed
+- Bump aws-cdk: 2.148.0 to 2.154.1
+- Bump aws-cdk-lib: ^2.148.0 to ^2.150.0
+- Bump @aws-sdk/client-cloudformation: 3.606.0 to 3.637.0
+- Bump @aws-sdk/client-cloudfront: ^3.606.0 to ^3.637.0
+- Bump @aws-sdk/client-cloudwatch: 3.606.0 to 3.637.0
+- Bump @aws-sdk/client-config-service: ^3.606.0 to ^3.637.0
+- Bump @aws-sdk/client-ec2: ^3.606.0 to ^3.637.0
+- Bump @aws-sdk/client-fms: 3.606.0 to 3.637.0
+- Bump @aws-sdk/client-pricing: 3.606.0 to 3.637.0
+- Bump @aws-sdk/client-s3: ^3.606.0 to ^3.637.0
+- Bump @aws-sdk/client-secrets-manager: ^3.606.0 to ^3.637.0
+- Bump @aws-sdk/client-service-quotas: 3.606.0 to 3.637.0
+- Bump @aws-sdk/client-shield: 3.606.0 to 3.637.0
+- Bump @aws-sdk/client-iam: 3.606.0 to 3.637.0
+- Bump @aws-sdk/client-ssm: 3.606.0 to 3.637.0
+- Bump @aws-sdk/client-wafv2: 3.606.0 to 3.637.0
+- Bump @aws-solutions-constructs/aws-eventbridge-stepfunctions: ^2.60.0 to ^2.65.0
+- Bump @babel/traverse: ^7.24.7 to ^7.25.4
+- Bump @types/node: ^20.14.9 to ^22.5.0
+- Bump @types/aws-lambda: ^8.10.140 to ^8.10.143
+- Bump @types/lodash: 4.17.6 to 4.17.7
+- Bump axios: ^1.7.2 to ^1.7.5
+- Bump cdk-sops-secrets: ^1.12.0 to ^1.13.1
+- Bump cfonts: ^3.2.0 to ^3.3.0
+- Bump constructs: 10.2.0 to 10.3.0
+- Bump lodash: 4.17.20 to 4.17.21
+- Bump npm: 10.8.1 to 10.8.2
+- Bump table: ^6.8.0 to ^6.8.2
+- Bump i: ^0.3.6 to ^0.3.7
+- Bump typedoc-plugin-extras: ^3.0.0 to ^3.1.0
+- Bump uuid: ^10.0.0 to ^10.0.0
+- Bump typescript: 5.4.5 to 5.5.4
+- Bump ts-jest: 29.1.5 to 29.2.5
+- Bump adaptivecards: 3.0.2 to 3.0.4
+- Bump aws-lambda: ^1.0.6 to ^1.0.7
+
 ## 4.5.0
 ### Added
  - Added support for deploying Shield Advanced policies, including the ability to calculate pricing. AWS Shield Advanced provides customized detection based on traffic patterns to your protected resources, detects and alerts on smaller DDoS attacks, and identifies application layer attacks by baselining traffic and spotting anomalies.

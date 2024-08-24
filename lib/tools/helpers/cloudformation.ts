@@ -1,6 +1,6 @@
 import * as cloudformation from "@aws-sdk/client-cloudformation";
 import { RuntimeProperties, ProcessProperties } from "../../types/runtimeprops";
-import { Config } from "../../types/config";
+import { wafConfig } from "../../types/config";
 
 
 
@@ -33,7 +33,7 @@ function processOutputsToProcessProperties<K extends keyof ProcessProperties>(
  * @param runtimeprops runtime properties, where to write stack outputs into
  * @param config the config object from the values ts
  */
-export async function setOutputsFromStack(deploymentRegion: string, runtimeProps: RuntimeProperties, config: Config): Promise<void> {
+export async function setOutputsFromStack(deploymentRegion: string, runtimeProps: RuntimeProperties, config: wafConfig): Promise<void> {
   const stackName = `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-" + config.General.DeployHash.toUpperCase() : ""}`;
   const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
   const params = {
@@ -64,7 +64,7 @@ export async function setOutputsFromStack(deploymentRegion: string, runtimeProps
  * @param config the config object from the values ts
  * @param name the name of the output to get eg.: (AWSManagedRulesCommonRuleSetVersion)
  */
-export async function getManagedRuleGroupVersionFromStack(deploymentRegion: string, config: Config, name: string): Promise<string | undefined> {
+export async function getManagedRuleGroupVersionFromStack(deploymentRegion: string, config: wafConfig, name: string): Promise<string | undefined> {
   const stackName = `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-" + config.General.DeployHash.toUpperCase() : ""}`;
   const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
   const params = {

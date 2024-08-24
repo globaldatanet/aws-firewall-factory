@@ -2,7 +2,7 @@
 import cfonts = require("cfonts");
 import * as packageJsonObject from "../../../package.json";
 import { RuntimeProperties } from "../../types/runtimeprops";
-import { Config, ShieldConfig } from "../../types/config";
+import { wafConfig, ShieldConfig } from "../../types/config";
 
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
@@ -15,7 +15,7 @@ const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
  * @return deploymentRegion AWS region, e.g. eu-central-1
  */
 export const outputInfoBanner = (
-  config?: Config,
+  config?: wafConfig,
   shieldConfig?: ShieldConfig
 ) => {
   /**
@@ -149,7 +149,7 @@ export function initRuntimeProperties(): RuntimeProperties {
  * The function will check if s3 bucket is Parameter is starting with aws-waf-logs- if Logging Configuration is set to S3
  * @param config Config
  */
-export function wrongLoggingConfiguration(config: Config): boolean {
+export function wrongLoggingConfiguration(config: wafConfig): boolean {
   if (config.General.LoggingConfiguration === "S3") {
     if (!config.General.S3LoggingBucketName.startsWith("aws-waf-logs-")) {
       return true;

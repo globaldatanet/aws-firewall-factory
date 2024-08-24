@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
-import { CustomResponseBodies, NONEVERSIONEDMANAGEDRULEGRPOUP, Config } from "../../../types/config";
+import { CustomResponseBodies, NONEVERSIONEDMANAGEDRULEGRPOUP, wafConfig } from "../../../types/config";
 import { ManagedRuleGroup, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule, SubVariables } from "../../../types/fms";
 import { Scope, WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput} from "@aws-sdk/client-wafv2";
 import { RuntimeProperties, ProcessProperties } from "../../../types/runtimeprops";
@@ -110,7 +110,7 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
      * @param deployHash string
      * @returns serviceDataRuleGroup
      */
-export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", runtimeProps: RuntimeProperties, config: Config, ipSets: cdk.aws_wafv2.CfnIPSet[],regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]) : ServiceDataRuleGroup[] {
+export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", runtimeProps: RuntimeProperties, config: wafConfig, ipSets: cdk.aws_wafv2.CfnIPSet[],regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]) : ServiceDataRuleGroup[] {
   const webaclName = config.WebAcl.Name;
   const prefix = config.General.Prefix;
   const webAclScope = config.WebAcl.Scope;

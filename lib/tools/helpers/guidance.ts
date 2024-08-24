@@ -1,5 +1,5 @@
 import { RuntimeProperties } from "../../types/runtimeprops";
-import { Config } from "../../types/config";
+import { wafConfig } from "../../types/config";
 
 /**
 This function will help you to get guidance on implementing Best Practices for AWS Firewalls.
@@ -52,7 +52,7 @@ export function getGuidance(context: string, runtimeProperties: RuntimePropertie
 This function will print out the collected guidance for your Firewall.
 @param runtimeProperties - The runtimeProperties object.
  */
-export function outputGuidance(runtimeProperties: RuntimeProperties, config?: Config) {
+export function outputGuidance(runtimeProperties: RuntimeProperties, config?: wafConfig) {
   if(runtimeProperties.GuidanceSummary.length !== 0 || runtimeProperties.Guidance.nestedRateStatementCount !== 0 || runtimeProperties.Guidance.overrideActionManagedRuleGroupCount !== 0 || runtimeProperties.Guidance.noRuleLabelsCount !== 0 || runtimeProperties.Guidance.byteMatchStatementPositionalConstraintCount !== 0){
     console.log("\x1b[0m","\n🛟  Guidance:","\x1b[0m");
     runtimeProperties.GuidanceSummary.forEach(element => {
