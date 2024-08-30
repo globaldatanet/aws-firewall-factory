@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 import { RuntimeProperties } from "../../types/runtimeprops";
 import { wafConfig, ShieldConfig } from "../../types/config";
 import * as cfonts from "cfonts";
@@ -9,9 +9,9 @@ import * as cfonts from "cfonts";
  */
 const packageJsonPath = path.resolve(__dirname, "../../../package.json");
 const packageJsonContent = fs.readFileSync(packageJsonPath, "utf-8");
-//eslint-disable @typescript-eslint/no-unsafe-assignment
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const packageJson = JSON.parse(packageJsonContent);
-//eslint-disable @typescript-eslint/no-unsafe-assignment
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
 const FIREWALL_FACTORY_VERSION = packageJson.version;
 
 /**
