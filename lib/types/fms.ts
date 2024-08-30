@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-types */
 
 import { aws_wafv2 as waf } from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
@@ -79,7 +78,7 @@ type NameObject = {
  * Interface for the ManagedRuleGroup
  */
 export interface ManagedRuleGroup {
-  vendor: fwmEnums.ManagedRuleGroupVendor | string | "AWS",
+  vendor: fwmEnums.ManagedRuleGroupVendor | string,
   name: fwmEnums.AwsManagedRules | string,
   version?: string,
   /**
