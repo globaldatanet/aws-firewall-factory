@@ -13,15 +13,15 @@
   "parserOptions": {
     "ecmaVersion": 2018,
     "sourceType": "module",
-    "project": [
-      "./**/tsconfig.dev.json"
-    ]
+    "project": "tsconfig.eslint.json"
   },
   "ignorePatterns": [
     "*.js",
     "*.d.ts",
     "node_modules/",
     "*.generated.ts",
+    "values",
+    "gotestwaf",
     "coverage"
   ],
   "rules": {

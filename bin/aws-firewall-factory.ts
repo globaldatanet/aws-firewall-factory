@@ -48,7 +48,7 @@ void (async () => {
     const prerequisites: Prerequisites = values.prereq[CONFIG_OBJECT_NAME];
     const deploymentRegion = afwfHelper.outputInfoBanner();
     const runtimeProperties = afwfHelper.initRuntimeProperties();
-    ssmHelper.getAllAwsRegionsFromPublicSsmParameter(
+    await ssmHelper.getAllAwsRegionsFromPublicSsmParameter(
       deploymentRegion,
       runtimeProperties
     );
@@ -124,7 +124,7 @@ void (async () => {
     );
 
     await pricingHelper.isShieldPriceCalculated(shieldConfig);
-    await guidanceHelper.outputGuidance(runtimeProperties);
+    guidanceHelper.outputGuidance(runtimeProperties);
   }
   // ---------------------------------------------------------------------
   // Deploying Firewall stack
