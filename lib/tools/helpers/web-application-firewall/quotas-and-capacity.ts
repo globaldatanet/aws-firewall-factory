@@ -446,7 +446,7 @@ async function calculateCustomRulesCapacities(config: wafConfig, customRules: Fm
         // in case rule has an ipSetReferenceStatement
         const ipSetReferenceStatement = scopeDownStatement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
         // in case rule has an regexPatternSetReferenceStatement
-        const regexPatternSetsStatement = scopeDownStatement.regexMatchStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
+        const regexPatternSetsStatement = scopeDownStatement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
         if(andStatement && andStatement.statements) {
           for (const statement of andStatement.statements as wafv2.CfnWebACL.StatementProperty[]) {
             const statementIpSetReferenceStatement = statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
