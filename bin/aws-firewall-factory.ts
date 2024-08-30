@@ -45,7 +45,6 @@ void (async () => {
   // Deploying prerequisite stack
   console.log(process.env.PREREQUISITE);
   if (process.env.STACK_NAME === "PreRequisiteStack") {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
     const prerequisites: Prerequisites = values.prereq[CONFIG_OBJECT_NAME];
     const deploymentRegion = afwfHelper.outputInfoBanner();
     const runtimeProperties = afwfHelper.initRuntimeProperties();
@@ -270,6 +269,6 @@ void (async () => {
       config,
       deploymentRegion
     );
-    await guidanceHelper.outputGuidance(runtimeProperties, config);
+    guidanceHelper.outputGuidance(runtimeProperties, config);
   }
 })();

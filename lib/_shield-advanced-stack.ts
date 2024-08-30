@@ -29,7 +29,7 @@ import { ShieldDashboard } from "./constructs/ShieldDashboard";
  * @param {RuntimeProperties} runtimeProperties Variable for Runtime Properties.
  */
 
-export interface shield_props extends cdk.StackProps {
+export interface ShieldProps extends cdk.StackProps {
    /**
    * Class Variable for a Shield Config.
    */
@@ -42,7 +42,7 @@ export interface shield_props extends cdk.StackProps {
 export class ShieldStack extends cdk.Stack {
   readonly oamSinkArn: string;
 
-  constructor(scope: Construct, id: string, props: shield_props) {
+  constructor(scope: Construct, id: string, props: ShieldProps) {
     super(scope, id, props);
     const preProcessRuleGroups: never[] = [];
     const postProcessRuleGroups: never[] = [];
@@ -61,9 +61,9 @@ export class ShieldStack extends cdk.Stack {
       },
     };
 
-    props.shieldConfig.remediationEnabled === false
-      ? getGuidance("remediationNotEnabled", props.runtimeProperties)
-      : null;
+    if(props.shieldConfig.remediationEnabled ===false){
+      getGuidance("remediationNotEnabled", props.runtimeProperties);
+    }
     const cfnShieldPolicyProps: fms.CfnPolicyProps = {
       remediationEnabled: props.shieldConfig.remediationEnabled,
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#resourcetype:~:text=fms%2Dpolicy%2Dresourcetags-,resourceType,-%3F

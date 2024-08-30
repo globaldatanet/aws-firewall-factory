@@ -10,7 +10,7 @@ import { guidanceHelper } from "../../helpers";
 import * as cr from "aws-cdk-lib/custom-resources";
 
 
-const MANAGEDRULEGROUPSINFO: string[]= [""];
+const MANAGEDRULEGROUPSINFO : string[] = [""];
 const subVariables : SubVariables = {};
 
 /**

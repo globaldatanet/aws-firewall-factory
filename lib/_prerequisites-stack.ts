@@ -26,11 +26,11 @@ import * as path from "path";
 import { SopsSyncProvider, SopsSecret } from "cdk-sops-secrets";
 
 
-  /**
+/**
  * @group Interfaces
  * @description
  * Specifies the Prerequisites Stack properties.
- * 
+ *
  * @param {Prerequisites} prerequisites  Variable for a prerequisites Config.
  * @param {RuntimeProperties} runtimeProperties Variable for Runtime Properties.
  */

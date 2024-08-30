@@ -15,7 +15,7 @@ import { wafHelper } from "./tools/helpers";
 
 
 
-    /**
+/**
  * @group Interfaces
  * @description
  * Specifies the Waf Stack properties.
