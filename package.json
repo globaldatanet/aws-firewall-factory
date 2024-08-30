@@ -1,6 +1,6 @@
 {
   "name": "aws-firewall-factory",
-  "version": "4.5.0",
+  "version": "4.5.1",
   "bin": {
     "firewallfactory": "bin/aws-firewall-factory.js"
   },

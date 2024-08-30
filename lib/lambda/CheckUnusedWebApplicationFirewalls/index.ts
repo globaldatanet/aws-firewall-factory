@@ -35,9 +35,8 @@ export const handler = async (
       console.log(`📦 Uploading WAF usage data to S3 bucket: ${bucketName}`);
       await uploadFileToS3(bucketName, "temp/" +accountwafs.AccountAlias + ".json", JSON.stringify(accountwafs), "application/json");
       return true;
-    }
-    catch (error) {
-      console.log(`❌ Error: ${error}`);
+    } catch (error) {
+      console.error("❌ Error in Lambda function: ", error);
       throw error;
     }
   }

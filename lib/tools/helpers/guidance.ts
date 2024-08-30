@@ -10,11 +10,15 @@ export function getGuidance(context: string, runtimeProperties: RuntimePropertie
   switch(context){
     case "nestedRateStatement":
       runtimeProperties.Guidance.nestedRateStatementCount++;
-      source ? runtimeProperties.Guidance.nestedRateStatementInfo.push(source) : undefined;
+      if(source){
+        runtimeProperties.Guidance.nestedRateStatementInfo.push(source);
+      }
       break;
     case "overrideActionManagedRuleGroup":
       runtimeProperties.Guidance.overrideActionManagedRuleGroupCount++;
-      source ? runtimeProperties.Guidance.overrideActionManagedRuleGroupInfo.push(source) : undefined;
+      if(source){
+        runtimeProperties.Guidance.overrideActionManagedRuleGroupInfo.push(source);
+      }
       break;
     case "noManageRuleGroups":
       runtimeProperties.GuidanceSummary.push("\x1b[31m","\n    🚨  No ManagedRuleGroups are used in your Firewall.\n       https://docs.aws.amazon.com/waf/latest/developerguide/waf-managed-rule-groups.html.","\x1b[0m");
@@ -24,14 +28,18 @@ export function getGuidance(context: string, runtimeProperties: RuntimePropertie
       break;
     case "byteMatchStatementPositionalConstraint":
       runtimeProperties.Guidance.byteMatchStatementPositionalConstraintCount++;
-      source ? runtimeProperties.Guidance.byteMatchStatementPositionalConstraintInfo.push(source) : undefined;
+      if(source){
+        runtimeProperties.Guidance.byteMatchStatementPositionalConstraintInfo.push(source);
+      }
       break;
     case "noBotControlRuleSetProperty":
       runtimeProperties.GuidanceSummary.push("\x1b[33m","\n    ⚠️  No BotControlRuleSetProperty is used in your ManagedRulesBotControlRuleSet.\n       https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-wafv2-webacl-awsmanagedrulesbotcontrolruleset.html.","\x1b[0m");
       break;
     case "noRuleLabels":
       runtimeProperties.Guidance.noRuleLabelsCount++;
-      source ? runtimeProperties.Guidance.noRuleLabelsInfo.push(source) : undefined;
+      if(source){
+        runtimeProperties.Guidance.noRuleLabelsInfo.push(source);
+      }
       break;
     case "noAWSManagedIPDDoSList":
       runtimeProperties.GuidanceSummary.push("\x1b[33m","\n    ⚠️  No AWSManagedRulesAmazonIpReputationList is used in your Firewall - These Rules identify and block IPs acting as bots, conducting reconnaissance on AWS resources, or involved in DDoS activities. AWSManagedIPDDoSList rule has effectively blocked over 90% of malicious request floods.","\x1b[0m");

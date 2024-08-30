@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { CustomResponseBodies, NONEVERSIONEDMANAGEDRULEGRPOUP, wafConfig } from "../../../types/config";
 import { ManagedRuleGroup, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule, SubVariables } from "../../../types/fms";
-import { Scope, WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput} from "@aws-sdk/client-wafv2";
+import { Scope, WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput, ListAvailableManagedRuleGroupVersionsCommandOutput} from "@aws-sdk/client-wafv2";
 import { RuntimeProperties, ProcessProperties } from "../../../types/runtimeprops";
 import { transformWafRuleStatements } from "./statements";
 import { Construct } from "constructs";
@@ -30,7 +30,9 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
       guidanceHelper.getGuidance("overrideActionManagedRuleGroup", runtimeProps, managedRuleGroup.name);
     }
     if(managedRuleGroup.name === "AWSManagedRulesBotControlRuleSet"){
-      managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ? undefined : guidanceHelper.getGuidance("noBotControlRuleSetProperty",runtimeProps);
+      if(managedRuleGroup.awsManagedRulesBotControlRuleSetProperty === undefined){
+        guidanceHelper.getGuidance("noBotControlRuleSetProperty",runtimeProps);
+      }
     }
     if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
       console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
@@ -217,9 +219,11 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
       }
       // Don't lowercase the first char of the Key of the Custom Response Body,
       // only toAwsCamel the properties below the Key
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let cstResBodies: { [key:string]: any} | undefined = {};
       if(customResponseBodies) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies![curr]; return acc; }, cstResBodies);
       }
       else {
@@ -373,10 +377,13 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         }
         const cfnRuleProperties = [];
         let rulegroupcounter = 0;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         while (rulegroupcounter < rulesets[count].length) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           const statementindex = rulesets[count][rulegroupcounter];
           let rulename = "";
           if (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             ruleGroupSet[statementindex]
               .name !== undefined
           ) {
@@ -390,28 +397,37 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
           } else {
             rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-"+deployHash : ""}`;
           }
-    
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const statement = transformWafRuleStatements(ruleGroupSet[statementindex],prefix, stage, config.WebAcl.Name, ipSets, regexPatternSets);
           const cfnRuleProperty = {
             name: rulename,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             priority: ruleGroupSet[statementindex].priority,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             action: ruleGroupSet[statementindex].action,
             statement,
             visibilityConfig: {
               sampledRequestsEnabled:
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                   ruleGroupSet[statementindex]
                     .visibilityConfig.sampledRequestsEnabled,
               cloudWatchMetricsEnabled:
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                   ruleGroupSet[statementindex]
                     .visibilityConfig.cloudWatchMetricsEnabled,
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
               metricName: ruleGroupSet[statementindex].visibilityConfig.metricName,
             },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             captchaConfig: (Object.keys(ruleGroupSet[statementindex]
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
               .action)[0] === "captcha") ? ruleGroupSet[statementindex].captchaConfig : undefined,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             ruleLabels: ruleGroupSet[statementindex].ruleLabels,
           };
           let cfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty;
           if (
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             ruleGroupSet[statementindex]
               .ruleLabels
           ) {
@@ -428,6 +444,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let cstResBodies: { [key:string]: any} | undefined = {};
         if(customResponseBodies) {
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies![curr]; return acc; }, cstResBodies);
         }
         else {
@@ -520,9 +537,9 @@ export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string
   };
   const command = new ListAvailableManagedRuleGroupVersionsCommand(input);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const response: any = await client.send(command);
-  if(response.Versions.length > 0){
-    return response.Versions[0].Name;
+  const response: ListAvailableManagedRuleGroupVersionsCommandOutput = await client.send(command);
+  if(response.Versions!.length > 0){
+    return response.Versions![0].Name;
   }
   else{
     return undefined;

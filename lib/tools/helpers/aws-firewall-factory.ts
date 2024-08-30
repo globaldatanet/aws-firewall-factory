@@ -1,9 +1,8 @@
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
-import cfonts = require("cfonts");
 import * as packageJsonObject from "../../../package.json";
 import { RuntimeProperties } from "../../types/runtimeprops";
 import { wafConfig, ShieldConfig } from "../../types/config";
-
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import cfonts = require("cfonts");
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
  */

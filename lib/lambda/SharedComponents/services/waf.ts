@@ -3,7 +3,7 @@ import { WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListWebACLsC
 import { PaginatedManagedRuleGroupVersions, ManagedRuleGroupVersionResponse} from "../types/index";
 import {CloudFrontClient, ListDistributionsByWebACLIdCommand, ListDistributionsByWebACLIdCommandOutput} from "@aws-sdk/client-cloudfront";
 import { AwsCredentialIdentity } from "@aws-sdk/types";
-import { AccountWebACLs, WebACLs} from "../types/index";
+import { AccountWebAcls, WebAcls} from "../types/index";
 
 export async function getManagedRuleGroupVersions(VendorName: string,Name: string,WafScope: string): Promise<PaginatedManagedRuleGroupVersions> {
   const client = new WAFV2Client({region: process.env.AWS_DEFAULT_REGION});
@@ -135,6 +135,7 @@ async function checkwafusage(WebACLArn:string | undefined, wafclient: WAFV2Clien
             break;
           }
         } catch (error) {
+          console.log(error);
           await delay(5000);
           retryCount++;
         }
@@ -162,7 +163,7 @@ function delay(ms: number) {
  * @returns WebACLs[]
  */
 export async function getallwafs(client: WAFV2Client, maxResults = 10, region: string | undefined) {
-  const wafs: WebACLs[] = [];
+  const wafs: WebAcls[] = [];
 
   // Retrieve CLOUDFRONT WAFs if region is us-east-1
   if (region === "us-east-1") {
@@ -185,7 +186,7 @@ export async function getallwafs(client: WAFV2Client, maxResults = 10, region: s
  * @returns WebACLs[]
  */
 async function getWAFs(client: WAFV2Client, maxResults: number, scope: Scope) {
-  const wafs: WebACLs[] = [];
+  const wafs: WebAcls[] = [];
 
   let NextMarker: string | undefined = undefined;
 
@@ -223,7 +224,7 @@ async function getWAFs(client: WAFV2Client, maxResults: number, scope: Scope) {
  * @param regexString string
  * @returns AccountWebACLs
  */
-export async function checkWafUsageInAccount(credentials: AwsCredentialIdentity, regions: string[], accountwafs: AccountWebACLs, regexString?:string): Promise<AccountWebACLs> {
+export async function checkWafUsageInAccount(credentials: AwsCredentialIdentity, regions: string[], accountwafs: AccountWebAcls, regexString?:string): Promise<AccountWebAcls> {
   for(const region of regions){
     const WebACLsInUse =[];
     const UnusedWebACLs = [];

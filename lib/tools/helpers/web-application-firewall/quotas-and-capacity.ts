@@ -1,6 +1,6 @@
 import { table } from "table";
 import * as quota from "@aws-sdk/client-service-quotas";
-import { Scope, WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput,DescribeManagedRuleGroupCommandOutput, Rule as SdkRule} from "@aws-sdk/client-wafv2";
+import { Scope, WAFV2Client, CheckCapacityCommand, CheckCapacityCommandInput, CheckCapacityCommandOutput, DescribeManagedRuleGroupCommand, DescribeManagedRuleGroupCommandInput,DescribeManagedRuleGroupCommandOutput, Rule as SdkRule} from "@aws-sdk/client-wafv2";
 import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-sdk/client-fms";
 import { RuntimeProperties, ProcessProperties } from "../../../types/runtimeprops";
 import { wafConfig } from "../../../types/config";
@@ -58,7 +58,7 @@ async function getTotalCapacityOfRules(config: wafConfig, runtimeProperties: Run
   const command = new CheckCapacityCommand(input);
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response : any = await client.send(command);
+    const response : CheckCapacityCommandOutput = await client.send(command);
     return response.Capacity || 0;
   } catch(err) {
     guidanceHelper.outputGuidance(runtimeProperties, config);
@@ -222,7 +222,9 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
       processProperties = runtimeProperties.PostProcess;
       break;
   }
-  config.WebAcl.PreProcess.ManagedRuleGroups === undefined && config.WebAcl.PostProcess.ManagedRuleGroups === undefined ? guidanceHelper.getGuidance("noManageRuleGroups", runtimeProperties) : null;
+  if(config.WebAcl.PreProcess.ManagedRuleGroups === undefined && config.WebAcl.PostProcess.ManagedRuleGroups === undefined ){
+    guidanceHelper.getGuidance("noManageRuleGroups", runtimeProperties);
+  }
   const managedcapacitieslog = [];
   managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
   for (const managedrule of managedrules) {

@@ -53,7 +53,7 @@ export async function setOutputsFromStack(deploymentRegion: string, runtimeProps
     processOutputsToProcessProperties("DeployedRuleGroupIdentifier", runtimeProps.PostProcess,"PostProcessDeployedRuleGroupIdentifier", responseStack);
     processOutputsToProcessProperties("DeployedRuleGroupCapacities", runtimeProps.PostProcess, "PostProcessDeployedRuleGroupCapacities", responseStack);
 
-  } catch (e) {
+  } catch {
     console.log("🆕 Creating new CloudFormation Stack.\n");
   }
 }
@@ -77,7 +77,8 @@ export async function getManagedRuleGroupVersionFromStack(deploymentRegion: stri
     const outputValue = responseStack.Stacks?.[0]?.Outputs?.find(output => output.OutputKey === name+"Version")?.OutputValue || "";
     return outputValue;
   }
-  catch (e) {
+  catch (error) {
+    console.error("Error getting ManagedRuleGroupVersion from CloudFormation Stack: ", error);
     return undefined;
   }
 }

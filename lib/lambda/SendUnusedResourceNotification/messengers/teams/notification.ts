@@ -5,14 +5,14 @@
 
 import { IncomingWebhook } from "./IncomingWebhook";
 import { PolicySummary } from "@aws-sdk/client-fms";
-import { AccountWebACLs, FmsPolicy } from "../../../SharedComponents/types/index";
+import { AccountWebAcls, FmsPolicy } from "../../../SharedComponents/types/index";
 import * as AdaptiveCards from "adaptivecards";
 import {getProductPrice}  from "../../../../tools/helpers/pricing";
 import { PriceRegions, RegionString } from "../../../../types/config";
 import * as packageJsonObject from "../../../../../package.json";
 import {addAccount} from "../../helper";
 
-export async function unusedNotificationTeams(AllWAFs: AccountWebACLs[], UniqueUnusedFMSPolicies:  FmsPolicy[], allFMSPolicies: PolicySummary[], bucketName: string, key: string, Webhook: string): Promise<void> {
+export async function unusedNotificationTeams(AllWAFs: AccountWebAcls[], UniqueUnusedFMSPolicies:  FmsPolicy[], allFMSPolicies: PolicySummary[], bucketName: string, key: string, Webhook: string): Promise<void> {
   const webhook = new IncomingWebhook(Webhook);
   const totalWafs: number = AllWAFs.reduce((acc, account) => acc + account.TotalWafs, 0);
   const wafsInUse: number = AllWAFs.reduce((acc, account) => acc + account.WafsInUse, 0);
