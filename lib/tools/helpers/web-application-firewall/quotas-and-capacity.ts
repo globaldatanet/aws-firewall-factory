@@ -595,7 +595,7 @@ function calculateRatebasedStatementwithoutScopeDownStatement(customRule: FmsRul
 function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebACL.IPSetReferenceStatementProperty) {
   let ipSetRuleCapacity = 1;
   const ipSetForwardedIpConfig = ipSetReferenceStatement.ipSetForwardedIpConfig as wafv2.CfnWebACL.IPSetForwardedIPConfigurationProperty | undefined;
-  if(ipSetForwardedIpConfig && ipSetForwardedIpConfig.position === "ANY") ipSetRuleCapacity = 4;
+  if(ipSetForwardedIpConfig && ipSetForwardedIpConfig.position === "ANY") ipSetRuleCapacity += 4;
   return ipSetRuleCapacity;
 }
 

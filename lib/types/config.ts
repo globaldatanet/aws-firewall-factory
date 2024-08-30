@@ -522,7 +522,7 @@ export interface IPSet {
    */
   name: string; // This name will be used as a CloudFormation logical ID, so it can't have a already used name and must be alphanumeric
   /*
-   * @TJS-pattern ^[\w+=:#@\/\-,\.][\w+=:#@\/\-,\.\s]+[\w+=:#@\/\-,\.]$
+   * @TJS-pattern ^[a-zA-Z0-9=:#@/\-,.][a-zA-Z0-9+=:#@/\-,.\s]+[a-zA-Z0-9+=:#@/\-,.]{1,256}$
    */
   description?: string;
   /**

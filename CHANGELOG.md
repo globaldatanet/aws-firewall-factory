@@ -3,8 +3,13 @@
 ## Released
 
 ## 4.5.1
+### Added
+- Renamed Type: Changed the type name WafConfig to wafConfig in the Config module to follow naming conventions and improve consistency across the codebase.
+
 
 ### Fixed
+- Corrected the regex pattern for IPSet descriptions to ensure accurate validation
+- Fixed Bug on IPSet capacity check
 - Bump aws-cdk: 2.148.0 to 2.154.1
 - Bump aws-cdk-lib: ^2.148.0 to ^2.150.0
 - Bump @aws-sdk/client-cloudformation: 3.606.0 to 3.637.0
