@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 import * as cdk from "aws-cdk-lib";
 import { wafConfig } from "../types/config";
 import { Construct } from "constructs";
@@ -15,9 +15,9 @@ const REGION = cdk.Aws.REGION;
  */
 const packageJsonPath = path.resolve(__dirname, "../../package.json");
 const packageJsonContent = fs.readFileSync(packageJsonPath, "utf-8");
-//eslint-disable @typescript-eslint/no-unsafe-assignment
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const packageJson = JSON.parse(packageJsonContent);
-//eslint-disable @typescript-eslint/no-unsafe-assignment
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const FIREWALL_FACTORY_VERSION = packageJson.version;
 
 /**

@@ -52,4 +52,4 @@ jobs:
           mask-aws-account-id: false
       - name: 🧪 Check Enums for ManagedRule Groups
         run: |
-            ts-node ./lib/tools/enumcheck.ts
+            ts-node ./workflows/enumcheck.ts
