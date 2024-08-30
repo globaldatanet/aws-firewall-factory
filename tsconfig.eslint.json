@@ -29,9 +29,7 @@
     "./bin/**/*.ts"
   ],
   "exclude": [
-    "./values/tests/regexPatternSets.ts",
-    "./values/**/*.ts",
-    "node_modules",
+    "values/**/*.ts",
     "cdk.out/**/*.ts",
     "gotestwaf/**/*.ts"
   ]

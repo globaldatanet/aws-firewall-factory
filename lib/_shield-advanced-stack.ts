@@ -16,7 +16,7 @@ import { ShieldDashboard } from "./constructs/ShieldDashboard";
  * Specifies the AWS Shield Advanced configuration.
 
  * This CDK creates a Shield Advanced Stack which will be managed by AWS Firewall Manager.
- * 
+ *
 
 */
 
