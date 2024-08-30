@@ -7,9 +7,11 @@ import * as cfonts from "cfonts";
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
  */
-const packageJsonPath = path.resolve(__dirname, '../../../package.json');
-const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
+const packageJsonPath = path.resolve(__dirname, "../../../package.json");
+const packageJsonContent = fs.readFileSync(packageJsonPath, "utf-8");
+//eslint-disable @typescript-eslint/no-unsafe-assignment
 const packageJson = JSON.parse(packageJsonContent);
+//eslint-disable @typescript-eslint/no-unsafe-assignment
 const FIREWALL_FACTORY_VERSION = packageJson.version;
 
 /**
