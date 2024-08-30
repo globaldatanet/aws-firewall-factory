@@ -225,7 +225,7 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
   if(config.WebAcl.PreProcess.ManagedRuleGroups === undefined && config.WebAcl.PostProcess.ManagedRuleGroups === undefined ){
     guidanceHelper.getGuidance("noManageRuleGroups", runtimeProperties);
   }
-  const managedcapacitieslog = [];
+  const managedcapacitieslog: string[][] = [];
   managedcapacitieslog.push(["➕ RuleName", "Capacity", "🏷  Specified Version", "🔄 EnforceUpdate"]);
   for (const managedrule of managedrules) {
     const enforceUpdate = managedrule.enforceUpdate ?? false;
@@ -244,7 +244,7 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
       ruleversion
     );
     managedrule.capacity = capacity;
-    managedcapacitieslog.push([managedrule.name, capacity, ruleversion ?? "[unversioned]", enforceUpdate]);
+    managedcapacitieslog.push([managedrule.name, capacity.toString(), ruleversion ?? "[unversioned]", enforceUpdate.toString()]);
     runtimeProperties.ManagedRuleCapacity += capacity;
     processProperties.ManagedRuleGroupCount += 1;
     switch(managedrule.name){
@@ -306,8 +306,8 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
    * @returns an array with the capacities of the supplied custom rules
    */
 async function calculateCustomRulesCapacities(config: wafConfig, customRules: FmsRule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
-  const capacities = [];
-  const capacitieslog = [];
+  const capacities: number[] = [];
+  const capacitieslog: string[][] = [];
   capacitieslog.push(["🔺 Priority", "➕ RuleName", "🧮 Capacity", "ℹ StatementType"]);
   for (const customRule of customRules) {
     // Manually calculate and return capacity if rule has a ipset statements with a logical ID entry (e.g. ${IPsString.Arn})
@@ -559,8 +559,9 @@ async function calculateCustomRulesCapacities(config: wafConfig, customRules: Fm
     else {
       capacities.push(await calculateCustomRuleStatementsCapacity(config, customRule, deploymentRegion, scope, runtimeProperties));
     }
-    capacitieslog.push([customRule.priority, customRule.name,capacities[capacities.length-1], Object.keys(customRule.statement)[0].charAt(0).toUpperCase()+ Object.keys(customRule.statement)[0].slice(1)]);
+    capacitieslog.push([customRule.priority.toString(), customRule.name,capacities[capacities.length-1].toString(), Object.keys(customRule.statement)[0].charAt(0).toUpperCase()+ Object.keys(customRule.statement)[0].slice(1)]);
   }
+  // eslint-disable-next-line  @typescript-eslint/no-unnecessary-type-assertion
   capacitieslog.sort((a, b) => parseInt(a[0] as string,10) - parseInt(b[0] as string,10));
   console.log(table(capacitieslog));
   return capacities;
@@ -607,10 +608,10 @@ function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebA
  * @param customRule FmsRule
  * @param deploymentRegion string
  * @param scope "REGIONAL" | "CLOUDFRONT"
- * @returns 
+ * @returns
  */
 async function calculateCustomRuleStatementsCapacity(config: wafConfig, customRule: FmsRule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProperties) {
-  const ruleCalculatedCapacityJson = [];
+  const ruleCalculatedCapacityJson: SdkRule[] = [];
   const rule = transformCdkRuletoSdkRule(customRule, runtimeProperties);
   ruleCalculatedCapacityJson.push(rule);
   const capacity = await getTotalCapacityOfRules(
