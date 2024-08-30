@@ -5,7 +5,7 @@
 ## 4.5.1
 ### Added
 - Renamed Type: Changed the type name WafConfig to wafConfig in the Config module to follow naming conventions and improve consistency across the codebase.
-
+- Change the ManagedRuleGroup interface, to extends the wafv2.CfnWebACL.ManagedRuleGroupStatementProperty.
 
 ### Fixed
 - Corrected the regex pattern for IPSet descriptions to ensure accurate validation
