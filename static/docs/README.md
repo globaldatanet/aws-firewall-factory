@@ -67,4 +67,3 @@ All releases are tested prior to release using automated test workflows of sampl
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 5.  Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
 ![List of Resources](./static/images/options.jpg "Stacks")
-[[include:./static/images/options.jpg]]

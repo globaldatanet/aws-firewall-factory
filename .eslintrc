@@ -1,6 +1,10 @@
 {
   "root": true,
   "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+  // Required for certain syntax usages
+  "ecmaVersion": 2017
+},
   "plugins": [
     "@typescript-eslint"
   ],

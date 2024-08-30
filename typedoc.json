@@ -6,7 +6,7 @@
     "name": "AWS Firewall Factory Documentation",
     "entryPointStrategy": "Expand",
     "exclude": ["**/gotestwaf/**","**/bin/**","**/values/**","**/lambda/**","**/constructs/**","**/adaptivecards/**"],
-    "plugin": ["typedoc-plugin-extras", "typedoc-plugin-coverage"],
+    "plugin": ["typedoc-plugin-extras"],
     "favicon": "static/icon/aws_firewall_factory_favicon.ico",
     "searchInComments": true,
     "hideGenerator": true,
