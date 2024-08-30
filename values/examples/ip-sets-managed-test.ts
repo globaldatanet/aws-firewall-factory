@@ -53,13 +53,13 @@ export const config: wafConfig = {
     PostProcess: {
       ManagedRuleGroups: [
         {
-          vendor: "AWS",
+          vendorName: "AWS",
           name: "AWSManagedRulesAmazonIpReputationList",
           capacity: 25,
           version: "",
         },
         {
-          vendor: "AWS",
+          vendorName: "AWS",
           name: "AWSManagedRulesCommonRuleSet",
           capacity: 700,
           version: "Version_1.6",

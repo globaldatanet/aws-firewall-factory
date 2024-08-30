@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "lint": "eslint",
+    "lint": "eslint .",
     "preinstall": "npx only-allow npm"
   },
   "devDependencies": {

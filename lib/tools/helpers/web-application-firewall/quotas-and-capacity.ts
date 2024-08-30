@@ -235,10 +235,10 @@ async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deployme
         managedrule.version = version;
       }
     }
-    const ruleversion = managedrule.version ?? await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendor, managedrule.name, config.WebAcl.Scope);
+    const ruleversion = managedrule.version ?? await getcurrentManagedRuleGroupVersion(deploymentRegion, managedrule.vendorName, managedrule.name, config.WebAcl.Scope);
     const capacity = await getManagedRuleCapacity(
       deploymentRegion,
-      managedrule.vendor,
+      managedrule.vendorName,
       managedrule.name,
       config.WebAcl.Scope,
       ruleversion

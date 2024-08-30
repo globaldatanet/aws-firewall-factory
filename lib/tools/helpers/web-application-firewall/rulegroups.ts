@@ -25,7 +25,7 @@ const subVariables : SubVariables = {};
 export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string, runtimeProps: RuntimeProperties): { ServiceData: ServiceDataManagedRuleGroup[], ManagedRuleGroupInfo: string[], SubVariables: SubVariables } {
   const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
-    if(managedRuleGroup.overrideAction?.type === "COUNT"){
+    if(managedRuleGroup.ruleActionOverrides?.toString() === "COUNT"){
       // eslint-disable-next-line quotes
       guidanceHelper.getGuidance("overrideActionManagedRuleGroup", runtimeProps, managedRuleGroup.name);
     }
@@ -38,26 +38,26 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
       console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
       cfnManagedRuleGroup.push({
         managedRuleGroupIdentifier: {
-          vendorName: managedRuleGroup.vendor,
+          vendorName: managedRuleGroup.vendorName,
           managedRuleGroupName: managedRuleGroup.name,
           version: undefined,
           versionEnabled: undefined,
         },
         overrideAction: managedRuleGroup.overrideAction ? managedRuleGroup.overrideAction : { type: "NONE" },
         ruleGroupArn: undefined,
-        excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : undefined,
+        excludeRules: managedRuleGroup.excludedRules ?  managedRuleGroup.excludedRules : undefined,
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?? undefined,
         awsManagedRulesBotControlRuleSetProperty: managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ?? undefined,
         awsManagedRulesACFPRuleSetProperty: managedRuleGroup.awsManagedRulesACFPRuleSetProperty ?? undefined,
         awsManagedRulesATPRuleSetProperty: managedRuleGroup.awsManagedRulesATPRuleSetProperty ?? undefined,
       });
-      MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendor +"]");
+      MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendorName +"]");
     }
     else{
       const crManagedRuleGroupanagedRuleGroupVersion = new cdk.CustomResource(scope, `Cr${managedRuleGroup.name}` , {
         properties: {
-          VendorName: managedRuleGroup.vendor,
+          VendorName: managedRuleGroup.vendorName,
           Name: managedRuleGroup.name,
           Scope: wafScope,
           ManagedRuleGroupVersion: managedRuleGroup.version,
@@ -78,7 +78,7 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
 
       cfnManagedRuleGroup.push({
         managedRuleGroupIdentifier: {
-          vendorName: managedRuleGroup.vendor,
+          vendorName: managedRuleGroup.vendorName,
           managedRuleGroupName: managedRuleGroup.name,
           version,
           versionEnabled: managedRuleGroup.versionEnabled ?? undefined,
@@ -89,7 +89,7 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?? undefined,
       });
-      MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendor +"] " + cwVersion);
+      MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendorName +"] " + cwVersion);
     }
   }
   return {ServiceData: cfnManagedRuleGroup, ManagedRuleGroupInfo: MANAGEDRULEGROUPSINFO, SubVariables: subVariables};

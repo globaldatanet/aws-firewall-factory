@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { aws_wafv2 as waf } from "aws-cdk-lib";
-import * as fwmEnums from "./enums";
-
 /*
   * Interface for the CustomRequestHandling
   */
@@ -77,9 +74,7 @@ type NameObject = {
 /**
  * Interface for the ManagedRuleGroup
  */
-export interface ManagedRuleGroup {
-  vendor: fwmEnums.ManagedRuleGroupVendor | string,
-  name: fwmEnums.AwsManagedRules | string,
+export interface ManagedRuleGroup extends waf.CfnWebACL.ManagedRuleGroupStatementProperty {
   version?: string,
   /**
     * Will be automatically set using the [Check Capacity API](https://docs.aws.amazon.com/waf/latest/APIReference/API_CheckCapacity.html).

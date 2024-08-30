@@ -77,8 +77,7 @@ export async function getManagedRuleGroupVersionFromStack(deploymentRegion: stri
     const outputValue = responseStack.Stacks?.[0]?.Outputs?.find(output => output.OutputKey === name+"Version")?.OutputValue || "";
     return outputValue;
   }
-  catch (error) {
-    console.error("Error getting ManagedRuleGroupVersion from CloudFormation Stack: ", error);
+  catch {
     return undefined;
   }
 }

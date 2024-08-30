@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Rule, ManagedRuleGroup } from "./fms";
-import { aws_fms as fms, CfnTag, aws_events as events } from "aws-cdk-lib";
+import { aws_fms as fms, CfnTag, aws_events as events} from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
 import * as cdk from "aws-cdk-lib";
 /**
