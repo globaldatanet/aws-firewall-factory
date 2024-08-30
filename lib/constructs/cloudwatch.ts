@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
-import * as packageJsonObject from "../../package.json";
+import * as fs from 'fs';
+import * as path from 'path';
 import * as cdk from "aws-cdk-lib";
 import { wafConfig } from "../types/config";
 import { Construct } from "constructs";
@@ -12,7 +13,10 @@ const REGION = cdk.Aws.REGION;
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
  */
-const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
+const packageJsonPath = path.resolve(__dirname, '../../package.json');
+const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
+const packageJson = JSON.parse(packageJsonContent);
+const FIREWALL_FACTORY_VERSION = packageJson.version;
 
 /**
  * Central CloudWatch Dashboard Construct

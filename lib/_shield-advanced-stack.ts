@@ -40,8 +40,7 @@ export interface ShieldProps extends cdk.StackProps {
   readonly runtimeProperties: RuntimeProperties;
 }
 export class ShieldStack extends cdk.Stack {
-  readonly oamSinkArn: string;
-
+  readonly oamSinkArn: string = "";
   constructor(scope: Construct, id: string, props: ShieldProps) {
     super(scope, id, props);
     const preProcessRuleGroups: never[] = [];

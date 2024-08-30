@@ -1,12 +1,16 @@
-import * as packageJsonObject from "../../../package.json";
+import * as fs from 'fs';
+import * as path from 'path';
 import { RuntimeProperties } from "../../types/runtimeprops";
 import { wafConfig, ShieldConfig } from "../../types/config";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-import cfonts = require("cfonts");
+import * as cfonts from "cfonts";
+
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
  */
-const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
+const packageJsonPath = path.resolve(__dirname, '../../../package.json');
+const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf-8');
+const packageJson = JSON.parse(packageJsonContent);
+const FIREWALL_FACTORY_VERSION = packageJson.version;
 
 /**
  * The function will display info banner and returns deploymentRegion for WAF Stack

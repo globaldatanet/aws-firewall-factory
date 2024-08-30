@@ -2,7 +2,6 @@
   "compilerOptions": {
     "alwaysStrict": true,
     "declaration": true,
-    "esModuleInterop": true,
     "experimentalDecorators": true,
     "inlineSourceMap": true,
     "inlineSources": true,
@@ -18,11 +17,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "resolveJsonModule": true,
+    "esModuleInterop": true,
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "stripInternal": true,
-    "target": "ES2019"
+    "target": "ES2019",
   },
   "include": [
     "./lib/**/*.ts",
