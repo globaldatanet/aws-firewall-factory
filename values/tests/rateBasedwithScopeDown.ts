@@ -28,7 +28,7 @@ export const config: wafConfig = {
     PreProcess: {
       CustomRules: [
         {
-          name: "ip-allow-ratebased-ten-test",
+          name: "low-ratebased-test",
           statement: {
             rateBasedStatement: {
               aggregateKeyType: "IP",
@@ -42,7 +42,7 @@ export const config: wafConfig = {
           visibilityConfig: {
             sampledRequestsEnabled: true,
             cloudWatchMetricsEnabled: true,
-            metricName: "ip-allow-ratebased-ten-test",
+            metricName: "low-ratebased-test",
           },
           priority: 10,
         },
