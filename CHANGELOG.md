@@ -7,7 +7,7 @@
 - Renamed Type: Changed the type name WafConfig to wafConfig in the Config module to follow naming conventions and improve consistency across the codebase.
 - Change the ManagedRuleGroup interface, to extends the wafv2.CfnWebACL.ManagedRuleGroupStatementProperty.
 - Changed structure in lib and improved Documentation, extended jsdoc with examples.
-
+- Added tests to make sure that [rate-based rules with lower rate limits](https://aws.amazon.com/about-aws/whats-new/2024/08/aws-waf-rate-based-rules-lower-rate-limits/) will work correctly.
 ### Fixed
 - Corrected the regex pattern for IPSet descriptions to ensure accurate validation
 - Fixed Bug on IPSet capacity check

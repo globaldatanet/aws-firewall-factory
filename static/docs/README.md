@@ -1,5 +1,5 @@
 
-[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) - [🔖 Imprint](https://globaldatanet.com/imprint) - [📅 Meeting](https://calendly.com/dakn/30min-1)
+[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) - [🔖 Imprint](https://globaldatanet.com/imprint) - [📅 Meeting](https://calendly.com/dakn/30min-1) -  [🚧 Feature request](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=feature-request%2C+enhancement&template=feature_request.md&title=) | [🐛 Bug Report](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=bug%2C+triage&template=bug_report.md&title=)
 
 ## ⁉️ .What is a Web Application Firewall?
 

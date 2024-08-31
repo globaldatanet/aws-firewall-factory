@@ -28,6 +28,25 @@ export const config: wafConfig = {
     PreProcess: {
       CustomRules: [
         {
+          name: "ip-allow-ratebased-ten-test",
+          statement: {
+            rateBasedStatement: {
+              aggregateKeyType: "IP",
+              limit: 10,
+              evaluationWindowSec: 60,
+            },
+          },
+          action: {
+            block: {},
+          },
+          visibilityConfig: {
+            sampledRequestsEnabled: true,
+            cloudWatchMetricsEnabled: true,
+            metricName: "ip-allow-ratebased-ten-test",
+          },
+          priority: 10,
+        },
+        {
           name: "ip-allow",
           statement: {
             rateBasedStatement: {
