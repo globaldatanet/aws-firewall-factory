@@ -1,6 +1,9 @@
-/** 
+/**
  * @packageDocumentation
  * # AWS Firewall Factory - Web Application Firewall Stack
+ * 
+ * The waf Stack deploy WAF using Firewall Manager.
+ * 
  * @example
 * import { wafConfig } from "../../lib/types/config";
 * import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums";

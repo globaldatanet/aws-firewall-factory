@@ -2,6 +2,8 @@
  * @packageDocumentation
  * # AWS Firewall Factory - Shield Advanced Stack
  * 
+ * The Shield Advanced Stack deploy Shield Advanced Policies using Firewall Manager.
+ * 
  * @example
  * import { ShieldConfig } from "../../lib/types/config";
 * export const shieldConfig: ShieldConfig = {
