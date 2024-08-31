@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import { WafStack } from "../lib/_web-application-firewall-stack";
-import { PrerequisitesStack } from "../lib/_prerequisites-stack";
-import { ShieldStack } from "../lib/_shield-advanced-stack";
+import { WafStack } from "../lib/_waf/index";
+import { PrerequisitesStack } from "../lib/_prerequisites/index";
+import { ShieldStack } from "../lib/_shield-advanced/index";
 import * as cdk from "aws-cdk-lib";
 import {
   wafConfig,
@@ -18,6 +18,12 @@ import {
   guidanceHelper,
   ssmHelper,
 } from "../lib/tools/helpers";
+
+
+/** 
+ * @Module
+ * # AWS Firewall Factory
+ */
 
 const app = new cdk.App();
 

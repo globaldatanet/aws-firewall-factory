@@ -1,6 +1,6 @@
 {
     "$schema": "https://typedoc.org/schema.json",
-    "entryPoints": ["bin/aws-firewall-factory.ts","lib/_shield-advanced-stack.ts","lib/_web-application-firewall-stack.ts","lib/_prerequisites-stack.ts","lib/types/config.ts", "lib/types/runtimeprops.ts", "lib/types/enums.ts", "lib/types/fms.ts", "node_modules/aws-cdk-lib/core/lib/cfn-tag.d.ts", "node_modules/aws-cdk-lib/core/lib/tag-manager.d.ts", "lib/constructs/*", "lib/tools/helpers/index.ts"],
+    "entryPoints": ["lib/_shield-advanced/index.ts","lib/_waf/index.ts","lib/_prerequisites/index.ts","lib/types/config.ts", "lib/types/runtimeprops.ts", "lib/types/enums.ts", "lib/types/fms.ts", "node_modules/aws-cdk-lib/core/lib/cfn-tag.d.ts", "node_modules/aws-cdk-lib/core/lib/tag-manager.d.ts", "lib/constructs/*", "lib/tools/helpers/index.ts"],
     "readme": "./static/docs/README.md",
     "customCss": "./static/docs/custom.css",
     "name": "AWS Firewall Factory Documentation",

@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { Prerequisites } from "./types/config";
-import { RuntimeProperties } from "./types/runtimeprops";
+import { Prerequisites } from "../types/config";
+import { RuntimeProperties } from "../types/runtimeprops";
 import {
   aws_s3 as s3,
   aws_kms as kms,
@@ -25,6 +25,10 @@ import {
 import * as path from "path";
 import { SopsSyncProvider, SopsSecret } from "cdk-sops-secrets";
 
+/** 
+ * @packageDocumentation
+ * # AWS Firewall Factory Prerequisites Stack
+ */
 
 /**
  * @group Interfaces
@@ -33,7 +37,9 @@ import { SopsSyncProvider, SopsSecret } from "cdk-sops-secrets";
  *
  * @param {Prerequisites} prerequisites  Variable for a prerequisites Config.
  * @param {RuntimeProperties} runtimeProperties Variable for Runtime Properties.
- */
+ *
+ **/
+
 export interface StackProps extends cdk.StackProps {
     /**
    * Class Variable for Prerequisites Properties.

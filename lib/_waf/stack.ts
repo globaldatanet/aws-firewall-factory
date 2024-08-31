@@ -4,14 +4,14 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_wafv2 as wafv2, aws_fms as fms,aws_lambda_nodejs as NodejsFunction, aws_lambda as lambda, aws_kinesisfirehose as firehouse, aws_iam as iam, aws_logs as logs   } from "aws-cdk-lib";
-import { wafConfig } from "./types/config";
-import { ManagedServiceData, SubVariables } from "./types/fms";
-import { RuntimeProperties } from "./types/runtimeprops";
-import {WafCloudWatchDashboard} from "./constructs/cloudwatch";
+import { wafConfig } from "../types/config";
+import { ManagedServiceData, SubVariables } from "../types/fms";
+import { RuntimeProperties } from "../types/runtimeprops";
+import {WafCloudWatchDashboard} from "../constructs/cloudwatch";
 import * as path from "path";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { v5 as uuidv5 } from "uuid";
-import { wafHelper } from "./tools/helpers";
+import { wafHelper } from "../tools/helpers";
 
 
 

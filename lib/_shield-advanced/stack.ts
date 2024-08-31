@@ -1,17 +1,17 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_fms as fms } from "aws-cdk-lib";
-import { ManagedServiceData } from "./types/fms";
-import { getGuidance } from "./tools/helpers/guidance";
-import { RuntimeProperties } from "./types/runtimeprops";
-import { ShieldConfig } from "./types/config";
-import { ShieldDashboard } from "./constructs/ShieldDashboard";
+import { ManagedServiceData } from "../types/fms";
+import { getGuidance } from "../tools/helpers/guidance";
+import { RuntimeProperties } from "../types/runtimeprops";
+import { ShieldConfig } from "../types/config";
+import { ShieldDashboard } from "../constructs/ShieldDashboard";
 
 /**
- *  @packageDocumentation
- * 
+ * @packageDocumentation
+ *
  * # AWS Firewall Factory Shield Advanced 
- * 
+ *
  * @description
  * Specifies the AWS Shield Advanced configuration.
 
@@ -27,6 +27,7 @@ import { ShieldDashboard } from "./constructs/ShieldDashboard";
  * 
  * @param {ShieldConfig} shieldConfig  Variable for a Shield Config.
  * @param {RuntimeProperties} runtimeProperties Variable for Runtime Properties.
+ *
  */
 
 export interface ShieldProps extends cdk.StackProps {
