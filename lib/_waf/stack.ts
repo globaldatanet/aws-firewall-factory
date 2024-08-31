@@ -184,7 +184,7 @@ export class WafStack extends cdk.Stack {
     managedRuleGroupVersionLambdaRole.addToPolicy(wafGetManagedRuleGroupVersion);
 
     const managedRuleGroupVersionLambda = new NodejsFunction.NodejsFunction(this, "AwsManagedRuleGroupVersionLambdaFunction", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it. 
-      entry: path.join(__dirname, "../lib/lambda/ManagedRuleGroupVersion/index.ts"),
+      entry: path.join(__dirname, "../lambda/ManagedRuleGroupVersion/index.ts"),
       handler: "handler",
       timeout: cdk.Duration.seconds(30),
       architecture:lambda.Architecture.ARM_64,

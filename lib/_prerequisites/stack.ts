@@ -76,7 +76,7 @@ export class PrerequisitesStack extends cdk.Stack {
           architecture: lambda.Architecture.ARM_64,
           entry: path.join(
             __dirname,
-            "../lib/lambda/ManagedRuleGroupInfo/index.ts"
+            "../lambda/ManagedRuleGroupInfo/index.ts"
           ),
           handler: "handler",
           timeout: cdk.Duration.seconds(30),
@@ -154,7 +154,7 @@ export class PrerequisitesStack extends cdk.Stack {
           architecture: lambda.Architecture.ARM_64,
           entry: path.join(
             __dirname,
-            "../lib/lambda/GetMemberAccountsofFms/index.ts"
+            "../lambda/GetMemberAccountsofFms/index.ts"
           ),
           handler: "handler",
           logRetention: logs.RetentionDays.ONE_WEEK,
@@ -184,7 +184,7 @@ export class PrerequisitesStack extends cdk.Stack {
             architecture: lambda.Architecture.ARM_64,
             entry: path.join(
               __dirname,
-              "../lib/lambda/CheckUnusedWebApplicationFirewalls/index.ts"
+              "../lambda/CheckUnusedWebApplicationFirewalls/index.ts"
             ),
             handler: "handler",
             timeout: cdk.Duration.seconds(900),
@@ -221,7 +221,7 @@ export class PrerequisitesStack extends cdk.Stack {
           architecture: lambda.Architecture.ARM_64,
           entry: path.join(
             __dirname,
-            "../lib/lambda/SendUnusedResourceNotification/index.ts"
+            "../lambda/SendUnusedResourceNotification/index.ts"
           ),
           handler: "handler",
           timeout: cdk.Duration.seconds(30),
@@ -608,7 +608,7 @@ export class PrerequisitesStack extends cdk.Stack {
           architecture: lambda.Architecture.ARM_64,
           entry: path.join(
             __dirname,
-            "../lib/lambda/FmsDdosNotification/index.ts"
+            "../lambda/FmsDdosNotification/index.ts"
           ),
           handler: "handler",
           timeout: cdk.Duration.seconds(60),
