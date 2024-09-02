@@ -5,7 +5,7 @@ import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
 import * as fs from "fs";
 import * as path from "path";
 import * as cdk from "aws-cdk-lib";
-import { wafConfig } from "../types/config";
+import { wafConfig } from "../../types/config";
 import { Construct } from "constructs";
 
 const REGION = cdk.Aws.REGION;

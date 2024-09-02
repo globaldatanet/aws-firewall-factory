@@ -67,7 +67,7 @@
     - Bot vs Non-bot Requests
 
 See example:
-![FirewallDashboard](./static/FirewallDashboard.jpg)
+![FirewallDashboard](./static/docs/images/waf_Dashboard.jpg)
 
 20. Example Configurations
     1.  Example WAF Configuration againts: [OWASP Top Ten](https://owasp.org/www-project-top-ten/)
@@ -97,7 +97,7 @@ See example:
   The Dashboard shows the ammount of DDoS attacks detected
 
   See example:
-  ![ShieldDashboard](./static/shield-dashboard.png)
+  ![ShieldDashboard](./static/docs/images/shield-dashboard.png)
 
 27. Cloudwatch Cross-Account association - The Firewall Factory offers CloudFormation templates for associating the monitoring account with source accounts:
     - [Monitoring account template](./static/cf-templates/monitoring-account-sink.template.yml)
