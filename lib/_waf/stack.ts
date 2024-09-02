@@ -7,7 +7,7 @@ import { aws_wafv2 as wafv2, aws_fms as fms,aws_lambda_nodejs as NodejsFunction,
 import { wafConfig } from "../types/config";
 import { ManagedServiceData, SubVariables } from "../types/fms";
 import { RuntimeProperties } from "../types/runtimeprops";
-import {WafCloudWatchDashboard} from "../constructs/waf_Dashboard/index";
+import {WafCloudWatchDashboard} from "../constructs/wafDashboard/index";
 import * as path from "path";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { v5 as uuidv5 } from "uuid";

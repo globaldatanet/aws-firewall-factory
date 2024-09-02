@@ -5,7 +5,7 @@ import { ManagedServiceData } from "../types/fms";
 import { getGuidance } from "../tools/helpers/guidance";
 import { RuntimeProperties } from "../types/runtimeprops";
 import { ShieldConfig } from "../types/config";
-import { ShieldDashboard } from "../constructs/shield_Dashboard/index";
+import { ShieldDashboard } from "../constructs/shieldDashboard/index";
 
 /**
  * @packageDocumentation
