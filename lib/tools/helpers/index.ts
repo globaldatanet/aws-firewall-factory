@@ -3,7 +3,7 @@
  * # AWS Firewall Factory - Helper Functions
  *
  * This Helper Functions are used to provide the necessary functions to the AWS Firewall Factory.
- * ## 🧰 Helpers:
+ * ## 🧰 Helpers
  * - AWS Firewall Factory Helper (afwfHelper): Contains the necessary functions to print firewall factory information, etc.
  *
  * - CloudFormation Helper (cloudformationHelper): Contians the necessary functions to get CloudFormation Stacks output etc.
