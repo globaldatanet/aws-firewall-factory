@@ -27,25 +27,25 @@ export const config: wafConfig = {
     ],
     PreProcess: {
       CustomRules: [
-        {
-          name: "low-ratebased-test",
-          statement: {
-            rateBasedStatement: {
-              aggregateKeyType: "IP",
-              limit: 10,
-              evaluationWindowSec: 60,
-            },
-          },
-          action: {
-            block: {},
-          },
-          visibilityConfig: {
-            sampledRequestsEnabled: true,
-            cloudWatchMetricsEnabled: true,
-            metricName: "low-ratebased-test",
-          },
-          priority: 10,
-        },
+        // {
+        //   name: "low-ratebased-test",
+        //   statement: {
+        //     rateBasedStatement: {
+        //       aggregateKeyType: "IP",
+        //       limit: 10,
+        //       evaluationWindowSec: 60,
+        //     },
+        //   },
+        //   action: {
+        //     block: {},
+        //   },
+        //   visibilityConfig: {
+        //     sampledRequestsEnabled: true,
+        //     cloudWatchMetricsEnabled: true,
+        //     metricName: "low-ratebased-test",
+        //   },
+        //   priority: 10,
+        // },
         {
           name: "ip-allow",
           statement: {
