@@ -1,5 +1,5 @@
 
-[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) - [🔖 Imprint](https://globaldatanet.com/imprint) - [📅 Meeting](https://calendly.com/dakn/30min-1) -  [🚧 Feature request](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=feature-request%2C+enhancement&template=feature_request.md&title=) | [🐛 Bug Report](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=bug%2C+triage&template=bug_report.md&title=)
+[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) | [🔖 Imprint](https://globaldatanet.com/imprint) | [📅 Meeting](https://calendly.com/dakn/30min-1) | [🚧 Feature request](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=feature-request%2C+enhancement&template=feature_request.md&title=) | [🐛 Bug Report](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=bug%2C+triage&template=bug_report.md&title=)
 
 ## ⁉️ .What is a Web Application Firewall?
 
@@ -12,18 +12,21 @@ An open-source solution that helps you **deploy, update and stage** your Web App
 
 It automates your security management, can be tailored with individual WAF configurations and alligns with **AWS best-practices**.
 
- - **♾️ Fully automated to centralize your WAF Deployment & Management:**
-  It simplifies the entire process by minimising administrative effort. Making it easier for you to ensure consistent protection and overseeing your WAF across applications.
+- **♾️ Fully automated to centralize your WAF Deployment & Management:**
+It simplifies the entire process by minimising administrative effort. Making it easier for you to ensure consistent protection and overseeing your WAF across applications.
 
-   - **🛡️ Fully automated to centralize your Advanced Shield Policy Deployment:**
-  Supports deployment of AWS Advanced Shield Policy through AWS Firewall Manager. You can now seamlessly protect your resources fom DDoS attacks across your accounts in a centralised manner.
+- **🛡️ Fully automated to centralize your Advanced Shield Policy Deployment:**
+Supports deployment of AWS Advanced Shield Policy through AWS Firewall Manager. You can now seamlessly protect your resources fom DDoS attacks across your accounts in a centralised manner.
 
- - **🔖 Comprehensive Testing with Detailed Reports:**
-  It uncovers wether your application is resilient or not and reports issues precisely. With these insights you can dive deep into strengthening your application’s weaknesses.
- - **🧮 Automate Calculation of Your WAF's Costs:**
-  Your smart assistant that overtakes cost estimations in a transparent way, helping you associate expenses to the exact security measures. This will **boost your financial planning.**
+- **🔖 Comprehensive Testing with Detailed Reports:**
+It uncovers wether your application is resilient or not and reports issues precisely. With these insights you can dive deep into strengthening your application’s weaknesses.
+
+- **🧮 Automate Calculation of Your WAF's Costs:**
+Your smart assistant that overtakes cost estimations in a transparent way, helping you associate expenses to the exact security measures. This will **boost your financial planning.**
+
 - **💌 Notifications about Ddos or Managed Rule Group Changes:**
-  Get notified about potential DDoS activity for protected resources or changes in AWS managed rule groups, such as upcoming new versions and urgent security updates.
+Get notified about potential DDoS activity for protected resources or changes in AWS managed rule groups, such as upcoming new versions and urgent security updates.
+
 - ✅ **Additional features such as centralized dashboards and logging:**
 Monitor every security event in real time to be able to defend against potential threads and anomalies immediately.
 
