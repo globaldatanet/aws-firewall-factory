@@ -38,6 +38,7 @@ All releases are tested prior to release using automated test workflows of sampl
 |  CodeQL | ![CodeQL](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)  |
 |  Linting | ![linting](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/linting.yml/badge.svg?branch=master)  |
 |  WAF Deployment - Only Managed Rule Groups  | ![onlyManagedRuleGroups](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_onlymanagedrulegroups.yml/badge.svg?branch=master)  |
+|  WAF Deployment - Only Managed Rule Groups with Excludes | ![rateBasedwithScopeDown](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_onlymanagedrulegroupsWithExcludes.yml/badge.svg?branch=master)  |
 |  WAF Deployment - IpSets | ![IpSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_ipSets.yml/badge.svg?branch=master)   |
 |  WAF Deployment - RegexPatternSets | ![regexPatternSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_regexPatternSets.yml/badge.svg?branch=master)  |
 |  WAF Deployment - RateBasedwithScopeDown | ![rateBasedwithScopeDown](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_rateBasedwithScopeDown.yml/badge.svg?branch=master)  |
