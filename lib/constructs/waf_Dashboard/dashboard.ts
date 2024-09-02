@@ -13,7 +13,7 @@ const REGION = cdk.Aws.REGION;
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
  */
-const packageJsonPath = path.resolve(__dirname, "../../package.json");
+const packageJsonPath = path.resolve(__dirname, "../../../package.json");
 const packageJsonContent = fs.readFileSync(packageJsonPath, "utf-8");
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const packageJson = JSON.parse(packageJsonContent);
