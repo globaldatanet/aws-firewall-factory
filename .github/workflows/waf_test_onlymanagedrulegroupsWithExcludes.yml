@@ -1,4 +1,4 @@
-name: ManagedRuleGroups-Firewall
+name: ManagedRuleGroupsExcludes-Firewall
 
 env:
   AWS_REGION: eu-central-1
