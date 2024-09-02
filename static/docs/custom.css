@@ -5,3 +5,16 @@
 a {
   color: #00ecbd
 }
+
+.title {
+  padding-left: 40px;
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: 20px;
+  line-height: 40px;
+  height: 40px;
+  display: block;
+  background-image: url(./firewallfactory.png);
+  background-repeat: no-repeat;
+  background-position: left center;
+}
