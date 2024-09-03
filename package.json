@@ -13,7 +13,7 @@
     "preinstall": "npx only-allow npm"
   },
   "devDependencies": {
-    "@types/node": "^22.5.0",
+    "@types/node": "^22.5.2",
     "@typescript-eslint/eslint-plugin": "^8.3.0",
     "@typescript-eslint/parser": "^8.3.0",
     "@typescript-eslint/typescript-estree": "^8.3.0",
