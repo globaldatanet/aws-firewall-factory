@@ -1,3 +1,6 @@
+/*
+    * Interface for the runtime properties
+    */
 export interface RuntimeProperties {
     GuidanceSummary: string[],
     Guidance: Guidance,
@@ -8,6 +11,9 @@ export interface RuntimeProperties {
     AllAwsRegions: string[],
 }
 
+/**
+ * Interface for all the guidance information
+ */
 export interface Guidance {
     rateBasedStatementCount: number,
     nestedRateStatementCount: number,
@@ -19,6 +25,10 @@ export interface Guidance {
     noRuleLabelsCount: number,
     noRuleLabelsInfo: string[],
 }
+
+/**
+ * Interface for the current AWS pricing information
+ */
 export interface ResourcePrices {
     Policy: number,
     Rule: number,
@@ -32,6 +42,9 @@ export interface ResourcePrices {
     Dashboard: number
 }
 
+/**
+ * Interface for the process properties
+ */
 export interface ProcessProperties {
     Capacity: number,
     RuleCapacities: number[],

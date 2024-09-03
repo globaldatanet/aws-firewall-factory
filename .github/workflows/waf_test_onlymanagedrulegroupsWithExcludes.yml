@@ -1,4 +1,4 @@
-name: FwfEnumCheck
+name: ManagedRuleGroupsExcludes-Firewall
 
 env:
   AWS_REGION: eu-central-1
@@ -9,19 +9,31 @@ permissions:
   id-token: write
   contents: read
 
-concurrency: ci-${{ github.ref }}
+# concurrency:
+#   group: test_envrionment
+#   cancel-in-progress: true
 
 on:
-  schedule:
-    - cron: "0 10 * * 1"
-
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'bin/**/*'
+      - 'lib/**/*'
+      - 'package*.json'
 jobs:
   deploy_production_main:
-    name: Check Enums for ManagedRule Groups
+    name: Test and deploy OnlyManagedRuleGroups Firewall
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout
         uses: actions/checkout@v4.1.1
+      - name: 📁 Install Taskfile
+        run: |
+          npm install -g @go-task/cli
       - name: ☊ Use Node.js
         uses: actions/setup-node@v4.0.2
         with:
@@ -34,9 +46,9 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
-      - name: 🌐 Install ts-node and typescript globally
+      - name: 🌐 Install CDK and typescript globally
         run: |
-          npm i -g typescript ts-node @types/node
+          npm i -g aws-cdk typescript ts-node @types/node yarn
           npm link typescript
       - name: 📦 Install Packages
         run: |
@@ -50,6 +62,15 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GitHubActionsSession
           mask-aws-account-id: false
-      - name: 🧪 Check Enums for ManagedRule Groups
+      - name: 🚀 Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: 🫙 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.3.0
+      - name: 🔥 Deploy Firewall to AWS
         run: |
-            ts-node ./workflows/enumcheck.ts
+          export STACK_NAME=WAFStack
+          task deploy config=onlyManagedRuleGroupsWithExcludesTests
+      - name: 🗑️ Remove Firewall from AWS
+        run: |
+          export STACK_NAME=WAFStack
+          task destroy config=onlyManagedRuleGroupsWithExcludesTests

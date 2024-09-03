@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import { WafStack } from "../lib/_web-application-firewall-stack";
-import { PrerequisitesStack } from "../lib/_prerequisites-stack";
-import { ShieldStack } from "../lib/_shield-advanced-stack";
+import { WafStack } from "../lib/_waf/index";
+import { PrerequisitesStack } from "../lib/_prerequisites/index";
+import { ShieldStack } from "../lib/_shield-advanced/index";
 import * as cdk from "aws-cdk-lib";
 import {
-  Config,
+  wafConfig,
   ShieldConfig,
   Prerequisites,
   PriceRegions,
@@ -18,6 +18,12 @@ import {
   guidanceHelper,
   ssmHelper,
 } from "../lib/tools/helpers";
+
+
+/** 
+ * @Module
+ * # AWS Firewall Factory
+ */
 
 const app = new cdk.App();
 
@@ -45,11 +51,10 @@ void (async () => {
   // Deploying prerequisite stack
   console.log(process.env.PREREQUISITE);
   if (process.env.STACK_NAME === "PreRequisiteStack") {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
     const prerequisites: Prerequisites = values.prereq[CONFIG_OBJECT_NAME];
     const deploymentRegion = afwfHelper.outputInfoBanner();
     const runtimeProperties = afwfHelper.initRuntimeProperties();
-    ssmHelper.getAllAwsRegionsFromPublicSsmParameter(
+    await ssmHelper.getAllAwsRegionsFromPublicSsmParameter(
       deploymentRegion,
       runtimeProperties
     );
@@ -125,13 +130,13 @@ void (async () => {
     );
 
     await pricingHelper.isShieldPriceCalculated(shieldConfig);
-    await guidanceHelper.outputGuidance(runtimeProperties);
+    guidanceHelper.outputGuidance(runtimeProperties);
   }
   // ---------------------------------------------------------------------
   // Deploying Firewall stack
   if (process.env.STACK_NAME === "WAFStack") {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const config: Config = values.configs[CONFIG_OBJECT_NAME];
+    const config: wafConfig = values.configs[CONFIG_OBJECT_NAME];
     const deploymentRegion = afwfHelper.outputInfoBanner(config);
     const runtimeProperties = afwfHelper.initRuntimeProperties();
     if (process.env.SKIP_QUOTA_CHECK === "true") {
@@ -270,6 +275,6 @@ void (async () => {
       config,
       deploymentRegion
     );
-    await guidanceHelper.outputGuidance(runtimeProperties, config);
+    guidanceHelper.outputGuidance(runtimeProperties, config);
   }
 })();

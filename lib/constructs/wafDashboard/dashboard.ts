@@ -2,9 +2,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
-import * as packageJsonObject from "../../package.json";
+import * as fs from "fs";
+import * as path from "path";
 import * as cdk from "aws-cdk-lib";
-import { Config } from "../types/config";
+import { wafConfig } from "../../types/config";
 import { Construct } from "constructs";
 
 const REGION = cdk.Aws.REGION;
@@ -12,11 +13,19 @@ const REGION = cdk.Aws.REGION;
 /**
  * Version of the AWS Firewall Factory - extracted from package.json
  */
-const FIREWALL_FACTORY_VERSION = packageJsonObject.version;
+const packageJsonPath = path.resolve(__dirname, "../../../package.json");
+const packageJsonContent = fs.readFileSync(packageJsonPath, "utf-8");
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const packageJson = JSON.parse(packageJsonContent);
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+const FIREWALL_FACTORY_VERSION = packageJson.version;
 
+/**
+ * Central CloudWatch Dashboard Construct
+ */
 export class WafCloudWatchDashboard extends Construct {
 
-  constructor(scope: Construct, id: string, config: Config,managedRuleGroupsInfo:string[]) {
+  constructor(scope: Construct, id: string, config: wafConfig,managedRuleGroupsInfo:string[]) {
     super(scope, id);
     console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", `${config.General.Prefix.toUpperCase()}-${config.WebAcl.Name}-${config.General.Stage}${config.General.DeployHash ? "-"+config.General.DeployHash : ""}`,"\u001b[0m");
     console.log("   ℹ️  Warnings for Math expressions can be ignored.");

@@ -7,23 +7,23 @@ export interface PaginatedManagedRuleGroupVersions {
 }
 
 
-export interface AccountWebACLs {
+export interface AccountWebAcls {
     AccountAlias: string,
     AccountId: string,
-    WebACLsPerAccount: { [index: string]: WebACLsPerRegion },
+    WebACLsPerAccount: { [index: string]: WebAclsPerRegion },
     WafsInUse: number,
     TotalWafs: number,
     IgnoredWafs: number,
 }
 
 
-export interface WebACLsPerRegion {
-    WebACLsInUse: WebACLs[]
-    UnusedWebACLs: WebACLs[]
-    IgnoredWebACLs: WebACLs[]
+export interface WebAclsPerRegion {
+    WebACLsInUse: WebAcls[]
+    UnusedWebACLs: WebAcls[]
+    IgnoredWebACLs: WebAcls[]
 }
 
-export interface WebACLs {
+export interface WebAcls {
     Name: string,
     Arn: string,
     Scope: Scope,
@@ -36,7 +36,7 @@ export interface FmsPolicy {
 
 
 export interface UnutilizedFirewalls {
-    AccountWebACLs: AccountWebACLs[],
+    AccountWebACLs: AccountWebAcls[],
     UnutilizedFMSPolicies: FmsPolicy[]
 }
 

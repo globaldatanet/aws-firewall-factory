@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { Rule, ManagedRuleGroup } from "./fms";
-import { aws_fms as fms, CfnTag, aws_events as events } from "aws-cdk-lib";
+import { aws_fms as fms, CfnTag, aws_events as events} from "aws-cdk-lib";
 import * as fwmEnums from "./enums";
 import * as cdk from "aws-cdk-lib";
 /**
  * Settings for the AWS WAF policy (type WAFV2) that specifies rule groups to run first in the corresponding AWS WAF Web ACL and rule groups to run last in the Web ACL.
  */
-export interface Config {
+export interface wafConfig {
   readonly General: {
     /**
      * Defines a Prefix which will be added to all resources.
@@ -146,6 +146,9 @@ export interface Config {
   };
 }
 
+/**
+ * Interface for Shield Configuration in the Firewall Factory
+ */
 export interface ShieldConfig {
   readonly General: {
     /**
@@ -273,6 +276,10 @@ export type WebAclType =
   | "AWS::ApiGatewayV2::Api"
   | "AWS::ApiGateway::Stage";
 // | "AWS::Cognito::UserPool" | "AWS::AppSync::GraphQLApi" - waiting for support if you need a GraphQLApi Firewall just use an ApiGateway:Stage Firewall
+
+/**
+ * Interface for Prerequisites Stacks in the Firewall Factory
+ */
 export interface Prerequisites {
   readonly General: {
     /**
@@ -515,7 +522,7 @@ export interface IPSet {
    */
   name: string; // This name will be used as a CloudFormation logical ID, so it can't have a already used name and must be alphanumeric
   /*
-   * @TJS-pattern ^[\w+=:#@\/\-,\.][\w+=:#@\/\-,\.\s]+[\w+=:#@\/\-,\.]$
+   * @TJS-pattern ^[a-zA-Z0-9=:#@/\-,.][a-zA-Z0-9+=:#@/\-,.\s]+[a-zA-Z0-9+=:#@/\-,.]{1,256}$
    */
   description?: string;
   /**

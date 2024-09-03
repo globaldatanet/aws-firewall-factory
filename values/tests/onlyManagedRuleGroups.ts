@@ -1,6 +1,6 @@
-import { Config } from "../../lib/types/config";
+import { wafConfig } from "../../lib/types/config";
 import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums";
-export const config: Config = {
+export const config: wafConfig = {
   General: {
     Prefix: "testcases",
     Stage: "test",
@@ -20,39 +20,39 @@ export const config: Config = {
     PreProcess: {
       ManagedRuleGroups: [
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.AMAZON_IP_REPUTATION_LIST,
         },
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.ANONYMOUS_IP_LIST
         },
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.BOT_CONTROL_RULE_SET,
         },
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.COMMON_RULE_SET,
           version: "Version_1.11",
           versionEnabled: true,
           enforceUpdate: true
         },
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.KNOWN_BAD_INPUTS_RULE_SET,
           enforceUpdate: true,
           versionEnabled: false
         },
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.SQLI_RULE_SET,
           version: "Version_2.0",
           versionEnabled: true,
           enforceUpdate: true
         },
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.ADMIN_PROTECTION_RULE_SET,
           enforceUpdate: false,
           versionEnabled: true,

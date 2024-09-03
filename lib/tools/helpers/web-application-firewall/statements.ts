@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Rule, NotStatementProperty } from "../../../types/fms";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
-
 /**
  * Function to transform RuleStatements
  * @param rule Rule
@@ -18,7 +17,7 @@ export function transformWafRuleStatements(rule: Rule, prefix: string, stage: st
 
   if(notStatement) {
     const adjustedstatement = handleNotStatement(notStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
-    rule.statement = adjustedstatement as wafv2.CfnWebACL.StatementProperty;
+    rule.statement = adjustedstatement;
   }
   const andStatement = rule.statement.andStatement as wafv2.CfnWebACL.AndStatementProperty | undefined;
 
@@ -148,12 +147,12 @@ function handleAndOrStatement(statements: wafv2.CfnWebACL.StatementProperty[], p
     const notStatement = statements[i].notStatement as wafv2.CfnWebACL.NotStatementProperty | undefined;
     if(notStatement && (ipSets || regexPatternSets)) {
       const adjustedstatement = handleNotStatement(notStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
-      statements[i] = adjustedstatement as wafv2.CfnWebACL.StatementProperty;
+      statements[i] = adjustedstatement;
     }
     const rateBasedStatement = statements[i].rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
     if(rateBasedStatement && (ipSets || regexPatternSets)) {
       const adjustedstatement = handleRateBasedStatement(rateBasedStatement, prefix, stage, webAclName, ipSets, regexPatternSets);
-      statements[i] = adjustedstatement as wafv2.CfnWebACL.StatementProperty;
+      statements[i] = adjustedstatement;
     }
   }
 }
@@ -173,7 +172,6 @@ function handleRateBasedStatement(rateBasedStatement: wafv2.CfnWebACL.RateBasedS
     const ipSetReferenceStatement = scopeDownStatement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
     if (ipSetReferenceStatement && ipSets) {
       const actualIpSetReferenceStatement = getActualIpReferenceStatementInStatement(ipSetReferenceStatement, prefix, stage, webAclName, ipSets);
-      actualIpSetReferenceStatement as wafv2.CfnWebACL.StatementProperty;
       rateBasedStatement = {
         ...rateBasedStatement,
         scopeDownStatement: actualIpSetReferenceStatement
@@ -183,7 +181,6 @@ function handleRateBasedStatement(rateBasedStatement: wafv2.CfnWebACL.RateBasedS
     const regexPatternSetReferenceStatement = scopeDownStatement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
     if (regexPatternSetReferenceStatement && regexPatternSets) {
       const actualRegexPatternSetReferenceStatement = getActualRegexPatternSetReferenceStatementProperty(regexPatternSetReferenceStatement, prefix, stage, regexPatternSets);
-      actualRegexPatternSetReferenceStatement as wafv2.CfnWebACL.StatementProperty;
       rateBasedStatement = {
         ...rateBasedStatement,
         scopeDownStatement: actualRegexPatternSetReferenceStatement
@@ -205,14 +202,20 @@ export function convertPropValuesToUint8Array(rulesObject: Record<string, any>, 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const convertedObject: Record<string, any> = {};
   for (const origKey in rulesObject) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     if (Object.prototype.hasOwnProperty.call(rulesObject, origKey)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
       let value = rulesObject[origKey];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (value instanceof Array || (value !== null && value.constructor === Object)) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         value = convertPropValuesToUint8Array(value, propertyName);
       }
       if (origKey === propertyName) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         value = convertStringToUint8Array(value);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       convertedObject[origKey] = value;
     }
   }

@@ -1,8 +1,8 @@
-import {Config, Prerequisites, ShieldConfig} from "../lib/types/config";
+import {wafConfig, Prerequisites, ShieldConfig} from "../lib/types/config";
 
 import {  owasptopTen, prequisites, ipSetsManagedTest, shieldConfigExample} from "./examples";
 import * as tests from "./tests";
-export const configs : { [key: string]: Config } = {
+export const configs : { [key: string]: wafConfig } = {
   owasptopTen,
   ipSetsManagedTest,
   ...tests,

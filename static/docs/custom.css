@@ -5,3 +5,31 @@
 a {
   color: #00ecbd
 }
+
+.title {
+  padding-left: 40px;
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: 20px;
+  line-height: 40px;
+  height: 40px;
+  display: block;
+  background-image: url(./firewallfactory.png);
+  background-repeat: no-repeat;
+  background-position: left center;
+}
+.tsd-page-title {
+  font-size: 2rem;
+  padding-left: 40px;
+  text-decoration: none;
+  color: var(--color-text);
+  line-height: 40px;
+  display: block;
+  padding-top: 0px;
+  background-image: url(./firewallfactory.png);
+  background-repeat: no-repeat;
+  background-position: left center;
+}
+.tsd-page-title h2 {
+  font-size: 2rem; 
+}

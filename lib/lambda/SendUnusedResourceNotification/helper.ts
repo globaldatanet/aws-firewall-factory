@@ -1,12 +1,12 @@
-import { AccountWebACLs, FmsPolicy } from "../SharedComponents/types/index";
+import { AccountWebAcls, FmsPolicy } from "../SharedComponents/types/index";
 
 
 /**
  * Detect unused FMS Policies - That means we can delete the whole FMS Policy and not only the WebACL
- * @param {AccountWebACLs[]} data
+ * @param {AccountWebAcls[]} data
  * @returns {Promise<WebACLs[]>}
  */
-export async function detectUnusedFmsPolicies(data: AccountWebACLs[]): Promise<FmsPolicy[]> {
+export function detectUnusedFmsPolicies(data: AccountWebAcls[]): FmsPolicy[] {
   const unusedFirewalls: FmsPolicy[] = [];
   const unusedFirewallsByName: { [name: string]: boolean } = {};
 
@@ -42,10 +42,10 @@ export async function detectUnusedFmsPolicies(data: AccountWebACLs[]): Promise<F
 
 /**
  * Detect unused FMS Policies - That means we can delete the whole FMS Policy and not only the WebACL
- * @param {AccountWebACLs[]} data
+ * @param {AccountWebAcls[]} data
  * @returns {Promise<WebACLs[]>}
  */
-export async function detectUniqueFmsPolicies(data: AccountWebACLs[]): Promise<FmsPolicy[]> {
+export function detectUniqueFmsPolicies(data: AccountWebAcls[]): FmsPolicy[] {
   const uniqueFirewalls: FmsPolicy[] = [];
   const uniqueFirewallsbyName: { [name: string]: boolean } = {};
 

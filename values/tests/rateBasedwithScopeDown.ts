@@ -1,5 +1,5 @@
-import { Config } from "../../lib/types/config";
-export const config: Config = {
+import { wafConfig } from "../../lib/types/config";
+export const config: wafConfig = {
   General: {
     Prefix: "testcases",
     Stage: "test",
@@ -27,6 +27,25 @@ export const config: Config = {
     ],
     PreProcess: {
       CustomRules: [
+        // {
+        //   name: "low-ratebased-test",
+        //   statement: {
+        //     rateBasedStatement: {
+        //       aggregateKeyType: "IP",
+        //       limit: 10,
+        //       evaluationWindowSec: 60,
+        //     },
+        //   },
+        //   action: {
+        //     block: {},
+        //   },
+        //   visibilityConfig: {
+        //     sampledRequestsEnabled: true,
+        //     cloudWatchMetricsEnabled: true,
+        //     metricName: "low-ratebased-test",
+        //   },
+        //   priority: 10,
+        // },
         {
           name: "ip-allow",
           statement: {

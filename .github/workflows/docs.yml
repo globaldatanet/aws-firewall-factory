@@ -36,5 +36,6 @@ jobs:
         run: npx typedoc --options typedoc.json
       - name: 🚀 Upload Documentation
         run: |
+            cp -a ./static/docs/images/. ./docs/assets/
             aws s3 sync ./docs s3://${{env.S3_BUCKET}} --delete
             aws cloudfront create-invalidation --distribution-id ${{env.DISTRIBUTION_ID}} --paths "/*"

@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { Prerequisites } from "./types/config";
-import { RuntimeProperties } from "./types/runtimeprops";
+import { Prerequisites } from "../types/config";
+import { RuntimeProperties } from "../types/runtimeprops";
 import {
   aws_s3 as s3,
   aws_kms as kms,
@@ -25,8 +25,29 @@ import {
 import * as path from "path";
 import { SopsSyncProvider, SopsSecret } from "cdk-sops-secrets";
 
+/** 
+ * @packageDocumentation
+ * # AWS Firewall Factory Prerequisites Stack
+ */
+
+/**
+ * @group Interfaces
+ * @description
+ * Specifies the Prerequisites Stack properties.
+ *
+ * @param {Prerequisites} prerequisites  Variable for a prerequisites Config.
+ * @param {RuntimeProperties} runtimeProperties Variable for Runtime Properties.
+ *
+ **/
+
 export interface StackProps extends cdk.StackProps {
+    /**
+   * Class Variable for Prerequisites Properties.
+   */
   readonly prerequisites: Prerequisites;
+    /**
+   * Class Variable for Runtime Properties.
+   */
   runtimeProperties: RuntimeProperties;
 }
 
@@ -55,7 +76,7 @@ export class PrerequisitesStack extends cdk.Stack {
           architecture: lambda.Architecture.ARM_64,
           entry: path.join(
             __dirname,
-            "../lib/lambda/ManagedRuleGroupInfo/index.ts"
+            "../lambda/ManagedRuleGroupInfo/index.ts"
           ),
           handler: "handler",
           timeout: cdk.Duration.seconds(30),
@@ -133,7 +154,7 @@ export class PrerequisitesStack extends cdk.Stack {
           architecture: lambda.Architecture.ARM_64,
           entry: path.join(
             __dirname,
-            "../lib/lambda/GetMemberAccountsofFms/index.ts"
+            "../lambda/GetMemberAccountsofFms/index.ts"
           ),
           handler: "handler",
           logRetention: logs.RetentionDays.ONE_WEEK,
@@ -163,7 +184,7 @@ export class PrerequisitesStack extends cdk.Stack {
             architecture: lambda.Architecture.ARM_64,
             entry: path.join(
               __dirname,
-              "../lib/lambda/CheckUnusedWebApplicationFirewalls/index.ts"
+              "../lambda/CheckUnusedWebApplicationFirewalls/index.ts"
             ),
             handler: "handler",
             timeout: cdk.Duration.seconds(900),
@@ -200,7 +221,7 @@ export class PrerequisitesStack extends cdk.Stack {
           architecture: lambda.Architecture.ARM_64,
           entry: path.join(
             __dirname,
-            "../lib/lambda/SendUnusedResourceNotification/index.ts"
+            "../lambda/SendUnusedResourceNotification/index.ts"
           ),
           handler: "handler",
           timeout: cdk.Duration.seconds(30),
@@ -587,7 +608,7 @@ export class PrerequisitesStack extends cdk.Stack {
           architecture: lambda.Architecture.ARM_64,
           entry: path.join(
             __dirname,
-            "../lib/lambda/FmsDdosNotification/index.ts"
+            "../lambda/FmsDdosNotification/index.ts"
           ),
           handler: "handler",
           timeout: cdk.Duration.seconds(60),

@@ -1,5 +1,5 @@
-import { Config } from "../../lib/types/config";
-export const config: Config = {
+import { wafConfig } from "../../lib/types/config";
+export const config: wafConfig = {
   General: {
     Prefix: "aws-firewall-factory",
     Stage: "dev",
@@ -53,13 +53,13 @@ export const config: Config = {
     PostProcess: {
       ManagedRuleGroups: [
         {
-          vendor: "AWS",
+          vendorName: "AWS",
           name: "AWSManagedRulesAmazonIpReputationList",
           capacity: 25,
           version: "",
         },
         {
-          vendor: "AWS",
+          vendorName: "AWS",
           name: "AWSManagedRulesCommonRuleSet",
           capacity: 700,
           version: "Version_1.6",

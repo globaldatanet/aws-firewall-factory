@@ -1,5 +1,5 @@
 import { listFilesInBucket, getFileContent } from "../SharedComponents/services/s3";
-import { AccountWebACLs, UnutilizedFirewalls } from "../SharedComponents/types/index";
+import { AccountWebAcls, UnutilizedFirewalls } from "../SharedComponents/types/index";
 import { unusedNotificationTeams } from "./messengers/teams/notification";
 import {unusedNotificationSlack} from "./messengers/slack/notification";
 import  { uploadFileToS3, deleteS3FilesWithPrefix } from "../SharedComponents/services/s3";
@@ -21,12 +21,13 @@ export const handler = async (
   console.log("ƛ Lambda is invoked with:" + JSON.stringify(Event));
   const bucketName = process.env.BUCKET_NAME || "undefined";
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || "";
-  const allwebacls: AccountWebACLs[] = [];
+  const allwebacls: AccountWebAcls[] = [];
   console.log("📁 Importing WAF Usage Files from s3:");
   const files = await listFilesInBucket(bucketName, "temp");
   for (const file of files) {
     console.log(`📄 Importing File: ${file}`);
-    const content = await getFileContent(bucketName, file!);
+    const content = await getFileContent(bucketName, file);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     allwebacls.push(JSON.parse(content));
   }
 
@@ -39,7 +40,7 @@ export const handler = async (
     const regionpolicy = await listAllPolicies(region);
     allFMSPolicies.push(...regionpolicy);
   }
-  const unutilizedFMSPolicies = await detectUnusedFmsPolicies(allwebacls);
+  const unutilizedFMSPolicies = detectUnusedFmsPolicies(allwebacls);
 
 
   const key = "archiv/LatestUnusedFirewallReport" + Date.now() + ".json";
@@ -56,9 +57,9 @@ export const handler = async (
   }
   try{
     await deleteS3FilesWithPrefix(bucketName, "temp");
-  }
-  catch {
-    throw(Error);
+  } catch(error) {
+    console.error("❌ Error deleting files from S3 - Error:", error);
+    throw(error);
   }
   return true;
 };

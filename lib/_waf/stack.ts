@@ -4,16 +4,33 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_wafv2 as wafv2, aws_fms as fms,aws_lambda_nodejs as NodejsFunction, aws_lambda as lambda, aws_kinesisfirehose as firehouse, aws_iam as iam, aws_logs as logs   } from "aws-cdk-lib";
-import { Config } from "./types/config";
-import { ManagedServiceData, SubVariables } from "./types/fms";
-import { RuntimeProperties } from "./types/runtimeprops";
-import {WafCloudWatchDashboard} from "./constructs/cloudwatch";
+import { wafConfig } from "../types/config";
+import { ManagedServiceData, SubVariables } from "../types/fms";
+import { RuntimeProperties } from "../types/runtimeprops";
+import {WafCloudWatchDashboard} from "../constructs/wafDashboard/index";
 import * as path from "path";
 import * as cr from "aws-cdk-lib/custom-resources";
 import { v5 as uuidv5 } from "uuid";
-import { wafHelper } from "./tools/helpers";
+import { wafHelper } from "../tools/helpers";
+
+
+
+/**
+ * @group Interfaces
+ * @description
+ * Specifies the Waf Stack properties.
+ * 
+ * @param {wafConfig} config  Variable for a WAF Config.
+ * @param {RuntimeProperties} runtimeProperties Variable for Runtime Properties.
+ */
 export interface ConfigStackProps extends cdk.StackProps {
-  readonly config: Config;
+    /**
+   * Class Variable for WAF Properties.
+   */
+  readonly config: wafConfig;
+    /**
+   * Class Variable for Runtime Properties.
+   */
   runtimeProperties: RuntimeProperties;
 }
 
@@ -167,7 +184,7 @@ export class WafStack extends cdk.Stack {
     managedRuleGroupVersionLambdaRole.addToPolicy(wafGetManagedRuleGroupVersion);
 
     const managedRuleGroupVersionLambda = new NodejsFunction.NodejsFunction(this, "AwsManagedRuleGroupVersionLambdaFunction", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it. 
-      entry: path.join(__dirname, "../lib/lambda/ManagedRuleGroupVersion/index.ts"),
+      entry: path.join(__dirname, "../lambda/ManagedRuleGroupVersion/index.ts"),
       handler: "handler",
       timeout: cdk.Duration.seconds(30),
       architecture:lambda.Architecture.ARM_64,

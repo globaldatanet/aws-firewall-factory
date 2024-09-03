@@ -1,5 +1,5 @@
 
-[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) - [🔖 Imprint](https://globaldatanet.com/imprint) - [📅 Meeting](https://calendly.com/dakn/30min-1)
+[📦 Releases](https://github.com/globaldatanet/aws-firewall-factory/releases) | [🔖 Imprint](https://globaldatanet.com/imprint) | [📅 Meeting](https://calendly.com/dakn/30min-1) | [🚧 Feature request](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=feature-request%2C+enhancement&template=feature_request.md&title=) | [🐛 Bug Report](https://github.com/globaldatanet/aws-firewall-factory/issues/new?assignees=&labels=bug%2C+triage&template=bug_report.md&title=)
 
 ## ⁉️ .What is a Web Application Firewall?
 
@@ -12,18 +12,21 @@ An open-source solution that helps you **deploy, update and stage** your Web App
 
 It automates your security management, can be tailored with individual WAF configurations and alligns with **AWS best-practices**.
 
- - **♾️ Fully automated to centralize your WAF Deployment & Management:**
-  It simplifies the entire process by minimising administrative effort. Making it easier for you to ensure consistent protection and overseeing your WAF across applications.
+- **♾️ Fully automated to centralize your WAF Deployment & Management:**
+It simplifies the entire process by minimising administrative effort. Making it easier for you to ensure consistent protection and overseeing your WAF across applications.
 
-   - **🛡️ Fully automated to centralize your Advanced Shield Policy Deployment:**
-  Supports deployment of AWS Advanced Shield Policy through AWS Firewall Manager. You can now seamlessly protect your resources fom DDoS attacks across your accounts in a centralised manner.
+- **🛡️ Fully automated to centralize your Advanced Shield Policy Deployment:**
+Supports deployment of AWS Advanced Shield Policy through AWS Firewall Manager. You can now seamlessly protect your resources fom DDoS attacks across your accounts in a centralised manner.
 
- - **🔖 Comprehensive Testing with Detailed Reports:**
-  It uncovers wether your application is resilient or not and reports issues precisely. With these insights you can dive deep into strengthening your application’s weaknesses.
- - **🧮 Automate Calculation of Your WAF's Costs:**
-  Your smart assistant that overtakes cost estimations in a transparent way, helping you associate expenses to the exact security measures. This will **boost your financial planning.**
+- **🔖 Comprehensive Testing with Detailed Reports:**
+It uncovers wether your application is resilient or not and reports issues precisely. With these insights you can dive deep into strengthening your application’s weaknesses.
+
+- **🧮 Automate Calculation of Your WAF's Costs:**
+Your smart assistant that overtakes cost estimations in a transparent way, helping you associate expenses to the exact security measures. This will **boost your financial planning.**
+
 - **💌 Notifications about Ddos or Managed Rule Group Changes:**
-  Get notified about potential DDoS activity for protected resources or changes in AWS managed rule groups, such as upcoming new versions and urgent security updates.
+Get notified about potential DDoS activity for protected resources or changes in AWS managed rule groups, such as upcoming new versions and urgent security updates.
+
 - ✅ **Additional features such as centralized dashboards and logging:**
 Monitor every security event in real time to be able to defend against potential threads and anomalies immediately.
 
@@ -35,11 +38,13 @@ All releases are tested prior to release using automated test workflows of sampl
 |  CodeQL | ![CodeQL](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/github-code-scanning/codeql/badge.svg?branch=master)  |
 |  Linting | ![linting](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/linting.yml/badge.svg?branch=master)  |
 |  WAF Deployment - Only Managed Rule Groups  | ![onlyManagedRuleGroups](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_onlymanagedrulegroups.yml/badge.svg?branch=master)  |
+|  WAF Deployment - Only Managed Rule Groups with Excludes | ![rateBasedwithScopeDown](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_onlymanagedrulegroupsWithExcludes.yml/badge.svg?branch=master)  |
 |  WAF Deployment - IpSets | ![IpSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_ipSets.yml/badge.svg?branch=master)   |
 |  WAF Deployment - RegexPatternSets | ![regexPatternSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_regexPatternSets.yml/badge.svg?branch=master)  |
 |  WAF Deployment - RateBasedwithScopeDown | ![rateBasedwithScopeDown](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_rateBasedwithScopeDown.yml/badge.svg?branch=master)  |
 
-
+## 🏛️ Architecture
+![Architecture](assets/aws-firewall-factory-architecture.png)
 ## 🛡️ Deployment
 
 ### ⚙️ Prerequisites
@@ -55,7 +60,7 @@ All releases are tested prior to release using automated test workflows of sampl
 9. (Optional) Enter `task generateprerequisitesconfig`
 10. Enter `task deploy config=NAMEOFYOURCONFIGFILE prerequisite=true`
 11. Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
-![List of Resources](./static/options.jpg "Stacks")
+![List of Resources](assets/options.jpg "Stacks")
 
 ### 🏁 Deployment via Taskfile
 
@@ -66,4 +71,4 @@ All releases are tested prior to release using automated test workflows of sampl
    2. Enter `task generate-shield-skeleton`
 4. Enter `task deploy config=NAMEOFYOURCONFIGFILE`
 5.  Select the type of resource to be deployed (Pre-requisite Stacks, WAF or Shield Advanced)
-![List of Resources](./static/options.jpg "Stacks")
+![List of Resources](assets/options.jpg "Stacks")

@@ -1,14 +1,14 @@
 import { IncomingWebhook } from "@slack/webhook";
 import { MessageAttachment } from "@slack/types";
 import { PolicySummary } from "@aws-sdk/client-fms";
-import { AccountWebACLs, FmsPolicy } from "../../../SharedComponents/types/index";
+import { AccountWebAcls, FmsPolicy } from "../../../SharedComponents/types/index";
 import {getProductPrice}  from "../../../../tools/helpers/pricing";
 import { PriceRegions, RegionString } from "../../../../types/config";
 import * as packageJsonObject from "../../../../../package.json";
 
 
 export async function unusedNotificationSlack(
-  AllWAFs: AccountWebACLs[], UniqueUnusedFMSPolicies:  FmsPolicy[], allFMSPolicies: PolicySummary[], Webhook: string) {
+  AllWAFs: AccountWebAcls[], UniqueUnusedFMSPolicies:  FmsPolicy[], allFMSPolicies: PolicySummary[], Webhook: string) {
   const totalWafs: number = AllWAFs.reduce((acc, account) => acc + account.TotalWafs, 0);
   const wafsInUse: number = AllWAFs.reduce((acc, account) => acc + account.WafsInUse, 0);
   const ignoredWafs: number = AllWAFs.reduce((acc, account) => acc + account.IgnoredWafs, 0);

@@ -9,7 +9,7 @@
 import util from "util";
 import fs from "fs";
 import path from "path";
-import { Config } from "../lib/types/config";
+import { wafConfig } from "../lib/types/config";
 
 interface OldConfig {
   General: any,
@@ -121,7 +121,7 @@ findFile(process.argv[2], ".").then((filePath) => {
           CustomRules: oldConfig.WebAcl.PostProcess.CustomRules ? toAwsCamel(oldConfig.WebAcl.PostProcess.CustomRules) : undefined
         }
       }
-    } as Config;
+    } as wafConfig;
 
     let priority = 100;
 

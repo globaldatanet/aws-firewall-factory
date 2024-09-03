@@ -14,6 +14,9 @@ export interface ShieldDashboardProps extends cdk.StackProps {
   };
 }
 
+/**
+ * Shield Dashboard Construct
+ */
 export class ShieldDashboard extends Construct {
   constructor(scope: Construct, id: string, props: ShieldDashboardProps) {
     super(scope, id);

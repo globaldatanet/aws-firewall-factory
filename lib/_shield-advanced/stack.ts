@@ -1,20 +1,48 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_fms as fms } from "aws-cdk-lib";
-import { ManagedServiceData } from "./types/fms";
-import { getGuidance } from "./tools/helpers/guidance";
-import { RuntimeProperties } from "./types/runtimeprops";
-import { ShieldConfig } from "./types/config";
-import { ShieldDashboard } from "./constructs/ShieldDashboard";
+import { ManagedServiceData } from "../types/fms";
+import { getGuidance } from "../tools/helpers/guidance";
+import { RuntimeProperties } from "../types/runtimeprops";
+import { ShieldConfig } from "../types/config";
+import { ShieldDashboard } from "../constructs/shieldDashboard/index";
 
-export interface shield_props extends cdk.StackProps {
+/**
+ * @packageDocumentation
+ *
+ * # AWS Firewall Factory Shield Advanced 
+ *
+ * @description
+ * Specifies the AWS Shield Advanced configuration.
+
+ * This CDK creates a Shield Advanced Stack which will be managed by AWS Firewall Manager.
+ *
+
+*/
+
+/**
+ * @group Interfaces
+ * @description
+ * Specifies the Shield Advanced Stack properties.
+ * 
+ * @param {ShieldConfig} shieldConfig  Variable for a Shield Config.
+ * @param {RuntimeProperties} runtimeProperties Variable for Runtime Properties.
+ *
+ */
+
+export interface ShieldProps extends cdk.StackProps {
+   /**
+   * Class Variable for a Shield Config.
+   */
   readonly shieldConfig: ShieldConfig;
+  /**
+   * Class Variable for Runtime Properties.
+   */
   readonly runtimeProperties: RuntimeProperties;
 }
 export class ShieldStack extends cdk.Stack {
-  readonly oamSinkArn: string;
-
-  constructor(scope: Construct, id: string, props: shield_props) {
+  readonly oamSinkArn: string = "";
+  constructor(scope: Construct, id: string, props: ShieldProps) {
     super(scope, id, props);
     const preProcessRuleGroups: never[] = [];
     const postProcessRuleGroups: never[] = [];
@@ -33,9 +61,9 @@ export class ShieldStack extends cdk.Stack {
       },
     };
 
-    props.shieldConfig.remediationEnabled === false
-      ? getGuidance("remediationNotEnabled", props.runtimeProperties)
-      : null;
+    if(props.shieldConfig.remediationEnabled ===false){
+      getGuidance("remediationNotEnabled", props.runtimeProperties);
+    }
     const cfnShieldPolicyProps: fms.CfnPolicyProps = {
       remediationEnabled: props.shieldConfig.remediationEnabled,
       // https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_fms.CfnPolicy.html#resourcetype:~:text=fms%2Dpolicy%2Dresourcetags-,resourceType,-%3F
@@ -53,13 +81,11 @@ export class ShieldStack extends cdk.Stack {
         managedServiceData: cdk.Fn.sub(JSON.stringify(managedServiceData), {}),
       },
     };
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    const fmspolicy = new fms.CfnPolicy(
+    new fms.CfnPolicy(
       this,
       "CfnPolicy",
       cfnShieldPolicyProps
     ); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it.
-    /* eslint-enable @typescript-eslint/no-unused-vars */
     if (props.shieldConfig.General.CreateDashboard === true) {
       new ShieldDashboard(this, "ShieldDashboardConstruct", {
         shieldConfig: {
