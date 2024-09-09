@@ -44,7 +44,7 @@
     "@aws-solutions-constructs/aws-eventbridge-stepfunctions": "^2.65.0",
     "@babel/traverse": "^7.25.5",
     "@mhlabs/cfn-diagram": "^1.1.40",
-    "@slack/types": "^2.12.0",
+    "@slack/types": "^2.13.0",
     "@slack/webhook": "^7.0.3",
     "@types/aws-lambda": "^8.10.143",
     "@types/lodash": "4.17.7",
