@@ -16,7 +16,7 @@
     "@types/node": "^22.5.0",
     "@typescript-eslint/eslint-plugin": "^8.3.0",
     "@typescript-eslint/parser": "^8.3.0",
-    "@typescript-eslint/typescript-estree": "^8.3.0",
+    "@typescript-eslint/typescript-estree": "^8.10.0",
     "aws-cdk": "2.154.1",
     "eslint": "^8.57.0",
     "eslint-import-resolver-typescript": "^3.6.1",
