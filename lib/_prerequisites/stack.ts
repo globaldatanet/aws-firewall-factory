@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { Prerequisites } from "../types/config";
-import { RuntimeProperties } from "../types/runtimeprops";
+import { prerequisites, runtime } from "../types/config/index";
 import {
   aws_s3 as s3,
   aws_kms as kms,
@@ -44,11 +43,11 @@ export interface StackProps extends cdk.StackProps {
     /**
    * Class Variable for Prerequisites Properties.
    */
-  readonly prerequisites: Prerequisites;
+  readonly prerequisites: prerequisites.PrerequisitesConfig;
     /**
    * Class Variable for Runtime Properties.
    */
-  runtimeProperties: RuntimeProperties;
+  runtimeProperties: runtime.RuntimeProps;
 }
 
 export class PrerequisitesStack extends cdk.Stack {

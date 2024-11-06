@@ -1,5 +1,5 @@
-import { ShieldConfig } from "../../lib/types/config";
-export const shieldConfig: ShieldConfig = {
+import { shield } from "../../lib/types/config";
+export const shieldConfig: shield.ShieldConfig = {
   General: {
     Prefix: "aws-firewall-factory1",
     Stage: "test",

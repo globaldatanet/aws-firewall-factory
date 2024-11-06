@@ -1,7 +1,7 @@
-import { wafConfig } from "../../lib/types/config";
-import * as fwmEnums from "../../lib/types/enums";
+import { waf } from "../../lib/types/config";
+import {WebAclScope, WebAclTypeEnum} from "../../lib/types/enums/waf";
 
-export const config: wafConfig = {
+export const config: waf.WafConfig = {
   General: {
     Prefix: "testcases",
     Stage: "test",
@@ -422,7 +422,7 @@ export const config: wafConfig = {
       ManagedRuleGroups: [],
 
     },
-    Scope: fwmEnums.WebAclScope.REGIONAL,
-    Type: fwmEnums.WebAclTypeEnum.ELASTICLOADBALANCINGV2_LOADBALANCER
+    Scope: WebAclScope.REGIONAL,
+    Type: WebAclTypeEnum.ELASTICLOADBALANCINGV2_LOADBALANCER
   },
 };

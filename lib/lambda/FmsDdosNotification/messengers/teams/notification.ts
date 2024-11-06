@@ -11,11 +11,11 @@ import * as AdaptiveCards from "adaptivecards";
 export async function ddosNotificationTeams(Record: SNSEventRecord, Webhook: string) {
   const webhook = new IncomingWebhook(Webhook);
   const card = new AdaptiveCards.AdaptiveCard();
-  card.version = AdaptiveCards.Versions.v1_4;
+  card.version = AdaptiveCards.Versions.v1_5;
   card.height = "stretch";
 
   const subjectblock = new AdaptiveCards.TextBlock();
-  subjectblock.text = Record.Sns.Subject;
+  subjectblock.text = Record.Sns.Subject || "DDoS Notification";
   subjectblock.wrap = true;
   subjectblock.weight = AdaptiveCards.TextWeight.Bolder;
   subjectblock.size = AdaptiveCards.TextSize.Large;

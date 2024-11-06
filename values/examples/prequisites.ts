@@ -1,5 +1,5 @@
-import { Prerequisites } from "../../lib/types/config";
-export const prequisites: Prerequisites = {
+import { prerequisites } from "../../lib/types/config";
+export const prequisites: prerequisites.PrerequisitesConfig = {
   General: {
     Prefix: "aws-firewall-factory1",
   },

@@ -1,0 +1,1 @@
+export { config as azureIpSet } from "./azureIpSet";

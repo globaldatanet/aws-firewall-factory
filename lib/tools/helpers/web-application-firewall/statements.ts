@@ -1,5 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import { Rule, NotStatementProperty } from "../../../types/fms";
+import { waf} from "../../../types/config/index";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 /**
  * Function to transform RuleStatements
@@ -9,8 +9,8 @@ import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
  * @param ipSets cdk.aws_wafv2.CfnIPSet[]
  * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
  */
-export function transformWafRuleStatements(rule: Rule, prefix: string, stage: string, webAclName: string, ipSets?: cdk.aws_wafv2.CfnIPSet[], regexPatternSets?: cdk.aws_wafv2.CfnRegexPatternSet[]) {
-  const notStatement = rule.statement.notStatement as NotStatementProperty | undefined;
+export function transformWafRuleStatements(rule: waf.Rule, prefix: string, stage: string, webAclName: string, ipSets?: cdk.aws_wafv2.CfnIPSet[], regexPatternSets?: cdk.aws_wafv2.CfnRegexPatternSet[]) {
+  const notStatement = rule.statement.notStatement as waf.NotStatementProperty | undefined;
   const ipSetReferenceStatement = rule.statement.ipSetReferenceStatement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
   const regexPatternSetReferenceStatement = rule.statement.regexPatternSetReferenceStatement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
   const rateBasedStatement = rule.statement.rateBasedStatement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;

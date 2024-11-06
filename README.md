@@ -67,7 +67,7 @@ If you want to learn more about the AWS Firewall Factory feel free to look at th
 |  WAF Deployment - IpSets | ![IpSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_ipSets.yml/badge.svg?branch=master)   |
 |  WAF Deployment - RegexPatternSets | ![regexPatternSets](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_regexPatternSets.yml/badge.svg?branch=master)  |
 |  WAF Deployment - RateBasedwithScopeDown | ![rateBasedwithScopeDown](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/waf_test_rateBasedwithScopeDown.yml/badge.svg?branch=master)  |
-
+|  AutoUpdatedManagedIpSet - azureIpSet | ![azureIpSet](https://github.com/globaldatanet/aws-firewall-factory/actions/workflows/tests_autoUpdatedManagedIpSets.yml/badge.svg?branch=master)  |
 
 ## 🦸🏼‍♀️ Contributors
 

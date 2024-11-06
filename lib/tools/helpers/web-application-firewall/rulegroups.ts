@@ -1,9 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
-import { CustomResponseBodies, NONEVERSIONEDMANAGEDRULEGRPOUP, wafConfig } from "../../../types/config";
-import { ManagedRuleGroup, ServiceDataManagedRuleGroup, ServiceDataRuleGroup, Rule, SubVariables } from "../../../types/fms";
 import { Scope, WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput, ListAvailableManagedRuleGroupVersionsCommandOutput} from "@aws-sdk/client-wafv2";
-import { RuntimeProperties, ProcessProperties } from "../../../types/runtimeprops";
+import { waf, runtime } from "../../../types/config/index";
 import { transformWafRuleStatements } from "./statements";
 import { Construct } from "constructs";
 import { guidanceHelper } from "../../helpers";
@@ -11,7 +9,7 @@ import * as cr from "aws-cdk-lib/custom-resources";
 
 
 const MANAGEDRULEGROUPSINFO : string[] = [""];
-const subVariables : SubVariables = {};
+const subVariables : waf.SubVariables = {};
 
 /**
    * * Build Managed RuleGroups as [ManagedServiceData](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-fms-policy-securityservicepolicydata.html#cfn-fms-policy-securityservicepolicydata-managedservicedata) for FMS Policy
@@ -22,8 +20,8 @@ const subVariables : SubVariables = {};
    * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
    * @returns adjustedRule
    */
-export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string, runtimeProps: RuntimeProperties): { ServiceData: ServiceDataManagedRuleGroup[], ManagedRuleGroupInfo: string[], SubVariables: SubVariables } {
-  const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
+export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: waf.ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string, runtimeProps: runtime.RuntimeProps): { ServiceData: waf.ServiceDataManagedRuleGroup[], ManagedRuleGroupInfo: string[], SubVariables: waf.SubVariables } {
+  const cfnManagedRuleGroup : waf.ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
     if(managedRuleGroup.ruleActionOverrides?.toString() === "COUNT"){
       // eslint-disable-next-line quotes
@@ -34,7 +32,8 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
         guidanceHelper.getGuidance("noBotControlRuleSetProperty",runtimeProps);
       }
     }
-    if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
+    if(waf.NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
+    
       console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
       cfnManagedRuleGroup.push({
         managedRuleGroupIdentifier: {
@@ -45,7 +44,7 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
         },
         overrideAction: managedRuleGroup.overrideAction ? managedRuleGroup.overrideAction : { type: "NONE" },
         ruleGroupArn: undefined,
-        excludeRules: managedRuleGroup.excludedRules ?  managedRuleGroup.excludedRules : undefined,
+        excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : undefined,
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?? undefined,
         awsManagedRulesBotControlRuleSetProperty: managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ?? undefined,
@@ -103,27 +102,27 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
      * @param webaclName string
      * @param webAclScope string
      * @param stage string
-     * @param processRuntimeProps RuntimeProperties
+     * @param processRuntimeProps runtime.props
      * @param prefix string
      * @param ruleGroupSet: Rule[]
-     * @param customResponseBodies CustomResponseBodies  | undefined
+     * @param customResponseBodies waf.CustomResponseBodies  | undefined
      * @param ipSets cdk.aws_wafv2.CfnIPSet[]
      * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
      * @param deployHash string
      * @returns serviceDataRuleGroup
      */
-export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", runtimeProps: RuntimeProperties, config: wafConfig, ipSets: cdk.aws_wafv2.CfnIPSet[],regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]) : ServiceDataRuleGroup[] {
+export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", runtimeProps: runtime.RuntimeProps, config: waf.WafConfig, ipSets: cdk.aws_wafv2.CfnIPSet[],regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]) : waf.ServiceDataRuleGroup[] {
   const webaclName = config.WebAcl.Name;
   const prefix = config.General.Prefix;
   const webAclScope = config.WebAcl.Scope;
   const stage = config.General.Stage;
   const deployHash = config.General.DeployHash;
-  const serviceDataRuleGroup : ServiceDataRuleGroup[] = [];
+  const serviceDataRuleGroup : waf.ServiceDataRuleGroup[] = [];
   let icon;
   let capacity: number;
-  let processRuntimeProps: ProcessProperties;
-  let customResponseBodies: CustomResponseBodies | undefined;
-  let ruleGroupSet: Rule[] | undefined;
+  let processRuntimeProps: runtime.ProcessProperties;
+  let customResponseBodies: waf.CustomResponseBodies | undefined;
+  let ruleGroupSet: waf.Rule[] | undefined;
   if (type === "Pre") {
     icon = "🥇 ";
     processRuntimeProps = runtimeProps.PreProcess;

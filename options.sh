@@ -7,7 +7,7 @@ if [ -z "$STACK_NAME" ]; then
   choices=()
 
   # Options array
-  options=("PreRequisiteStack" "WAFStack" "ShieldAdvancedStack")
+  options=("PreRequisiteStack" "WAFStack" "ShieldAdvancedStack" "AutoUpdatedManagedIpSets")
 
   # Calculate the height (number of options + 5)
   height=$(( ${#options[@]} + 5 ))

@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { RuntimeProperties } from "../../types/runtimeprops";
-import { wafConfig, ShieldConfig } from "../../types/config";
+import { runtime, waf, shield } from "../../types/config/index";
 import * as cfonts from "cfonts";
 
 /**
@@ -20,8 +19,8 @@ const FIREWALL_FACTORY_VERSION = packageJson.version;
  * @return deploymentRegion AWS region, e.g. eu-central-1
  */
 export const outputInfoBanner = (
-  config?: wafConfig,
-  shieldConfig?: ShieldConfig
+  config?: waf.WafConfig,
+  shieldConfig?: shield.ShieldConfig
 ) => {
   /**
    * the region into which the stack is deployed
@@ -91,7 +90,7 @@ export const outputInfoBanner = (
  * initialize a runtime properties object
  * @returns the runtime properties object
  */
-export function initRuntimeProperties(): RuntimeProperties {
+export function initRuntimeProperties(): runtime.RuntimeProps {
   return {
     AllAwsRegions: [],
     GuidanceSummary: [],
@@ -154,7 +153,7 @@ export function initRuntimeProperties(): RuntimeProperties {
  * The function will check if s3 bucket is Parameter is starting with aws-waf-logs- if Logging Configuration is set to S3
  * @param config Config
  */
-export function wrongLoggingConfiguration(config: wafConfig): boolean {
+export function wrongLoggingConfiguration(config: waf.WafConfig): boolean {
   if (config.General.LoggingConfiguration === "S3") {
     if (!config.General.S3LoggingBucketName.startsWith("aws-waf-logs-")) {
       return true;

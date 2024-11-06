@@ -2,6 +2,37 @@
 
 ## Released
 
+## 4.6.0
+### Added
+- Automated IP Set Management: The AutoUpdatedManagedIpSet feature now supports automated management of IP sets through AWS Firewall Factory.
+  - Easy Configuration: Simply provide a URL pointing to a JSON file and specify the key containing the CIDRs you want to include in your IP sets.
+  - Automated Scheduling: IP sets are updated based on a predefined schedule, ensuring up-to-date protection without manual intervention. The IP set will only be updated if new CIDRs are detected in the downloaded JSON file. If the file is empty or the CIDRs are unchanged, no update will occur.
+  - Rollback Support: The IP addresses of IP sets are stored in SSM Parameter Store, allowing for easy rollback to previous versions as needed.
+  - CloudWatch Monitoring: When an IP set is updated in the latest schedule, a metric labeled "ManagedIpSets" in the "AWS-Firewall-Factory" namespace is set to 1 for that specific IP set. This enables you to configure a CloudWatch alarm for real-time notifications.
+- Restructured Enums and Configuration Files: Improved code organization by separating and reorganizing enums and configuration settings into service- and stack-specific files. This restructuring enhances maintainability and simplifies dependency management. 🚨 Note: You will need to update the imports in your value files. 🚨
+
+
+### Updated
+- **@aws-sdk/client-cloudfront**: Updated from 3.637.0 to 3.682.0
+- **@aws-sdk/client-config-service**: Updated from 3.637.0 to 3.682.0
+- **@aws-sdk/client-ec2**: Updated from 3.641.0 to 3.682.0
+- **@aws-sdk/client-s3**: Updated from 3.637.0 to 3.682.0
+- **@aws-sdk/client-secrets-manager**: Updated from 3.637.0 to 3.682.0
+- **@aws-solutions-constructs/aws-eventbridge-stepfunctions**: Updated from 2.65.0 to 2.74.0
+- **@babel/traverse**: Updated from 7.25.6 to 7.25.9
+- **@slack/types**: Updated from 2.12.0 to 2.14.0
+- **@types/aws-lambda**: Updated from 8.10.143 to 8.10.145
+- **@types/lodash**: Updated from 4.17.7 to 4.17.7
+- **@types/node**: Updated from 22.5.0 to 22.8.4
+- **@typescript-eslint/eslint-plugin**: Updated from 8.3.0 to 8.12.2
+- **@typescript-eslint/parser**: Updated from 8.3.0 to 8.12.2
+- **@typescript-eslint/typescript-estree**: Updated from 8.3.0 to 8.12.2
+- **adaptivecards**: Updated from 3.0.4 to 3.0.4
+- **axios**: Updated from 1.7.5 to 1.7.7
+- **cdk-sops-secrets**: Updated from 1.13.1 to 1.13.4
+- **eslint**: Updated from 8.57.0 to 8.57.1
+- **eslint-plugin-import**: Updated from 2.29.1 to 2.31.0
+- **npm**: Updated from 10.8.2 to 10.9.0
 
 ## 4.5.1
 ### Added

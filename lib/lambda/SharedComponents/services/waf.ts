@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListWebACLsCommand, ListWebACLsCommandInput, ListResourcesForWebACLCommand, ListResourcesForWebACLCommandOutput, Scope, ResourceType} from "@aws-sdk/client-wafv2";
+import { WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListWebACLsCommand, ListWebACLsCommandInput, ListResourcesForWebACLCommand, ListResourcesForWebACLCommandOutput, Scope, ResourceType, UpdateIPSetCommand, ListIPSetsCommandInput, ListIPSetsCommand, CreateIPSetCommand, IPAddressVersion, CreateIPSetCommandInput, IPSetSummary, UpdateIPSetCommandInput, DeleteIPSetCommand, DeleteIPSetCommandInput, GetIPSetCommand, GetIPSetCommandInput} from "@aws-sdk/client-wafv2";
 import { PaginatedManagedRuleGroupVersions, ManagedRuleGroupVersionResponse} from "../types/index";
 import {CloudFrontClient, ListDistributionsByWebACLIdCommand, ListDistributionsByWebACLIdCommandOutput} from "@aws-sdk/client-cloudfront";
+import {putSsmParameter}  from "./ssm";
 import { AwsCredentialIdentity } from "@aws-sdk/types";
 import { AccountWebAcls, WebAcls} from "../types/index";
+import { general } from "../../../types/enums/index";
+import {CfnTag} from "aws-cdk-lib";
+import {putIpSetMetric} from "./cloudwatch";
 
 export async function getManagedRuleGroupVersions(VendorName: string,Name: string,WafScope: string): Promise<PaginatedManagedRuleGroupVersions> {
   const client = new WAFV2Client({region: process.env.AWS_DEFAULT_REGION});
@@ -294,4 +298,117 @@ export async function checkWafUsageInAccount(credentials: AwsCredentialIdentity,
     }
   }
   return accountwafs;
+}
+
+async function checkIfIpSetExist(region: general.AWSRegion, ipSetName: string, scope: "REGIONAL" | "CLOUDFRONT"): Promise<IPSetSummary | undefined> {
+  const client = new WAFV2Client({region});
+  try {
+    // List all IP sets in the specified scope
+    const input: ListIPSetsCommandInput = { Scope: scope };
+    const command = new ListIPSetsCommand(input);
+    const response = await client.send(command);
+    const ipSet = response.IPSets?.find(ipSet => ipSet.Name === ipSetName);
+    // Check if an IP set with the given name exists
+    return ipSet;
+  } catch (error) {
+    console.error("Error checking IP set existence:", error);
+    throw new Error(`Error checking IP set existence: ${ipSetName}`);
+  }
+}
+
+async function getAddressesFromIPSet(region: general.AWSRegion, Name: string, Id: string, Scope: "REGIONAL" | "CLOUDFRONT"): Promise<string[]> {
+  const client = new WAFV2Client({region});
+  try {
+    const input: GetIPSetCommandInput = {
+      Id,
+      Scope,
+      Name
+    };
+    const command = new GetIPSetCommand(input);
+    const response = await client.send(command);
+    if(
+      response.IPSet &&
+    response.IPSet.Addresses &&
+    response.IPSet.Addresses.length > 0
+    ){
+      return response.IPSet.Addresses;
+    }
+    else{
+      console.error("Error getting Addresses from IPset:", response);
+    }
+  }
+  catch (error) {
+    console.error("Error getting Addresses from IPset:", error);
+    throw error;
+  }
+}
+
+export async function ipSetManager(Region: general.AWSRegion, Name: string, Scope: "CLOUDFRONT" | "REGIONAL", Addresses: string[], IPAddressVersion: IPAddressVersion, prefix: string, customDescription?: string, tags?: CfnTag[]): Promise<string>{
+  const client = new WAFV2Client({region: Region});
+
+  const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const Description = customDescription ? `${customDescription} - AWS Firewall Factory Managed IP Set - Last updated: ${now} ${timezone}` : `AWS Firewall Factory Managed IP Set - Last updated: ${now} ${timezone}`;
+  const existingIpSet = await checkIfIpSetExist(Region, Name, Scope);
+
+  if(existingIpSet && existingIpSet.Id){
+    const currentAddresses = await getAddressesFromIPSet(Region, Name, existingIpSet.Id, Scope);
+    const missing = currentAddresses.filter(item => Addresses.indexOf(item) < 0);
+    if(missing.length > 0 && Addresses.length > 0){
+      console.log(`ℹ️ Update existing IpSet: ${Name} - ${existingIpSet.Id}`);
+      await putSsmParameter(`/${prefix.toUpperCase()}/AWS-FIREWALL-FACTORY/MANAGEDIPSETS/${Name.toLocaleUpperCase()}/ADDRESSES`, Addresses.toString(), `Addresses for ${Name}`);
+      await putIpSetMetric(Region, "AWS-Firewall-Factory", "ManagedIpSets", 1, { Name: "IpSetName", Value: Name });
+      const input: UpdateIPSetCommandInput = {
+        Name,
+        Scope,
+        Id: existingIpSet.Id,
+        Description,
+        Addresses,
+        LockToken: existingIpSet.LockToken
+      };
+      const command = new UpdateIPSetCommand(input);
+      const response = await client.send(command);
+      console.log(response);
+      return existingIpSet.ARN || "";
+    } else{
+      console.log(`ℹ️ IpSet ${Name} already up to date`);
+      await putIpSetMetric(Region, "AWS-Firewall-Factory", "ManagedIpSets", 0, { Name: "IpSetName", Value: Name });
+      return existingIpSet.ARN || "";
+    }
+  }else {
+    console.log("ℹ️ Create IpSet");
+    const Tags = tags ? tags.map(tag => ({ Key: tag.key, Value: tag.value })) : undefined;
+    const input: CreateIPSetCommandInput = {
+      Name,
+      Scope,
+      Addresses,
+      Description,
+      IPAddressVersion,
+      Tags
+    };
+    const command = new CreateIPSetCommand(input);
+    const response = await client.send(command);
+    await putSsmParameter(`/${prefix.toUpperCase()}/AWS-FIREWALL-FACTORY/MANAGEDIPSETS/${Name.toLocaleUpperCase()}/ADDRESSES`,Addresses.toString() , `Addresses for ${Name}`);
+    await putIpSetMetric(Region, "AWS-Firewall-Factory", "ManagedIpSets", 1, { Name: "IpSetName", Value: Name });
+    console.log(response);
+    return response.Summary?.ARN || "";
+  }
+
+}
+
+export async function deleteIpSet(Region: general.AWSRegion, Name: string, Scope: "CLOUDFRONT" | "REGIONAL"): Promise<void> {
+  const client = new WAFV2Client({region: Region});
+  const existingIpSet = await checkIfIpSetExist(Region, Name, Scope);
+  console.log(`ℹ️ Delete IpSet: ${Name}`);
+  if(existingIpSet){
+    const input: DeleteIPSetCommandInput = {
+      Name,
+      Scope,
+      Id: existingIpSet.Id,
+      LockToken: existingIpSet.LockToken
+    };
+    const command = new DeleteIPSetCommand(input);
+    await client.send(command);
+  }
 }

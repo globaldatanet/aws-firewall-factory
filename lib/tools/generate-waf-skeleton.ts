@@ -1,12 +1,12 @@
-import { wafConfig } from "../types/config";
+import { waf } from "../types/config/index";
 import util from "util";
 import { afwfHelper } from "./helpers";
-import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums";
+import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../types/enums/waf";
 /**
  * The script will output a example WAF Skeleton Config to the terminal
  */
 
-const skeletonConfig : wafConfig = {
+const skeletonConfig : waf.WafConfig = {
   General: {
     FireHoseKeyArn: "",
     Prefix: "myPrefix",
@@ -25,11 +25,11 @@ const skeletonConfig : wafConfig = {
     PreProcess: {
       ManagedRuleGroups: [
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.AMAZON_IP_REPUTATION_LIST,
         },
         {
-          vendor: ManagedRuleGroupVendor.AWS,
+          vendorName: ManagedRuleGroupVendor.AWS,
           name: AwsManagedRules.COMMON_RULE_SET,
         }
       ]

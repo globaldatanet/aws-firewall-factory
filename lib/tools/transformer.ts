@@ -8,14 +8,14 @@ import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchS
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
   ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey, RateLimitHeader, RateLimitQueryString, RateLimitUriPath, RateLimitIP,  RateLimitHTTPMethod } from "@aws-sdk/client-wafv2";
 import { wafHelper, guidanceHelper} from "./helpers";
-import { RuntimeProperties } from "../types/runtimeprops";
+import { runtime } from "../types/config/index";
 
 /**
  * The function will map a CDK ByteMatchStatement Property to a SDK ByteMatchStatement Property
  * @param statement object of a CDK ByteMatchStatement Property
  * @return configuration object of a SDK ByteMatchStatement Property
  */
-export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties: RuntimeProperties): ByteMatchStatement {
+export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties: runtime.RuntimeProps): ByteMatchStatement {
   const bmst = statement as wafv2.CfnWebACL.ByteMatchStatementProperty | undefined;
   let ByteMatchStatement = undefined;
   if (bmst) {
@@ -262,7 +262,7 @@ export function transformXssMatchStatement(statement: wafv2.CfnWebACL.XssMatchSt
  * @param statement object of a CDK And/OrStatement Property  Property
  * @return configuration object of a SDK And/OrStatement Property  Property
  */
-export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isandStatement:boolean, runtimeProperties: RuntimeProperties): AndStatement | OrStatement | undefined {
+export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isandStatement:boolean, runtimeProperties: runtime.RuntimeProps): AndStatement | OrStatement | undefined {
   const Statements = [];
   let ConcatenatedStatement = undefined;
   if(statement.statements && Array.isArray(statement.statements)){
@@ -375,7 +375,7 @@ export function transformLabelMatchStatement(statement: wafv2.CfnWebACL.LabelMat
  * @param statement object of a CDK NotStatement Property
  * @return configuration object of a SDK NotStatement Property
  */
-export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProperty, runtimeProperties: RuntimeProperties): NotStatement {
+export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProperty, runtimeProperties: runtime.RuntimeProps): NotStatement {
   const nst = statement as wafv2.CfnWebACL.NotStatementProperty | undefined;
   let NotStatement = undefined;
   if (nst && nst.statement) {
@@ -445,7 +445,7 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
  * @param statement object of a CDK RateBasedStatement Property
  * @return configuration object of a SDK RateBasedStatement Property
  */
-export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties: RuntimeProperties): RateBasedStatement {
+export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties: runtime.RuntimeProps): RateBasedStatement {
   const rbst = statement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
   let RateBasedStatement = undefined;
   let Limit: number | undefined = undefined;
@@ -683,7 +683,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
  * @param cdkRule configuration object of a CDK Rule Property
  * @return configuration object of a SDK Rule Property
  */
-export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty, runtimeProperties: RuntimeProperties): Rule {
+export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty, runtimeProperties: runtime.RuntimeProps): Rule {
   const action = (cdkRule.action as wafv2.CfnWebACL.RuleActionProperty) as wafv2.CfnWebACL.RuleActionProperty | undefined;
   let Action = undefined;
   if (action) {

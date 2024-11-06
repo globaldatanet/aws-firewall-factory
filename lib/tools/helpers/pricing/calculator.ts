@@ -13,8 +13,8 @@ import {
   GetProductsCommandInput,
   FilterType,
 } from "@aws-sdk/client-pricing";
-import { RuntimeProperties } from "../../../types/runtimeprops";
-import { wafConfig, PriceRegions, ShieldConfig } from "../../../types/config";
+import { pricing } from "../../../types/enums/index";
+import { waf, runtime, shield } from "../../../types/config/index";
 import {
   CloudWatchClient,
   ListDashboardsCommand,
@@ -73,9 +73,9 @@ function findValuesHelper(obj: any, key: string, list: any) {
  * @returns true if prices are update in runtimeprops
  */
 async function getCurrentWafPrices(
-  deploymentRegion: PriceRegions,
-  runtimeProps: RuntimeProperties,
-  config: wafConfig,
+  deploymentRegion: pricing.PriceRegions,
+  runtimeProps: runtime.RuntimeProps,
+  config: waf.WafConfig,
   awsregion: string
 ): Promise<boolean> {
   console.log("   🔎  Getting current prices for: ", deploymentRegion, "\n");
@@ -143,7 +143,7 @@ async function getCurrentWafPrices(
  */
 async function getDashboardPrice(
   deploymentRegion: string,
-  config: wafConfig
+  config: waf.WafConfig
 ): Promise<number> {
   const client = new CloudWatchClient({ region: deploymentRegion });
   const input: ListDashboardsCommandInput = {};
@@ -175,7 +175,7 @@ async function getDashboardPrice(
  * @returns price for one product
  */
 export async function getProductPrice(
-  deploymentRegion: PriceRegions,
+  deploymentRegion: pricing.PriceRegions,
   servicecode: string,
   operation?: string,
   group?: string,
@@ -230,9 +230,9 @@ export async function getProductPrice(
  * @returns whether price is successfully calculated or not
  */
 export async function isWafPriceCalculated(
-  deploymentRegion: PriceRegions,
-  runtimeProps: RuntimeProperties,
-  config: wafConfig,
+  deploymentRegion: pricing.PriceRegions,
+  runtimeProps: runtime.RuntimeProps,
+  config: waf.WafConfig,
   awsregion: string
 ): Promise<boolean> {
   const shieldSubscriptionState = await getShieldSubscriptionState();
@@ -361,7 +361,7 @@ async function getShieldSubscriptionState() {
  * @returns whether price is successfully calculated or not
  */
 export async function isShieldPriceCalculated(
-  shieldconfig: ShieldConfig
+  shieldconfig: shield.ShieldConfig
 ): Promise<boolean> {
   const shieldSubscriptionState = await getShieldSubscriptionState();
   console.log("\n🛡️  Shield Advanced State: " + shieldSubscriptionState);

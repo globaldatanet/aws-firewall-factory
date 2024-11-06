@@ -4,9 +4,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_wafv2 as wafv2, aws_fms as fms,aws_lambda_nodejs as NodejsFunction, aws_lambda as lambda, aws_kinesisfirehose as firehouse, aws_iam as iam, aws_logs as logs   } from "aws-cdk-lib";
-import { wafConfig } from "../types/config";
-import { ManagedServiceData, SubVariables } from "../types/fms";
-import { RuntimeProperties } from "../types/runtimeprops";
+import { runtime, waf  } from "../types/config/index";
 import {WafCloudWatchDashboard} from "../constructs/wafDashboard/index";
 import * as path from "path";
 import * as cr from "aws-cdk-lib/custom-resources";
@@ -27,11 +25,11 @@ export interface ConfigStackProps extends cdk.StackProps {
     /**
    * Class Variable for WAF Properties.
    */
-  readonly config: wafConfig;
+  readonly config: waf.WafConfig;
     /**
    * Class Variable for Runtime Properties.
    */
-  runtimeProperties: RuntimeProperties;
+  runtimeProperties: runtime.RuntimeProps;
 }
 
 export class WafStack extends cdk.Stack {
@@ -211,7 +209,7 @@ export class WafStack extends cdk.Stack {
     const preProcessRuleGroups = [];
     const postProcessRuleGroups = [];
     const MANAGEDRULEGROUPSINFO: string[]= [""];
-    let subVariables : SubVariables = {};
+    let subVariables : waf.SubVariables = {};
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
       const preProcessmanagedRgs = wafHelper.buildServiceDataManagedRgs(this, props.config.WebAcl.PreProcess.ManagedRuleGroups, managedRuleGroupVersionProvider, props.config.WebAcl.Scope, props.runtimeProperties);
       preProcessRuleGroups.push(...preProcessmanagedRgs.ServiceData);
@@ -241,7 +239,7 @@ export class WafStack extends cdk.Stack {
       console.log("\nℹ️  No Custom Rules defined in PostProcess.");
     }
 
-    const managedServiceData : ManagedServiceData = {
+    const managedServiceData : waf.ManagedServiceData = {
       type: "WAFV2",
       defaultAction: { type: "ALLOW" },
       preProcessRuleGroups: preProcessRuleGroups,

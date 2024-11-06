@@ -5,9 +5,9 @@
  * The waf Stack deploy WAF using Firewall Manager.
  * 
  * @example
-* import { wafConfig } from "../../lib/types/config";
-* import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums";
-* export const config: wafConfig = {
+* import { waf } from "../../lib/types/config";
+* import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums/waf";
+* export const config: waf.WafConfig = {
 *   General: {
 *     FireHoseKeyArn: "",
 *     Prefix: "aws-firewall-factory",
