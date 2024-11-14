@@ -13,8 +13,8 @@
  * @description
  * 
  * @example
- * import { Prerequisites } from "../../lib/types/config";
- * export const prequisites: Prerequisites = {
+ * import { prerquisites } from "../../lib/types/config";
+ * export const prequisites: prerquisites.config = {
  *  General: {
  *    Prefix: "aws-firewall-factory",
  *  },

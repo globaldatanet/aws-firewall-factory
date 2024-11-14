@@ -1,12 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_wafv2 as wafv2, aws_fms as fms,aws_lambda_nodejs as NodejsFunction, aws_lambda as lambda, aws_kinesisfirehose as firehouse, aws_iam as iam, aws_logs as logs   } from "aws-cdk-lib";
-import { wafConfig } from "../types/config";
-import { ManagedServiceData, SubVariables } from "../types/fms";
-import { RuntimeProperties } from "../types/runtimeprops";
+import { RuntimeProps, WafConfig, SubVariables, ManagedServiceData, ManagedRuleGroup, ServiceDataManagedRuleGroup, ServiceDataRuleGroup  } from "../types/config/index";
 import {WafCloudWatchDashboard} from "../constructs/wafDashboard/index";
 import * as path from "path";
 import * as cr from "aws-cdk-lib/custom-resources";
@@ -27,11 +22,11 @@ export interface ConfigStackProps extends cdk.StackProps {
     /**
    * Class Variable for WAF Properties.
    */
-  readonly config: wafConfig;
+  readonly config: WafConfig;
     /**
    * Class Variable for Runtime Properties.
    */
-  runtimeProperties: RuntimeProperties;
+  runtimeProperties: RuntimeProps;
 }
 
 export class WafStack extends cdk.Stack {
@@ -208,8 +203,8 @@ export class WafStack extends cdk.Stack {
 
     // --------------------------------------------------------------------
 
-    const preProcessRuleGroups = [];
-    const postProcessRuleGroups = [];
+    const preProcessRuleGroups: (ServiceDataManagedRuleGroup | ManagedRuleGroup | ServiceDataRuleGroup)[] = [];
+    const postProcessRuleGroups: (ServiceDataManagedRuleGroup | ManagedRuleGroup | ServiceDataRuleGroup)[] = [];
     const MANAGEDRULEGROUPSINFO: string[]= [""];
     let subVariables : SubVariables = {};
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
@@ -279,7 +274,6 @@ export class WafStack extends cdk.Stack {
     }
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       new WafCloudWatchDashboard(this, "cloudwatch",props.config, MANAGEDRULEGROUPSINFO); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it. 
     }
   }

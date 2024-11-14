@@ -1,12 +1,11 @@
-import { RuntimeProperties } from "../../types/runtimeprops";
-import { wafConfig } from "../../types/config";
+import { RuntimeProps, WafConfig } from "../../types/config/index";
 
 /**
 This function will help you to get guidance on implementing Best Practices for AWS Firewalls.
 @param context - The context of the guidance. For example, nestedRateStatement.
 @param source - The source of the guidance. For example, ManagedRuleGroup.
  */
-export function getGuidance(context: string, runtimeProperties: RuntimeProperties, source?: string) {
+export function getGuidance(context: string, runtimeProperties: RuntimeProps, source?: string) {
   switch(context){
     case "nestedRateStatement":
       runtimeProperties.Guidance.nestedRateStatementCount++;
@@ -60,7 +59,7 @@ export function getGuidance(context: string, runtimeProperties: RuntimePropertie
 This function will print out the collected guidance for your Firewall.
 @param runtimeProperties - The runtimeProperties object.
  */
-export function outputGuidance(runtimeProperties: RuntimeProperties, config?: wafConfig) {
+export function outputGuidance(runtimeProperties: RuntimeProps, config?: WafConfig) {
   if(runtimeProperties.GuidanceSummary.length !== 0 || runtimeProperties.Guidance.nestedRateStatementCount !== 0 || runtimeProperties.Guidance.overrideActionManagedRuleGroupCount !== 0 || runtimeProperties.Guidance.noRuleLabelsCount !== 0 || runtimeProperties.Guidance.byteMatchStatementPositionalConstraintCount !== 0){
     console.log("\x1b[0m","\n🛟  Guidance:","\x1b[0m");
     runtimeProperties.GuidanceSummary.forEach(element => {

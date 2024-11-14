@@ -1,20 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-for-in-array */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   PricingClient,
   GetProductsCommand,
   GetProductsCommandInput,
   FilterType,
 } from "@aws-sdk/client-pricing";
-import { RuntimeProperties } from "../../../types/runtimeprops";
-import { wafConfig, PriceRegions, ShieldConfig } from "../../../types/config";
+import { PriceRegions, WafConfig, RuntimeProps, ShieldConfig } from "../../../types/";
 import {
   CloudWatchClient,
   ListDashboardsCommand,
@@ -74,8 +65,8 @@ function findValuesHelper(obj: any, key: string, list: any) {
  */
 async function getCurrentWafPrices(
   deploymentRegion: PriceRegions,
-  runtimeProps: RuntimeProperties,
-  config: wafConfig,
+  runtimeProps: RuntimeProps,
+  config: WafConfig,
   awsregion: string
 ): Promise<boolean> {
   console.log("   🔎  Getting current prices for: ", deploymentRegion, "\n");
@@ -143,7 +134,7 @@ async function getCurrentWafPrices(
  */
 async function getDashboardPrice(
   deploymentRegion: string,
-  config: wafConfig
+  config: WafConfig
 ): Promise<number> {
   const client = new CloudWatchClient({ region: deploymentRegion });
   const input: ListDashboardsCommandInput = {};
@@ -231,8 +222,8 @@ export async function getProductPrice(
  */
 export async function isWafPriceCalculated(
   deploymentRegion: PriceRegions,
-  runtimeProps: RuntimeProperties,
-  config: wafConfig,
+  runtimeProps: RuntimeProps,
+  config: WafConfig,
   awsregion: string
 ): Promise<boolean> {
   const shieldSubscriptionState = await getShieldSubscriptionState();

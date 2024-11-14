@@ -5,8 +5,8 @@
  * The Shield Advanced Stack deploy Shield Advanced Policies using Firewall Manager.
  * 
  * @example
- * import { ShieldConfig } from "../../lib/types/config";
-* export const shieldConfig: ShieldConfig = {
+ * import { shield } from "../../lib/types/config";
+* export const shieldConfig: shield.config = {
 *  General: {
 *    Prefix: "aws-firewall-factory",
 *    Stage: "test",

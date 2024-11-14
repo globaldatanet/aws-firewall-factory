@@ -1,7 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { RuntimeProperties } from "../../types/runtimeprops";
-import { wafConfig, ShieldConfig } from "../../types/config";
+import { RuntimeProps, WafConfig, ShieldConfig } from "../../types/config/index";
 import * as cfonts from "cfonts";
 
 /**
@@ -9,9 +8,7 @@ import * as cfonts from "cfonts";
  */
 const packageJsonPath = path.resolve(__dirname, "../../../package.json");
 const packageJsonContent = fs.readFileSync(packageJsonPath, "utf-8");
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const packageJson = JSON.parse(packageJsonContent);
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
 const FIREWALL_FACTORY_VERSION = packageJson.version;
 
 /**
@@ -20,14 +17,13 @@ const FIREWALL_FACTORY_VERSION = packageJson.version;
  * @return deploymentRegion AWS region, e.g. eu-central-1
  */
 export const outputInfoBanner = (
-  config?: wafConfig,
+  config?: WafConfig,
   shieldConfig?: ShieldConfig
 ) => {
   /**
    * the region into which the stack is deployed
    */
   let deploymentRegion = "";
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
   cfonts.say("AWS FIREWALL FACTORY", {
     font: "block",
     align: "center",
@@ -91,7 +87,7 @@ export const outputInfoBanner = (
  * initialize a runtime properties object
  * @returns the runtime properties object
  */
-export function initRuntimeProperties(): RuntimeProperties {
+export function initRuntimeProperties(): RuntimeProps {
   return {
     AllAwsRegions: [],
     GuidanceSummary: [],
@@ -154,7 +150,7 @@ export function initRuntimeProperties(): RuntimeProperties {
  * The function will check if s3 bucket is Parameter is starting with aws-waf-logs- if Logging Configuration is set to S3
  * @param config Config
  */
-export function wrongLoggingConfiguration(config: wafConfig): boolean {
+export function wrongLoggingConfiguration(config: WafConfig): boolean {
   if (config.General.LoggingConfiguration === "S3") {
     if (!config.General.S3LoggingBucketName.startsWith("aws-waf-logs-")) {
       return true;

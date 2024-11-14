@@ -1,7 +1,7 @@
 /*
     * Interface for the runtime properties
     */
-export interface RuntimeProperties {
+export interface RuntimeProps {
     GuidanceSummary: string[],
     Guidance: Guidance,
     PreProcess: ProcessProperties,

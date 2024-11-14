@@ -1,5 +1,5 @@
-import { wafConfig } from "../../lib/types/config";
-export const config: wafConfig = {
+import { WafConfig } from "../../lib/types/config";
+export const config: WafConfig = {
   General: {
     Prefix: "aws-firewall-factory",
     Stage: "dev",

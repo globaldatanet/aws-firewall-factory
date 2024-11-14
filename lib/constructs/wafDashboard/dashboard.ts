@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
+ 
+ 
+ 
 import { aws_cloudwatch as cloudwatch } from "aws-cdk-lib";
 import * as fs from "fs";
 import * as path from "path";
 import * as cdk from "aws-cdk-lib";
-import { wafConfig } from "../../types/config";
+import { WafConfig } from "../../types/config";
 import { Construct } from "constructs";
 
 const REGION = cdk.Aws.REGION;
@@ -15,9 +15,9 @@ const REGION = cdk.Aws.REGION;
  */
 const packageJsonPath = path.resolve(__dirname, "../../../package.json");
 const packageJsonContent = fs.readFileSync(packageJsonPath, "utf-8");
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+ 
 const packageJson = JSON.parse(packageJsonContent);
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+ 
 const FIREWALL_FACTORY_VERSION = packageJson.version;
 
 /**
@@ -25,7 +25,7 @@ const FIREWALL_FACTORY_VERSION = packageJson.version;
  */
 export class WafCloudWatchDashboard extends Construct {
 
-  constructor(scope: Construct, id: string, config: wafConfig,managedRuleGroupsInfo:string[]) {
+  constructor(scope: Construct, id: string, config: WafConfig,managedRuleGroupsInfo:string[]) {
     super(scope, id);
     console.log("\n🎨 Creating central CloudWatch Dashboard \n   📊 DashboardName: ","\u001b[32m", `${config.General.Prefix.toUpperCase()}-${config.WebAcl.Name}-${config.General.Stage}${config.General.DeployHash ? "-"+config.General.DeployHash : ""}`,"\u001b[0m");
     console.log("   ℹ️  Warnings for Math expressions can be ignored.");
@@ -66,7 +66,7 @@ export class WafCloudWatchDashboard extends Construct {
       const firstrow = new cloudwatch.Row(infowidget,app,fwfactory);
       cwdashboard.addWidgets(firstrow);
       for(const account of config.WebAcl.IncludeMap.account){
-        // eslint-disable-next-line no-useless-escape
+         
         const countexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\CountedRequests\"', '\Sum', 300)";
 
         const countedRequests = new cloudwatch.GraphWidget({
@@ -83,7 +83,7 @@ export class WafCloudWatchDashboard extends Construct {
             searchRegion: REGION,
             color: "#9dbcd4"
           }));
-        // eslint-disable-next-line no-useless-escape
+         
         const blockedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\BlockedRequests\"', '\Sum', 300)";
         const blockedRequests = new cloudwatch.GraphWidget({
           title: "❌ Blocked Requests in " + account,
@@ -99,7 +99,7 @@ export class WafCloudWatchDashboard extends Construct {
             searchRegion: REGION,
             color: "#ff0000"
           }));
-        // eslint-disable-next-line no-useless-escape  
+         
         const allowedexpression = "SEARCH('{AWS\/WAFV2,\Region,\WebACL,\Rule} \WebACL="+webaclNamewithPrefix+" \MetricName=\"\AllowedRequests\"', '\Sum', 300)";
         const allowedRequests = new cloudwatch.GraphWidget({
           title: "✅ Allowed Requests in " + account,
@@ -115,15 +115,15 @@ export class WafCloudWatchDashboard extends Construct {
             searchRegion: REGION,
             color: "#00FF00"
           }));
-        // eslint-disable-next-line no-useless-escape
+         
         const sinlevaluecountedrequestsexpression = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"CountedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-        // eslint-disable-next-line no-useless-escape
+         
         const expression1 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-        // eslint-disable-next-line no-useless-escape
+         
         const expression2 = "SEARCH('{AWS\/WAFV2,\Rule,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-        // eslint-disable-next-line no-useless-escape
+         
         const expression3 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"AllowedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
-        // eslint-disable-next-line no-useless-escape
+         
         const expression4 = "SEARCH('{AWS\/WAFV2,\LabelName,\LabelNamespace,\WebACL,\Region} \WebACL="+webaclNamewithPrefix+" \LabelNamespace=\"awswaf:managed:aws:bot-control:bot:category\" \MetricName=\"BlockedRequests\" \Rule=\"ALL\"', '\Sum', 300)";
         const expression5 = "SUM([e3,e4])";
         const expression6 = "SUM([e1,e2,-e3,-e4])";

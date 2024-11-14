@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+ 
+ 
+ 
+ 
 
 import { IncomingWebhook } from "./IncomingWebhook";
 import { SNSEventRecord } from "aws-lambda";
@@ -15,11 +15,11 @@ export async function mangedRuleGroupNotificationTeams(CurrentDefaultVersion: st
   cardfacts.push(new AdaptiveCards.Fact("Current Default Version", CurrentDefaultVersion));
 
   const card = new AdaptiveCards.AdaptiveCard();
-  card.version = AdaptiveCards.Versions.v1_4;
+  card.version = AdaptiveCards.Versions.v1_5;
   card.height = "stretch";
 
   const subjectblock = new AdaptiveCards.TextBlock();
-  subjectblock.text = Record.Sns.Subject;
+  subjectblock.text = Record.Sns.Subject || "Managed Rule Group Notification";
   subjectblock.wrap = true;
   subjectblock.weight = AdaptiveCards.TextWeight.Bolder;
   subjectblock.size = AdaptiveCards.TextSize.Large;

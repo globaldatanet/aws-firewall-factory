@@ -1,10 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_fms as fms } from "aws-cdk-lib";
-import { ManagedServiceData } from "../types/fms";
 import { getGuidance } from "../tools/helpers/guidance";
-import { RuntimeProperties } from "../types/runtimeprops";
-import { ShieldConfig } from "../types/config";
+import { RuntimeProps, ShieldConfig, ManagedServiceData } from "../types/config";
 import { ShieldDashboard } from "../constructs/shieldDashboard/index";
 
 /**
@@ -34,11 +32,11 @@ export interface ShieldProps extends cdk.StackProps {
    /**
    * Class Variable for a Shield Config.
    */
-  readonly shieldConfig: ShieldConfig;
+  readonly shieldConfig: ShieldConfig; 
   /**
    * Class Variable for Runtime Properties.
    */
-  readonly runtimeProperties: RuntimeProperties;
+  readonly runtimeProperties: RuntimeProps;
 }
 export class ShieldStack extends cdk.Stack {
   readonly oamSinkArn: string = "";

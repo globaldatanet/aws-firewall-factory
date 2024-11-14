@@ -1,15 +1,20 @@
-import {wafConfig, Prerequisites, ShieldConfig} from "../lib/types/config";
+import {WafConfig, ShieldConfig, PrerequisitesConfig, AutoUpdatedManagedIpSetsConfig} from "../lib/types/config";
 
 import {  owasptopTen, prequisites, ipSetsManagedTest, shieldConfigExample} from "./examples";
-import * as tests from "./tests";
-export const configs : { [key: string]: wafConfig } = {
+import * as tests_waf from "./tests_waf";
+import * as tests_autoUpdatedManagedIpSets from "./tests_autoUpdatedManagedIpSets";
+export const configs : { [key: string]: WafConfig } = {
   owasptopTen,
   ipSetsManagedTest,
-  ...tests,
+  ...tests_waf,
 };
 export const shieldConfigs : { [key: string]: ShieldConfig } = {
   shieldConfigExample
 };
-export const prereq : { [key: string]: Prerequisites } = {
+export const prereq : { [key: string]: PrerequisitesConfig } = {
   prequisites,
+};
+
+export const autoUpdatedManagedIpSetsConfigs : { [key: string]: AutoUpdatedManagedIpSetsConfig } = {
+  ...tests_autoUpdatedManagedIpSets,
 };

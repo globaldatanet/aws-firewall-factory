@@ -1,5 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import { Rule, NotStatementProperty } from "../../../types/fms";
+import { Rule, NotStatementProperty } from "../../../types/config";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 /**
  * Function to transform RuleStatements
@@ -202,20 +202,20 @@ export function convertPropValuesToUint8Array(rulesObject: Record<string, any>, 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const convertedObject: Record<string, any> = {};
   for (const origKey in rulesObject) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     
     if (Object.prototype.hasOwnProperty.call(rulesObject, origKey)) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+       
       let value = rulesObject[origKey];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+       
       if (value instanceof Array || (value !== null && value.constructor === Object)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+         
         value = convertPropValuesToUint8Array(value, propertyName);
       }
       if (origKey === propertyName) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+         
         value = convertStringToUint8Array(value);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+       
       convertedObject[origKey] = value;
     }
   }

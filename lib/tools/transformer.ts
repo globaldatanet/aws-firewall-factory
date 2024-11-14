@@ -1,43 +1,72 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/naming-convention */
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { NotStatement, LabelMatchStatement, OrStatement, AndStatement, XssMatchStatement, SqliMatchStatement, RegexPatternSetReferenceStatement, Statement,
   IPSetReferenceStatement, SizeConstraintStatement, Rule, RegexMatchStatement, RateBasedStatement,
-  ByteMatchStatement, GeoMatchStatement, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey, RateLimitHeader, RateLimitQueryString, RateLimitUriPath, RateLimitIP,  RateLimitHTTPMethod } from "@aws-sdk/client-wafv2";
+  ByteMatchStatement, GeoMatchStatement, ForwardedIPConfig, FieldToMatch, JsonMatchScope, Headers, MapMatchScope, OversizeHandling, Cookies, JsonBody, Body, RateBasedStatementCustomKey, RateLimitHeader, RateLimitQueryString, RateLimitUriPath, RateLimitIP,  RateLimitHTTPMethod, 
+  FallbackBehavior,
+  CountryCode,
+  TextTransformation,
+  TextTransformationType,
+  ComparisonOperator,
+  IPSetForwardedIPConfig,
+  ForwardedIPPosition,
+  SensitivityLevel,
+  LabelMatchScope,
+  PositionalConstraint,
+  SingleQueryArgument,
+  UriPath,
+  SingleHeader,
+  CookieMatchPattern,
+  HeaderMatchPattern,
+  AllQueryArguments,
+  JsonMatchPattern,
+  BlockAction,
+  CaptchaAction,
+  CountAction,
+  CaptchaConfig,
+  ImmunityTimeProperty,
+  AllowAction,
+  ChallengeConfig,
+  OverrideAction,
+  CustomResponse,
+  ChallengeAction,
+  VisibilityConfig,
+  RateBasedStatementAggregateKeyType,
+  RuleAction} from "@aws-sdk/client-wafv2";
 import { wafHelper, guidanceHelper} from "./helpers";
-import { RuntimeProperties } from "../types/runtimeprops";
+import { RuntimeProps } from "../types/config";
 
 /**
  * The function will map a CDK ByteMatchStatement Property to a SDK ByteMatchStatement Property
  * @param statement object of a CDK ByteMatchStatement Property
  * @return configuration object of a SDK ByteMatchStatement Property
  */
-export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties: RuntimeProperties): ByteMatchStatement {
+export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties: RuntimeProps): ByteMatchStatement {
   const bmst = statement as wafv2.CfnWebACL.ByteMatchStatementProperty | undefined;
-  let ByteMatchStatement = undefined;
+  let ByteMatchStatement: ByteMatchStatement | undefined = undefined;
   if (bmst) {
-    let FieldToMatch = undefined;
+    let FieldToMatch:  undefined | FieldToMatch = undefined;
     if (bmst.fieldToMatch) {
       FieldToMatch = transformfieldToMatch(bmst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
-    let TextTransformations = undefined;
+    let TextTransformations: TextTransformation[] | undefined = undefined;
     if (bmst.textTransformations) {
       TextTransformations = [];
       (bmst.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
         TextTransformations?.push({
           Priority: tt.priority,
-          Type: tt.type
+          Type: tt.type as TextTransformationType
         });
       });
     }
+    let positionalConstraint: PositionalConstraint | undefined = undefined;
     if(bmst.positionalConstraint === "CONTAINS" || bmst.positionalConstraint === "CONTAINS_WORD" || bmst.positionalConstraint === "STARTS_WITH" || bmst.positionalConstraint === "ENDS_WITH"){
       guidanceHelper.getGuidance("byteMatchStatementPositionalConstraint", runtimeProperties, "CONTSTRAINT: " + bmst.positionalConstraint +"; SearchString: "+ bmst.searchString+"; FieldtoMatch: "+ JSON.stringify(FieldToMatch));
     }
+    if(bmst.positionalConstraint){
+      positionalConstraint = bmst.positionalConstraint as PositionalConstraint;
+    }
     ByteMatchStatement = {
-      PositionalConstraint: bmst.positionalConstraint,
+      PositionalConstraint: positionalConstraint,
       SearchString: bmst.searchString ? wafHelper.convertStringToUint8Array(bmst.searchString) : undefined,
       TextTransformations,
       FieldToMatch
@@ -53,19 +82,19 @@ export function transformByteMatchStatement(statement: wafv2.CfnWebACL.ByteMatch
  */
 export function transformRegexMatchStatement(statement: wafv2.CfnWebACL.RegexMatchStatementProperty): RegexMatchStatement {
   const rest = statement as wafv2.CfnWebACL.RegexMatchStatementProperty | undefined;
-  let RegexMatchStatement = undefined;
+  let RegexMatchStatement: RegexMatchStatement | undefined;
   if (rest) {
-    let FieldToMatch = undefined;
+    let FieldToMatch: undefined | FieldToMatch;
     if (rest.fieldToMatch) {
       FieldToMatch = transformfieldToMatch(rest.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
-    let TextTransformations = undefined;
+    let TextTransformations: TextTransformation[] | undefined;
     if (rest.textTransformations) {
       TextTransformations = [];
       (rest.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
         TextTransformations?.push({
           Priority: tt.priority,
-          Type: tt.type
+          Type: tt.type as TextTransformationType
         });
       });
     }
@@ -85,19 +114,23 @@ export function transformRegexMatchStatement(statement: wafv2.CfnWebACL.RegexMat
  */
 export function transformGeoMatchStatement(statement: wafv2.CfnWebACL.GeoMatchStatementProperty): GeoMatchStatement {
   const gmst = statement as wafv2.CfnWebACL.GeoMatchStatementProperty | undefined;
-  let GeoMatchStatement = undefined;
+  let GeoMatchStatement: GeoMatchStatement | undefined;
   if (gmst) {
-    let ForwardedIPConfig = undefined;
+    let ForwardedIPConfig: ForwardedIPConfig | undefined;
     if (gmst.forwardedIpConfig) {
       const fic = gmst.forwardedIpConfig as wafv2.CfnWebACL.ForwardedIPConfigurationProperty;
       ForwardedIPConfig ={
-        FallbackBehavior: fic.fallbackBehavior,
+        FallbackBehavior: fic.fallbackBehavior as FallbackBehavior,
         HeaderName: fic.headerName
       };
     }
+    let CountryCodes: CountryCode[] | undefined;
+    if(gmst.countryCodes){
+      CountryCodes = gmst.countryCodes as CountryCode[];
+    }
     GeoMatchStatement = {
       ForwardedIPConfig,
-      CountryCodes: gmst.countryCodes
+      CountryCodes
     };
   }
   return GeoMatchStatement as GeoMatchStatement;
@@ -110,26 +143,25 @@ export function transformGeoMatchStatement(statement: wafv2.CfnWebACL.GeoMatchSt
  */
 export function transformSizeConstraintStatement(statement: wafv2.CfnWebACL.SizeConstraintStatementProperty): SizeConstraintStatement {
   const szst = statement as wafv2.CfnWebACL.SizeConstraintStatementProperty | undefined;
-  let SizeConstraintStatement = undefined;
+  let SizeConstraintStatement: SizeConstraintStatement | undefined;
   if (szst) {
-    let FieldToMatch = undefined;
+    let FieldToMatch: FieldToMatch | undefined;
     if (szst.fieldToMatch) {
       FieldToMatch = transformfieldToMatch(szst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
-    let TextTransformations = undefined;
+    let TextTransformations: TextTransformation[] | undefined;
     if (szst.textTransformations) {
-      TextTransformations = [];
       (szst.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
         TextTransformations?.push({
           Priority: tt.priority,
-          Type: tt.type
+          Type: tt.type as TextTransformationType
         });
       });
     }
     SizeConstraintStatement = {
       TextTransformations,
       FieldToMatch,
-      ComparisonOperator: szst.comparisonOperator,
+      ComparisonOperator: szst.comparisonOperator as ComparisonOperator,
       Size: szst.size,
     };
   }
@@ -143,15 +175,15 @@ export function transformSizeConstraintStatement(statement: wafv2.CfnWebACL.Size
  */
 export function transformIPSetReferenceStatement(statement: wafv2.CfnWebACL.IPSetReferenceStatementProperty): IPSetReferenceStatement {
   const ipsst = statement as wafv2.CfnWebACL.IPSetReferenceStatementProperty | undefined;
-  let IPSetReferenceStatement = undefined;
+  let IPSetReferenceStatement: IPSetReferenceStatement | undefined;
   if (ipsst) {
-    let IPSetForwardedIPConfig = undefined;
+    let IPSetForwardedIPConfig: IPSetForwardedIPConfig |  undefined;
     if (ipsst.ipSetForwardedIpConfig) {
       const fic = ipsst.ipSetForwardedIpConfig as wafv2.CfnWebACL.IPSetForwardedIPConfigurationProperty;
       IPSetForwardedIPConfig = {
-        FallbackBehavior: fic.fallbackBehavior,
+        FallbackBehavior: fic.fallbackBehavior as FallbackBehavior,
         HeaderName: fic.headerName,
-        Position: fic.position,
+        Position: fic.position as ForwardedIPPosition,
       };
     }
     IPSetReferenceStatement = {
@@ -169,19 +201,19 @@ export function transformIPSetReferenceStatement(statement: wafv2.CfnWebACL.IPSe
  */
 export function transformRegexPatternSetReferenceStatement(statement: wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty): RegexPatternSetReferenceStatement {
   const regpst = statement as wafv2.CfnWebACL.RegexPatternSetReferenceStatementProperty | undefined;
-  let RegexPatternSetReferenceStatement = undefined;
+  let RegexPatternSetReferenceStatement: RegexPatternSetReferenceStatement | undefined;
   if (regpst) {
-    let FieldToMatch = undefined;
+    let FieldToMatch: FieldToMatch | undefined;
     if (regpst.fieldToMatch) {
       FieldToMatch = transformfieldToMatch(regpst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
-    let TextTransformations = undefined;
+    let TextTransformations: TextTransformation[] | undefined;
     if (regpst.textTransformations) {
       TextTransformations = [];
       (regpst.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
         TextTransformations?.push({
           Priority: tt.priority,
-          Type: tt.type
+          Type: tt.type as TextTransformationType
         });
       });
     }
@@ -201,26 +233,26 @@ export function transformRegexPatternSetReferenceStatement(statement: wafv2.CfnW
  */
 export function transformSqliMatchStatement(statement: wafv2.CfnWebACL.SqliMatchStatementProperty): SqliMatchStatement {
   const sqlst = statement as wafv2.CfnWebACL.SqliMatchStatementProperty | undefined;
-  let SqliMatchStatement = undefined;
+  let SqliMatchStatement: SqliMatchStatement | undefined;
   if (sqlst) {
-    let FieldToMatch = undefined;
+    let FieldToMatch: FieldToMatch | undefined;
     if (sqlst.fieldToMatch) {
       FieldToMatch = transformfieldToMatch(sqlst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
-    let TextTransformations = undefined;
+    let TextTransformations: TextTransformation[] | undefined;
     if (sqlst.textTransformations) {
       TextTransformations = [];
       (sqlst.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
         TextTransformations?.push({
           Priority: tt.priority,
-          Type: tt.type
+          Type: tt.type as TextTransformationType
         });
       });
     }
     SqliMatchStatement = {
       TextTransformations,
       FieldToMatch,
-      SensitivityLevel: sqlst.sensitivityLevel,
+      SensitivityLevel: sqlst.sensitivityLevel as SensitivityLevel,
     };
   }
   return SqliMatchStatement as SqliMatchStatement;
@@ -233,19 +265,18 @@ export function transformSqliMatchStatement(statement: wafv2.CfnWebACL.SqliMatch
  */
 export function transformXssMatchStatement(statement: wafv2.CfnWebACL.XssMatchStatementProperty): XssMatchStatement {
   const xsst = statement as wafv2.CfnWebACL.XssMatchStatementProperty | undefined;
-  let XssMatchStatement = undefined;
+  let XssMatchStatement: XssMatchStatement | undefined;
   if (xsst) {
-    let FieldToMatch = undefined;
+    let FieldToMatch: FieldToMatch | undefined;
     if (xsst.fieldToMatch) {
       FieldToMatch = transformfieldToMatch(xsst.fieldToMatch as wafv2.CfnWebACL.FieldToMatchProperty);
     }
-    let TextTransformations = undefined;
+    let TextTransformations: TextTransformation[]| undefined;
     if (xsst.textTransformations) {
-      TextTransformations = [];
       (xsst.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
         TextTransformations?.push({
           Priority: tt.priority,
-          Type: tt.type
+          Type: tt.type as TextTransformationType
         });
       });
     }
@@ -262,25 +293,25 @@ export function transformXssMatchStatement(statement: wafv2.CfnWebACL.XssMatchSt
  * @param statement object of a CDK And/OrStatement Property  Property
  * @return configuration object of a SDK And/OrStatement Property  Property
  */
-export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isandStatement:boolean, runtimeProperties: RuntimeProperties): AndStatement | OrStatement | undefined {
-  const Statements = [];
-  let ConcatenatedStatement = undefined;
+export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isandStatement:boolean, runtimeProperties: RuntimeProps): AndStatement | OrStatement | undefined {
+  const Statements: Statement[] = [];
+  let ConcatenatedStatement: OrStatement | AndStatement | undefined;
   if(statement.statements && Array.isArray(statement.statements)){
     for (const currentstatement of statement.statements as wafv2.CfnWebACL.StatementProperty[]) {
       const Statement: Statement ={};
-      let ByteMatchStatement = undefined;
-      let GeoMatchStatement = undefined;
-      let IPSetReferenceStatement = undefined;
-      let RegexPatternSetReferenceStatement = undefined;
-      let SizeConstraintStatement = undefined;
-      let SqliMatchStatement = undefined;
-      let XssMatchStatement = undefined;
-      let LabelMatchStatement = undefined;
-      let NotStatement = undefined;
-      let RegexMatchStatement = undefined;
-      let RateBasedStatement = undefined;
-      let OrStatement = undefined;
-      let AndStatement = undefined;
+      let ByteMatchStatement: ByteMatchStatement | undefined;
+      let GeoMatchStatement: GeoMatchStatement | undefined;
+      let IPSetReferenceStatement: IPSetReferenceStatement | undefined;
+      let RegexPatternSetReferenceStatement: RegexPatternSetReferenceStatement | undefined;
+      let SizeConstraintStatement: SizeConstraintStatement | undefined;
+      let SqliMatchStatement: SqliMatchStatement | undefined;
+      let XssMatchStatement: XssMatchStatement | undefined;
+      let LabelMatchStatement: LabelMatchStatement | undefined;
+      let NotStatement: NotStatement | undefined;
+      let RegexMatchStatement: RegexMatchStatement | undefined;
+      let RateBasedStatement: RateBasedStatement | undefined;
+      let OrStatement: OrStatement | undefined;
+      let AndStatement: AndStatement | undefined;
       switch(Object.keys(currentstatement)[0]){
         case "byteMatchStatement":
           ByteMatchStatement = transformByteMatchStatement(currentstatement.byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
@@ -360,10 +391,10 @@ export function transformConcatenatedStatement(statement: wafv2.CfnWebACL.AndSta
  */
 export function transformLabelMatchStatement(statement: wafv2.CfnWebACL.LabelMatchStatementProperty): LabelMatchStatement {
   const lst = statement as wafv2.CfnWebACL.LabelMatchStatementProperty | undefined;
-  let LabelMatchStatement = undefined;
+  let LabelMatchStatement: LabelMatchStatement | undefined;
   if (lst) {
     LabelMatchStatement = {
-      Scope: lst.scope,
+      Scope: lst.scope as LabelMatchScope,
       Key: lst.key,
     };
   }
@@ -375,21 +406,21 @@ export function transformLabelMatchStatement(statement: wafv2.CfnWebACL.LabelMat
  * @param statement object of a CDK NotStatement Property
  * @return configuration object of a SDK NotStatement Property
  */
-export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProperty, runtimeProperties: RuntimeProperties): NotStatement {
+export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProperty, runtimeProperties: RuntimeProps): NotStatement {
   const nst = statement as wafv2.CfnWebACL.NotStatementProperty | undefined;
-  let NotStatement = undefined;
+  let NotStatement: NotStatement | undefined;
   if (nst && nst.statement) {
     const Statement: Statement ={};
-    let ByteMatchStatement = undefined;
-    let GeoMatchStatement = undefined;
-    let IPSetReferenceStatement = undefined;
-    let RegexPatternSetReferenceStatement = undefined;
-    let SizeConstraintStatement = undefined;
-    let SqliMatchStatement = undefined;
-    let XssMatchStatement = undefined;
-    let LabelMatchStatement = undefined;
-    let RegexMatchStatement = undefined;
-    let RateBasedStatement = undefined;
+    let ByteMatchStatement: ByteMatchStatement | undefined;
+    let GeoMatchStatement: GeoMatchStatement | undefined;
+    let IPSetReferenceStatement: IPSetReferenceStatement | undefined;
+    let RegexPatternSetReferenceStatement: RegexPatternSetReferenceStatement | undefined;
+    let SizeConstraintStatement: SizeConstraintStatement | undefined;
+    let SqliMatchStatement: SqliMatchStatement | undefined;
+    let XssMatchStatement: XssMatchStatement | undefined;
+    let LabelMatchStatement: LabelMatchStatement | undefined;
+    let RegexMatchStatement: RegexMatchStatement | undefined;
+    let RateBasedStatement: RateBasedStatement | undefined;
     switch(Object.keys(nst.statement)[0]){
       case "byteMatchStatement":
         ByteMatchStatement = transformByteMatchStatement((nst.statement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
@@ -445,31 +476,31 @@ export function tranformNotStatement(statement: wafv2.CfnWebACL.NotStatementProp
  * @param statement object of a CDK RateBasedStatement Property
  * @return configuration object of a SDK RateBasedStatement Property
  */
-export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties: RuntimeProperties): RateBasedStatement {
+export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedStatementProperty, runtimeProperties: RuntimeProps): RateBasedStatement {
   const rbst = statement as wafv2.CfnWebACL.RateBasedStatementProperty | undefined;
-  let RateBasedStatement = undefined;
+  let RateBasedStatement: RateBasedStatement | undefined;
   let Limit: number | undefined = undefined;
   let Statement: Statement | ByteMatchStatement | GeoMatchStatement | LabelMatchStatement | OrStatement | NotStatement | AndStatement | IPSetReferenceStatement | SizeConstraintStatement | XssMatchStatement | SqliMatchStatement  | undefined;
-  let AggregateKeyType: string | undefined = undefined;
+  let AggregateKeyType: RateBasedStatementAggregateKeyType | undefined = undefined;
   let CustomKeys: RateBasedStatementCustomKey[] | undefined = undefined;
   let Header: RateLimitHeader | undefined = undefined;
   let EvaluationWindowSec: number | undefined = undefined;
-  let ForwardedIPConfig = undefined;
+  let ForwardedIPConfig: ForwardedIPConfig | undefined;
   if(rbst){
     runtimeProperties.Guidance.rateBasedStatementCount++;
     if (rbst.scopeDownStatement) {
-      let ByteMatchStatement = undefined;
-      let GeoMatchStatement = undefined;
-      let IPSetReferenceStatement = undefined;
-      let RegexPatternSetReferenceStatement = undefined;
-      let SizeConstraintStatement = undefined;
-      let SqliMatchStatement = undefined;
-      let XssMatchStatement = undefined;
-      let LabelMatchStatement = undefined;
-      let RegexMatchStatement = undefined;
-      let AndStatement = undefined;
-      let OrStatement = undefined;
-      let NotStatement = undefined;
+      let ByteMatchStatement: ByteMatchStatement | undefined;
+      let GeoMatchStatement: GeoMatchStatement | undefined;
+      let IPSetReferenceStatement: IPSetReferenceStatement | undefined;
+      let RegexPatternSetReferenceStatement: RegexPatternSetReferenceStatement | undefined;
+      let SizeConstraintStatement: SizeConstraintStatement | undefined;
+      let SqliMatchStatement: SqliMatchStatement | undefined;
+      let XssMatchStatement: XssMatchStatement | undefined;
+      let LabelMatchStatement: LabelMatchStatement | undefined;
+      let NotStatement: NotStatement | undefined;
+      let RegexMatchStatement: RegexMatchStatement | undefined;
+      let OrStatement: OrStatement | undefined;
+      let AndStatement: AndStatement | undefined;
       switch(Object.keys(rbst.scopeDownStatement)[0]){
         case "byteMatchStatement":
           ByteMatchStatement = transformByteMatchStatement((rbst.scopeDownStatement as wafv2.CfnWebACL.StatementProperty).byteMatchStatement as wafv2.CfnWebACL.ByteMatchStatementProperty, runtimeProperties);
@@ -524,7 +555,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
     if (rbst.forwardedIpConfig) {
       const fic = rbst.forwardedIpConfig as wafv2.CfnWebACL.ForwardedIPConfigurationProperty;
       ForwardedIPConfig ={
-        FallbackBehavior: fic.fallbackBehavior,
+        FallbackBehavior: fic.fallbackBehavior as FallbackBehavior,
         HeaderName: fic.headerName
       };
     }
@@ -532,7 +563,7 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
       Limit = rbst.limit;
     }
     if(rbst.aggregateKeyType){
-      AggregateKeyType = rbst.aggregateKeyType;
+      AggregateKeyType = rbst.aggregateKeyType as RateBasedStatementAggregateKeyType;
     }
     if(rbst.customKeys){
       const customkeys = rbst.customKeys as wafv2.CfnWebACL.RateBasedStatementCustomKeyProperty[];
@@ -540,13 +571,13 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
       for(const customKey of customkeys) {
         if(customKey.header){
           const header = customKey.header as wafv2.CfnWebACL.RateLimitHeaderProperty;
-          let TextTransformations = undefined;
+          let TextTransformations: TextTransformation[] | undefined;
           if (header.textTransformations) {
             TextTransformations = [];
             (header.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
               TextTransformations?.push({
                 Priority: tt.priority,
-                Type: tt.type
+                Type: tt.type as TextTransformationType
               });
             });
           }
@@ -558,13 +589,13 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
         }
         if(customKey.cookie){
           const cookie = customKey.cookie as wafv2.CfnWebACL.RateLimitCookieProperty;
-          let TextTransformations = undefined;
+          let TextTransformations: TextTransformation[] | undefined;
           if (cookie.textTransformations) {
             TextTransformations = [];
             (cookie.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
               TextTransformations?.push({
                 Priority: tt.priority,
-                Type: tt.type
+                Type: tt.type as TextTransformationType
               });
             });
           }
@@ -591,13 +622,13 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
         }
         if(customKey.queryArgument){
           const queryArgument = customKey.queryArgument as wafv2.CfnWebACL.RateLimitQueryArgumentProperty;
-          let TextTransformations = undefined;
+          let TextTransformations: TextTransformation[] | undefined;
           if (queryArgument.textTransformations) {
             TextTransformations = [];
             (queryArgument.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
               TextTransformations?.push({
                 Priority: tt.priority,
-                Type: tt.type
+                Type: tt.type as TextTransformationType
               });
             });
           }
@@ -609,13 +640,13 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
         }
         if(customKey.queryString){
           const queryString = customKey.queryString as wafv2.CfnWebACL.RateLimitQueryStringProperty;
-          let TextTransformations = undefined;
+          let TextTransformations: TextTransformation[] | undefined;
           if (queryString.textTransformations) {
             TextTransformations = [];
             (queryString.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
               TextTransformations?.push({
                 Priority: tt.priority,
-                Type: tt.type
+                Type: tt.type as TextTransformationType
               });
             });
           }
@@ -626,13 +657,13 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
         }
         if(customKey.uriPath){
           const uriPath = customKey.uriPath as wafv2.CfnWebACL.RateLimitUriPathProperty;
-          let TextTransformations = undefined;
+          let TextTransformations: TextTransformation[] | undefined;
           if (uriPath.textTransformations) {
             TextTransformations = [];
             (uriPath.textTransformations as wafv2.CfnWebACL.TextTransformationProperty[]).forEach((tt) => {
               TextTransformations?.push({
                 Priority: tt.priority,
-                Type: tt.type
+                Type: tt.type as TextTransformationType
               });
             });
           }
@@ -666,9 +697,10 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
       EvaluationWindowSec = rbst.evaluationWindowSec;
     }
   }
+  // eslint-disable-next-line prefer-const
   RateBasedStatement = {
     ForwardedIPConfig,
-    ScopeDownStatement: Statement,
+    ScopeDownStatement: Statement as Statement,
     Limit,
     AggregateKeyType,
     EvaluationWindowSec,
@@ -683,11 +715,11 @@ export function tranformRateBasedStatement(statement: wafv2.CfnWebACL.RateBasedS
  * @param cdkRule configuration object of a CDK Rule Property
  * @return configuration object of a SDK Rule Property
  */
-export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty, runtimeProperties: RuntimeProperties): Rule {
+export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty, runtimeProperties: RuntimeProps): Rule {
   const action = (cdkRule.action as wafv2.CfnWebACL.RuleActionProperty) as wafv2.CfnWebACL.RuleActionProperty | undefined;
-  let Action = undefined;
+  let Action: RuleAction | undefined;
   if (action) {
-    let Captcha = undefined;
+    let Captcha: CaptchaAction | undefined;
     if (action.captcha) {
       const ac = action.captcha as wafv2.CfnWebACL.CaptchaActionProperty;
       if(ac.customRequestHandling){
@@ -711,7 +743,7 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
         Captcha = {};
       }
     }
-    let Allow = undefined;
+    let Allow: AllowAction | undefined;
     if (action.allow) {
       const al = action.allow as wafv2.CfnWebACL.AllowActionProperty;
       if(al.customRequestHandling){
@@ -735,10 +767,10 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
       }
     }
 
-    let Block = undefined;
+    let Block: BlockAction | undefined;
     if (action.block) {
       const bl = action.block as wafv2.CfnWebACL.BlockActionProperty;
-      let CustomResponse = undefined;
+      let CustomResponse: CustomResponse | undefined;
       if(bl.customResponse){
         const cr = bl.customResponse as wafv2.CfnWebACL.CustomResponseProperty;
         const CustomResponseHeaders: { Name: string; Value: string; }[]= [];
@@ -762,7 +794,7 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
         Block = {};
       }
     }
-    let Count = undefined;
+    let Count: CountAction | undefined;
     if (action.count) {
       const ct = action.count as wafv2.CfnWebACL.CountActionProperty;
       if(ct.customRequestHandling){
@@ -786,7 +818,7 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
       }
     }
 
-    let Challenge = undefined;
+    let Challenge: ChallengeAction | undefined;
     if (action.challenge) {
       const ch = action.challenge as wafv2.CfnWebACL.ChallengeActionProperty;
       if(ch.customRequestHandling){
@@ -819,7 +851,7 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
     };
   }
   const vc = (cdkRule.visibilityConfig as wafv2.CfnWebACL.VisibilityConfigProperty) as wafv2.CfnWebACL.VisibilityConfigProperty | undefined;
-  let VisibilityConfig = undefined;
+  let VisibilityConfig: VisibilityConfig | undefined;
   if(vc){
     VisibilityConfig  = {
       CloudWatchMetricsEnabled: vc.cloudWatchMetricsEnabled as boolean,
@@ -829,7 +861,7 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
   }
 
   const oa = (cdkRule.overrideAction as wafv2.CfnWebACL.OverrideActionProperty) as wafv2.CfnWebACL.OverrideActionProperty | undefined;
-  let OverrideAction = undefined;
+  let OverrideAction: OverrideAction | undefined;
   if(oa){
     OverrideAction ={
       Count: oa.count,
@@ -838,7 +870,7 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
   }
 
   const rl = cdkRule.ruleLabels as wafv2.CfnWebACL.LabelProperty[] | undefined;
-  let RuleLabels = undefined;
+  let RuleLabels: Array<{ Name: string }> | undefined;
   if (rl) {
     RuleLabels = [];
     rl.forEach((l) => {
@@ -850,9 +882,9 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
   }
 
   const cC = (cdkRule.captchaConfig as wafv2.CfnWebACL.CaptchaConfigProperty) as wafv2.CfnWebACL.CaptchaConfigProperty | undefined;
-  let CaptchaConfig = undefined;
+  let CaptchaConfig: CaptchaConfig | undefined;
   if(cC){
-    let ImmunityTimeProperty = undefined;
+    let ImmunityTimeProperty: ImmunityTimeProperty | undefined;
     if(cC.immunityTimeProperty){
       const ccIt =  cC.immunityTimeProperty as wafv2.CfnWebACL.ImmunityTimePropertyProperty;
       ImmunityTimeProperty = {
@@ -865,9 +897,9 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
   }
 
   const cConfig = (cdkRule.challengeConfig as wafv2.CfnWebACL.ChallengeConfigProperty) as wafv2.CfnWebACL.ChallengeConfigProperty | undefined;
-  let ChallengeConfig = undefined;
+  let ChallengeConfig: ChallengeConfig | undefined;
   if(cConfig){
-    let ImmunityTimeProperty = undefined;
+    let ImmunityTimeProperty :ImmunityTimeProperty | undefined;
     if(cConfig.immunityTimeProperty){
       const ccIt = cConfig.immunityTimeProperty as wafv2.CfnWebACL.ImmunityTimePropertyProperty;
       ImmunityTimeProperty = {
@@ -879,19 +911,19 @@ export function transformCdkRuletoSdkRule(cdkRule: wafv2.CfnWebACL.RuleProperty,
     };
   }
 
-  let ByteMatchStatement = undefined;
-  let GeoMatchStatement = undefined;
-  let IPSetReferenceStatement = undefined;
-  let RegexPatternSetReferenceStatement = undefined;
-  let SizeConstraintStatement = undefined;
-  let SqliMatchStatement = undefined;
-  let XssMatchStatement = undefined;
-  let AndStatement = undefined;
-  let OrStatement = undefined;
-  let LabelMatchStatement = undefined;
-  let NotStatement = undefined;
-  let RegexMatchStatement = undefined;
-  let RateBasedStatement = undefined;
+  let ByteMatchStatement: ByteMatchStatement | undefined;
+  let GeoMatchStatement: GeoMatchStatement | undefined;
+  let IPSetReferenceStatement: IPSetReferenceStatement | undefined;
+  let RegexPatternSetReferenceStatement: RegexPatternSetReferenceStatement | undefined;
+  let SizeConstraintStatement: SizeConstraintStatement | undefined;
+  let SqliMatchStatement: SqliMatchStatement | undefined;
+  let XssMatchStatement: XssMatchStatement | undefined;
+  let LabelMatchStatement: LabelMatchStatement | undefined;
+  let NotStatement: NotStatement | undefined;
+  let RegexMatchStatement: RegexMatchStatement | undefined;
+  let RateBasedStatement: RateBasedStatement | undefined;
+  let OrStatement: OrStatement | undefined;
+  let AndStatement: AndStatement | undefined;
 
   switch(Object.keys(cdkRule.statement)[0]){
     case "byteMatchStatement":
@@ -977,19 +1009,19 @@ export function transformfieldToMatch(fieldToMatch: wafv2.CfnWebACL.FieldToMatch
       OversizeHandling: ftmBody.oversizeHandling as OversizeHandling,
     };
   }
-  let SingleHeader = undefined;
+  let SingleHeader: SingleHeader | undefined;
   if(fieldToMatch.singleHeader){
     SingleHeader = {
       Name: fieldToMatch.singleHeader.name,
     };
   }
-  let SingleQueryArgument = undefined;
+  let SingleQueryArgument: SingleQueryArgument | undefined;
   if(fieldToMatch.singleQueryArgument){
     SingleQueryArgument ={
       Name: fieldToMatch.singleQueryArgument.name,
     };
   }
-  let UriPath = undefined;
+  let UriPath: UriPath | undefined;
   if(fieldToMatch.uriPath){
     UriPath ={
       Path: fieldToMatch.uriPath.path,
@@ -998,17 +1030,17 @@ export function transformfieldToMatch(fieldToMatch: wafv2.CfnWebACL.FieldToMatch
   let JsonBody: JsonBody | undefined = undefined;
   if (fieldToMatch.jsonBody) {
     const ftmJsonBody = fieldToMatch.jsonBody as wafv2.CfnWebACL.JsonBodyProperty;
-    let IncludedPaths = undefined;
-    let MatchPattern = undefined;
+    let IncludedPaths: string[] | undefined;
+    let MatchPattern: JsonMatchPattern | undefined;
     if(ftmJsonBody.matchPattern){
       const mp = ftmJsonBody.matchPattern as wafv2.CfnWebACL.JsonMatchPatternProperty;
-      IncludedPaths = mp.includedPaths as string[];
+      IncludedPaths = mp.includedPaths;
       MatchPattern = {
         IncludedPaths,
         All: mp.all,
       };
     }
-    let MatchScope = undefined;
+    let MatchScope: JsonMatchScope | undefined;
     if(ftmJsonBody.matchScope){
       const ms = ftmJsonBody.matchScope as JsonMatchScope;
       MatchScope = ms;
@@ -1022,7 +1054,7 @@ export function transformfieldToMatch(fieldToMatch: wafv2.CfnWebACL.FieldToMatch
   let Cookies: Cookies | undefined = undefined;
   if(fieldToMatch.cookies){
     const ftmCookies = fieldToMatch.cookies as wafv2.CfnWebACL.CookiesProperty;
-    let MatchPattern = undefined;
+    let MatchPattern: CookieMatchPattern | undefined;
     if(ftmCookies.matchPattern){
       const cmp = ftmCookies.matchPattern as wafv2.CfnWebACL.CookieMatchPatternProperty;
       MatchPattern = {
@@ -1040,7 +1072,7 @@ export function transformfieldToMatch(fieldToMatch: wafv2.CfnWebACL.FieldToMatch
   let Headers: Headers | undefined = undefined;
   if(fieldToMatch.headers){
     const fmtHeaders = fieldToMatch.headers as wafv2.CfnWebACL.HeadersProperty;
-    let MatchPattern = undefined;
+    let MatchPattern: HeaderMatchPattern | undefined;
     if(fmtHeaders.matchPattern){
       const hmp = fmtHeaders.matchPattern as wafv2.CfnWebACL.HeaderMatchPatternProperty;
       MatchPattern = {
@@ -1055,7 +1087,7 @@ export function transformfieldToMatch(fieldToMatch: wafv2.CfnWebACL.FieldToMatch
       OversizeHandling: fmtHeaders.oversizeHandling as OversizeHandling,
     };
   }
-  let AllQueryArguments = undefined;
+  let AllQueryArguments: AllQueryArguments | undefined;
   if(fieldToMatch.allQueryArguments){
     AllQueryArguments = {
       OversizeHandling: fieldToMatch.allQueryArguments.oversizeHandling,

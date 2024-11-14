@@ -1,4 +1,4 @@
-import { ShieldConfig } from "../types/config";
+import { ShieldConfig } from "../types/config/index";
 import util from "util";
 import { afwfHelper } from "./helpers";
 
