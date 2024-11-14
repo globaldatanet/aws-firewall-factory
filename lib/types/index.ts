@@ -1,5 +1,5 @@
-export * as config from "./config/index";
-export * as enums from "./enums/index";
+export * from "./config/index";
+export * from "./enums/index";
 
 
 

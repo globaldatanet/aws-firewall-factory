@@ -1,4 +1,4 @@
-import { shield } from "../types/config/index";
+import { ShieldConfig } from "../types/config/index";
 import util from "util";
 import { afwfHelper } from "./helpers";
 
@@ -6,7 +6,7 @@ import { afwfHelper } from "./helpers";
  * The script will output a example WAF Skeleton Config to the terminal
  */
 
-const skeletonConfig : shield.ShieldConfig = {
+const skeletonConfig : ShieldConfig = {
   General: {
     Prefix: "AFWF",
     Stage: "TEST",

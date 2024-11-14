@@ -1,5 +1,5 @@
 import { CfnTag } from "aws-cdk-lib";
-import { general } from "../enums/index";
+import { AWSRegion } from "../enums/";
 import * as events from "aws-cdk-lib/aws-events";
 import { IPAddressVersion } from "@aws-sdk/client-wafv2";
 
@@ -48,7 +48,7 @@ export interface ManagedIpSet {
   /**
    * Defines the Region where the IPSet will be deployed
    */
-  region: general.AWSRegion,
+  region: AWSRegion,
   /**
    * Defines the Scope of the IPSet
    */

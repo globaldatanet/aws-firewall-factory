@@ -1,7 +1,7 @@
-import { waf } from "../../lib/types/config";
+import { WafConfig } from "../../lib/types/config";
 import {WebAclScope, WebAclTypeEnum} from "../../lib/types/enums/waf";
 
-export const config: waf.WafConfig = {
+export const config: WafConfig = {
   General: {
     Prefix: "testcases",
     Stage: "test",

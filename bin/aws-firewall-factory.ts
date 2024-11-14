@@ -1,10 +1,10 @@
-import { WafStack } from "../lib/_waf/index";
-import { PrerequisitesStack } from "../lib/_prerequisites/index";
-import { ShieldStack } from "../lib/_shield-advanced/index";
-import { AutoUpdatedManagedIpSetsStack } from "../lib/_autoUpdatedManagedIpSets/index";
+#!/usr/bin/env node
+import { WafStack } from "../lib/_waf";
+import { PrerequisitesStack } from "../lib/_prerequisites";
+import { ShieldStack } from "../lib/_shield-advanced";
+import { AutoUpdatedManagedIpSetsStack } from "../lib/_autoUpdatedManagedIpSets";
+import { AutoUpdatedManagedIpSetsConfig, ShieldConfig, PrerequisitesConfig, WafConfig, PriceRegions, RegionString  } from "../lib/types";
 import * as cdk from "aws-cdk-lib";
-import { waf, shield, autoUpdatedManagedIpSets, prerequisites  } from "../lib/types/config/index";
-import { general, pricing } from "../lib/types/enums/index";
 import * as helpers from "../lib/tools/helpers";
 
 
@@ -40,7 +40,7 @@ void (async () => {
     case "PreRequisiteStack": {
       // ---------------------------------------------------------------------
       // Deploying prerequisite stack
-      const prerequisites: prerequisites.PrerequisitesConfig = values.prereq[CONFIG_OBJECT_NAME];
+      const prerequisites: PrerequisitesConfig = values.prereq[CONFIG_OBJECT_NAME];
       const deploymentRegion = helpers.afwfHelper.outputInfoBanner();
       const runtimeProperties = helpers.afwfHelper.initRuntimeProperties();
       await helpers.ssmHelper.getAllAwsRegionsFromPublicSsmParameter(
@@ -66,8 +66,7 @@ void (async () => {
       break;
     }
     case "ShieldAdvancedStack": {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
-      const shieldConfig: shield.ShieldConfig = values.shieldConfigs[CONFIG_OBJECT_NAME];
+      const shieldConfig: ShieldConfig = values.shieldConfigs[CONFIG_OBJECT_NAME];
       const deploymentRegion = process.env.AWS_REGION;
       const runtimeProperties =  helpers.afwfHelper.initRuntimeProperties();
       console.log(`🛡️  Deploy Shield Policy: ${shieldConfig.General.Prefix.toUpperCase()}-${
@@ -121,8 +120,7 @@ void (async () => {
     case "WAFStack": {
       // ---------------------------------------------------------------------
       // Deploying Firewall stack
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const config: waf.WafConfig = values.configs[CONFIG_OBJECT_NAME];
+      const config: WafConfig = values.configs[CONFIG_OBJECT_NAME];
       const deploymentRegion =  helpers.afwfHelper.outputInfoBanner(config);
       const runtimeProperties =  helpers.afwfHelper.initRuntimeProperties();
       if (process.env.SKIP_QUOTA_CHECK === "true") {
@@ -256,7 +254,7 @@ void (async () => {
       );
 
       await  helpers.pricingHelper.isWafPriceCalculated(
-        pricing.PriceRegions[deploymentRegion as general.RegionString],
+        PriceRegions[deploymentRegion as RegionString],
         runtimeProperties,
         config,
         deploymentRegion
@@ -274,7 +272,7 @@ void (async () => {
     `);
       }
       const app = new cdk.App();
-      const autoUpdatedManagedIpSetsConfig: autoUpdatedManagedIpSets.AutoUpdatedManagedIpSetsConfig = values.autoUpdatedManagedIpSetsConfigs[CONFIG_OBJECT_NAME];
+      const autoUpdatedManagedIpSetsConfig: AutoUpdatedManagedIpSetsConfig = values.autoUpdatedManagedIpSetsConfigs[CONFIG_OBJECT_NAME];
       new AutoUpdatedManagedIpSetsStack(
         app,
         "AutoUpdatedManagedIpSets",

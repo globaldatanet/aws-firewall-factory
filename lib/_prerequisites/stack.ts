@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { prerequisites, runtime } from "../types/config/index";
+import {PrerequisitesConfig, RuntimeProps } from "../types/config/index";
 import {
   aws_s3 as s3,
   aws_kms as kms,
@@ -43,11 +43,11 @@ export interface StackProps extends cdk.StackProps {
     /**
    * Class Variable for Prerequisites Properties.
    */
-  readonly prerequisites: prerequisites.PrerequisitesConfig;
+  readonly prerequisites: PrerequisitesConfig;
     /**
    * Class Variable for Runtime Properties.
    */
-  runtimeProperties: runtime.RuntimeProps;
+  runtimeProperties: RuntimeProps;
 }
 
 export class PrerequisitesStack extends cdk.Stack {
@@ -340,7 +340,7 @@ export class PrerequisitesStack extends cdk.Stack {
         console.log(
           "\n🪣  Creating Bucket with Name: AWS-Firewall-Factory-Logging"
         );
-        let encryptionKey = undefined;
+        let encryptionKey: kms.Key | undefined;
         if (props.prerequisites.Logging.BucketProperties?.KmsEncryptionKey) {
           console.log(
             "   🔑 Creating KMS Key for: AWS-Firewall-Factory-Logging Bucket."
@@ -440,7 +440,6 @@ export class PrerequisitesStack extends cdk.Stack {
           console.log(
             "   ➕ Adding ObjectLock to Bucket: AWS-Firewall-Factory-Logging \n"
           );
-          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
           console.log(
             "   ⚙️  Settings: \n      🗓️  Retention-Days: " +
               props.prerequisites.Logging.BucketProperties?.ObjectLock?.Days +

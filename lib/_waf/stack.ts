@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_wafv2 as wafv2, aws_fms as fms,aws_lambda_nodejs as NodejsFunction, aws_lambda as lambda, aws_kinesisfirehose as firehouse, aws_iam as iam, aws_logs as logs   } from "aws-cdk-lib";
-import { runtime, waf  } from "../types/config/index";
+import { RuntimeProps, WafConfig, SubVariables, ManagedServiceData, ManagedRuleGroup, ServiceDataManagedRuleGroup, ServiceDataRuleGroup  } from "../types/config/index";
 import {WafCloudWatchDashboard} from "../constructs/wafDashboard/index";
 import * as path from "path";
 import * as cr from "aws-cdk-lib/custom-resources";
@@ -25,11 +22,11 @@ export interface ConfigStackProps extends cdk.StackProps {
     /**
    * Class Variable for WAF Properties.
    */
-  readonly config: waf.WafConfig;
+  readonly config: WafConfig;
     /**
    * Class Variable for Runtime Properties.
    */
-  runtimeProperties: runtime.RuntimeProps;
+  runtimeProperties: RuntimeProps;
 }
 
 export class WafStack extends cdk.Stack {
@@ -206,10 +203,10 @@ export class WafStack extends cdk.Stack {
 
     // --------------------------------------------------------------------
 
-    const preProcessRuleGroups = [];
-    const postProcessRuleGroups = [];
+    const preProcessRuleGroups: (ServiceDataManagedRuleGroup | ManagedRuleGroup | ServiceDataRuleGroup)[] = [];
+    const postProcessRuleGroups: (ServiceDataManagedRuleGroup | ManagedRuleGroup | ServiceDataRuleGroup)[] = [];
     const MANAGEDRULEGROUPSINFO: string[]= [""];
-    let subVariables : waf.SubVariables = {};
+    let subVariables : SubVariables = {};
     if (props.config.WebAcl.PreProcess.ManagedRuleGroups) {
       const preProcessmanagedRgs = wafHelper.buildServiceDataManagedRgs(this, props.config.WebAcl.PreProcess.ManagedRuleGroups, managedRuleGroupVersionProvider, props.config.WebAcl.Scope, props.runtimeProperties);
       preProcessRuleGroups.push(...preProcessmanagedRgs.ServiceData);
@@ -239,7 +236,7 @@ export class WafStack extends cdk.Stack {
       console.log("\nℹ️  No Custom Rules defined in PostProcess.");
     }
 
-    const managedServiceData : waf.ManagedServiceData = {
+    const managedServiceData : ManagedServiceData = {
       type: "WAFV2",
       defaultAction: { type: "ALLOW" },
       preProcessRuleGroups: preProcessRuleGroups,
@@ -277,7 +274,6 @@ export class WafStack extends cdk.Stack {
     }
 
     if(props.config.General.CreateDashboard && props.config.General.CreateDashboard === true) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       new WafCloudWatchDashboard(this, "cloudwatch",props.config, MANAGEDRULEGROUPSINFO); // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Sonarqube identify the following Error: Either remove this useless object instantiation or use it. 
     }
   }

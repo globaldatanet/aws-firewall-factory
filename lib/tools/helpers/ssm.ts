@@ -1,11 +1,11 @@
 import { SSMClient, paginateGetParametersByPath } from "@aws-sdk/client-ssm";
-import { runtime } from "../../types/config/index";
+import { RuntimeProps } from "../../types/config/index";
 /**
  * Get all AWS regions from public SSM parameter
  * @param deploymentRegion AWS region, e.g. eu-central-1
  */
 
-export async function getAllAwsRegionsFromPublicSsmParameter(deploymentRegion: string, runtimeProps: runtime.RuntimeProps): Promise<boolean> {
+export async function getAllAwsRegionsFromPublicSsmParameter(deploymentRegion: string, runtimeProps: RuntimeProps): Promise<boolean> {
   const client = new SSMClient({ region: deploymentRegion });
   const paginator = paginateGetParametersByPath(
     { client, pageSize: 10 }, {

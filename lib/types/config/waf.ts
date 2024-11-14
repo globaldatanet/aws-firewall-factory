@@ -1,4 +1,4 @@
-import {waf as wafEnums} from "../enums/index";
+import { WebAclScope, WebAclTypeEnum, CustomResponseBodiesContentType} from "../enums/index";
 import { aws_fms as fms, CfnTag } from "aws-cdk-lib";
 
 /**
@@ -100,15 +100,15 @@ export interface WafConfig {
        *
        * @see https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-wafv2-webacl.html
        */
-      readonly Scope: wafEnums.WebAclScope | "CLOUDFRONT" | "REGIONAL";
+      readonly Scope: WebAclScope | "CLOUDFRONT" | "REGIONAL";
       /**
        * The type of resource protected by or in scope of the policy. To apply this policy to multiple resource types, specify a resource type of ResourceTypeList and then specify the resource types in a ResourceTypeList.
        */
-      readonly Type: wafEnums.WebAclTypeEnum | "ResourceTypeList" | WebAclType;
+      readonly Type: WebAclTypeEnum | "ResourceTypeList" | WebAclType;
       /**
        * enum for supportd webacl types
        */
-      readonly TypeList?: wafEnums.WebAclTypeEnum[] | WebAclType[];
+      readonly TypeList?: WebAclTypeEnum[] | WebAclType[];
       /**
        * An array of ResourceTag objects, used to explicitly include resources in the policy scope or explicitly exclude them. If this isn't set, then tags aren't used to modify policy scope. See also ExcludeResourceTags.
        */
@@ -170,7 +170,7 @@ export type CustomResponseBodies = {
        *
        * @see https://docs.aws.amazon.com/waf/latest/APIReference/API_CustomResponseBody.html
        */
-      ContentType: wafEnums.CustomResponseBodiesContentType;
+      ContentType: CustomResponseBodiesContentType;
     };
   };
   
@@ -407,7 +407,7 @@ export interface ServiceDataManagedRuleGroup extends ServiceDataAbstactRuleGroup
     version?: string | null,
     versionEnabled?: boolean
   },
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   excludeRules: any,
   ruleGroupType: "ManagedRuleGroup",
   ruleActionOverrides: RuleActionOverrideProperty[] | undefined,

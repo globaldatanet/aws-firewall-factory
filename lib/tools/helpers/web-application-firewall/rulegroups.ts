@@ -1,7 +1,8 @@
 import * as cdk from "aws-cdk-lib";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import { Scope, WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput, ListAvailableManagedRuleGroupVersionsCommandOutput} from "@aws-sdk/client-wafv2";
-import { waf, runtime } from "../../../types/config/index";
+import { WafConfig, RuntimeProps, SubVariables, ManagedRuleGroup,ServiceDataRuleGroup, CustomResponseBodies, Rule,
+  ServiceDataManagedRuleGroup, NONEVERSIONEDMANAGEDRULEGRPOUP, ProcessProperties } from "../../../types/config";
 import { transformWafRuleStatements } from "./statements";
 import { Construct } from "constructs";
 import { guidanceHelper } from "../../helpers";
@@ -9,7 +10,7 @@ import * as cr from "aws-cdk-lib/custom-resources";
 
 
 const MANAGEDRULEGROUPSINFO : string[] = [""];
-const subVariables : waf.SubVariables = {};
+const subVariables : SubVariables = {};
 
 /**
    * * Build Managed RuleGroups as [ManagedServiceData](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-fms-policy-securityservicepolicydata.html#cfn-fms-policy-securityservicepolicydata-managedservicedata) for FMS Policy
@@ -20,11 +21,10 @@ const subVariables : waf.SubVariables = {};
    * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
    * @returns adjustedRule
    */
-export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: waf.ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string, runtimeProps: runtime.RuntimeProps): { ServiceData: waf.ServiceDataManagedRuleGroup[], ManagedRuleGroupInfo: string[], SubVariables: waf.SubVariables } {
-  const cfnManagedRuleGroup : waf.ServiceDataManagedRuleGroup[] = [];
+export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string, runtimeProps: RuntimeProps): { ServiceData: ServiceDataManagedRuleGroup[], ManagedRuleGroupInfo: string[], SubVariables: SubVariables } {
+  const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
     if(managedRuleGroup.ruleActionOverrides?.toString() === "COUNT"){
-      // eslint-disable-next-line quotes
       guidanceHelper.getGuidance("overrideActionManagedRuleGroup", runtimeProps, managedRuleGroup.name);
     }
     if(managedRuleGroup.name === "AWSManagedRulesBotControlRuleSet"){
@@ -32,7 +32,7 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
         guidanceHelper.getGuidance("noBotControlRuleSetProperty",runtimeProps);
       }
     }
-    if(waf.NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
+    if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
     
       console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
       cfnManagedRuleGroup.push({
@@ -102,27 +102,27 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
      * @param webaclName string
      * @param webAclScope string
      * @param stage string
-     * @param processRuntimeProps runtime.props
+     * @param processRuntimeProps props
      * @param prefix string
      * @param ruleGroupSet: Rule[]
-     * @param customResponseBodies waf.CustomResponseBodies  | undefined
+     * @param customResponseBodies CustomResponseBodies  | undefined
      * @param ipSets cdk.aws_wafv2.CfnIPSet[]
      * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
      * @param deployHash string
      * @returns serviceDataRuleGroup
      */
-export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", runtimeProps: runtime.RuntimeProps, config: waf.WafConfig, ipSets: cdk.aws_wafv2.CfnIPSet[],regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]) : waf.ServiceDataRuleGroup[] {
+export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", runtimeProps: RuntimeProps, config: WafConfig, ipSets: cdk.aws_wafv2.CfnIPSet[],regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]) : ServiceDataRuleGroup[] {
   const webaclName = config.WebAcl.Name;
   const prefix = config.General.Prefix;
   const webAclScope = config.WebAcl.Scope;
   const stage = config.General.Stage;
   const deployHash = config.General.DeployHash;
-  const serviceDataRuleGroup : waf.ServiceDataRuleGroup[] = [];
+  const serviceDataRuleGroup : ServiceDataRuleGroup[] = [];
   let icon;
   let capacity: number;
-  let processRuntimeProps: runtime.ProcessProperties;
-  let customResponseBodies: waf.CustomResponseBodies | undefined;
-  let ruleGroupSet: waf.Rule[] | undefined;
+  let processRuntimeProps: ProcessProperties;
+  let customResponseBodies: CustomResponseBodies | undefined;
+  let ruleGroupSet: Rule[] | undefined;
   if (type === "Pre") {
     icon = "🥇 ";
     processRuntimeProps = runtimeProps.PreProcess;
@@ -143,7 +143,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
   );
 
   if (capacity < 1500) {
-    const rules = [];
+    const rules: wafv2.CfnRuleGroup.RuleProperty[] = [];
     let count = 1;
     if(ruleGroupSet){
       for (const rule of ruleGroupSet) {
@@ -174,7 +174,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         if (rule.ruleLabels) {
           cfnRuleProperties = cfnRuleProperty as wafv2.CfnWebACL.RuleProperty;
         } else {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-assignment
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
           guidanceHelper.getGuidance("noRuleLabels", runtimeProps, rulename);
           cfnRuleProperties = cfnRulePropertii as wafv2.CfnWebACL.RuleProperty;
@@ -193,7 +193,6 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
             "⭕️ Deploy new RuleGroup because the Capacity has changed!"
           );
           console.log(
-          // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             "\n 🟥 Old Capacity: [" +
                 processRuntimeProps.DeployedRuleGroupCapacities[0] +
                 "]\n 🟩 New Capacity: [" +
@@ -218,11 +217,9 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
       }
       // Don't lowercase the first char of the Key of the Custom Response Body,
       // only toAwsCamel the properties below the Key
-      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let cstResBodies: { [key:string]: any} | undefined = {};
       if(customResponseBodies) {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies![curr]; return acc; }, cstResBodies);
       }
       else {
@@ -246,7 +243,6 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         overrideAction: { type: "NONE" },
       });
       console.log(
-      // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
         "  ➡️  Creating " +
             rulegroupidentifier +
             " with calculated capacity: [" +
@@ -287,7 +283,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rulesets: any[] = [];
       const indexes: number[] = [];
-      const rulegroupcapacities = [];
+      const rulegroupcapacities: number[] = [];
       //ORDER BY Priority DESC
       while (
         indexes.length < processRuntimeProps.RuleCapacities.length
@@ -333,7 +329,6 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
                   " !"
             );
             console.log(
-            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
               "\n 🟥 Old Capacity: [" +
                   processRuntimeProps.DeployedRuleGroupCapacities[
                     count
@@ -374,21 +369,17 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
           rulegroupidentifier = type + "R" + count.toString();
           name = `${webaclName}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
         }
-        const cfnRuleProperties = [];
+        const cfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty[] = [];
         let rulegroupcounter = 0;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         while (rulegroupcounter < rulesets[count].length) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           const statementindex = rulesets[count][rulegroupcounter];
           let rulename = "";
           if (
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             ruleGroupSet[statementindex]
               .name !== undefined
           ) {
             const tempHash = Date.now().toString(36);
             rulename =
-                // eslint-disable-next-line @typescript-eslint/restrict-plus-operands, @typescript-eslint/no-unsafe-member-access
                 ruleGroupSet[statementindex]
                   .name +
                 "-" +
@@ -396,37 +387,27 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
           } else {
             rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-"+deployHash : ""}`;
           }
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           const statement = transformWafRuleStatements(ruleGroupSet[statementindex],prefix, stage, config.WebAcl.Name, ipSets, regexPatternSets);
           const cfnRuleProperty = {
             name: rulename,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             priority: ruleGroupSet[statementindex].priority,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             action: ruleGroupSet[statementindex].action,
             statement,
             visibilityConfig: {
               sampledRequestsEnabled:
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                   ruleGroupSet[statementindex]
                     .visibilityConfig.sampledRequestsEnabled,
               cloudWatchMetricsEnabled:
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                   ruleGroupSet[statementindex]
                     .visibilityConfig.cloudWatchMetricsEnabled,
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
               metricName: ruleGroupSet[statementindex].visibilityConfig.metricName,
             },
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             captchaConfig: (Object.keys(ruleGroupSet[statementindex]
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
               .action)[0] === "captcha") ? ruleGroupSet[statementindex].captchaConfig : undefined,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             ruleLabels: ruleGroupSet[statementindex].ruleLabels,
           };
           let cfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty;
           if (
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             ruleGroupSet[statementindex]
               .ruleLabels
           ) {
@@ -443,7 +424,6 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let cstResBodies: { [key:string]: any} | undefined = {};
         if(customResponseBodies) {
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies![curr]; return acc; }, cstResBodies);
         }
         else {
@@ -535,7 +515,6 @@ export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string
     Limit: 5,
   };
   const command = new ListAvailableManagedRuleGroupVersionsCommand(input);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const response: ListAvailableManagedRuleGroupVersionsCommandOutput = await client.send(command);
   if(response.Versions!.length > 0){
     return response.Versions![0].Name;

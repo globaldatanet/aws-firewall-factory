@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 import { WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListWebACLsCommand, ListWebACLsCommandInput, ListResourcesForWebACLCommand, ListResourcesForWebACLCommandOutput, Scope, ResourceType, UpdateIPSetCommand, ListIPSetsCommandInput, ListIPSetsCommand, CreateIPSetCommand, IPAddressVersion, CreateIPSetCommandInput, IPSetSummary, UpdateIPSetCommandInput, DeleteIPSetCommand, DeleteIPSetCommandInput, GetIPSetCommand, GetIPSetCommandInput} from "@aws-sdk/client-wafv2";
-import { PaginatedManagedRuleGroupVersions, ManagedRuleGroupVersionResponse} from "../types/index";
 import {CloudFrontClient, ListDistributionsByWebACLIdCommand, ListDistributionsByWebACLIdCommandOutput} from "@aws-sdk/client-cloudfront";
 import {putSsmParameter}  from "./ssm";
 import { AwsCredentialIdentity } from "@aws-sdk/types";
-import { AccountWebAcls, WebAcls} from "../types/index";
-import { general } from "../../../types/enums/index";
+import { AWSRegion } from "../../../types";
+import { AccountWebAcls, WebAcls,  PaginatedManagedRuleGroupVersions, ManagedRuleGroupVersionResponse} from "../types";
 import {CfnTag} from "aws-cdk-lib";
 import {putIpSetMetric} from "./cloudwatch";
 
@@ -42,7 +41,7 @@ export async function getManagedRuleGroupVersions(VendorName: string,Name: strin
           console.log("⏱️ Throttled - waiting 5 seconds");
           await new Promise(r => setTimeout(r, 5000));
         } else {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+           
           console.log(`❌ Error: ${error}`);
           console.log(error.message);
           console.log(error.name);
@@ -230,9 +229,9 @@ async function getWAFs(client: WAFV2Client, maxResults: number, scope: Scope) {
  */
 export async function checkWafUsageInAccount(credentials: AwsCredentialIdentity, regions: string[], accountwafs: AccountWebAcls, regexString?:string): Promise<AccountWebAcls> {
   for(const region of regions){
-    const WebACLsInUse =[];
-    const UnusedWebACLs = [];
-    const IgnoredWebACLs = [];
+    const WebACLsInUse : WebAcls[] = [];
+    const UnusedWebACLs: WebAcls[] = [];
+    const IgnoredWebACLs: WebAcls[] = [];
     console.log(`🌎 Checking region: ${region}`);
     const client = new WAFV2Client({
       region: region,
@@ -300,7 +299,7 @@ export async function checkWafUsageInAccount(credentials: AwsCredentialIdentity,
   return accountwafs;
 }
 
-async function checkIfIpSetExist(region: general.AWSRegion, ipSetName: string, scope: "REGIONAL" | "CLOUDFRONT"): Promise<IPSetSummary | undefined> {
+async function checkIfIpSetExist(region: AWSRegion, ipSetName: string, scope: "REGIONAL" | "CLOUDFRONT"): Promise<IPSetSummary | undefined> {
   const client = new WAFV2Client({region});
   try {
     // List all IP sets in the specified scope
@@ -316,7 +315,7 @@ async function checkIfIpSetExist(region: general.AWSRegion, ipSetName: string, s
   }
 }
 
-async function getAddressesFromIPSet(region: general.AWSRegion, Name: string, Id: string, Scope: "REGIONAL" | "CLOUDFRONT"): Promise<string[]> {
+async function getAddressesFromIPSet(region: AWSRegion, Name: string, Id: string, Scope: "REGIONAL" | "CLOUDFRONT"): Promise<string[]> {
   const client = new WAFV2Client({region});
   try {
     const input: GetIPSetCommandInput = {
@@ -335,15 +334,16 @@ async function getAddressesFromIPSet(region: general.AWSRegion, Name: string, Id
     }
     else{
       console.error("Error getting Addresses from IPset:", response);
+      throw new Error(`Error getting Addresses from IPset: ${Name}`);
     }
   }
   catch (error) {
     console.error("Error getting Addresses from IPset:", error);
-    throw error;
+    throw new Error(error);
   }
 }
 
-export async function ipSetManager(Region: general.AWSRegion, Name: string, Scope: "CLOUDFRONT" | "REGIONAL", Addresses: string[], IPAddressVersion: IPAddressVersion, prefix: string, customDescription?: string, tags?: CfnTag[]): Promise<string>{
+export async function ipSetManager(Region: AWSRegion, Name: string, Scope: "CLOUDFRONT" | "REGIONAL", Addresses: string[], IPAddressVersion: IPAddressVersion, prefix: string, customDescription?: string, tags?: CfnTag[]): Promise<string>{
   const client = new WAFV2Client({region: Region});
 
   const now = new Date().toISOString().slice(0, 19).replace("T", " ");
@@ -397,7 +397,7 @@ export async function ipSetManager(Region: general.AWSRegion, Name: string, Scop
 
 }
 
-export async function deleteIpSet(Region: general.AWSRegion, Name: string, Scope: "CLOUDFRONT" | "REGIONAL"): Promise<void> {
+export async function deleteIpSet(Region: AWSRegion, Name: string, Scope: "CLOUDFRONT" | "REGIONAL"): Promise<void> {
   const client = new WAFV2Client({region: Region});
   const existingIpSet = await checkIfIpSetExist(Region, Name, Scope);
   console.log(`ℹ️ Delete IpSet: ${Name}`);

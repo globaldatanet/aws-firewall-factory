@@ -27,7 +27,7 @@ export const handler = async (
   for (const file of files) {
     console.log(`📄 Importing File: ${file}`);
     const content = await getFileContent(bucketName, file);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+     
     allwebacls.push(JSON.parse(content));
   }
 

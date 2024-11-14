@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
-import { runtime, autoUpdatedManagedIpSets } from "../types/config/index";
+import { RuntimeProps, AutoUpdatedManagedIpSetsConfig } from "../types/config/index";
 import {
   aws_lambda as lambda,
   aws_lambda_nodejs as NodejsFunction,
@@ -17,11 +17,11 @@ export interface AutoUpdatedManagedIpSetsStackProps extends cdk.StackProps {
     /**
    * Class Variable for WAF Properties.
    */
-  readonly config: autoUpdatedManagedIpSets.AutoUpdatedManagedIpSetsConfig;
+  readonly config: AutoUpdatedManagedIpSetsConfig;
     /**
    * Class Variable for Runtime Properties.
    */
-  runtimeProperties: runtime.RuntimeProps;
+  runtimeProperties: RuntimeProps;
 }
 
 

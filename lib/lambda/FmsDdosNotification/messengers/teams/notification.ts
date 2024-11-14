@@ -1,7 +1,7 @@
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+ 
+ 
+ 
+ 
 
 import { IncomingWebhook } from "./IncomingWebhook";
 import { SNSEventRecord } from "aws-lambda";

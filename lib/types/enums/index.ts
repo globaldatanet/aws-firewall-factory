@@ -1,4 +1,4 @@
-export * as waf from "./waf";
-export * as s3 from "./s3";
-export * as pricing from "./pricing";
-export * as general from "./general";
+export * from "./waf";
+export * from "./s3";
+export * from "./pricing";
+export * from "./general";

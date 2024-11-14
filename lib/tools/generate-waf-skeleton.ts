@@ -1,4 +1,4 @@
-import { waf } from "../types/config/index";
+import { WafConfig } from "../types/config/index";
 import util from "util";
 import { afwfHelper } from "./helpers";
 import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../types/enums/waf";
@@ -6,7 +6,7 @@ import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} fr
  * The script will output a example WAF Skeleton Config to the terminal
  */
 
-const skeletonConfig : waf.WafConfig = {
+const skeletonConfig : WafConfig = {
   General: {
     FireHoseKeyArn: "",
     Prefix: "myPrefix",

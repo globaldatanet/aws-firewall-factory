@@ -1,5 +1,5 @@
 import * as cloudformation from "@aws-sdk/client-cloudformation";
-import { waf, runtime } from "../../types/config/index";
+import { WafConfig, ProcessProperties, RuntimeProps } from "../../types/config/index";
 
 
 /** Puts specified output values into the runtimeprops - this function is needed to identify chagend WCUs of WAF RuleGroups
@@ -8,19 +8,19 @@ import { waf, runtime } from "../../types/config/index";
    * @param cloudformationOutputName name of the cloudformation output to get eg.: PreProcessDeployedRuleGroupNames
    * @param describeStacksCommandOutput the output of the CloudFormation describeStacksCommand
    */
-// eslint-disable-next-line no-inner-declarations
-function processOutputsToProcessProperties<K extends keyof runtime.ProcessProperties>(
+
+function processOutputsToProcessProperties<K extends keyof ProcessProperties>(
   propertyName: K,
-  runtimeProps: runtime.ProcessProperties,
+  runtimeProps: ProcessProperties,
   cloudformationOutputName: string,
   describeStacksCommandOutput: cloudformation.DescribeStacksCommandOutput){
 
   const outputValue = describeStacksCommandOutput.Stacks?.[0]?.Outputs?.find(output => output.OutputKey === cloudformationOutputName)?.OutputValue || "";
   if(propertyName === "DeployedRuleGroupNames" || propertyName === "DeployedRuleGroupIdentifier"){
-    Object.assign(runtimeProps,{ [propertyName]: outputValue.split(",", outputValue.length) as runtime.ProcessProperties[K] });
+    Object.assign(runtimeProps,{ [propertyName]: outputValue.split(",", outputValue.length) as ProcessProperties[K] });
   }
   if(propertyName === "DeployedRuleGroupCapacities"){
-    Object.assign(runtimeProps,{ [propertyName]: outputValue?.split(",",outputValue?.length).map(Number) as runtime.ProcessProperties[K] });
+    Object.assign(runtimeProps,{ [propertyName]: outputValue?.split(",",outputValue?.length).map(Number) as ProcessProperties[K] });
   }
 }
 
@@ -31,7 +31,7 @@ function processOutputsToProcessProperties<K extends keyof runtime.ProcessProper
  * @param runtimeprops runtime properties, where to write stack outputs into
  * @param config the config object from the values ts
  */
-export async function setOutputsFromStack(deploymentRegion: string, runtimeProps: runtime.RuntimeProps, config: waf.WafConfig): Promise<void> {
+export async function setOutputsFromStack(deploymentRegion: string, runtimeProps: RuntimeProps, config:WafConfig ): Promise<void> {
   const stackName = `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-" + config.General.DeployHash.toUpperCase() : ""}`;
   const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
   const params = {
@@ -62,7 +62,7 @@ export async function setOutputsFromStack(deploymentRegion: string, runtimeProps
  * @param config the config object from the values ts
  * @param name the name of the output to get eg.: (AWSManagedRulesCommonRuleSetVersion)
  */
-export async function getManagedRuleGroupVersionFromStack(deploymentRegion: string, config: waf.WafConfig, name: string): Promise<string | undefined> {
+export async function getManagedRuleGroupVersionFromStack(deploymentRegion: string, config: WafConfig, name: string): Promise<string | undefined> {
   const stackName = `${config.General.Prefix.toUpperCase()}-WAF-${config.WebAcl.Name.toUpperCase()}-${config.General.Stage.toUpperCase()}${config.General.DeployHash ? "-" + config.General.DeployHash.toUpperCase() : ""}`;
   const cloudformationClient = new cloudformation.CloudFormationClient({ region: deploymentRegion });
   const params = {

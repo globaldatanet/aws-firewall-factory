@@ -1,5 +1,5 @@
-export * as autoUpdatedManagedIpSets from "./autoUpdatedManagedIpSets";
-export * as waf from "./waf";
-export * as shield from "./shield";
-export * as prerequisites from "./prerequisites";
-export * as runtime from "./runtime";
+export * from "./autoUpdatedManagedIpSets";
+export * from "./waf";
+export * from "./shield";
+export * from "./prerequisites";
+export * from "./runtime";

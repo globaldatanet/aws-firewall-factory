@@ -5,7 +5,7 @@ import { FMSClient, ListPoliciesCommand, ListPoliciesCommandInput } from "@aws-s
 import { cloudformationHelper, guidanceHelper } from "../../helpers";
 import * as lodash from "lodash";
 import {transformCdkRuletoSdkRule} from "../../transformer";
-import { waf, runtime } from "../../../types/config/index";
+import { WafConfig, RuntimeProps, ProcessProperties, ManagedRuleGroup, Rule } from "../../../types/config";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
 import {getcurrentManagedRuleGroupVersion} from "./rulegroups";
 
@@ -36,13 +36,13 @@ async function getPolicyCount(deploymentRegion: string): Promise<number> {
 /**
  *
  * @param config Config
- * @param runtimeProperties runtime.props
+ * @param runtimeProperties props
  * @param deploymentRegion AWS region, e.g. eu-central-1
  * @param scope whether scope is REGIONAL or CLOUDFRONT
  * @param rules rules for which you want to calculate the capacity
  * @returns the total capacity of the supplied rules
  */
-async function getTotalCapacityOfRules(config: waf.WafConfig, runtimeProperties: runtime.RuntimeProps, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: SdkRule[]): Promise<number> {
+async function getTotalCapacityOfRules(config: WafConfig, runtimeProperties: RuntimeProps, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", rules: SdkRule[]): Promise<number> {
   const client = new WAFV2Client({ region: deploymentRegion });
   if(scope === "CLOUDFRONT"){
     scope = Scope.CLOUDFRONT;
@@ -55,7 +55,6 @@ async function getTotalCapacityOfRules(config: waf.WafConfig, runtimeProperties:
   };
   const command = new CheckCapacityCommand(input);
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response : CheckCapacityCommandOutput = await client.send(command);
     return response.Capacity || 0;
   } catch(err) {
@@ -160,9 +159,9 @@ async function getManagedRuleCapacity(deploymentRegion: string, vendor: string, 
  * @param runtimeProperties runtime properties object, where to store capacities
  */
 async function calculateCapacities(
-  config: waf.WafConfig,
+  config: WafConfig,
   deploymentRegion: string,
-  runtimeProperties: runtime.RuntimeProps
+  runtimeProperties: RuntimeProps
 ): Promise<void> {
   console.log("\n👀 Get CustomRule Capacity:");
   if (!config.WebAcl.PreProcess.CustomRules) {
@@ -205,11 +204,11 @@ async function calculateCapacities(
  * @param type "Pre" | "Post"
  * @param deploymentRegion string
  * @param config Config
- * @param runtimeProperties runtime.props
+ * @param runtimeProperties props
  */
-async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deploymentRegion:string, config: waf.WafConfig, runtimeProperties: runtime.RuntimeProps): Promise<void> {
-  let managedrules: waf.ManagedRuleGroup[] = [];
-  let processProperties: runtime.ProcessProperties;
+async function calculateManagedRuleGroupCapacities(type: "Pre" | "Post",deploymentRegion:string, config: WafConfig, runtimeProperties: RuntimeProps): Promise<void> {
+  let managedrules: ManagedRuleGroup[] = [];
+  let processProperties: ProcessProperties;
   switch(type){
     case "Pre":
       managedrules = config.WebAcl.PreProcess.ManagedRuleGroups ?? [];
@@ -303,7 +302,7 @@ function filterStatements(statement: wafv2.CfnWebACL.StatementProperty){
    * @param scope the scope of the WebACL, e.g. REGIONAL or CLOUDFRONT
    * @returns an array with the capacities of the supplied custom rules
    */
-async function calculateCustomRulesCapacities(config: waf.WafConfig, customRules: waf.Rule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: runtime.RuntimeProps) {
+async function calculateCustomRulesCapacities(config: WafConfig, customRules: Rule[], deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProps) {
   const capacities: number[] = [];
   const capacitieslog: string[][] = [];
   capacitieslog.push(["🔺 Priority", "➕ RuleName", "🧮 Capacity", "ℹ StatementType"]);
@@ -559,7 +558,6 @@ async function calculateCustomRulesCapacities(config: waf.WafConfig, customRules
     }
     capacitieslog.push([customRule.priority.toString(), customRule.name,capacities[capacities.length-1].toString(), Object.keys(customRule.statement)[0].charAt(0).toUpperCase()+ Object.keys(customRule.statement)[0].slice(1)]);
   }
-  // eslint-disable-next-line  @typescript-eslint/no-unnecessary-type-assertion
   capacitieslog.sort((a, b) => parseInt(a[0] as string,10) - parseInt(b[0] as string,10));
   console.log(table(capacitieslog));
   return capacities;
@@ -571,13 +569,13 @@ async function calculateCustomRulesCapacities(config: waf.WafConfig, customRules
    * @param rateBasedStatement the RateBasedStatement
    * @returns tempCalcRule
    */
-function calculateRatebasedStatementwithoutScopeDownStatement(customRule: waf.Rule, rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty): waf.Rule {
+function calculateRatebasedStatementwithoutScopeDownStatement(customRule: Rule, rateBasedStatement: wafv2.CfnWebACL.RateBasedStatementProperty): Rule {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { scopeDownStatement, ...rateBasedWithoutScopeDown } = rateBasedStatement;
   const statement:wafv2.CfnWebACL.StatementProperty = {
     rateBasedStatement: rateBasedWithoutScopeDown
   };
-  const tempCalcRule : waf.Rule = {
+  const tempCalcRule : Rule = {
     name: customRule.name,
     priority: customRule.priority,
     visibilityConfig: customRule.visibilityConfig,
@@ -608,7 +606,7 @@ function calculateIpsSetStatementCapacity(ipSetReferenceStatement: wafv2.CfnWebA
  * @param scope "REGIONAL" | "CLOUDFRONT"
  * @returns
  */
-async function calculateCustomRuleStatementsCapacity(config: waf.WafConfig, customRule: waf.Rule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: runtime.RuntimeProps) {
+async function calculateCustomRuleStatementsCapacity(config: WafConfig, customRule: Rule, deploymentRegion: string, scope: "REGIONAL" | "CLOUDFRONT", runtimeProperties: RuntimeProps) {
   const ruleCalculatedCapacityJson: SdkRule[] = [];
   const rule = transformCdkRuletoSdkRule(customRule, runtimeProperties);
   ruleCalculatedCapacityJson.push(rule);
@@ -654,7 +652,7 @@ function calculateRegexPatternSetsStatementsCapacity(regexPatternSetsStatement: 
  * @param isOrStatement boolean
  * @returns tempCalcRule
  */
-function buildCustomRuleWithoutReferenceStatements(customRule: waf.Rule, concatenatedStatement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isOrStatement: boolean) {
+function buildCustomRuleWithoutReferenceStatements(customRule: Rule, concatenatedStatement: wafv2.CfnWebACL.AndStatementProperty | wafv2.CfnWebACL.OrStatementProperty, isOrStatement: boolean) {
   const statements = concatenatedStatement.statements as wafv2.CfnWebACL.StatementProperty[];
   let statement;
   if (statements.length === 1) {
@@ -668,7 +666,7 @@ function buildCustomRuleWithoutReferenceStatements(customRule: waf.Rule, concate
       andStatement: concatenatedStatement
     };
   }
-  const tempCalcRule : waf.Rule = {
+  const tempCalcRule : Rule = {
     name: customRule.name,
     priority: customRule.priority,
     visibilityConfig: customRule.visibilityConfig,
@@ -708,7 +706,7 @@ export async function isPolicyQuotaReached(deploymentRegion: string): Promise<bo
    * @param config configuration object of the values.json
    * @returns whether WCU limit is reached
    */
-export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: runtime.RuntimeProps, config: waf.WafConfig): Promise<boolean> {
+export async function isWcuQuotaReached(deploymentRegion: string, runtimeProps: RuntimeProps, config: WafConfig): Promise<boolean> {
   await calculateCapacities(config, deploymentRegion, runtimeProps);
   const customCapacity = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity;
   const totalWcu = runtimeProps.PreProcess.Capacity + runtimeProps.PostProcess.Capacity + runtimeProps.ManagedRuleCapacity;

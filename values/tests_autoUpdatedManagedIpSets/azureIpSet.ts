@@ -1,9 +1,9 @@
-import { autoUpdatedManagedIpSets } from "../../lib/types/config/index";
+import { AutoUpdatedManagedIpSetsConfig } from "../../lib/types/config/index";
 import { AWSRegion } from "../../lib/types/enums/general";
 import * as events from "aws-cdk-lib/aws-events";
 import * as cdk from "aws-cdk-lib";
 
-export const config: autoUpdatedManagedIpSets.AutoUpdatedManagedIpSetsConfig = {
+export const config: AutoUpdatedManagedIpSetsConfig = {
   General: {
     Prefix: "testcases",
   },

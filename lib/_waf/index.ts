@@ -7,7 +7,7 @@
  * @example
 * import { waf } from "../../lib/types/config";
 * import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum} from "../../lib/types/enums/waf";
-* export const config: waf.WafConfig = {
+* export const config:  WafConfig= {
 *   General: {
 *     FireHoseKeyArn: "",
 *     Prefix: "aws-firewall-factory",

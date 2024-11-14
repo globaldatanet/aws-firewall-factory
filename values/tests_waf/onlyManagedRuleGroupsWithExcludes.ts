@@ -1,6 +1,6 @@
-import { waf } from "../../lib/types/config";
+import { WafConfig } from "../../lib/types/config";
 import {ManagedRuleGroupVendor, AwsManagedRules, WebAclScope, WebAclTypeEnum, COMMON_RULE_SET_RULES} from "../../lib/types/enums/waf";
-export const config: waf.WafConfig = {
+export const config: WafConfig = {
   General: {
     Prefix: "testcases",
     Stage: "test",

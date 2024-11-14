@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { aws_fms as fms } from "aws-cdk-lib";
 import { getGuidance } from "../tools/helpers/guidance";
-import { runtime, shield, waf } from "../types/config/index";
+import { RuntimeProps, ShieldConfig, ManagedServiceData } from "../types/config";
 import { ShieldDashboard } from "../constructs/shieldDashboard/index";
 
 /**
@@ -32,11 +32,11 @@ export interface ShieldProps extends cdk.StackProps {
    /**
    * Class Variable for a Shield Config.
    */
-  readonly shieldConfig: shield.ShieldConfig; 
+  readonly shieldConfig: ShieldConfig; 
   /**
    * Class Variable for Runtime Properties.
    */
-  readonly runtimeProperties: runtime.RuntimeProps;
+  readonly runtimeProperties: RuntimeProps;
 }
 export class ShieldStack extends cdk.Stack {
   readonly oamSinkArn: string = "";
@@ -45,7 +45,7 @@ export class ShieldStack extends cdk.Stack {
     const preProcessRuleGroups: never[] = [];
     const postProcessRuleGroups: never[] = [];
     let loggingConfiguration;
-    const managedServiceData: waf.ManagedServiceData = {
+    const managedServiceData: ManagedServiceData = {
       type: "SHIELD_ADVANCED",
       defaultAction: { type: props.shieldConfig.defaultActionType },
       preProcessRuleGroups: preProcessRuleGroups,

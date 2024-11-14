@@ -1,20 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-for-in-array */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   PricingClient,
   GetProductsCommand,
   GetProductsCommandInput,
   FilterType,
 } from "@aws-sdk/client-pricing";
-import { pricing } from "../../../types/enums/index";
-import { waf, runtime, shield } from "../../../types/config/index";
+import { PriceRegions, WafConfig, RuntimeProps, ShieldConfig } from "../../../types/";
 import {
   CloudWatchClient,
   ListDashboardsCommand,
@@ -73,9 +64,9 @@ function findValuesHelper(obj: any, key: string, list: any) {
  * @returns true if prices are update in runtimeprops
  */
 async function getCurrentWafPrices(
-  deploymentRegion: pricing.PriceRegions,
-  runtimeProps: runtime.RuntimeProps,
-  config: waf.WafConfig,
+  deploymentRegion: PriceRegions,
+  runtimeProps: RuntimeProps,
+  config: WafConfig,
   awsregion: string
 ): Promise<boolean> {
   console.log("   🔎  Getting current prices for: ", deploymentRegion, "\n");
@@ -143,7 +134,7 @@ async function getCurrentWafPrices(
  */
 async function getDashboardPrice(
   deploymentRegion: string,
-  config: waf.WafConfig
+  config: WafConfig
 ): Promise<number> {
   const client = new CloudWatchClient({ region: deploymentRegion });
   const input: ListDashboardsCommandInput = {};
@@ -175,7 +166,7 @@ async function getDashboardPrice(
  * @returns price for one product
  */
 export async function getProductPrice(
-  deploymentRegion: pricing.PriceRegions,
+  deploymentRegion: PriceRegions,
   servicecode: string,
   operation?: string,
   group?: string,
@@ -230,9 +221,9 @@ export async function getProductPrice(
  * @returns whether price is successfully calculated or not
  */
 export async function isWafPriceCalculated(
-  deploymentRegion: pricing.PriceRegions,
-  runtimeProps: runtime.RuntimeProps,
-  config: waf.WafConfig,
+  deploymentRegion: PriceRegions,
+  runtimeProps: RuntimeProps,
+  config: WafConfig,
   awsregion: string
 ): Promise<boolean> {
   const shieldSubscriptionState = await getShieldSubscriptionState();
@@ -361,7 +352,7 @@ async function getShieldSubscriptionState() {
  * @returns whether price is successfully calculated or not
  */
 export async function isShieldPriceCalculated(
-  shieldconfig: shield.ShieldConfig
+  shieldconfig: ShieldConfig
 ): Promise<boolean> {
   const shieldSubscriptionState = await getShieldSubscriptionState();
   console.log("\n🛡️  Shield Advanced State: " + shieldSubscriptionState);
