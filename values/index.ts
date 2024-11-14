@@ -2,7 +2,7 @@ import {WafConfig, ShieldConfig, PrerequisitesConfig, AutoUpdatedManagedIpSetsCo
 
 import {  owasptopTen, prequisites, ipSetsManagedTest, shieldConfigExample} from "./examples";
 import * as tests_waf from "./tests_waf";
-import * as tests_autoUpdatedManagedIpSets from "./tests_autoUpdatedManagedIpSets"
+import * as tests_autoUpdatedManagedIpSets from "./tests_autoUpdatedManagedIpSets";
 export const configs : { [key: string]: WafConfig } = {
   owasptopTen,
   ipSetsManagedTest,
