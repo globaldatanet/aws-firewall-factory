@@ -21,7 +21,8 @@ export default [{
     "**/cdk.context.json",
     "**/cdk",
     ".github/enumcheck.ts",
-    "jest.config.js"
+    "jest.config.js",
+    "values/migrate.ts"
   ],
 }, ...compat.extends(
   "eslint:recommended",
