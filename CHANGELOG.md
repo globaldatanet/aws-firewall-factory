@@ -2,6 +2,13 @@
 
 ## Released
 
+## 4.6.1
+### Fixed
+- Fix "code not found" error on WAF WCU Quota check
+- WAFConfig:
+  - Add prop OptimizeUnassociatedWebACL
+  - Fixes CDK rejecting the deployment if the CustomResponseBodies props first char is uppercased
+
 ## 4.6.0
 ### Added
 - Automated IP Set Management: The AutoUpdatedManagedIpSet feature now supports automated management of IP sets through AWS Firewall Factory.
