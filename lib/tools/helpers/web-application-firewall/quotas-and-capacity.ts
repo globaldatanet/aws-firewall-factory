@@ -12,7 +12,7 @@ import {getcurrentManagedRuleGroupVersion} from "./rulegroups";
 /**
  * Service Quota Code for Firewall Manager Total WAF WCU in account & region
  */
-const WCU_QUOTA_CODE = "L-D86ED2F3";
+const WCU_QUOTA_CODE = "L-1E778CA5";
 
 /**
  * Service Quota Code for Firewall Manager policies per organization per Region
