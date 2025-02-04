@@ -1,14 +1,9 @@
- 
- 
- 
- 
-
 import { IncomingWebhook } from "./IncomingWebhook";
 import { PolicySummary } from "@aws-sdk/client-fms";
 import { AccountWebAcls, FmsPolicy } from "../../../SharedComponents/types/index";
 import * as AdaptiveCards from "adaptivecards";
 import {getProductPrice}  from "../../../../tools/helpers/pricing";
-import { pricing, general } from "../../../../types/enums";
+import { PriceRegions, RegionString } from "../../../../types/enums";
 import * as packageJsonObject from "../../../../../package.json";
 import {addAccount} from "../../helper";
 
@@ -131,8 +126,8 @@ export async function unusedNotificationTeams(AllWAFs: AccountWebAcls[], UniqueU
 
   
   const region = process.env.AWS_DEFAULT_REGION || "us-east-1";
-  const policyPrice = Number(await getProductPrice(pricing.PriceRegions[region as general.RegionString],"AWSFMS","WAFv2"));
-  const webAclPrice = Number(await getProductPrice(pricing.PriceRegions[region as general.RegionString] as pricing.PriceRegions,"awswaf",undefined,"Web ACL"));
+  const policyPrice = Number(await getProductPrice(PriceRegions[region as RegionString],"AWSFMS","WAFv2"));
+  const webAclPrice = Number(await getProductPrice(PriceRegions[region as RegionString] as PriceRegions,"awswaf",undefined,"Web ACL"));
 
   const totalcost = (allFMSPolicies.length * policyPrice) + (totalWafs * webAclPrice);
   const potentialsavings = ((UniqueUnusedFMSPolicies.length)*policyPrice) + ((totalWafs - wafsInUse)*webAclPrice);

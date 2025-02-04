@@ -86,6 +86,13 @@ export interface WafConfig {
        * Replace web ACLs that are currently associated with in-scope resources with the web ACLs created by this policy - Default is False
        */
       readonly OverrideCustomerWebACLAssociation?: boolean;
+
+      /**
+       * Automatically remove protections from resources that leave the policy scope and clean up resources that 
+       * Firewall Manager is managing for accounts when those accounts leave policy scope - Default is False
+       */
+      readonly OptimizeUnassociatedWebACL?: boolean;
+
       /**
        * Specifies whether this is for an Amazon CloudFront distribution or for a regional application.
        * A regional application can be
@@ -162,7 +169,7 @@ export type CustomResponseBodies = {
       /**
        * @TJS-pattern [\s\S]*
        */
-      Content: string;
+      content: string;
       /**
        * AWS WAF Content Type
        *
@@ -170,7 +177,7 @@ export type CustomResponseBodies = {
        *
        * @see https://docs.aws.amazon.com/waf/latest/APIReference/API_CustomResponseBody.html
        */
-      ContentType: CustomResponseBodiesContentType;
+      contentType: CustomResponseBodiesContentType;
     };
   };
   
@@ -392,6 +399,7 @@ export interface ManagedServiceData {
   preProcessRuleGroups: any,
   postProcessRuleGroups: any,
   overrideCustomerWebACLAssociation: boolean,
+  optimizeUnassociatedWebACL?: boolean,
   loggingConfiguration: {
     logDestinationConfigs: string[]
   }
