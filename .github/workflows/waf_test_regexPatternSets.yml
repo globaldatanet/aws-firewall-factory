@@ -70,6 +70,10 @@ jobs:
         run: |
           export STACK_NAME=WAFStack
           task deploy config=regexPatternSetsTests
+      - name: Sleep for 30 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '30s'
       - name: 🗑️ Remove Firewall from AWS
         run: |
           export STACK_NAME=WAFStack
