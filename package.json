@@ -45,7 +45,7 @@
     "@babel/traverse": "^7.25.9",
     "@mhlabs/cfn-diagram": "^1.1.40",
     "@slack/types": "^2.14.0",
-    "@slack/webhook": "^7.0.3",
+    "@slack/webhook": "^7.0.4",
     "@types/aws-lambda": "^8.10.145",
     "@types/lodash": "^4.17.12",
     "@types/uuid": "^10.0.0",
