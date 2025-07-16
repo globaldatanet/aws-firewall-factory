@@ -2,6 +2,20 @@
 
 ## Released
 
+
+## 4.6.2
+### Added
+- ✅ Added support for `AWSManagedRulesAntiDDoSRuleSet`, an AWS WAF managed rule group that delivers advanced protection against application-layer DDoS attacks. Pricing is automatically factored into the total cost calculation, and setup guidance is included to help users understand usage and configuration.
+
+### Updated
+- 🔼 Bumped `@aws-solutions-constructs/aws-eventbridge-stepfunctions` from `^2.65.0` to `^2.85.2`
+- 🔼 Updated `aws-cdk-lib` from `^2.150.0` to `2.202.0`
+- 🔼 Updated `aws-cdk` from `2.150.0` to `2.1019.1`
+- 🔼 Updated `cdk-sops-secrets` from `^1.13.1` to `^v2.2.2`
+- 🔼 Bumped `@aws-sdk/client-cloudwatch` from `^3.682.0` to `^3.799.0`
+- 🔼 Bumped `@aws-sdk/client-ec2` from `^3.682.0` to `^3.800.0`
+- 🔼 Bumped `@aws-sdk/client-iam` from `^3.682.0` to `^3.799.0`
+
 ## 4.6.1
 ### Fixed
 - Bug Fix: Resolved "code not found" error in WAF WCU Quota check. Kudos to [@vboufleur](https://github.com/vboufleur) for fixing this.

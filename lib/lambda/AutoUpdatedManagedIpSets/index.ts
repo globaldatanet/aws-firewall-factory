@@ -44,7 +44,7 @@ export async function handler(Event: CdkCustomResourceEvent | EventBridgeEvent<a
       return {
         Status: "SUCCESS",
         Reason: "IPSet updated successfully",
-        PhysicalResourceId: Event.LogicalResourceId,
+        PhysicalResourceId: Event.RequestId,
         StackId: Event.StackId,
         RequestId: Event.RequestId,
         LogicalResourceId: Event.LogicalResourceId,
@@ -58,7 +58,7 @@ export async function handler(Event: CdkCustomResourceEvent | EventBridgeEvent<a
         return {
           Status: "FAILED",
           Reason: error.message,
-          PhysicalResourceId: Event.LogicalResourceId,
+          PhysicalResourceId: Event.RequestId,
           StackId: Event.StackId,
           RequestId: Event.RequestId,
           LogicalResourceId: Event.LogicalResourceId,
@@ -75,7 +75,7 @@ export async function handler(Event: CdkCustomResourceEvent | EventBridgeEvent<a
       return {
         Status: "SUCCESS",
         Reason: "IP set successfully deleted",
-        PhysicalResourceId: Event.LogicalResourceId,
+        PhysicalResourceId: Event.RequestId,
         StackId: Event.StackId,
         RequestId: Event.RequestId,
         LogicalResourceId: Event.LogicalResourceId,
@@ -87,7 +87,7 @@ export async function handler(Event: CdkCustomResourceEvent | EventBridgeEvent<a
         return {
           Status: "FAILED",
           Reason: error.message,
-          PhysicalResourceId: Event.LogicalResourceId,
+          PhysicalResourceId: Event.RequestId,
           StackId: Event.StackId,
           RequestId: Event.RequestId,
           LogicalResourceId: Event.LogicalResourceId,
