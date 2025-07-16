@@ -44,7 +44,7 @@ export async function handler(Event: CdkCustomResourceEvent | EventBridgeEvent<a
       return {
         Status: "SUCCESS",
         Reason: "IPSet updated successfully",
-        PhysicalResourceId: Event.RequestId,
+        PhysicalResourceId: Event.LogicalResourceId,
         StackId: Event.StackId,
         RequestId: Event.RequestId,
         LogicalResourceId: Event.LogicalResourceId,
