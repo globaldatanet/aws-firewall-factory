@@ -1,4 +1,3 @@
-import { run } from "node:test";
 import { RuntimeProps, WafConfig } from "../../types/config/index";
 
 /**
