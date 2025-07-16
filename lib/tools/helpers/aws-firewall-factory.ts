@@ -1,6 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
-import { RuntimeProps, WafConfig, ShieldConfig } from "../../types/config/index";
+import {
+  RuntimeProps,
+  WafConfig,
+  ShieldConfig,
+} from "../../types/config/index";
 import * as cfonts from "cfonts";
 
 /**
@@ -18,7 +22,7 @@ const FIREWALL_FACTORY_VERSION = packageJson.version;
  */
 export const outputInfoBanner = (
   config?: WafConfig,
-  shieldConfig?: ShieldConfig
+  shieldConfig?: ShieldConfig,
 ) => {
   /**
    * the region into which the stack is deployed
@@ -40,13 +44,18 @@ export const outputInfoBanner = (
     width: "80%",
   });
   console.log("\n © by globaldatanet");
-  console.log("\n🏷  Version: ", "\x1B[1m", FIREWALL_FACTORY_VERSION, "\x1b[0m");
+  console.log(
+    "\n🏷  Version: ",
+    "\x1B[1m",
+    FIREWALL_FACTORY_VERSION,
+    "\x1b[0m",
+  );
   if (shieldConfig || config) {
     console.log("\n👤 AWS FMS Administrator Account: ");
     console.log(
       "\x1b[33m",
       `                        ${process.env.CDK_DEFAULT_ACCOUNT}`,
-      "\x1b[0m"
+      "\x1b[0m",
     );
   }
   if (shieldConfig) {
@@ -62,7 +71,7 @@ export const outputInfoBanner = (
       console.log(
         "\x1b[32m",
         `                      ${process.env.AWS_REGION}`,
-        "\x1b[0m \n\n"
+        "\x1b[0m \n\n",
       );
     } else {
       if (config.WebAcl.Scope === "CLOUDFRONT") {
@@ -74,7 +83,7 @@ export const outputInfoBanner = (
       console.log(
         "\x1b[32m",
         `                      ${deploymentRegion}`,
-        "\x1b[0m \n"
+        "\x1b[0m \n",
       );
     }
   } else {
@@ -112,6 +121,7 @@ export function initRuntimeProperties(): RuntimeProps {
       ManagedRuleGroupCount: 0,
       ManagedRuleBotControlCount: 0,
       ManagedRuleATPCount: 0,
+      ManagedRuleDdosCount: 0,
       CustomRuleCount: 0,
       IpReputationListCount: 0,
       CustomRuleGroupCount: 0,
@@ -126,6 +136,7 @@ export function initRuntimeProperties(): RuntimeProps {
       ManagedRuleGroupCount: 0,
       ManagedRuleBotControlCount: 0,
       ManagedRuleATPCount: 0,
+      ManagedRuleDdosCount: 0,
       IpReputationListCount: 0,
       CustomRuleCount: 0,
       CustomRuleGroupCount: 0,
@@ -141,6 +152,8 @@ export function initRuntimeProperties(): RuntimeProps {
       Captcha: 0,
       AccountTakeoverPrevention: 0,
       AccountTakeoverPreventionRequest: 0,
+      DdoSProtection: 0,
+      DdosProctectionRequest: 0,
       Dashboard: 0,
     },
   };

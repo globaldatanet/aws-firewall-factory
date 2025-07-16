@@ -1,78 +1,145 @@
 import * as cdk from "aws-cdk-lib";
 import { aws_wafv2 as wafv2 } from "aws-cdk-lib";
-import { Scope, WAFV2Client, ListAvailableManagedRuleGroupVersionsCommand, ListAvailableManagedRuleGroupVersionsCommandInput, ListAvailableManagedRuleGroupVersionsCommandOutput} from "@aws-sdk/client-wafv2";
-import { WafConfig, RuntimeProps, SubVariables, ManagedRuleGroup,ServiceDataRuleGroup, CustomResponseBodies, Rule,
-  ServiceDataManagedRuleGroup, NONEVERSIONEDMANAGEDRULEGRPOUP, ProcessProperties } from "../../../types/config";
+import {
+  Scope,
+  WAFV2Client,
+  ListAvailableManagedRuleGroupVersionsCommand,
+  ListAvailableManagedRuleGroupVersionsCommandInput,
+  ListAvailableManagedRuleGroupVersionsCommandOutput,
+} from "@aws-sdk/client-wafv2";
+import {
+  WafConfig,
+  RuntimeProps,
+  SubVariables,
+  ManagedRuleGroup,
+  ServiceDataRuleGroup,
+  CustomResponseBodies,
+  Rule,
+  ServiceDataManagedRuleGroup,
+  NONEVERSIONEDMANAGEDRULEGRPOUP,
+  ProcessProperties,
+} from "../../../types/config";
 import { transformWafRuleStatements } from "./statements";
 import { Construct } from "constructs";
 import { guidanceHelper } from "../../helpers";
 import * as cr from "aws-cdk-lib/custom-resources";
 
-
-const MANAGEDRULEGROUPSINFO : string[] = [""];
-const subVariables : SubVariables = {};
+const MANAGEDRULEGROUPSINFO: string[] = [""];
+const subVariables: SubVariables = {};
 
 /**
-   * * Build Managed RuleGroups as [ManagedServiceData](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-fms-policy-securityservicepolicydata.html#cfn-fms-policy-securityservicepolicydata-managedservicedata) for FMS Policy
-   * @param rule Rule
-   * @param prefix string
-   * @param stage string
-   * @param ipSets cdk.aws_wafv2.CfnIPSet[]
-   * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
-   * @returns adjustedRule
-   */
-export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: ManagedRuleGroup[], managedRuleGroupVersionProvider: cr.Provider, wafScope: string, runtimeProps: RuntimeProps): { ServiceData: ServiceDataManagedRuleGroup[], ManagedRuleGroupInfo: string[], SubVariables: SubVariables } {
-  const cfnManagedRuleGroup : ServiceDataManagedRuleGroup[] = [];
+ * * Build Managed RuleGroups as [ManagedServiceData](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-fms-policy-securityservicepolicydata.html#cfn-fms-policy-securityservicepolicydata-managedservicedata) for FMS Policy
+ * @param rule Rule
+ * @param prefix string
+ * @param stage string
+ * @param ipSets cdk.aws_wafv2.CfnIPSet[]
+ * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
+ * @returns adjustedRule
+ */
+export function buildServiceDataManagedRgs(
+  scope: Construct,
+  managedRuleGroups: ManagedRuleGroup[],
+  managedRuleGroupVersionProvider: cr.Provider,
+  wafScope: string,
+  runtimeProps: RuntimeProps,
+): {
+  ServiceData: ServiceDataManagedRuleGroup[];
+  ManagedRuleGroupInfo: string[];
+  SubVariables: SubVariables;
+} {
+  const cfnManagedRuleGroup: ServiceDataManagedRuleGroup[] = [];
   for (const managedRuleGroup of managedRuleGroups) {
-    if(managedRuleGroup.ruleActionOverrides?.toString() === "COUNT"){
-      guidanceHelper.getGuidance("overrideActionManagedRuleGroup", runtimeProps, managedRuleGroup.name);
+    if (managedRuleGroup.ruleActionOverrides?.toString() === "COUNT") {
+      guidanceHelper.getGuidance(
+        "overrideActionManagedRuleGroup",
+        runtimeProps,
+        managedRuleGroup.name,
+      );
     }
-    if(managedRuleGroup.name === "AWSManagedRulesBotControlRuleSet"){
-      if(managedRuleGroup.awsManagedRulesBotControlRuleSetProperty === undefined){
-        guidanceHelper.getGuidance("noBotControlRuleSetProperty",runtimeProps);
-      }
-    }
-    if(NONEVERSIONEDMANAGEDRULEGRPOUP.find((rulegroup) => rulegroup === managedRuleGroup.name)){
-    
-      console.log("\nℹ️  ManagedRuleGroup " + managedRuleGroup.name + " is not versioned. Skip Custom Resource for Versioning.");
+    const managedRuleGroupConfigs: wafv2.CfnWebACL.ManagedRuleGroupConfigProperty[] =
+      [
+        managedRuleGroup.awsManagedRulesBotControlRuleSetProperty && {
+          awsmanagedRulesBotControlRuleSet:
+            managedRuleGroup.awsManagedRulesBotControlRuleSetProperty,
+        },
+        managedRuleGroup.awsManagedRulesACFPRuleSetProperty && {
+          awsmanagedRulesACFPRuleSet:
+            managedRuleGroup.awsManagedRulesACFPRuleSetProperty,
+        },
+        managedRuleGroup.awsManagedRulesATPRuleSetProperty && {
+          awsmanagedRulesATPRuleSet:
+            managedRuleGroup.awsManagedRulesATPRuleSetProperty,
+        },
+        managedRuleGroup.awsManagedRulesAntiDDoSRuleSetProperty && {
+          awsmanagedRulesAntiDDoSRuleSet:
+            managedRuleGroup.awsManagedRulesAntiDDoSRuleSetProperty,
+        },
+      ].filter(Boolean) as wafv2.CfnWebACL.ManagedRuleGroupConfigProperty[];
+
+    if (
+      NONEVERSIONEDMANAGEDRULEGRPOUP.find(
+        (rulegroup) => rulegroup === managedRuleGroup.name,
+      )
+    ) {
+      console.log(
+        "\nℹ️  ManagedRuleGroup " +
+          managedRuleGroup.name +
+          " is not versioned. Skip Custom Resource for Versioning.",
+      );
       cfnManagedRuleGroup.push({
         managedRuleGroupIdentifier: {
           vendorName: managedRuleGroup.vendorName,
           managedRuleGroupName: managedRuleGroup.name,
           version: undefined,
           versionEnabled: undefined,
+          ...(managedRuleGroupConfigs.length > 0 && {
+            managedRuleGroupConfigs: managedRuleGroupConfigs,
+          }),
         },
-        overrideAction: managedRuleGroup.overrideAction ? managedRuleGroup.overrideAction : { type: "NONE" },
+        overrideAction: managedRuleGroup.overrideAction
+          ? managedRuleGroup.overrideAction
+          : { type: "NONE" },
         ruleGroupArn: undefined,
-        excludeRules: managedRuleGroup.excludeRules ?  managedRuleGroup.excludeRules : undefined,
+        excludeRules: managedRuleGroup.excludeRules
+          ? managedRuleGroup.excludeRules
+          : undefined,
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?? undefined,
-        awsManagedRulesBotControlRuleSetProperty: managedRuleGroup.awsManagedRulesBotControlRuleSetProperty ?? undefined,
-        awsManagedRulesACFPRuleSetProperty: managedRuleGroup.awsManagedRulesACFPRuleSetProperty ?? undefined,
-        awsManagedRulesATPRuleSetProperty: managedRuleGroup.awsManagedRulesATPRuleSetProperty ?? undefined,
       });
-      MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendorName +"]");
-    }
-    else{
-      const crManagedRuleGroupanagedRuleGroupVersion = new cdk.CustomResource(scope, `Cr${managedRuleGroup.name}` , {
-        properties: {
-          VendorName: managedRuleGroup.vendorName,
-          Name: managedRuleGroup.name,
-          Scope: wafScope,
-          ManagedRuleGroupVersion: managedRuleGroup.version,
-          Latest: managedRuleGroup.latestVersion ? managedRuleGroup.latestVersion : false,
-          EnforceUpdate: managedRuleGroup.enforceUpdate ? Date.now() : false
+      MANAGEDRULEGROUPSINFO.push(
+        managedRuleGroup.name + " [" + managedRuleGroup.vendorName + "]",
+      );
+    } else {
+      const crManagedRuleGroupanagedRuleGroupVersion = new cdk.CustomResource(
+        scope,
+        `Cr${managedRuleGroup.name}`,
+        {
+          properties: {
+            VendorName: managedRuleGroup.vendorName,
+            Name: managedRuleGroup.name,
+            Scope: wafScope,
+            ManagedRuleGroupVersion: managedRuleGroup.version,
+            Latest: managedRuleGroup.latestVersion
+              ? managedRuleGroup.latestVersion
+              : false,
+            EnforceUpdate: managedRuleGroup.enforceUpdate ? Date.now() : false,
+          },
+          serviceToken: managedRuleGroupVersionProvider.serviceToken,
         },
-        serviceToken: managedRuleGroupVersionProvider.serviceToken,
-      });
-      const cwVersion = "**"+ crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version") +"**";
-      subVariables[managedRuleGroup.name] = crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version");
+      );
+      const cwVersion =
+        "**" +
+        crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version") +
+        "**";
+      subVariables[managedRuleGroup.name] =
+        crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version");
       const version = `\${${managedRuleGroup.name}}`;
 
       // if a version is supplied, create an output
-      new cdk.CfnOutput(scope, `${managedRuleGroup.name}Version`, { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+      new cdk.CfnOutput(scope, `${managedRuleGroup.name}Version`, {
+        // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
         value: crManagedRuleGroupanagedRuleGroupVersion.getAttString("Version"),
-        description: `Version of ${managedRuleGroup.name} used in ${managedRuleGroup.name} RuleGroup`
+        description: `Version of ${managedRuleGroup.name} used in ${managedRuleGroup.name} RuleGroup`,
       });
 
       cfnManagedRuleGroup.push({
@@ -81,6 +148,9 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
           managedRuleGroupName: managedRuleGroup.name,
           version,
           versionEnabled: managedRuleGroup.versionEnabled ?? undefined,
+          ...(managedRuleGroupConfigs.length > 0 && {
+            managedRuleGroupConfigs: managedRuleGroupConfigs,
+          }),
         },
         overrideAction: managedRuleGroup.overrideAction ?? { type: "NONE" },
         ruleGroupArn: undefined,
@@ -88,36 +158,53 @@ export function buildServiceDataManagedRgs(scope: Construct, managedRuleGroups: 
         ruleGroupType: "ManagedRuleGroup",
         ruleActionOverrides: managedRuleGroup.ruleActionOverrides ?? undefined,
       });
-      MANAGEDRULEGROUPSINFO.push(managedRuleGroup.name+" ["+managedRuleGroup.vendorName +"] " + cwVersion);
+      MANAGEDRULEGROUPSINFO.push(
+        managedRuleGroup.name +
+          " [" +
+          managedRuleGroup.vendorName +
+          "] " +
+          cwVersion,
+      );
     }
   }
-  return {ServiceData: cfnManagedRuleGroup, ManagedRuleGroupInfo: MANAGEDRULEGROUPSINFO, SubVariables: subVariables};
+  return {
+    ServiceData: cfnManagedRuleGroup,
+    ManagedRuleGroupInfo: MANAGEDRULEGROUPSINFO,
+    SubVariables: subVariables,
+  };
 }
 
 /**
-     * Build Custom RuleGroups as ServiceData for FMS Policy
-     * @param scope Construct
-     * @param type "Pre" | "Post"
-     * @param capacity number
-     * @param webaclName string
-     * @param webAclScope string
-     * @param stage string
-     * @param processRuntimeProps props
-     * @param prefix string
-     * @param ruleGroupSet: Rule[]
-     * @param customResponseBodies CustomResponseBodies  | undefined
-     * @param ipSets cdk.aws_wafv2.CfnIPSet[]
-     * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
-     * @param deployHash string
-     * @returns serviceDataRuleGroup
-     */
-export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post", runtimeProps: RuntimeProps, config: WafConfig, ipSets: cdk.aws_wafv2.CfnIPSet[],regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[]) : ServiceDataRuleGroup[] {
+ * Build Custom RuleGroups as ServiceData for FMS Policy
+ * @param scope Construct
+ * @param type "Pre" | "Post"
+ * @param capacity number
+ * @param webaclName string
+ * @param webAclScope string
+ * @param stage string
+ * @param processRuntimeProps props
+ * @param prefix string
+ * @param ruleGroupSet: Rule[]
+ * @param customResponseBodies CustomResponseBodies  | undefined
+ * @param ipSets cdk.aws_wafv2.CfnIPSet[]
+ * @param regexPatternSets cdk.aws_wafv2.CfnRegexPatternSet[]
+ * @param deployHash string
+ * @returns serviceDataRuleGroup
+ */
+export function buildServiceDataCustomRgs(
+  scope: Construct,
+  type: "Pre" | "Post",
+  runtimeProps: RuntimeProps,
+  config: WafConfig,
+  ipSets: cdk.aws_wafv2.CfnIPSet[],
+  regexPatternSets: cdk.aws_wafv2.CfnRegexPatternSet[],
+): ServiceDataRuleGroup[] {
   const webaclName = config.WebAcl.Name;
   const prefix = config.General.Prefix;
   const webAclScope = config.WebAcl.Scope;
   const stage = config.General.Stage;
   const deployHash = config.General.DeployHash;
-  const serviceDataRuleGroup : ServiceDataRuleGroup[] = [];
+  const serviceDataRuleGroup: ServiceDataRuleGroup[] = [];
   let icon;
   let capacity: number;
   let processRuntimeProps: ProcessProperties;
@@ -138,34 +225,44 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
   }
   console.log(
     "\u001b[1m",
-    "\n"+icon+"  Custom Rules " + type + "Process: ",
-    "\x1b[0m\n"
+    "\n" + icon + "  Custom Rules " + type + "Process: ",
+    "\x1b[0m\n",
   );
 
   if (capacity < 1500) {
     const rules: wafv2.CfnRuleGroup.RuleProperty[] = [];
     let count = 1;
-    if(ruleGroupSet){
+    if (ruleGroupSet) {
       for (const rule of ruleGroupSet) {
         let rulename = "";
         if (rule.name !== undefined) {
-          rulename = `${rule.name}-${type.toLocaleLowerCase()}${deployHash ? "-"+deployHash : ""}`;
+          rulename = `${rule.name}-${type.toLocaleLowerCase()}${deployHash ? "-" + deployHash : ""}`;
         } else {
-          rulename = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
+          rulename = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-" + deployHash : ""}`;
         }
         // transform ipSetReferenceStatements
-        const statement = transformWafRuleStatements(rule, prefix, stage, config.WebAcl.Name, ipSets,regexPatternSets);
+        const statement = transformWafRuleStatements(
+          rule,
+          prefix,
+          stage,
+          config.WebAcl.Name,
+          ipSets,
+          regexPatternSets,
+        );
         const cfnRuleProperty = {
           name: rulename,
           priority: rule.priority,
           action: rule.action,
           statement,
-          captchaConfig: (Object.keys(rule.action)[0] === "captcha") ? rule.captchaConfig : undefined,
+          captchaConfig:
+            Object.keys(rule.action)[0] === "captcha"
+              ? rule.captchaConfig
+              : undefined,
           visibilityConfig: {
             sampledRequestsEnabled:
-                rule.visibilityConfig.sampledRequestsEnabled,
+              rule.visibilityConfig.sampledRequestsEnabled,
             cloudWatchMetricsEnabled:
-                rule.visibilityConfig.cloudWatchMetricsEnabled,
+              rule.visibilityConfig.cloudWatchMetricsEnabled,
             metricName: rule.visibilityConfig.metricName,
           },
           ruleLabels: rule.ruleLabels,
@@ -182,34 +279,32 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         rules.push(cfnRuleProperties);
         count += 1;
       }
-      let name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-"+deployHash : ""}`;
+      let name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-" + deployHash : ""}`;
       let rulegroupidentifier = type + "RuleGroup";
       if (processRuntimeProps.DeployedRuleGroupCapacities[0]) {
-        if (
-          processRuntimeProps.DeployedRuleGroupCapacities[0] !==
-            capacity
-        ) {
+        if (processRuntimeProps.DeployedRuleGroupCapacities[0] !== capacity) {
           console.log(
-            "⭕️ Deploy new RuleGroup because the Capacity has changed!"
+            "⭕️ Deploy new RuleGroup because the Capacity has changed!",
           );
           console.log(
             "\n 🟥 Old Capacity: [" +
-                processRuntimeProps.DeployedRuleGroupCapacities[0] +
-                "]\n 🟩 New Capacity: [" +
-                processRuntimeProps.Capacity +
-                "]"
+              processRuntimeProps.DeployedRuleGroupCapacities[0] +
+              "]\n 🟩 New Capacity: [" +
+              processRuntimeProps.Capacity +
+              "]",
           );
           if (
             processRuntimeProps.DeployedRuleGroupIdentifier[0] ===
-              type+"RuleGroup"
+            type + "RuleGroup"
           ) {
             rulegroupidentifier = type + "RG";
           }
-    
+
           if (
-            processRuntimeProps.DeployedRuleGroupNames[0] === `${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-"+deployHash : ""}`
+            processRuntimeProps.DeployedRuleGroupNames[0] ===
+            `${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-" + deployHash : ""}`
           ) {
-            name = `${prefix.toUpperCase()}-G${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-"+deployHash : ""}`;
+            name = `${prefix.toUpperCase()}-G${webaclName}-${type.toLocaleLowerCase()}-${stage}${deployHash ? "-" + deployHash : ""}`;
           }
           console.log(" 💬 New Name: " + name);
           console.log(" 📇 New Identifier: " + rulegroupidentifier);
@@ -218,14 +313,17 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
       // Don't lowercase the first char of the Key of the Custom Response Body,
       // only toAwsCamel the properties below the Key
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let cstResBodies: { [key:string]: any} | undefined = {};
-      if(customResponseBodies) {
-        cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies![curr]; return acc; }, cstResBodies);
-      }
-      else {
+      let cstResBodies: { [key: string]: any } | undefined = {};
+      if (customResponseBodies) {
+        cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => {
+          acc[curr] = customResponseBodies![curr];
+          return acc;
+        }, cstResBodies);
+      } else {
         cstResBodies = undefined;
       }
-      new wafv2.CfnRuleGroup(scope, rulegroupidentifier, { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+      new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
+        // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
         capacity: processRuntimeProps.Capacity,
         scope: webAclScope,
         rules: rules,
@@ -234,7 +332,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         visibilityConfig: {
           sampledRequestsEnabled: false,
           cloudWatchMetricsEnabled: false,
-          metricName: `${prefix.toUpperCase()}-${webaclName}-${stage}${deployHash ? "-"+deployHash : ""}`,
+          metricName: `${prefix.toUpperCase()}-${webaclName}-${stage}${deployHash ? "-" + deployHash : ""}`,
         },
       });
       serviceDataRuleGroup.push({
@@ -244,50 +342,47 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
       });
       console.log(
         "  ➡️  Creating " +
-            rulegroupidentifier +
-            " with calculated capacity: [" +
-            processRuntimeProps.Capacity +
-            "]"
+          rulegroupidentifier +
+          " with calculated capacity: [" +
+          processRuntimeProps.Capacity +
+          "]",
       );
       processRuntimeProps.DeployedRuleGroupCapacities.splice(0);
       processRuntimeProps.DeployedRuleGroupIdentifier.splice(0);
       processRuntimeProps.DeployedRuleGroupNames.splice(0);
-    
-      processRuntimeProps.DeployedRuleGroupIdentifier[0] =
-          rulegroupidentifier;
+
+      processRuntimeProps.DeployedRuleGroupIdentifier[0] = rulegroupidentifier;
       processRuntimeProps.DeployedRuleGroupNames[0] = name;
       processRuntimeProps.DeployedRuleGroupCapacities[0] =
-          processRuntimeProps.Capacity;
-    
-      new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupNames", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
-        value:
-            processRuntimeProps.DeployedRuleGroupNames.toString(),
-        description: type+"ProcessDeployedRuleGroupNames",
+        processRuntimeProps.Capacity;
+
+      new cdk.CfnOutput(scope, type + "ProcessDeployedRuleGroupNames", {
+        // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+        value: processRuntimeProps.DeployedRuleGroupNames.toString(),
+        description: type + "ProcessDeployedRuleGroupNames",
       });
-    
-      new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupCapacities", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
-        value: 
-            processRuntimeProps.DeployedRuleGroupCapacities.toString(),
-        description: type+"ProcessDeployedRuleGroupCapacities",
+
+      new cdk.CfnOutput(scope, type + "ProcessDeployedRuleGroupCapacities", {
+        // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+        value: processRuntimeProps.DeployedRuleGroupCapacities.toString(),
+        description: type + "ProcessDeployedRuleGroupCapacities",
       });
-    
-      new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupIdentifier", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
-        value:
-            processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
-        description: type+"ProcessDeployedRuleGroupIdentifier",
+
+      new cdk.CfnOutput(scope, type + "ProcessDeployedRuleGroupIdentifier", {
+        // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+        value: processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
+        description: type + "ProcessDeployedRuleGroupIdentifier",
       });
     }
-  } else{
-    if(capacity > 1500 && ruleGroupSet){
+  } else {
+    if (capacity > 1500 && ruleGroupSet) {
       const threshold = 1500;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rulesets: any[] = [];
       const indexes: number[] = [];
       const rulegroupcapacities: number[] = [];
       //ORDER BY Priority DESC
-      while (
-        indexes.length < processRuntimeProps.RuleCapacities.length
-      ) {
+      while (indexes.length < processRuntimeProps.RuleCapacities.length) {
         let tracker = 0;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ruleset: any[] = [];
@@ -305,9 +400,9 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         rulesets.push(ruleset);
         rulegroupcapacities.push(tracker);
       }
-    
+
       console.log(
-        `  🖖 Split Rules into ${rulesets.length.toString()} RuleGroups: \n`
+        `  🖖 Split Rules into ${rulesets.length.toString()} RuleGroups: \n`,
       );
       let count = 0;
       let rulegroupidentifier = "";
@@ -316,78 +411,69 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         if (processRuntimeProps.DeployedRuleGroupCapacities[count]) {
           if (
             rulegroupcapacities[count] ===
-              processRuntimeProps.DeployedRuleGroupCapacities[count]
+            processRuntimeProps.DeployedRuleGroupCapacities[count]
           ) {
             rulegroupidentifier = type + "R" + count.toString();
-            name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
+            name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-" + deployHash : ""}`;
           } else {
             console.log(
               "\n⭕️ Deploy new RuleGroup because the Capacity has changed for " +
-                  processRuntimeProps.DeployedRuleGroupIdentifier[
-                    count
-                  ] +
-                  " !"
+                processRuntimeProps.DeployedRuleGroupIdentifier[count] +
+                " !",
             );
             console.log(
               "\n 🟥 Old Capacity: [" +
-                  processRuntimeProps.DeployedRuleGroupCapacities[
-                    count
-                  ] +
-                  "]\n 🟩 New Capacity: [" +
-                  rulegroupcapacities[count] +
-                  "]"
+                processRuntimeProps.DeployedRuleGroupCapacities[count] +
+                "]\n 🟩 New Capacity: [" +
+                rulegroupcapacities[count] +
+                "]",
             );
             if (processRuntimeProps.DeployedRuleGroupCapacities[count]) {
               if (
-                processRuntimeProps.DeployedRuleGroupNames[
-                  count
-                ] === `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`
+                processRuntimeProps.DeployedRuleGroupNames[count] ===
+                `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-" + deployHash : ""}`
               ) {
-                name = `${prefix.toUpperCase()}-G${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
+                name = `${prefix.toUpperCase()}-G${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-" + deployHash : ""}`;
               } else {
-                name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
+                name = `${webaclName}-${type.toLocaleLowerCase()}-${stage}-${count.toString()}${deployHash ? "-" + deployHash : ""}`;
               }
               console.log(" 💬 New Name: " + name);
             }
             if (processRuntimeProps.DeployedRuleGroupIdentifier[count]) {
               if (
-                processRuntimeProps.DeployedRuleGroupIdentifier[
-                  count
-                ] ===
-                  "R" + count.toString()
+                processRuntimeProps.DeployedRuleGroupIdentifier[count] ===
+                "R" + count.toString()
               ) {
                 rulegroupidentifier = type + "G" + count.toString();
               } else {
                 rulegroupidentifier = type + "R" + count.toString();
               }
-              console.log(
-                " 📇 New Identifier: " + rulegroupidentifier + "\n"
-              );
+              console.log(" 📇 New Identifier: " + rulegroupidentifier + "\n");
             }
           }
         } else {
           rulegroupidentifier = type + "R" + count.toString();
-          name = `${webaclName}-${stage}-${count.toString()}${deployHash ? "-"+deployHash : ""}`;
+          name = `${webaclName}-${stage}-${count.toString()}${deployHash ? "-" + deployHash : ""}`;
         }
         const cfnRuleProperties: wafv2.CfnRuleGroup.RuleProperty[] = [];
         let rulegroupcounter = 0;
         while (rulegroupcounter < rulesets[count].length) {
           const statementindex = rulesets[count][rulegroupcounter];
           let rulename = "";
-          if (
-            ruleGroupSet[statementindex]
-              .name !== undefined
-          ) {
+          if (ruleGroupSet[statementindex].name !== undefined) {
             const tempHash = Date.now().toString(36);
-            rulename =
-                ruleGroupSet[statementindex]
-                  .name +
-                "-" +
-                tempHash;
+            rulename = ruleGroupSet[statementindex].name + "-" + tempHash;
           } else {
-            rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-"+deployHash : ""}`;
+            rulename = `${webaclName}-${stage}-${type.toLocaleLowerCase()}-${rulegroupcounter.toString()}${deployHash ? "-" + deployHash : ""}`;
           }
-          const statement = transformWafRuleStatements(ruleGroupSet[statementindex],prefix, stage, config.WebAcl.Name, ipSets, regexPatternSets);
+          const statement = transformWafRuleStatements(
+            ruleGroupSet[statementindex],
+            prefix,
+            stage,
+            config.WebAcl.Name,
+            ipSets,
+            regexPatternSets,
+          );
           const cfnRuleProperty = {
             name: rulename,
             priority: ruleGroupSet[statementindex].priority,
@@ -395,26 +481,26 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
             statement,
             visibilityConfig: {
               sampledRequestsEnabled:
-                  ruleGroupSet[statementindex]
-                    .visibilityConfig.sampledRequestsEnabled,
+                ruleGroupSet[statementindex].visibilityConfig
+                  .sampledRequestsEnabled,
               cloudWatchMetricsEnabled:
-                  ruleGroupSet[statementindex]
-                    .visibilityConfig.cloudWatchMetricsEnabled,
-              metricName: ruleGroupSet[statementindex].visibilityConfig.metricName,
+                ruleGroupSet[statementindex].visibilityConfig
+                  .cloudWatchMetricsEnabled,
+              metricName:
+                ruleGroupSet[statementindex].visibilityConfig.metricName,
             },
-            captchaConfig: (Object.keys(ruleGroupSet[statementindex]
-              .action)[0] === "captcha") ? ruleGroupSet[statementindex].captchaConfig : undefined,
+            captchaConfig:
+              Object.keys(ruleGroupSet[statementindex].action)[0] === "captcha"
+                ? ruleGroupSet[statementindex].captchaConfig
+                : undefined,
             ruleLabels: ruleGroupSet[statementindex].ruleLabels,
           };
           let cfnRuleProperti: wafv2.CfnRuleGroup.RuleProperty;
-          if (
-            ruleGroupSet[statementindex]
-              .ruleLabels
-          ) {
+          if (ruleGroupSet[statementindex].ruleLabels) {
             cfnRuleProperti = cfnRuleProperty;
             guidanceHelper.getGuidance("noRuleLabels", runtimeProps, rulename);
           } else {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { ruleLabels, ...cfnRulePropertii } = cfnRuleProperty;
             cfnRuleProperti = cfnRulePropertii;
           }
@@ -422,15 +508,21 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
           rulegroupcounter++;
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let cstResBodies: { [key:string]: any} | undefined = {};
-        if(customResponseBodies) {
-          cstResBodies = Object.keys(customResponseBodies).reduce((acc, curr) => { acc[curr] = customResponseBodies![curr]; return acc; }, cstResBodies);
-        }
-        else {
+        let cstResBodies: { [key: string]: any } | undefined = {};
+        if (customResponseBodies) {
+          cstResBodies = Object.keys(customResponseBodies).reduce(
+            (acc, curr) => {
+              acc[curr] = customResponseBodies![curr];
+              return acc;
+            },
+            cstResBodies,
+          );
+        } else {
           cstResBodies = undefined;
         }
-    
-        new wafv2.CfnRuleGroup(scope, rulegroupidentifier, { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+
+        new wafv2.CfnRuleGroup(scope, rulegroupidentifier, {
+          // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
           capacity: rulegroupcapacities[count],
           scope: webAclScope,
           rules: cfnRuleProperties,
@@ -442,7 +534,7 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
             metricName: name,
           },
         });
-    
+
         serviceDataRuleGroup.push({
           ruleGroupType: "RuleGroup",
           ruleGroupArn: "${" + rulegroupidentifier + ".Arn}",
@@ -450,43 +542,39 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
         });
         console.log(
           "   ➡️  Creating " +
-              rulegroupidentifier +
-              " with calculated capacity: [" +
-              rulegroupcapacities[count].toString() +
-              "]"
+            rulegroupidentifier +
+            " with calculated capacity: [" +
+            rulegroupcapacities[count].toString() +
+            "]",
         );
         processRuntimeProps.DeployedRuleGroupCapacities[count] =
-            rulegroupcapacities[count];
+          rulegroupcapacities[count];
         processRuntimeProps.DeployedRuleGroupIdentifier[count] =
-            rulegroupidentifier;
+          rulegroupidentifier;
         processRuntimeProps.DeployedRuleGroupNames[count] = name;
         count++;
       }
       const lenght = rulesets.length;
-      processRuntimeProps.DeployedRuleGroupCapacities.splice(
-        lenght
-      );
-      processRuntimeProps.DeployedRuleGroupIdentifier.splice(
-        lenght
-      );
+      processRuntimeProps.DeployedRuleGroupCapacities.splice(lenght);
+      processRuntimeProps.DeployedRuleGroupIdentifier.splice(lenght);
       processRuntimeProps.DeployedRuleGroupNames.splice(lenght);
-    
-      new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupNames", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
-        value:
-            processRuntimeProps.DeployedRuleGroupNames.toString(),
-        description: type+"ProcessDeployedRuleGroupNames"
+
+      new cdk.CfnOutput(scope, type + "ProcessDeployedRuleGroupNames", {
+        // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+        value: processRuntimeProps.DeployedRuleGroupNames.toString(),
+        description: type + "ProcessDeployedRuleGroupNames",
       });
-    
-      new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupCapacities", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
-        value:
-            processRuntimeProps.DeployedRuleGroupCapacities.toString(),
-        description: type+"ProcessDeployedRuleGroupCapacities"
+
+      new cdk.CfnOutput(scope, type + "ProcessDeployedRuleGroupCapacities", {
+        // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+        value: processRuntimeProps.DeployedRuleGroupCapacities.toString(),
+        description: type + "ProcessDeployedRuleGroupCapacities",
       });
-    
-      new cdk.CfnOutput(scope, type+"ProcessDeployedRuleGroupIdentifier", { // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
-        value:
-            processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
-        description: type+"ProcessDeployedRuleGroupIdentifier"
+
+      new cdk.CfnOutput(scope, type + "ProcessDeployedRuleGroupIdentifier", {
+        // NOSONAR -> SonarQube is identitfying this line as a Major Issue, but it is not. Error: Either remove this useless object instantiation or use it.
+        value: processRuntimeProps.DeployedRuleGroupIdentifier.toString(),
+        description: type + "ProcessDeployedRuleGroupIdentifier",
       });
     }
   }
@@ -501,11 +589,16 @@ export function buildServiceDataCustomRgs(scope: Construct, type: "Pre" | "Post"
  * @param scope whether scope is REGIONAL or CLOUDFRONT
  * @returns returns the CurrentDefaultVersion of the Managed Rule Group
  */
-export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string, vendor: string, rgName: string, scope: "REGIONAL" | "CLOUDFRONT" ): Promise<string | undefined>{
-  const client = new WAFV2Client({ region: deploymentRegion});
-  if(scope === "CLOUDFRONT"){
+export async function getcurrentManagedRuleGroupVersion(
+  deploymentRegion: string,
+  vendor: string,
+  rgName: string,
+  scope: "REGIONAL" | "CLOUDFRONT",
+): Promise<string | undefined> {
+  const client = new WAFV2Client({ region: deploymentRegion });
+  if (scope === "CLOUDFRONT") {
     scope = Scope.CLOUDFRONT;
-  }else{
+  } else {
     scope = Scope.REGIONAL;
   }
   const input: ListAvailableManagedRuleGroupVersionsCommandInput = {
@@ -515,11 +608,11 @@ export async function getcurrentManagedRuleGroupVersion(deploymentRegion: string
     Limit: 5,
   };
   const command = new ListAvailableManagedRuleGroupVersionsCommand(input);
-  const response: ListAvailableManagedRuleGroupVersionsCommandOutput = await client.send(command);
-  if(response.Versions!.length > 0){
+  const response: ListAvailableManagedRuleGroupVersionsCommandOutput =
+    await client.send(command);
+  if (response.Versions!.length > 0) {
     return response.Versions![0].Name;
-  }
-  else{
+  } else {
     return undefined;
   }
 }

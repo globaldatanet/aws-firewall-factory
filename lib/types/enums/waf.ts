@@ -48,7 +48,8 @@ export enum AwsManagedRules {
     ANONYMOUS_IP_LIST = "AWSManagedRulesAnonymousIpList",
     BOT_CONTROL_RULE_SET = "AWSManagedRulesBotControlRuleSet",
     ATP_RULE_SET = "AWSManagedRulesATPRuleSet",
-    ACFP_RULE_SET = "AWSManagedRulesACFPRuleSet"
+    ACFP_RULE_SET = "AWSManagedRulesACFPRuleSet",
+    DDOS_RULE_SET = "AWSManagedRulesAntiDDoSRuleSet",
   }
   
 /**
@@ -456,6 +457,7 @@ export enum BOT_CONTROL_RULE_SET_LABELS {
     TokenRejected = "awswaf:managed:token:rejected",
     tokenAccepted = "awswaf:managed:token:accepted",
     TokenAbsent = "awswaf:managed:token:absent",
+    CaptchaAbsent = "awswaf:managed:captcha:absent",
     TGT_ML_CoordinatedActivityMedium = "awswaf:managed:aws:bot-control:targeted:aggregate:coordinated_activity:medium",
     TGT_ML_CoordinatedActivityHigh = "awswaf:managed:aws:bot-control:targeted:aggregate:coordinated_activity:high",
     TGT_VolumetricIpTokenAbsent = "awswaf:managed:aws:bot-control:targeted:aggregate:volumetric:ip:token_absent",
@@ -750,7 +752,25 @@ export enum ADMIN_PROTECTION_RULE_SET_RULES {
 export enum ADMIN_PROTECTION_RULE_SET_LABELS {
     AdminProtection_URIPATH = "awswaf:managed:aws:admin-protection:AdminProtection_URIPath",
   }
-  
+
+/**
+ * Enum for AWSManagedRulesAntiDDoSRuleSet Rules
+ */
+export enum DDOS_RULE_SET_RULES {
+    ChallengeAllDuringEvent = "ChallengeAllDuringEvent",
+    ChallengeRequest = "ChallengeDDoSRequests",
+    Request = "DDoSRequests"
+}
+
+/**
+ * Enum for AWSManagedRulesAntiDDoSRuleSet Labels
+ */
+export enum DDOS_RULE_SET_LABELS {
+    ChallengeAllDuringEvent = "awswaf:managed:aws:anti-ddos:ChallengeAllDuringEvent",
+    ChallengeRequest = "awswaf:managed:aws:anti-ddos:ChallengeDDoSRequests",
+    Request = "awswaf:managed:aws:anti-ddos:DDoSRequests"
+}
+
 /**
    * AWS Managed roule Group Vendor
    */
@@ -785,3 +805,5 @@ export enum WebAclTypeEnum {
     COGNITO_USERPOOL = "AWS::Cognito::UserPool",
     APPSYNC_GRAPHQLAPI  = "AWS::AppSync::GraphQLApi"
   }
+
+

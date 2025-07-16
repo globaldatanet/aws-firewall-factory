@@ -5,7 +5,12 @@ import {
   GetProductsCommandInput,
   FilterType,
 } from "@aws-sdk/client-pricing";
-import { PriceRegions, WafConfig, RuntimeProps, ShieldConfig } from "../../../types/";
+import {
+  PriceRegions,
+  WafConfig,
+  RuntimeProps,
+  ShieldConfig,
+} from "../../../types/";
 import {
   CloudWatchClient,
   ListDashboardsCommand,
@@ -67,56 +72,51 @@ async function getCurrentWafPrices(
   deploymentRegion: PriceRegions,
   runtimeProps: RuntimeProps,
   config: WafConfig,
-  awsregion: string
+  awsregion: string,
 ): Promise<boolean> {
   console.log("   🔎  Getting current prices for: ", deploymentRegion, "\n");
   try {
     runtimeProps.Pricing.Policy = Number(
-      await getProductPrice(deploymentRegion, "AWSFMS", "WAFv2")
+      await getProductPrice(deploymentRegion, "AWSFMS", "WAFv2"),
     );
     runtimeProps.Pricing.Rule = Number(
-      await getProductPrice(deploymentRegion, "awswaf", undefined, "Rule")
+      await getProductPrice(deploymentRegion, "awswaf", undefined, "Rule"),
     );
     runtimeProps.Pricing.WebACL = Number(
-      await getProductPrice(deploymentRegion, "awswaf", undefined, "Web ACL")
+      await getProductPrice(deploymentRegion, "awswaf", undefined, "Web ACL"),
     );
     runtimeProps.Pricing.Request =
       (await getProductPrice(
         deploymentRegion,
         "awswaf",
         undefined,
-        "Request"
+        "Request",
       )) * 1000000;
     runtimeProps.Pricing.BotControl = Number(
       await getProductPrice(
         deploymentRegion,
         "awswaf",
         undefined,
-        "AMR Bot Control Entity"
-      )
+        "AMR Bot Control Entity",
+      ),
     );
-    const botControlRequest: any = await getProductPrice(
-      deploymentRegion,
-      "awswaf",
-      undefined,
-      undefined,
-      "AMR Bot Control Request Processed"
-    );
-    runtimeProps.Pricing.BotControlRequest = botControlRequest[0] * 1000000;
+    runtimeProps.Pricing.DdoSProtection = 20; /* Hardcoded due to missing in AWS Cost API */
+    runtimeProps.Pricing.DdosProctectionRequest = 0.15; /* Hardcoded due to missing in AWS Cost API */
+    runtimeProps.Pricing.BotControlRequest = 1 * 1000000;
     runtimeProps.Pricing.Captcha = 0.4;
     runtimeProps.Pricing.AccountTakeoverPrevention = Number(
       await getProductPrice(
         deploymentRegion,
         "awswaf",
         undefined,
-        "AMR ATP Entity"
-      )
+        "AMR ATP Entity",
+      ),
     );
     const accountTakeoverPreventionRequest: any = await getProductPrice(
       deploymentRegion,
       "awswaf",
       undefined,
-      "AMR ATP Login Attempt"
+      "AMR ATP Login Attempt",
     );
     runtimeProps.Pricing.AccountTakeoverPreventionRequest =
       accountTakeoverPreventionRequest[0] * 1000;
@@ -134,7 +134,7 @@ async function getCurrentWafPrices(
  */
 async function getDashboardPrice(
   deploymentRegion: string,
-  config: WafConfig
+  config: WafConfig,
 ): Promise<number> {
   const client = new CloudWatchClient({ region: deploymentRegion });
   const input: ListDashboardsCommandInput = {};
@@ -170,7 +170,7 @@ export async function getProductPrice(
   servicecode: string,
   operation?: string,
   group?: string,
-  groupDescription?: string
+  groupDescription?: string,
 ): Promise<number> {
   const client = new PricingClient({ region: PRICING_API_ENDPOINT_REGION });
   const filters: { Type: FilterType; Field: string; Value: string }[] = [];
@@ -224,7 +224,7 @@ export async function isWafPriceCalculated(
   deploymentRegion: PriceRegions,
   runtimeProps: RuntimeProps,
   config: WafConfig,
-  awsregion: string
+  awsregion: string,
 ): Promise<boolean> {
   const shieldSubscriptionState = await getShieldSubscriptionState();
   console.log("\n🛡️  Shield Advanced State: " + shieldSubscriptionState);
@@ -252,7 +252,10 @@ export async function isWafPriceCalculated(
     (runtimeProps.PostProcess.ManagedRuleATPCount +
       runtimeProps.PreProcess.ManagedRuleATPCount) *
     runtimeProps.Pricing.AccountTakeoverPrevention;
-
+  const ddosfixedcost =
+    (runtimeProps.PostProcess.ManagedRuleDdosCount +
+      runtimeProps.PreProcess.ManagedRuleDdosCount) *
+    runtimeProps.Pricing.DdoSProtection;
   let fixedcost =
     runtimeProps.Pricing.Policy +
     runtimeProps.Pricing.WebACL +
@@ -260,6 +263,7 @@ export async function isWafPriceCalculated(
     preprocessfixedcost +
     botcontrolfixedcost +
     atpfixedcost +
+    ddosfixedcost +
     runtimeProps.Pricing.Dashboard;
   const requestscost = runtimeProps.Pricing.Request;
   const totalcost = fixedcost + requestscost * 5 + captchacost * 5;
@@ -271,14 +275,14 @@ export async function isWafPriceCalculated(
 
   console.log("   WAF Rules cost: " + fixedcost + " $ per month");
   console.log(
-    "   WAF Requests: " + requestscost.toFixed(2) + " $ pro 1 mio requests"
+    "   WAF Requests: " + requestscost.toFixed(2) + " $ pro 1 mio requests",
   );
 
   if (captchacost > 0) {
     console.log(
       "   WAF Analysis fee:\n    Captcha: " +
         captchacost +
-        "$ per thousand challenge attempts analyzed"
+        "$ per thousand challenge attempts analyzed",
     );
   } else {
     console.log(" ");
@@ -286,50 +290,59 @@ export async function isWafPriceCalculated(
 
   console.log("\n   Total WAF cost (monthly): " + totalcost + " $ *");
   console.log(
-    "\n    * This costs are based on the expectation that the WAF gets 5 mio requests per month. "
+    "\n    * This costs are based on the expectation that the WAF gets 5 mio requests per month. ",
   );
 
   if (atpfixedcost !== 0) {
     console.log(
-      "\n    * This costs are based on the expectation that 10.000 login attempts were analyzed. "
+      "\n    * This costs are based on the expectation that 10.000 login attempts were analyzed. ",
     );
   }
 
   console.log(
-    "\n      ℹ The costs are calculated based on the provided information at https://aws.amazon.com/waf/pricing/. "
+    "\n      ℹ The costs are calculated based on the provided information at https://aws.amazon.com/waf/pricing/. ",
   );
 
   if (botcontrolfixedcost !== 0) {
     console.log(
-      "     The deployed WAF includes BotControl rules this costs an extra fee of " +
+      "\n     The deployed WAF includes BotControl rules this costs an extra fee of " +
         runtimeProps.Pricing.BotControl +
         " $ and " +
         runtimeProps.Pricing.BotControlRequest +
-        "$ pro 1 mio requests (10 mio request Free Tier). \n     These costs are already included in the price calculation."
+        "$ pro 1 mio requests (10 mio request Free Tier). \n     These costs are already included in the price calculation.",
     );
   }
 
   if (atpfixedcost !== 0) {
     console.log(
-      "     The deployed WAF includes Account Takeover Prevention rules this costs an extra fee of " +
+      "\n     The deployed WAF includes Account Takeover Prevention rules this costs an extra fee of " +
         runtimeProps.Pricing.AccountTakeoverPrevention +
         " $ and " +
         runtimeProps.Pricing.AccountTakeoverPreventionRequest +
-        " $ per thousand login attempts analyzed (10,000 attempts analyzed Free Tier). \n     These costs are already included in the price calculation."
+        " $ per thousand login attempts analyzed (10,000 attempts analyzed Free Tier). \n     These costs are already included in the price calculation.",
     );
   }
 
+  if (ddosfixedcost !== 0) {
+    console.log(
+      "\n     The deployed WAF includes AMR DDoS Protection against Layer 7 rules which incur an additional cost of " +
+        runtimeProps.Pricing.DdoSProtection +
+        " $ per WebACL per month and " +
+        runtimeProps.Pricing.DdosProctectionRequest +
+        " $ per million requests inspected.\n     These costs are already included in the price calculation.",
+    );
+  }
   if (runtimeProps.Pricing.Dashboard !== 0) {
     console.log(
-      "     The deployed WAF includes CloudWatch Dashboard and you have more than 3 Dashboards (Free tier), so you will need to pay " +
+      "\n     The deployed WAF includes CloudWatch Dashboard and you have more than 3 Dashboards (Free tier), so you will need to pay " +
         runtimeProps.Pricing.Dashboard +
-        "$ for this CloudWatch Dashboard. \n     These costs are already included in the price calculation."
+        "$ for this CloudWatch Dashboard. \n     These costs are already included in the price calculation.",
     );
   }
 
   if (shieldSubscriptionState === "ACTIVE") {
     console.log(
-      "     AWS WAF WebACLs or Rules created by Firewall Manager - are Included in AWS Shield Advanced. More information at https://aws.amazon.com/firewall-manager/pricing/."
+      "\n     AWS WAF WebACLs or Rules created by Firewall Manager - are Included in AWS Shield Advanced. More information at https://aws.amazon.com/firewall-manager/pricing/.",
     );
   }
 
@@ -352,14 +365,14 @@ async function getShieldSubscriptionState() {
  * @returns whether price is successfully calculated or not
  */
 export async function isShieldPriceCalculated(
-  shieldconfig: ShieldConfig
+  shieldconfig: ShieldConfig,
 ): Promise<boolean> {
   const shieldSubscriptionState = await getShieldSubscriptionState();
   console.log("\n🛡️  Shield Advanced State: " + shieldSubscriptionState);
 
   console.log("\n💰 Cost: \n");
   console.log(
-    "   🛡️ Shield Advanced Subscription: \n     3000 $ per month (whole Organization)\n"
+    "   🛡️ Shield Advanced Subscription: \n     3000 $ per month (whole Organization)\n",
   );
   console.log("   ⌗ Data Transfer Out Usage Fees: \n");
 
@@ -368,7 +381,7 @@ export async function isShieldPriceCalculated(
     shieldconfig.resourceType === "AWS::GlobalAccelerator::Accelerator"
   ) {
     console.log(
-      "     first 100 TB 0.025 $ per GB \n      next 400 TB 0.020 $ per GB"
+      "     first 100 TB 0.025 $ per GB \n      next 400 TB 0.020 $ per GB",
     );
   } else if (
     shieldconfig.resourceType === "AWS::ElasticLoadBalancingV2::LoadBalancer" ||
@@ -376,11 +389,11 @@ export async function isShieldPriceCalculated(
     shieldconfig.resourceType === "AWS::EC2::EIP"
   ) {
     console.log(
-      "     first 100 TB 0.05 $ per GB \n      next 400 TB 0.04 $ per GB"
+      "     first 100 TB 0.05 $ per GB \n      next 400 TB 0.04 $ per GB",
     );
   }
   console.log(
-    "\n      ℹ The costs are calculated based on the provided information at https://aws.amazon.com/shield/pricing/. "
+    "\n      ℹ The costs are calculated based on the provided information at https://aws.amazon.com/shield/pricing/. ",
   );
 
   return true;
